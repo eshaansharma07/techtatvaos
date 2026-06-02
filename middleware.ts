@@ -5,7 +5,11 @@ export default async function middleware(req: NextRequest) {
   const secret =
     process.env.AUTH_SECRET ||
     (process.env.NODE_ENV === "development" ? "tech-tatva-local-development-only" : undefined);
-  const token = await getToken({ req, secret });
+  const token = await getToken({
+    req,
+    secret,
+    secureCookie: req.nextUrl.protocol === "https:"
+  });
 
   if (req.nextUrl.pathname.startsWith("/admin") && !token) {
     const signInUrl = new URL("/login", req.nextUrl.origin);
