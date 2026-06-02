@@ -45,13 +45,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     jwt: async ({ token, user }) => {
-      if (user) token.role = (user as { role?: string }).role || "student_visitor";
+      if (user) {
+        token.role = (user as { role?: string }).role || "student_visitor";
+        token.sub = user.id;
+      }
       return token;
     },
     session: async ({ session, token }) => {
       (session.user as typeof session.user & { role?: string }).role = String(
         token.role || "student_visitor"
       );
+      (session.user as typeof session.user & { id?: string }).id = String(token.sub || "");
       return session;
     },
     redirect: async ({ url, baseUrl }) => {
