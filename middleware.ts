@@ -18,6 +18,10 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/portal", req.url));
   }
 
+  if (portal && !portalOnlyPrefixes.some((prefix) => path.startsWith(prefix))) {
+    return NextResponse.redirect(new URL("/portal", req.url));
+  }
+
   if (portal && path.startsWith("/admin")) {
     return NextResponse.redirect(new URL("/portal", req.url));
   }
