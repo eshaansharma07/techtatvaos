@@ -1,0 +1,8 @@
+import { randomUUID } from "crypto";
+import { NextRequest, NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import { Event, EventRegistration } from "@/lib/models";
+import { rateLimit } from "@/lib/rate-limit";
+import { registrationInput } from "@/lib/validations/event";
+export async function POST(req:NextRequest,{params}:{params:Promise<{id:string}>}){const ip=req.headers.get("x-forwarded-for")||"unknown";if(!rateLimit(`register:${ip}`,8))return NextResponse.json({error:"Too many attempts"},{status:429});const input=registrationInput.safeParse(await req.json());if(!input.success)return NextResponse.json({error:input.error.flatten()},{status:400});await connectDB();const {id}=await params;const event=await Event.findById(id);if(!event?.registrationOpen||!["published","active"].includes(event.status))return NextResponse.json({error:"Registration is closed"},{status:409});const count=await EventRegistration.countDocuments({event:id,status:"confirmed"});const status=count>=(event.capacity||Infinity)?"waitlisted":"confirmed";const record=await EventRegistration.findOneAndUpdate({event:id,user:input.data.userId},{$setOnInsert:{qrToken:randomUUID()},$set:{status,registeredAt:new Date()}},{upsert:true,new:true});return NextResponse.json(record,{status:201})}
+export async function DELETE(req:NextRequest,{params}:{params:Promise<{id:string}>}){const input=registrationInput.safeParse(await req.json());if(!input.success)return NextResponse.json({error:input.error.flatten()},{status:400});await connectDB();const {id}=await params;const record=await EventRegistration.findOneAndUpdate({event:id,user:input.data.userId},{status:"cancelled"},{new:true});return NextResponse.json(record)}
