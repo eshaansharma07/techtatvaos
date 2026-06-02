@@ -34,6 +34,14 @@ export function slugify(value: string) {
 const clean = (input: Record<string, any>) =>
   Object.fromEntries(Object.entries(input).filter(([, value]) => value !== "" && value !== undefined && value !== null));
 
+async function syncMemberTeam(userId: any, nextTeam?: any, previousTeam?: any) {
+  const user = new Types.ObjectId(String(userId));
+  const next = nextTeam ? String(nextTeam) : "";
+  const previous = previousTeam ? String(previousTeam) : "";
+  if (previous && previous !== next) await Team.findByIdAndUpdate(previous, { $pull: { members: user } });
+  if (next) await Team.findByIdAndUpdate(next, { $addToSet: { members: user } });
+}
+
 export async function createResource(resource: AdminResource, input: Record<string, any>, actorId?: string) {
   const body = clean(input);
   if (resource === "settings") {
@@ -45,11 +53,15 @@ export async function createResource(resource: AdminResource, input: Record<stri
     return Team.create({ ...body, slug: body.slug || slugify(body.name), active: body.active !== "false" });
   }
   if (resource === "users") {
-    return User.findOneAndUpdate(
-      { email: String(body.email).toLowerCase() },
-      { ...body, email: String(body.email).toLowerCase(), semester: body.semester ? Number(body.semester) : undefined },
+    const email = String(body.email).toLowerCase();
+    const existing = await User.findOne({ email }).select("team").lean();
+    const user = await User.findOneAndUpdate(
+      { email },
+      { ...body, email, semester: body.semester ? Number(body.semester) : undefined },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+    await syncMemberTeam(user._id, user.team, (existing as any)?.team);
+    return user;
   }
   if (resource === "events") {
     return Event.create({
@@ -82,7 +94,12 @@ export async function createResource(resource: AdminResource, input: Record<stri
 export async function updateResource(resource: AdminResource, id: string, input: Record<string, any>) {
   const body = clean(input);
   if (resource === "teams") return Team.findByIdAndUpdate(id, { ...body, active: body.active !== "false" }, { new: true });
-  if (resource === "users") return User.findByIdAndUpdate(id, { ...body, semester: body.semester ? Number(body.semester) : undefined }, { new: true });
+  if (resource === "users") {
+    const existing = await User.findById(id).select("team").lean();
+    const user = await User.findByIdAndUpdate(id, { ...body, semester: body.semester ? Number(body.semester) : undefined }, { new: true });
+    if (user) await syncMemberTeam(user._id, user.team, (existing as any)?.team);
+    return user;
+  }
   if (resource === "events") return Event.findByIdAndUpdate(id, { ...body, capacity: body.capacity ? Number(body.capacity) : undefined, registrationOpen: body.registrationOpen === true || body.registrationOpen === "true", startAt: body.startAt ? new Date(body.startAt) : undefined, endAt: body.endAt ? new Date(body.endAt) : undefined }, { new: true });
   if (resource === "tasks") return Task.findByIdAndUpdate(id, { ...body, dueAt: body.dueAt ? new Date(body.dueAt) : undefined }, { new: true });
   if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { ...body, publishAt: body.publishAt ? new Date(body.publishAt) : undefined }, { new: true });
@@ -94,7 +111,11 @@ export async function updateResource(resource: AdminResource, id: string, input:
 
 export async function deleteResource(resource: AdminResource, id: string) {
   if (resource === "teams") return Team.findByIdAndUpdate(id, { active: false }, { new: true });
-  if (resource === "users") return User.findByIdAndUpdate(id, { status: "inactive" }, { new: true });
+  if (resource === "users") {
+    const user = await User.findByIdAndUpdate(id, { status: "inactive" }, { new: true });
+    if (user?.team) await syncMemberTeam(user._id, undefined, user.team);
+    return user;
+  }
   if (resource === "events") return Event.findByIdAndUpdate(id, { status: "archived", registrationOpen: false }, { new: true });
   if (resource === "tasks") return Task.findByIdAndDelete(id);
   if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { status: "archived" }, { new: true });
