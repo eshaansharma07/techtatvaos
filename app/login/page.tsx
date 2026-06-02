@@ -11,14 +11,13 @@ export default function LoginPage() {
       <section className="relative mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-6 py-16 lg:grid-cols-[1.05fr_.95fr]">
         <div className="hidden max-w-2xl lg:block">
           <p className="text-[10px] font-semibold tracking-[.32em] text-violet-300">
-            SECURE OPERATIONS LAYER
+            INVITE-ONLY OPERATIONS LAYER
           </p>
           <h2 className="gradient-text mt-6 text-7xl font-medium leading-[.92] tracking-[-.075em]">
             Control the signal.
           </h2>
           <p className="mt-7 max-w-lg text-sm leading-7 text-white/45">
-            Manage members, events, attendance, announcements, and reports from one protected
-            command surface.
+            Verified club operators can manage members, events, attendance, announcements, and reports from one protected surface.
           </p>
         </div>
         <div className="flex justify-center lg:justify-end">
