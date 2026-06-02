@@ -8,7 +8,7 @@ export default async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret });
 
   if (req.nextUrl.pathname.startsWith("/admin") && !token) {
-    const signInUrl = new URL("/api/auth/signin", req.nextUrl.origin);
+    const signInUrl = new URL("/login", req.nextUrl.origin);
     signInUrl.searchParams.set("callbackUrl", req.nextUrl.href);
     return NextResponse.redirect(signInUrl);
   }
