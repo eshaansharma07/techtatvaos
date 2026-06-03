@@ -271,11 +271,12 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
     setMarking((state) => ({ ...state, [key]: true }));
     setPanel(`Saving attendance for ${row.name}...`);
     try {
-      const res = await fetch("/api/attendance/mark", {
+      const endpoint = status === "present" ? "/api/attendance/present" : "/api/attendance/absent";
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
-        body: JSON.stringify({ event: selected, user: row.user, registration: row.registration, status, action: status === "present" ? "mark_present" : "mark_absent" })
+        body: JSON.stringify({ event: selected, user: row.user, registration: row.registration })
       });
       const saved = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -284,7 +285,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
       }
       const savedStatus = saved.status === "present" ? "present" : "absent";
       if (savedStatus !== status) {
-        setPanel(`Attendance mismatch: requested ${status}, but server saved ${savedStatus}. Please try again.`);
+        setPanel(`Attendance was not saved correctly. Press ${status === "present" ? "Mark present" : "Mark absent"} again.`);
         return;
       }
       setLocalStatus((state) => ({ ...state, [key]: savedStatus }));
