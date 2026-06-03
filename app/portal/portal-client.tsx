@@ -241,6 +241,7 @@ function Workspace({active,rows,open,remove,restore,patch,duplicateEvent}:{activ
 function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value: string) => void; refresh: () => Promise<void> }) {
   const events = data.events || [];
   const [selected, setSelected] = useState(events[0] ? idOf(events[0]) : "");
+  const [attendanceSearch, setAttendanceSearch] = useState("");
   const [localStatus, setLocalStatus] = useState<Record<string, "present" | "absent">>({});
   const [marking, setMarking] = useState<Record<string, boolean>>({});
   const selectedEvent = events.find((event: any) => idOf(event) === selected);
@@ -275,6 +276,15 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
       teamName: registration.teamName || ""
     }));
     return [...leader, ...members];
+  });
+  const filteredParticipants = participants.filter((row: any) => {
+    const query = attendanceSearch.trim().toLowerCase();
+    if (!query) return true;
+    return [row.name, row.uid, row.email, row.program, row.semester, row.teamName, row.mode]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(query);
   });
 
   useEffect(() => {
@@ -333,11 +343,17 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm">Registered candidates</p>
-            <p className="mt-1 text-xs text-white/35">Filter by event, then mark attendance manually.</p>
+            <p className="mt-1 text-xs text-white/35">Filter by event, search by name or UID, then mark attendance manually.</p>
           </div>
-          <select value={selected} onChange={(event) => setSelected(event.target.value)} className="rounded-lg border border-white/[.07] bg-black/40 px-3 py-2.5 text-xs text-white outline-none">
-            {events.map((event: any) => <option value={idOf(event)} key={idOf(event)}>{event.title}</option>)}
-          </select>
+          <div className="flex flex-wrap gap-2">
+            <label className="portal-mini-button flex min-w-[240px] items-center gap-2 rounded-2xl px-3 py-2.5 text-white/45">
+              <Search size={14} />
+              <input value={attendanceSearch} onChange={(event) => setAttendanceSearch(event.target.value)} placeholder="Search name, UID, email..." className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/28" />
+            </label>
+            <select value={selected} onChange={(event) => setSelected(event.target.value)} className="rounded-2xl border border-white/[.07] bg-black/40 px-3 py-2.5 text-xs text-white outline-none">
+              {events.map((event: any) => <option value={idOf(event)} key={idOf(event)}>{event.title}</option>)}
+            </select>
+          </div>
         </div>
 
         {participants.length ? (
@@ -346,7 +362,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
               <span>Name</span><span>UID</span><span>Program</span><span>Mode</span><span>Attendance</span>
             </div>
             <div className="max-h-[430px] overflow-y-auto overscroll-contain">
-              {participants.map((row: any) => {
+              {filteredParticipants.map((row: any) => {
                 const status = localStatus[`${selected}:${row.user}`] || attendanceMap.get(`${selected}:${row.user}`)?.status || "absent";
                 const isPresent = status === "present";
                 const busy = Boolean(marking[`${selected}:${row.user}`]);
@@ -376,6 +392,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
                   </div>
                 );
               })}
+              {!filteredParticipants.length ? <p className="border-t border-white/[.05] bg-black/15 px-4 py-6 text-sm text-white/45">No candidates match “{attendanceSearch}”.</p> : null}
             </div>
           </div>
         ) : (
