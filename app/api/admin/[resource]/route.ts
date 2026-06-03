@@ -5,10 +5,15 @@ import { connectDB } from "@/lib/db";
 import { getAdminDashboardData } from "@/lib/public-data";
 import { audit, requirePortal } from "@/lib/portal";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: NextRequest) {
   const blocked = await requirePortal(req);
   if (blocked) return blocked;
-  return NextResponse.json(await getAdminDashboardData());
+  const res = NextResponse.json(await getAdminDashboardData());
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  return res;
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ resource: string }> }) {

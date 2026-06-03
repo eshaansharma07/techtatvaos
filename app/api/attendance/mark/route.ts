@@ -5,6 +5,9 @@ import { connectDB } from "@/lib/db";
 import { Attendance } from "@/lib/models";
 import { audit, requirePortal } from "@/lib/portal";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(req: NextRequest) {
   const blocked = await requirePortal(req);
   if (blocked) return blocked;
@@ -22,22 +25,26 @@ export async function POST(req: NextRequest) {
   if (!Types.ObjectId.isValid(event) || !Types.ObjectId.isValid(user)) return NextResponse.json({ error: "Valid event and user ids are required" }, { status: 400 });
 
   await connectDB();
+  const eventId = new Types.ObjectId(event);
+  const userId = new Types.ObjectId(user);
   const update: Record<string, any> = {
-    event,
-    user,
+    event: eventId,
+    user: userId,
     status,
     method: "manual",
     markedAt: new Date()
   };
-  if (registration && Types.ObjectId.isValid(registration)) update.registration = registration;
-  if ((session.user as any).id && Types.ObjectId.isValid((session.user as any).id)) update.markedBy = (session.user as any).id;
+  if (registration && Types.ObjectId.isValid(registration)) update.registration = new Types.ObjectId(registration);
+  if ((session.user as any).id && Types.ObjectId.isValid((session.user as any).id)) update.markedBy = new Types.ObjectId((session.user as any).id);
 
   const record = await Attendance.findOneAndUpdate(
-    { event, user },
+    { event: eventId, user: userId },
     { $set: update },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
-  );
+    { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
+  ).populate("event", "title").populate("user", "name email uid registrationNumber program semester");
 
   await audit(req, "portal.attendance.mark", { entityType: "attendance", entityId: String(record._id), event, user, status });
-  return NextResponse.json(record);
+  const res = NextResponse.json(record);
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  return res;
 }

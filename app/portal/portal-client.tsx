@@ -257,10 +257,12 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
       body: JSON.stringify({ event: selected, user: row.user, registration: row.registration, status })
     });
     if (res.ok) {
-      setLocalStatus((state) => ({ ...state, [key]: status }));
-      setPanel(`${row.name} marked ${status}.`);
+      const saved = await res.json();
+      const savedStatus = saved.status === "present" ? "present" : "absent";
+      setLocalStatus((state) => ({ ...state, [key]: savedStatus }));
+      setPanel(`${row.name} marked ${savedStatus}.`);
       await refresh();
-      setPanel(`${row.name} marked ${status}.`);
+      setPanel(`${row.name} marked ${savedStatus}.`);
     } else {
       const error = await res.json().catch(() => ({}));
       setPanel(error.error || `Could not update ${row.name}.`);
