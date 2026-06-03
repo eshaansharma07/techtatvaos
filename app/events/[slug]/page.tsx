@@ -46,15 +46,23 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           <ArrowLeft size={14} /> BACK TO EVENTS
         </Link>
 
-        <div className="relative mt-8 overflow-hidden rounded-3xl bg-gradient-to-br from-violet-800 to-fuchsia-700 p-8 md:p-14">
-          {event.banner ? <img src={event.banner} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" /> : null}
-          <div className="absolute inset-0 grid-bg opacity-25" />
-          <div className="relative max-w-3xl">
-            <span className="rounded-full bg-black/25 px-3 py-1.5 text-[10px] font-bold tracking-[.2em]">
-              {(event.category || "EVENT").toUpperCase()}
-            </span>
-            <h1 className="mt-8 text-5xl font-medium tracking-[-.06em] md:text-8xl">{event.title}</h1>
-            <p className="mt-6 max-w-2xl text-sm leading-7 text-white/75">{event.description || "No description has been added yet."}</p>
+        <div className="relative mt-8 overflow-hidden rounded-3xl border border-white/[.08] bg-gradient-to-br from-violet-950/80 via-black/45 to-fuchsia-950/50 p-6 md:p-10">
+          <div className="absolute inset-0 grid-bg opacity-20" />
+          <div className="relative grid items-center gap-8 lg:grid-cols-[.9fr_1.1fr]">
+            <div className="max-w-3xl">
+              <span className="rounded-full bg-black/30 px-3 py-1.5 text-[10px] font-bold tracking-[.2em]">
+                {(event.category || "EVENT").toUpperCase()}
+              </span>
+              <h1 className="mt-8 text-5xl font-medium tracking-[-.06em] md:text-8xl">{event.title}</h1>
+              <p className="mt-6 max-w-2xl text-sm leading-7 text-white/70">{event.description || "No description has been added yet."}</p>
+            </div>
+            {event.banner ? (
+              <div className="rounded-[1.75rem] border border-white/[.08] bg-black/25 p-5 shadow-2xl shadow-black/30 backdrop-blur-sm">
+                <div className="grid min-h-[260px] place-items-center rounded-[1.25rem] bg-white/[.03] p-6 md:min-h-[360px]">
+                  <img src={event.banner} alt="" className="max-h-[320px] max-w-full object-contain drop-shadow-[0_24px_70px_rgba(0,0,0,.45)] md:max-h-[430px]" />
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
 
