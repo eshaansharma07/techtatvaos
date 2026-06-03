@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Types } from "mongoose";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/db";
 import { Attendance } from "@/lib/models";
@@ -18,21 +19,22 @@ export async function POST(req: NextRequest) {
   const status = body.status === "present" ? "present" : body.status === "absent" ? "absent" : "";
 
   if (!event || !user || !status) return NextResponse.json({ error: "event, user, and status are required" }, { status: 400 });
+  if (!Types.ObjectId.isValid(event) || !Types.ObjectId.isValid(user)) return NextResponse.json({ error: "Valid event and user ids are required" }, { status: 400 });
 
   await connectDB();
+  const update: Record<string, any> = {
+    event,
+    user,
+    status,
+    method: "manual",
+    markedAt: new Date()
+  };
+  if (registration && Types.ObjectId.isValid(registration)) update.registration = registration;
+  if ((session.user as any).id && Types.ObjectId.isValid((session.user as any).id)) update.markedBy = (session.user as any).id;
+
   const record = await Attendance.findOneAndUpdate(
     { event, user },
-    {
-      $set: {
-        event,
-        user,
-        registration,
-        status,
-        method: "manual",
-        markedAt: new Date(),
-        markedBy: (session.user as any).id
-      }
-    },
+    { $set: update },
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 

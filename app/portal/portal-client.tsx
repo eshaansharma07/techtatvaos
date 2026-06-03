@@ -214,6 +214,7 @@ function Workspace({active,rows,open,remove,restore,patch,duplicateEvent}:{activ
 function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value: string) => void; refresh: () => Promise<void> }) {
   const events = data.events || [];
   const [selected, setSelected] = useState(events[0] ? idOf(events[0]) : "");
+  const [localStatus, setLocalStatus] = useState<Record<string, "present" | "absent">>({});
   const selectedEvent = events.find((event: any) => idOf(event) === selected);
   const attendanceMap = useMemo<Map<string, any>>(
     () => new Map((data.attendance || []).map((row: any) => [`${idOf(row.event)}:${idOf(row.user)}`, row])),
@@ -249,13 +250,21 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
   });
 
   async function mark(row: any, status: "present" | "absent") {
+    const key = `${selected}:${row.user}`;
     const res = await fetch("/api/attendance/mark", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ event: selected, user: row.user, registration: row.registration, status })
     });
-    setPanel(res.ok ? `${row.name} marked ${status}.` : `Could not update ${row.name}.`);
-    await refresh();
+    if (res.ok) {
+      setLocalStatus((state) => ({ ...state, [key]: status }));
+      setPanel(`${row.name} marked ${status}.`);
+      await refresh();
+      setPanel(`${row.name} marked ${status}.`);
+    } else {
+      const error = await res.json().catch(() => ({}));
+      setPanel(error.error || `Could not update ${row.name}.`);
+    }
   }
 
   return (
@@ -278,7 +287,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
             </div>
             <div className="max-h-[430px] overflow-y-auto overscroll-contain">
               {participants.map((row: any) => {
-                const status = attendanceMap.get(`${selected}:${row.user}`)?.status || "absent";
+                const status = localStatus[`${selected}:${row.user}`] || attendanceMap.get(`${selected}:${row.user}`)?.status || "absent";
                 const isPresent = status === "present";
                 return (
                   <div className="grid grid-cols-[.8fr_.8fr_.7fr_.6fr_auto] items-center gap-3 border-t border-white/[.05] bg-black/15 px-4 py-3 text-xs" key={`${row.registration}-${row.user}`}>

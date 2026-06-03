@@ -35,7 +35,7 @@ function truncate(font: any, value: string, size: number, maxWidth: number) {
 }
 
 function drawTable(page: any, fonts: { regular: any; bold: any }, students: Student[], pageNumber: number) {
-  drawCentered(page, "SAMPLE ATTENDANCE", 764, fonts.bold, 14);
+  drawCentered(page, `${String(page.__eventName || "EVENT").toUpperCase()} ATTENDANCE SHEET`, 764, fonts.bold, 14);
   drawText(page, "Attendance List", marginX, 704, fonts.regular, 12);
   drawText(page, "EVENT NAME: " + page.__eventName, marginX, 672, fonts.regular, 12);
   drawText(page, "DATE: " + page.__date, marginX, 642, fonts.regular, 12);
@@ -89,7 +89,7 @@ export async function attendancePdf(sheet: Sheet) {
 export async function attendanceXlsx(sheet: Sheet) {
   const book = new ExcelJS.Workbook();
   const ws = book.addWorksheet("Attendance");
-  ws.addRow(["SAMPLE ATTENDANCE"]);
+  ws.addRow([`${String(sheet.eventName || "Event").toUpperCase()} ATTENDANCE SHEET`]);
   ws.mergeCells("A1:E1");
   ws.addRow([]);
   ws.addRow(["Attendance List"]);
