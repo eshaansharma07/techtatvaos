@@ -138,7 +138,7 @@ export async function getPublicTeams(): Promise<PublicTeam[]> {
     .populate("lead", "name")
     .populate("coLeads", "name")
     .lean();
-  const members = await User.find({ team: { $in: teams.map((team) => team._id) }, status: "active" })
+  const members = await User.find({ team: { $in: teams.map((team) => team._id) }, memberType: "club_member", status: "active" })
     .sort({ name: 1 })
     .select("name team")
     .lean();
@@ -184,7 +184,7 @@ export async function getPublicHomeData() {
     Gallery.find({ published: true }).sort({ createdAt: -1 }).limit(4).lean()
   ]);
   const [members, eventCount, teamCount] = await Promise.all([
-    User.countDocuments({ status: "active" }),
+    User.countDocuments({ memberType: "club_member", status: "active" }),
     Event.countDocuments({ status: { $in: ["published", "active", "completed"] } }),
     Team.countDocuments({ active: true })
   ]);
@@ -201,6 +201,14 @@ export async function getPublicHomeData() {
 
 export async function getAdminDashboardData() {
   await connectDB();
+  const clubMemberQuery = {
+    $or: [
+      { memberType: "club_member" },
+      { team: { $ne: null } },
+      { portalAccess: true },
+      { role: { $ne: null } }
+    ]
+  };
   const [
     users,
     teams,
@@ -216,7 +224,7 @@ export async function getAdminDashboardData() {
     contactMessages,
     clubInfo
   ] = await Promise.all([
-    User.find({}).sort({ createdAt: -1 }).limit(200).populate("role", "name slug").populate("team", "name").lean(),
+    User.find(clubMemberQuery).sort({ createdAt: -1 }).limit(300).populate("role", "name slug").populate("team", "name").lean(),
     Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").populate("coLeads", "name").lean(),
     Event.find({}).sort({ startAt: -1 }).limit(200).populate("team", "name").lean(),
     Task.find({}).sort({ dueAt: 1 }).limit(200).populate("team", "name").lean(),

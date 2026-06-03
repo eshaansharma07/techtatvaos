@@ -1,6 +1,6 @@
 import { ChevronRight, Crown, Network, ShieldCheck, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
-import { getPublicTeams } from "@/lib/public-data";
+import { getClubInfo, getPublicTeams } from "@/lib/public-data";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,12 @@ function DetailCard({ label, value }: { label: string; value: string }) {
 }
 
 export default async function TeamsPage() {
-  const teams = await getPublicTeams();
+  const [teams, info] = await Promise.all([getPublicTeams(), getClubInfo()]);
+  const officeBearers = [
+    { role: "SECRETARY", name: info.secretaryName, email: info.secretaryEmail, photo: info.secretaryPhoto },
+    { role: "JOINT SECRETARY", name: info.jointSecretaryOneName, email: info.jointSecretaryOneEmail, photo: info.jointSecretaryOnePhoto },
+    { role: "JOINT SECRETARY", name: info.jointSecretaryTwoName, email: info.jointSecretaryTwoEmail, photo: info.jointSecretaryTwoPhoto }
+  ].filter((person) => person.name || person.email || person.photo);
 
   return (
     <PublicShell>
@@ -35,7 +40,30 @@ export default async function TeamsPage() {
           </p>
         </div>
 
-        <div className="relative mt-14 rounded-[2rem] border border-white/[.08] bg-white/[.025] p-4 backdrop-blur-xl md:p-6">
+        <div className="relative mt-12 grid gap-4 lg:grid-cols-[.8fr_1.2fr]">
+          <div className="rounded-[1.5rem] border border-violet-300/15 bg-violet-500/[.06] p-5">
+            <p className="text-[10px] font-semibold tracking-[.22em] text-violet-200/70">FACULTY CHAMPION</p>
+            <p className="mt-5 text-2xl text-white/88">{info.facultyChampionName || "To be announced"}</p>
+            {info.facultyChampionEmail ? <p className="mt-2 text-sm text-white/45">{info.facultyChampionEmail}</p> : null}
+            {info.facultyChampionPhone ? <p className="mt-1 text-sm text-white/35">{info.facultyChampionPhone}</p> : null}
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {officeBearers.length ? officeBearers.map((person) => (
+              <div className="rounded-[1.5rem] border border-white/[.07] bg-white/[.035] p-5" key={`${person.role}-${person.name}`}>
+                {person.photo ? <img src={person.photo} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/[.06] text-violet-200"><Crown size={18} /></div>}
+                <p className="mt-4 text-[10px] font-semibold tracking-[.18em] text-white/35">{person.role}</p>
+                <p className="mt-2 text-lg text-white/85">{person.name || "To be announced"}</p>
+                {person.email ? <p className="mt-1 break-all text-xs text-white/38">{person.email}</p> : null}
+              </div>
+            )) : (
+              <div className="rounded-[1.5rem] border border-white/[.07] bg-white/[.035] p-5 text-sm text-white/45 md:col-span-3">
+                Secretary and joint secretary details will appear once updated from the portal.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="relative mt-8 rounded-[2rem] border border-white/[.08] bg-white/[.025] p-4 backdrop-blur-xl md:p-6">
           <div className="flex items-center gap-4 rounded-2xl border border-violet-300/20 bg-violet-500/10 p-5">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-black/20 text-violet-200">
               <Network size={20} />
@@ -61,10 +89,9 @@ export default async function TeamsPage() {
                     </span>
                   </summary>
 
-                  <div className="mt-5 grid gap-3 md:grid-cols-3">
+                  <div className="mt-5 grid gap-3 md:grid-cols-2">
                     <DetailCard label="TEAM LEAD" value={team.lead || "To be announced"} />
                     <DetailCard label="CO-LEADS" value={team.coLeads.length ? team.coLeads.join(", ") : "To be announced"} />
-                    <DetailCard label="FACULTY CHAMPION" value={team.facultyChampionName || "To be announced"} />
                   </div>
 
                   <div className="mt-4 rounded-2xl border border-white/[.06] bg-white/[.025] p-4">

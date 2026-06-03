@@ -46,6 +46,13 @@ function normalizeTeamBody(input: Record<string, any>, create = false) {
   return normalized;
 }
 
+function memberEmail(body: Record<string, any>) {
+  const raw = String(body.email || "").trim().toLowerCase();
+  if (raw && raw !== "undefined" && raw.includes("@")) return raw;
+  const basis = String(body.uid || body.registrationNumber || body.name || new Types.ObjectId().toString());
+  return `${slugify(basis)}@members.techtatvaos.local`;
+}
+
 const eventStatuses = new Set(["draft", "published", "active", "completed", "archived"]);
 const participationModes = new Set(["individual", "team", "both"]);
 
@@ -105,11 +112,11 @@ export async function createResource(resource: AdminResource, input: Record<stri
     return team;
   }
   if (resource === "users") {
-    const email = String(body.email).toLowerCase();
+    const email = memberEmail(body);
     const existing = await User.findOne({ email }).select("team").lean();
     const user = await User.findOneAndUpdate(
       { email },
-      { ...body, email, semester: body.semester ? Number(body.semester) : undefined },
+      { ...body, email, memberType: "club_member", status: body.status || "active", semester: body.semester ? Number(body.semester) : undefined },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
     await syncMemberTeam(user._id, user.team, (existing as any)?.team);
@@ -145,7 +152,7 @@ export async function updateResource(resource: AdminResource, id: string, input:
   }
   if (resource === "users") {
     const existing = await User.findById(id).select("team").lean();
-    const user = await User.findByIdAndUpdate(id, { ...body, semester: body.semester ? Number(body.semester) : undefined }, { new: true });
+    const user = await User.findByIdAndUpdate(id, { ...body, memberType: "club_member", semester: body.semester ? Number(body.semester) : undefined }, { new: true });
     if (user) await syncMemberTeam(user._id, user.team, (existing as any)?.team);
     return user;
   }

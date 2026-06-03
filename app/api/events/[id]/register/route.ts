@@ -37,7 +37,8 @@ async function upsertParticipant(input: PublicParticipant) {
         program: clean(input.program),
         semester: semesterOf(input.semester),
         status: "active"
-      }
+      },
+      $setOnInsert: { memberType: "event_candidate" }
     },
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
