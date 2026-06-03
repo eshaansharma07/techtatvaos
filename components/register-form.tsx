@@ -32,14 +32,20 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
         };
       });
     }
-    const res = await fetch(`/api/events/${eventId}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    setLoading(false);
-    setStatus(res.ok ? `Registration ${data.status || "confirmed"}. ${mode === "team" ? "Team" : "Candidate"} attendance records created.` : data.error || "Registration failed.");
+    try {
+      const res = await fetch(`/api/events/${eventId}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
+      setStatus(res.ok ? `Registration ${data.status || "confirmed"}. ${mode === "team" ? "Team" : "Candidate"} attendance records created.` : data.error || "Registration failed.");
+    } catch {
+      setStatus("Registration failed. Please check the details and try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const fields = [

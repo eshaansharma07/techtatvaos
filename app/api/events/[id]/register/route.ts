@@ -26,18 +26,28 @@ function isValidParticipant(input: PublicParticipant) {
 
 async function upsertParticipant(input: PublicParticipant) {
   const email = clean(input.email).toLowerCase();
+  const uid = clean(input.uid);
+  const registrationNumber = clean(input.registrationNumber);
+  const query = {
+    $or: [
+      { email },
+      ...(uid ? [{ uid }] : []),
+      ...(registrationNumber ? [{ registrationNumber }] : [])
+    ]
+  };
+  const set: Record<string, unknown> = {
+    name: clean(input.name),
+    email,
+    uid,
+    program: clean(input.program),
+    semester: semesterOf(input.semester),
+    status: "active"
+  };
+  if (registrationNumber) set.registrationNumber = registrationNumber;
   return User.findOneAndUpdate(
-    { email },
+    query,
     {
-      $set: {
-        name: clean(input.name),
-        email,
-        uid: clean(input.uid),
-        registrationNumber: clean(input.registrationNumber),
-        program: clean(input.program),
-        semester: semesterOf(input.semester),
-        status: "active"
-      },
+      $set: set,
       $setOnInsert: { memberType: "event_candidate" }
     },
     { upsert: true, new: true, setDefaultsOnInsert: true }
@@ -45,76 +55,83 @@ async function upsertParticipant(input: PublicParticipant) {
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const ip = req.headers.get("x-forwarded-for") || "unknown";
-  if (!rateLimit(`register:${ip}`, 8)) return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
+  try {
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    if (!rateLimit(`register:${ip}`, 8)) return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
 
-  const payload = await req.json();
-  const legacy = registrationInput.safeParse(payload);
+    const payload = await req.json();
+    const legacy = registrationInput.safeParse(payload);
 
-  await connectDB();
-  const { id } = await params;
-  const event = await Event.findById(id);
-  if (!event?.registrationOpen || !["published", "active"].includes(event.status)) {
-    return NextResponse.json({ error: "Registration is closed" }, { status: 409 });
-  }
-
-  const mode = payload.mode === "team" ? "team" : "individual";
-  const eventMode = event.participationMode || "individual";
-  const allowed = eventMode === "both" || eventMode === mode;
-  if (!allowed) return NextResponse.json({ error: `This event accepts ${eventMode} registrations only.` }, { status: 400 });
-
-  let userId = legacy.success ? legacy.data.userId : null;
-  let leader: any = null;
-  let teamMembers: any[] = [];
-
-  if (!userId) {
-    const leaderInput: PublicParticipant = payload;
-    if (!isValidParticipant(leaderInput)) return NextResponse.json({ error: "Valid candidate details are required." }, { status: 400 });
-
-    const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
-    const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => clean(member?.name) || clean(member?.email) || clean(member?.uid)) : [];
-    const totalSize = 1 + memberInputs.length;
-    const maxTeamSize = Math.max(1, Number(event.maxTeamSize || 1));
-    if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
-    if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
-    if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
-      return NextResponse.json({ error: "Every team member needs name, email, UID, program, and semester." }, { status: 400 });
+    await connectDB();
+    const { id } = await params;
+    const event = await Event.findById(id);
+    if (!event?.registrationOpen || !["published", "active"].includes(event.status)) {
+      return NextResponse.json({ error: "Registration is closed" }, { status: 409 });
     }
 
-    leader = await upsertParticipant(leaderInput);
-    userId = String(leader._id);
-    const memberUsers = await Promise.all(memberInputs.map((member) => upsertParticipant(member)));
-    teamMembers = memberUsers.map((member, index) => ({
-      user: member._id,
-      name: member.name,
-      email: member.email,
-      uid: member.uid,
-      registrationNumber: member.registrationNumber,
-      program: member.program,
-      semester: member.semester ?? semesterOf(memberInputs[index]?.semester)
-    }));
-  }
+    const mode = payload.mode === "team" ? "team" : "individual";
+    const eventMode = event.participationMode || "individual";
+    const allowed = eventMode === "both" || eventMode === mode;
+    if (!allowed) return NextResponse.json({ error: `This event accepts ${eventMode} registrations only.` }, { status: 400 });
 
-  const count = await EventRegistration.countDocuments({ event: id, status: "confirmed" });
-  const status = count >= (event.capacity || Infinity) ? "waitlisted" : "confirmed";
-  const record = await EventRegistration.findOneAndUpdate(
-    { event: id, user: userId },
-    { $setOnInsert: { qrToken: randomUUID() }, $set: { status, mode, teamName: clean(payload.teamName), teamMembers, registeredAt: new Date() } },
-    { upsert: true, new: true }
-  );
+    let userId = legacy.success ? legacy.data.userId : null;
+    let leader: any = null;
+    let teamMembers: any[] = [];
 
-  const participantIds = [userId, ...teamMembers.map((member) => String(member.user))];
-  await Promise.all(
-    participantIds.map((participantId) =>
-      Attendance.findOneAndUpdate(
-        { event: id, user: participantId },
-        { $setOnInsert: { status: "absent", method: "manual", markedAt: new Date(), registration: record._id } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+    if (!userId) {
+      const leaderInput: PublicParticipant = payload;
+      if (!isValidParticipant(leaderInput)) return NextResponse.json({ error: "Valid candidate details are required." }, { status: 400 });
+
+      const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
+      const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => clean(member?.name) || clean(member?.email) || clean(member?.uid)) : [];
+      const totalSize = 1 + memberInputs.length;
+      const maxTeamSize = Math.max(1, Number(event.maxTeamSize || 1));
+      if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
+      if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
+      if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
+        return NextResponse.json({ error: "Every team member needs name, email, UID, program, and semester." }, { status: 400 });
+      }
+
+      leader = await upsertParticipant(leaderInput);
+      userId = String(leader._id);
+      const memberUsers = await Promise.all(memberInputs.map((member) => upsertParticipant(member)));
+      teamMembers = memberUsers.map((member, index) => ({
+        user: member._id,
+        name: member.name,
+        email: member.email,
+        uid: member.uid,
+        registrationNumber: member.registrationNumber,
+        program: member.program,
+        semester: member.semester ?? semesterOf(memberInputs[index]?.semester)
+      }));
+    }
+
+    const count = await EventRegistration.countDocuments({ event: id, status: "confirmed" });
+    const status = count >= (event.capacity || Infinity) ? "waitlisted" : "confirmed";
+    const record = await EventRegistration.findOneAndUpdate(
+      { event: id, user: userId },
+      { $setOnInsert: { qrToken: randomUUID() }, $set: { status, mode, teamName: clean(payload.teamName), teamMembers, registeredAt: new Date() } },
+      { upsert: true, new: true }
+    );
+
+    const participantIds = [userId, ...teamMembers.map((member) => String(member.user))];
+    await Promise.all(
+      participantIds.map((participantId) =>
+        Attendance.findOneAndUpdate(
+          { event: id, user: participantId },
+          { $setOnInsert: { status: "absent", method: "manual", markedAt: new Date(), registration: record._id } },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        )
       )
-    )
-  );
+    );
 
-  return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode }, { status: 201 });
+    return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode }, { status: 201 });
+  } catch (error: any) {
+    if (error?.code === 11000) {
+      return NextResponse.json({ error: "A candidate with this email, UID, or registration number is already registered. Use the same details or update the existing candidate." }, { status: 409 });
+    }
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Registration failed." }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
