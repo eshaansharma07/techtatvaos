@@ -1,4 +1,5 @@
 import { z } from "zod";
-export const eventInput=z.object({title:z.string().min(3).max(120),slug:z.string().regex(/^[a-z0-9-]+$/),description:z.string().min(10).max(5000),venue:z.string().min(2),capacity:z.number().int().positive().max(10000),category:z.string().min(2),startAt:z.coerce.date(),endAt:z.coerce.date(),registrationOpen:z.boolean().default(false),team:z.string().optional()});
+const booleanInput=z.preprocess((value)=>value==="true"||value===true,z.boolean());
+export const eventInput=z.object({title:z.string().min(3).max(120),slug:z.string().regex(/^[a-z0-9-]+$/),description:z.string().min(10).max(5000),venue:z.string().min(2),capacity:z.coerce.number().int().positive().max(10000),category:z.string().min(2),status:z.enum(["draft","published","active","completed","archived"]).default("published"),startAt:z.coerce.date(),endAt:z.coerce.date().optional(),registrationStart:z.coerce.date().optional(),registrationEnd:z.coerce.date().optional(),registrationOpen:booleanInput.default(true),team:z.string().optional(),leads:z.array(z.string()).optional()});
 export const registrationInput=z.object({userId:z.string().length(24)});
 export const publicRegistrationInput=z.object({name:z.string().min(2).max(120),email:z.string().email(),uid:z.string().min(2).max(50),registrationNumber:z.string().max(80).optional().or(z.literal(""))});

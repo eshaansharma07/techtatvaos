@@ -4,7 +4,9 @@ import {
   Announcement,
   ClubInfo,
   ContactMessage,
+  Attendance,
   Event,
+  EventRegistration,
   Gallery,
   Sponsor,
   Task,
@@ -41,6 +43,32 @@ function normalizeTeamBody(input: Record<string, any>, create = false) {
   if (body.order !== undefined) normalized.order = Number(body.order);
   if (body.coLeads !== undefined) normalized.coLeads = Array.isArray(body.coLeads) ? body.coLeads : [body.coLeads];
   if (create || body.active !== undefined) normalized.active = body.active !== false && body.active !== "false";
+  return normalized;
+}
+
+const eventStatuses = new Set(["draft", "published", "active", "completed", "archived"]);
+
+function normalizeEventStatus(value: any, fallback = "published") {
+  const status = String(value || fallback).toLowerCase().trim();
+  if (eventStatuses.has(status)) return status;
+  if (status === "final" || status === "live" || status === "public") return "published";
+  if (status === "open") return "active";
+  if (status === "closed" || status === "done") return "completed";
+  return fallback;
+}
+
+function normalizeEventBody(input: Record<string, any>, create = false) {
+  const body = clean(input);
+  const normalized: Record<string, any> = { ...body };
+  if (body.slug || body.title) normalized.slug = body.slug || slugify(body.title);
+  if (body.capacity !== undefined) normalized.capacity = Number(body.capacity);
+  if (create || body.status !== undefined) normalized.status = normalizeEventStatus(body.status, "published");
+  if (create || body.registrationOpen !== undefined) normalized.registrationOpen = body.registrationOpen === true || body.registrationOpen === "true";
+  if (body.registrationStart) normalized.registrationStart = new Date(body.registrationStart);
+  if (body.registrationEnd) normalized.registrationEnd = new Date(body.registrationEnd);
+  if (body.startAt) normalized.startAt = new Date(body.startAt);
+  if (body.endAt) normalized.endAt = new Date(body.endAt);
+  if (body.leads !== undefined) normalized.leads = Array.isArray(body.leads) ? body.leads : [body.leads];
   return normalized;
 }
 
@@ -85,14 +113,7 @@ export async function createResource(resource: AdminResource, input: Record<stri
     return user;
   }
   if (resource === "events") {
-    return Event.create({
-      ...body,
-      slug: body.slug || slugify(body.title),
-      capacity: body.capacity ? Number(body.capacity) : undefined,
-      registrationOpen: body.registrationOpen === true || body.registrationOpen === "true",
-      startAt: body.startAt ? new Date(body.startAt) : undefined,
-      endAt: body.endAt ? new Date(body.endAt) : undefined
-    });
+    return Event.create(normalizeEventBody(body, true));
   }
   if (resource === "tasks") {
     return Task.create({ ...body, createdBy: actorId, dueAt: body.dueAt ? new Date(body.dueAt) : undefined });
@@ -125,7 +146,7 @@ export async function updateResource(resource: AdminResource, id: string, input:
     if (user) await syncMemberTeam(user._id, user.team, (existing as any)?.team);
     return user;
   }
-  if (resource === "events") return Event.findByIdAndUpdate(id, { ...body, capacity: body.capacity ? Number(body.capacity) : undefined, registrationOpen: body.registrationOpen === true || body.registrationOpen === "true", startAt: body.startAt ? new Date(body.startAt) : undefined, endAt: body.endAt ? new Date(body.endAt) : undefined }, { new: true });
+  if (resource === "events") return Event.findByIdAndUpdate(id, normalizeEventBody(input), { new: true, runValidators: true });
   if (resource === "tasks") return Task.findByIdAndUpdate(id, { ...body, dueAt: body.dueAt ? new Date(body.dueAt) : undefined }, { new: true });
   if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { ...body, publishAt: body.publishAt ? new Date(body.publishAt) : undefined }, { new: true });
   if (resource === "sponsors") return Sponsor.findByIdAndUpdate(id, { ...body, active: body.active !== "false" }, { new: true });
@@ -141,7 +162,10 @@ export async function deleteResource(resource: AdminResource, id: string) {
     if (user?.team) await syncMemberTeam(user._id, undefined, user.team);
     return user;
   }
-  if (resource === "events") return Event.findByIdAndUpdate(id, { status: "archived", registrationOpen: false }, { new: true });
+  if (resource === "events") {
+    await Promise.all([EventRegistration.deleteMany({ event: id }), Attendance.deleteMany({ event: id })]);
+    return Event.findByIdAndDelete(id);
+  }
   if (resource === "tasks") return Task.findByIdAndDelete(id);
   if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { status: "archived" }, { new: true });
   if (resource === "sponsors") return Sponsor.findByIdAndUpdate(id, { active: false }, { new: true });

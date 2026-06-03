@@ -55,7 +55,7 @@ export async function getClubInfo() {
 
 export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   await connectDB();
-  const events = await Event.find({ status: { $in: ["published", "active"] } })
+  const events = await Event.find({ status: { $in: ["published", "active", "completed"] } })
     .sort({ startAt: 1 })
     .limit(limit || 0)
     .populate("team", "name")
@@ -87,7 +87,7 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
 
 export async function getPublicEvent(slug: string) {
   await connectDB();
-  const event = await Event.findOne({ slug, status: { $in: ["published", "active"] } })
+  const event = await Event.findOne({ slug, status: { $in: ["published", "active", "completed"] } })
     .populate("team", "name")
     .populate("leads", "name email")
     .populate("sponsors", "name logo website level")
