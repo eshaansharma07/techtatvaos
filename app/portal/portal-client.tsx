@@ -204,7 +204,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
 
 function Header({active,data,open,setPanel}:{active:Module;data:Data;open:(drawer:any)=>void;setPanel:(text:string)=>void}){
   const action=active==="Overview"?"Export summary":active==="Attendance"?"Generate attendance":active==="Settings"?"Update branding":`Add ${active.slice(0,-1)}`;
-  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-6 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-4xl font-semibold tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/43">Live operational controls for members, teams, events, attendance, media, and public club content.</p></div><button onClick={()=>{if(active==="Overview")setPanel(JSON.stringify({members:data.users?.length||0,events:data.events?.length||0,teams:data.teams?.length||0},null,2));else if(active==="Attendance")setPanel("Use the PDF/XLSX buttons beside real events below.");else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${active.slice(0,-1)}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:{}})}}} className="flex items-center gap-2 self-end rounded-2xl bg-white px-5 py-3 text-xs font-semibold text-black shadow-[0_16px_40px_rgba(255,255,255,.08)] transition hover:bg-violet-100">{active==="Overview"||active==="Attendance"?<Download size={14}/>:<Plus size={14}/>} {action}</button></div>
+  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-6 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-4xl font-semibold tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/43">Live operational controls for members, teams, events, attendance, media, and public club content.</p></div><button type="button" onClick={()=>{if(active==="Overview")setPanel(JSON.stringify({members:data.users?.length||0,events:data.events?.length||0,teams:data.teams?.length||0},null,2));else if(active==="Attendance"){window.dispatchEvent(new Event("portal-download-attendance"));setPanel("Generating attendance sheet for the selected event...");}else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${active.slice(0,-1)}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:{}})}}} className="flex items-center gap-2 self-end rounded-2xl bg-white px-5 py-3 text-xs font-semibold text-black shadow-[0_16px_40px_rgba(255,255,255,.08)] transition hover:bg-violet-100">{active==="Overview"||active==="Attendance"?<Download size={14}/>:<Plus size={14}/>} {action}</button></div>
 }
 
 function Overview({counts,chart,setActive}:{counts:any;chart:any[];setActive:(m:Module)=>void}){const cards=[["Total members",counts.members,"Members",Users,"from-violet-400 to-fuchsia-300"],["Active teams",counts.teams,"Teams",Workflow,"from-cyan-300 to-violet-300"],["Published events",counts.events,"Events",CalendarDays,"from-fuchsia-300 to-pink-300"],["Open tasks",counts.tasks,"Tasks",CheckCircle2,"from-emerald-300 to-violet-300"]];return <><div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards.map(([label,value,module,Icon,accent]:any)=><button onClick={()=>setActive(module)} className="portal-card group rounded-[1.5rem] p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-violet-200/25" key={label}><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-medium text-white/42">{label}</p><p className="mt-5 text-4xl font-semibold tracking-[-.05em] text-white">{value}</p></div><span className={`grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br ${accent} text-black shadow-[0_0_28px_rgba(168,85,247,.22)]`}><Icon size={18}/></span></div><div className="mt-5 h-1.5 overflow-hidden rounded-full bg-white/[.06]"><span className={`block h-full w-2/3 rounded-full bg-gradient-to-r ${accent} transition group-hover:w-full`}/></div><p className="mt-3 text-[10px] font-semibold tracking-[.18em] text-white/32">LIVE DATABASE COUNT</p></button>)}</div><div className="portal-chart mt-5 rounded-[1.75rem] p-6"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-lg font-semibold">System data volume</p><p className="mt-1 text-xs text-white/38">Realtime operational footprint across core modules.</p></div><span className="rounded-full border border-violet-300/20 bg-violet-500/10 px-3 py-1.5 text-[10px] font-semibold tracking-[.18em] text-violet-100">LIVE</span></div><div className="mt-6 h-80"><ResponsiveContainer><BarChart data={chart} barCategoryGap={42}><XAxis dataKey="m" axisLine={false} tickLine={false} tick={{fill:"#ffffff73",fontSize:11}}/><Tooltip cursor={{fill:"rgba(139,92,246,.08)"}} contentStyle={{background:"#111016",border:"1px solid #ffffff16",borderRadius:14,color:"#fff"}}/><Bar dataKey="v" fill="url(#portalBar)" radius={[12,12,4,4]}/><defs><linearGradient id="portalBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f0abfc"/><stop offset="45%" stopColor="#8b5cf6"/><stop offset="100%" stopColor="#4c1d95"/></linearGradient></defs></BarChart></ResponsiveContainer></div></div></>}
@@ -215,6 +215,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
   const events = data.events || [];
   const [selected, setSelected] = useState(events[0] ? idOf(events[0]) : "");
   const [localStatus, setLocalStatus] = useState<Record<string, "present" | "absent">>({});
+  const [marking, setMarking] = useState<Record<string, boolean>>({});
   const selectedEvent = events.find((event: any) => idOf(event) === selected);
   const attendanceMap = useMemo<Map<string, any>>(
     () => new Map((data.attendance || []).map((row: any) => [`${idOf(row.event)}:${idOf(row.user)}`, row])),
@@ -249,23 +250,48 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
     return [...leader, ...members];
   });
 
+  useEffect(() => {
+    const download = () => {
+      if (!selected) {
+        setPanel("Select an event before generating attendance.");
+        return;
+      }
+      window.location.href = `/api/attendance/export?event=${selected}&format=pdf`;
+    };
+    window.addEventListener("portal-download-attendance", download);
+    return () => window.removeEventListener("portal-download-attendance", download);
+  }, [selected, setPanel]);
+
   async function mark(row: any, status: "present" | "absent") {
     const key = `${selected}:${row.user}`;
-    const res = await fetch("/api/attendance/mark", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event: selected, user: row.user, registration: row.registration, status })
-    });
-    if (res.ok) {
-      const saved = await res.json();
+    if (!selected || !row.user) {
+      setPanel("Cannot mark attendance because the event or candidate id is missing.");
+      return;
+    }
+    setMarking((state) => ({ ...state, [key]: true }));
+    setPanel(`Saving attendance for ${row.name}...`);
+    try {
+      const res = await fetch("/api/attendance/mark", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ event: selected, user: row.user, registration: row.registration, status })
+      });
+      const saved = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setPanel(saved.error || `Could not update ${row.name}. Server returned ${res.status}.`);
+        return;
+      }
       const savedStatus = saved.status === "present" ? "present" : "absent";
       setLocalStatus((state) => ({ ...state, [key]: savedStatus }));
-      setPanel(`${row.name} marked ${savedStatus}.`);
+      setPanel(`${row.name} marked ${savedStatus}. Refreshing attendance...`);
       await refresh();
-      setPanel(`${row.name} marked ${savedStatus}.`);
-    } else {
-      const error = await res.json().catch(() => ({}));
-      setPanel(error.error || `Could not update ${row.name}.`);
+      setLocalStatus((state) => ({ ...state, [key]: savedStatus }));
+      setPanel(`${row.name} marked ${savedStatus} and saved to MongoDB.`);
+    } catch (error) {
+      setPanel(`Attendance update failed for ${row.name}. Check connection and try again.`);
+    } finally {
+      setMarking((state) => ({ ...state, [key]: false }));
     }
   }
 
@@ -291,6 +317,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
               {participants.map((row: any) => {
                 const status = localStatus[`${selected}:${row.user}`] || attendanceMap.get(`${selected}:${row.user}`)?.status || "absent";
                 const isPresent = status === "present";
+                const busy = Boolean(marking[`${selected}:${row.user}`]);
                 return (
                   <div className="grid grid-cols-[.8fr_.8fr_.7fr_.6fr_auto] items-center gap-3 border-t border-white/[.05] bg-black/15 px-4 py-3 text-xs" key={`${row.registration}-${row.user}`}>
                     <div>
@@ -304,8 +331,8 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
                       <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider ${isPresent ? "bg-emerald-400/10 text-emerald-200" : "bg-rose-400/10 text-rose-200"}`}>
                         {isPresent ? "Marked present" : "Marked absent"}
                       </span>
-                      <button onClick={() => mark(row, isPresent ? "absent" : "present")} className={`rounded-lg px-3 py-2 ${isPresent ? "border border-rose-300/25 text-rose-200 hover:bg-rose-400/10" : "border border-emerald-300/25 text-emerald-200 hover:bg-emerald-400/10"}`}>
-                        {isPresent ? "Mark absent" : "Mark present"}
+                      <button type="button" disabled={busy} onClick={(event) => { event.preventDefault(); event.stopPropagation(); void mark(row, isPresent ? "absent" : "present"); }} className={`rounded-lg px-3 py-2 disabled:cursor-wait disabled:opacity-60 ${isPresent ? "border border-rose-300/25 text-rose-200 hover:bg-rose-400/10" : "border border-emerald-300/25 text-emerald-200 hover:bg-emerald-400/10"}`}>
+                        {busy ? "Saving..." : isPresent ? "Mark absent" : "Mark present"}
                       </button>
                     </div>
                   </div>
