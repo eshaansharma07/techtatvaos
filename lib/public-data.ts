@@ -42,7 +42,9 @@ export type PublicTeam = {
   description?: string;
   lead?: string;
   coLeads: string[];
+  facultyChampionName?: string;
   members: number;
+  memberNames: string[];
 };
 
 export async function getClubInfo() {
@@ -130,11 +132,15 @@ export async function getPublicTeams(): Promise<PublicTeam[]> {
     .populate("lead", "name")
     .populate("coLeads", "name")
     .lean();
-  const memberCounts = await User.aggregate([
-    { $match: { team: { $in: teams.map((team) => team._id) }, status: "active" } },
-    { $group: { _id: "$team", count: { $sum: 1 } } }
-  ]);
-  const countMap = new Map(memberCounts.map((item) => [String(item._id), item.count]));
+  const members = await User.find({ team: { $in: teams.map((team) => team._id) }, status: "active" })
+    .sort({ name: 1 })
+    .select("name team")
+    .lean();
+  const memberMap = new Map<string, string[]>();
+  for (const member of members) {
+    const key = String(member.team);
+    memberMap.set(key, [...(memberMap.get(key) || []), member.name]);
+  }
   return serialize(
     teams.map((team) => ({
       id: String(team._id),
@@ -143,7 +149,9 @@ export async function getPublicTeams(): Promise<PublicTeam[]> {
       description: team.description,
       lead: (team.lead as unknown as { name?: string })?.name,
       coLeads: (team.coLeads || []).map((lead: any) => lead.name).filter(Boolean),
-      members: countMap.get(String(team._id)) || 0
+      facultyChampionName: team.facultyChampionName,
+      members: memberMap.get(String(team._id))?.length || 0,
+      memberNames: memberMap.get(String(team._id)) || []
     }))
   );
 }
@@ -203,7 +211,7 @@ export async function getAdminDashboardData() {
     clubInfo
   ] = await Promise.all([
     User.find({}).sort({ createdAt: -1 }).limit(200).populate("role", "name slug").populate("team", "name").lean(),
-    Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").lean(),
+    Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").populate("coLeads", "name").lean(),
     Event.find({}).sort({ startAt: -1 }).limit(200).populate("team", "name").lean(),
     Task.find({}).sort({ dueAt: 1 }).limit(200).populate("team", "name").lean(),
     Announcement.find({}).sort({ publishAt: -1 }).limit(200).lean(),

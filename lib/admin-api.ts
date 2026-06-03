@@ -34,12 +34,31 @@ export function slugify(value: string) {
 const clean = (input: Record<string, any>) =>
   Object.fromEntries(Object.entries(input).filter(([, value]) => value !== "" && value !== undefined && value !== null));
 
+function normalizeTeamBody(input: Record<string, any>, create = false) {
+  const body = clean(input);
+  const normalized: Record<string, any> = { ...body };
+  if (body.slug || body.name) normalized.slug = body.slug || slugify(body.name);
+  if (body.order !== undefined) normalized.order = Number(body.order);
+  if (body.coLeads !== undefined) normalized.coLeads = Array.isArray(body.coLeads) ? body.coLeads : [body.coLeads];
+  if (create || body.active !== undefined) normalized.active = body.active !== false && body.active !== "false";
+  return normalized;
+}
+
 async function syncMemberTeam(userId: any, nextTeam?: any, previousTeam?: any) {
   const user = new Types.ObjectId(String(userId));
   const next = nextTeam ? String(nextTeam) : "";
   const previous = previousTeam ? String(previousTeam) : "";
   if (previous && previous !== next) await Team.findByIdAndUpdate(previous, { $pull: { members: user } });
   if (next) await Team.findByIdAndUpdate(next, { $addToSet: { members: user } });
+}
+
+async function syncTeamLeadership(teamId: any, lead?: any, coLeads: any[] = []) {
+  const ids = [lead, ...coLeads].filter(Boolean).map((id) => new Types.ObjectId(String(id)));
+  if (!ids.length) return;
+  await Promise.all([
+    User.updateMany({ _id: { $in: ids } }, { $set: { team: teamId, status: "active" } }),
+    Team.findByIdAndUpdate(teamId, { $addToSet: { members: { $each: ids } } })
+  ]);
 }
 
 export async function createResource(resource: AdminResource, input: Record<string, any>, actorId?: string) {
@@ -50,7 +69,9 @@ export async function createResource(resource: AdminResource, input: Record<stri
     return { updated: entries.length };
   }
   if (resource === "teams") {
-    return Team.create({ ...body, slug: body.slug || slugify(body.name), active: body.active !== "false" });
+    const team = await Team.create(normalizeTeamBody(body, true));
+    await syncTeamLeadership(team._id, team.lead, team.coLeads);
+    return team;
   }
   if (resource === "users") {
     const email = String(body.email).toLowerCase();
@@ -93,7 +114,11 @@ export async function createResource(resource: AdminResource, input: Record<stri
 
 export async function updateResource(resource: AdminResource, id: string, input: Record<string, any>) {
   const body = clean(input);
-  if (resource === "teams") return Team.findByIdAndUpdate(id, { ...body, active: body.active !== "false" }, { new: true });
+  if (resource === "teams") {
+    const team = await Team.findByIdAndUpdate(id, normalizeTeamBody(input), { new: true });
+    if (team) await syncTeamLeadership(team._id, team.lead, team.coLeads);
+    return team;
+  }
   if (resource === "users") {
     const existing = await User.findById(id).select("team").lean();
     const user = await User.findByIdAndUpdate(id, { ...body, semester: body.semester ? Number(body.semester) : undefined }, { new: true });
