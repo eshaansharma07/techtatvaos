@@ -35,6 +35,12 @@ export function slugify(value: string) {
 
 const clean = (input: Record<string, any>) =>
   Object.fromEntries(Object.entries(input).filter(([, value]) => value !== "" && value !== undefined && value !== null));
+const refId = (value: any) => {
+  if (!value) return undefined;
+  if (typeof value === "object") return String(value._id || value.id || "");
+  return String(value);
+};
+const refIds = (value: any) => (Array.isArray(value) ? value : [value]).map(refId).filter(Boolean);
 
 function normalizeTeamBody(input: Record<string, any>, create = false) {
   const body = clean(input);
@@ -71,6 +77,7 @@ function normalizeEventBody(input: Record<string, any>, create = false) {
   if (body.slug || body.title) normalized.slug = body.slug || slugify(body.title);
   if (body.capacity !== undefined) normalized.capacity = Number(body.capacity);
   if (body.maxTeamSize !== undefined) normalized.maxTeamSize = Math.max(1, Number(body.maxTeamSize) || 1);
+  if (body.team !== undefined) normalized.team = refId(body.team);
   if (body.participationMode !== undefined || create) normalized.participationMode = participationModes.has(String(body.participationMode)) ? body.participationMode : "individual";
   if (create || body.status !== undefined) normalized.status = normalizeEventStatus(body.status, "published");
   if (create || body.registrationOpen !== undefined) normalized.registrationOpen = body.registrationOpen === true || body.registrationOpen === "true";
@@ -78,7 +85,8 @@ function normalizeEventBody(input: Record<string, any>, create = false) {
   if (body.registrationEnd) normalized.registrationEnd = new Date(body.registrationEnd);
   if (body.startAt) normalized.startAt = new Date(body.startAt);
   if (body.endAt) normalized.endAt = new Date(body.endAt);
-  if (body.leads !== undefined) normalized.leads = Array.isArray(body.leads) ? body.leads : [body.leads];
+  if (body.leads !== undefined) normalized.leads = refIds(body.leads);
+  if (body.sponsors !== undefined) normalized.sponsors = refIds(body.sponsors);
   return normalized;
 }
 

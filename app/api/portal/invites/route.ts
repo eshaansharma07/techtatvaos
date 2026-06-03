@@ -2,7 +2,13 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { PortalInvite, Role, Team } from "@/lib/models";
-import { audit, hashToken, isPortalHost, portalUrl, requirePortal } from "@/lib/portal";
+import { audit, hashToken, isPortalHost, requirePortal } from "@/lib/portal";
+
+function inviteUrl(req: NextRequest, token: string) {
+  const protocol = req.headers.get("x-forwarded-proto") || (process.env.NODE_ENV === "production" ? "https" : "http");
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || process.env.PORTAL_HOST || "portal.techtatva.in";
+  return `${protocol}://${host}/invite/accept?token=${token}`;
+}
 
 export async function POST(req: NextRequest) {
   const blocked = await requirePortal(req);
@@ -25,7 +31,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     id: String(invite._id),
     email,
-    inviteUrl: portalUrl(`/invite/accept?token=${token}`)
+    inviteUrl: inviteUrl(req, token)
   }, { status: 201 });
 }
 
