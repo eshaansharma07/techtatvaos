@@ -211,7 +211,110 @@ function Overview({counts,chart,setActive}:{counts:any;chart:any[];setActive:(m:
 
 function Workspace({active,rows,open,remove,restore,patch,duplicateEvent}:{active:Module;rows:any[];open:(drawer:any)=>void;remove:(resource:Resource,item:any)=>void;restore:(resource:Resource,item:any)=>void;patch:(resource:Resource,item:any,body:Record<string, any>,message:string)=>void;duplicateEvent:(item:any)=>void}){const c=config[active as keyof typeof config];return <div className="mt-7 grid gap-4 lg:grid-cols-[1fr_.6fr]"><div className="glass rounded-xl p-5"><p className="text-sm">{active} workspace</p>{rows.length?<div className="mt-4 overflow-hidden rounded-xl border border-white/[.06]">{rows.map((row:any[])=>{const item=row[row.length-1];const resource=(item.__resource||c.resource) as Resource;const fields=extraFields[resource] || c.fields;const inactive=item.active===false || item.published===false || item.status==="archived" || item.status==="inactive";const isEvent=active==="Events";return <div className="grid gap-3 border-b border-white/[.05] bg-black/15 p-4 text-xs last:border-0 md:grid-cols-[1.1fr_.8fr_.8fr_.8fr_auto]" key={idOf(item)}>{row.slice(0,-1).slice(0,4).map((cell:any,index:number)=><button onClick={()=>open({resource,title:`Edit ${active.slice(0,-1)}`,fields,item})} className={`text-left ${index===0?"text-white/75":"text-white/45"}`} key={`${idOf(item)}-${index}`}>{String(cell)}</button>)}<div className="flex flex-wrap gap-3">{active==="Teams"&&item.active!==false?<button onClick={()=>open({resource:"users",title:`Add member to ${item.name}`,fields:config.Members.fields,defaults:{team:idOf(item)}})} className="text-violet-300">Add member</button>:active==="Teams"?<span className="text-white/25">Inactive</span>:null}{isEvent?<><button onClick={()=>patch(resource,item,{status:"published"},"Event published. It is visible on the public website.")} className="text-emerald-300">Publish</button><button onClick={()=>patch(resource,item,{status:"draft",registrationOpen:"false"},"Event moved to draft and hidden publicly.")} className="text-white/45">Draft</button><button onClick={()=>patch(resource,item,{registrationOpen:String(!item.registrationOpen),status:item.status==="draft"?"published":item.status},"Registration setting updated.")} className="text-violet-300">{item.registrationOpen?"Close reg":"Open reg"}</button><button onClick={()=>duplicateEvent(item)} className="text-sky-300">Duplicate</button></>:null}{inactive?<button onClick={()=>restore(resource,item)} className="text-emerald-300">Restore</button>:!isEvent?<button onClick={()=>remove(resource,item)} className="text-rose-300">{active==="Members"?"Remove":"Archive"}</button>:null}{isEvent?<button onClick={()=>remove(resource,item)} className="text-rose-300">Delete</button>:null}</div></div>})}</div>:<p className="mt-5 rounded-xl border border-white/[.06] bg-white/[.025] p-6 text-sm text-white/45">No records yet. Add one from the button above.</p>}</div><div className="glass rounded-xl p-5"><p className="text-sm">Module actions</p>{active==="Media"?(["gallery","sponsors","achievements"] as Resource[]).map((resource)=><button onClick={()=>open({resource,title:`Add ${resource}`,fields:extraFields[resource]})} className="mt-3 block w-full rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-3 text-left text-xs text-white/60 transition hover:bg-violet-500/[.08]" key={resource}>Add {resource}</button>):<button onClick={()=>open({resource:c.resource,title:`Add ${active.slice(0,-1)}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:{}})} className="mt-3 block w-full rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-3 text-left text-xs text-white/60 transition hover:bg-violet-500/[.08]">Create record</button>}<p className="mt-3 rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-3 text-xs text-white/55">{active==="Teams"?"Lead and co-leads are saved per team. Club faculty and secretary details live in Settings.":active==="Events"?"Published or active events appear publicly. Draft and archived events stay hidden. Delete removes the event plus its registrations and attendance.":active==="Members"?"Removed members are made inactive so their data is preserved and can be restored.":"Archive uses safe public removal."}</p></div></div>}
 
-function Attendance({data,setPanel,refresh}:{data:Data;setPanel:(value:string)=>void;refresh:()=>Promise<void>}){const events=data.events||[];const [selected,setSelected]=useState(events[0]?idOf(events[0]):"");const selectedEvent=events.find((event:any)=>idOf(event)===selected);const attendanceMap=useMemo<Map<string, any>>(()=>new Map((data.attendance||[]).map((row:any)=>[`${idOf(row.event)}:${idOf(row.user)}`,row])),[data.attendance]);const registrations=(data.registrations||[]).filter((registration:any)=>idOf(registration.event)===selected);const participants=registrations.flatMap((registration:any)=>{const leader=registration.user?[{registration:idOf(registration),user:idOf(registration.user),name:registration.user.name,email:registration.user.email,uid:registration.user.uid,program:registration.user.program,semester:registration.user.semester,mode:registration.mode||"individual",teamName:registration.teamName||""}]:[];const members=(registration.teamMembers||[]).map((member:any)=>({registration:idOf(registration),user:idOf(member.user||member),name:member.name,email:member.email,uid:member.uid,program:member.program,semester:member.semester,mode:"team",teamName:registration.teamName||""}));return [...leader,...members]});async function mark(row:any,status:"present"|"absent"){const res=await fetch("/api/attendance/mark",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:selected,user:row.user,registration:row.registration,status})});setPanel(res.ok?`${row.name} marked ${status}.`:`Could not update ${row.name}.`);await refresh()}return <div className="mt-7 grid gap-4 xl:grid-cols-[1fr_.42fr]"><div className="glass rounded-xl p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm">Registered candidates</p><p className="mt-1 text-xs text-white/35">Filter by event, then mark attendance manually.</p></div><select value={selected} onChange={(event)=>setSelected(event.target.value)} className="rounded-lg border border-white/[.07] bg-black/40 px-3 py-2.5 text-xs text-white outline-none">{events.map((event:any)=><option value={idOf(event)} key={idOf(event)}>{event.title}</option>)}</select></div>{participants.length?<div className="mt-5 overflow-hidden rounded-xl border border-white/[.06]"><div className="grid grid-cols-[.8fr_.8fr_.7fr_.6fr_auto] gap-3 bg-white/[.035] px-4 py-3 text-[10px] uppercase tracking-wider text-white/35"><span>Name</span><span>UID</span><span>Program</span><span>Mode</span><span>Attendance</span></div>{participants.map((row:any)=>{const status=attendanceMap.get(`${selected}:${row.user}`)?.status || "absent";return <div className="grid grid-cols-[.8fr_.8fr_.7fr_.6fr_auto] items-center gap-3 border-t border-white/[.05] bg-black/15 px-4 py-3 text-xs" key={`${row.registration}-${row.user}`}><div><p className="text-white/75">{row.name}</p>{row.teamName?<p className="mt-1 text-[10px] text-violet-200/60">{row.teamName}</p>:null}</div><span className="text-white/45">{row.uid||"-"}</span><span className="text-white/45">{row.program||"-"}{row.semester?` / Sem ${row.semester}`:""}</span><span className="capitalize text-white/45">{row.mode}</span><div className="flex gap-2"><button onClick={()=>mark(row,"present")} className={`rounded-lg px-3 py-2 ${status==="present"?"bg-emerald-400 text-black":"border border-white/[.07] text-emerald-200"}`}>Present</button><button onClick={()=>mark(row,"absent")} className={`rounded-lg px-3 py-2 ${status==="absent"?"bg-rose-400 text-black":"border border-white/[.07] text-rose-200"}`}>Absent</button></div></div>})}</div>:<p className="mt-5 rounded-xl border border-white/[.06] bg-white/[.025] p-6 text-sm text-white/45">{selectedEvent?"No registrations for this event yet.":"Create an event before marking attendance."}</p>}</div><div className="glass rounded-xl p-5"><p className="text-sm">Exports</p><p className="mt-3 text-xs leading-6 text-white/40">{participants.length} registered participant rows. PDF/XLSX export includes only candidates marked present.</p>{selected?<div className="mt-4 grid gap-3"><a className="rounded-xl border border-violet-300/20 bg-violet-500/10 px-4 py-3 text-center text-xs text-violet-100" href={`/api/attendance/export?event=${selected}&format=pdf`}>Download PDF attendance sheet</a><a className="rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-3 text-center text-xs text-white/65" href={`/api/attendance/export?event=${selected}&format=xlsx`}>Download Excel attendance sheet</a></div>:null}<button onClick={()=>setPanel("For team events, the leader and every added member are listed separately so the attendance sheet contains actual present students only.")} className="mt-4 rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-3 text-left text-xs text-white/60">How team attendance works</button></div></div>}
+function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value: string) => void; refresh: () => Promise<void> }) {
+  const events = data.events || [];
+  const [selected, setSelected] = useState(events[0] ? idOf(events[0]) : "");
+  const selectedEvent = events.find((event: any) => idOf(event) === selected);
+  const attendanceMap = useMemo<Map<string, any>>(
+    () => new Map((data.attendance || []).map((row: any) => [`${idOf(row.event)}:${idOf(row.user)}`, row])),
+    [data.attendance]
+  );
+  const registrations = (data.registrations || []).filter((registration: any) => idOf(registration.event) === selected);
+  const participants = registrations.flatMap((registration: any) => {
+    const leader = registration.user
+      ? [{
+          registration: idOf(registration),
+          user: idOf(registration.user),
+          name: registration.user.name,
+          email: registration.user.email,
+          uid: registration.user.uid,
+          program: registration.user.program,
+          semester: registration.user.semester,
+          mode: registration.mode || "individual",
+          teamName: registration.teamName || ""
+        }]
+      : [];
+    const members = (registration.teamMembers || []).map((member: any) => ({
+      registration: idOf(registration),
+      user: idOf(member.user || member),
+      name: member.name,
+      email: member.email,
+      uid: member.uid,
+      program: member.program,
+      semester: member.semester,
+      mode: "team",
+      teamName: registration.teamName || ""
+    }));
+    return [...leader, ...members];
+  });
+
+  async function mark(row: any, status: "present" | "absent") {
+    const res = await fetch("/api/attendance/mark", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event: selected, user: row.user, registration: row.registration, status })
+    });
+    setPanel(res.ok ? `${row.name} marked ${status}.` : `Could not update ${row.name}.`);
+    await refresh();
+  }
+
+  return (
+    <div className="mt-7 grid gap-4 xl:grid-cols-[1fr_.42fr]">
+      <div className="glass rounded-xl p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm">Registered candidates</p>
+            <p className="mt-1 text-xs text-white/35">Filter by event, then mark attendance manually.</p>
+          </div>
+          <select value={selected} onChange={(event) => setSelected(event.target.value)} className="rounded-lg border border-white/[.07] bg-black/40 px-3 py-2.5 text-xs text-white outline-none">
+            {events.map((event: any) => <option value={idOf(event)} key={idOf(event)}>{event.title}</option>)}
+          </select>
+        </div>
+
+        {participants.length ? (
+          <div className="mt-5 overflow-hidden rounded-xl border border-white/[.06]">
+            <div className="grid grid-cols-[.8fr_.8fr_.7fr_.6fr_auto] gap-3 bg-white/[.035] px-4 py-3 text-[10px] uppercase tracking-wider text-white/35">
+              <span>Name</span><span>UID</span><span>Program</span><span>Mode</span><span>Attendance</span>
+            </div>
+            <div className="max-h-[430px] overflow-y-auto overscroll-contain">
+              {participants.map((row: any) => {
+                const status = attendanceMap.get(`${selected}:${row.user}`)?.status || "absent";
+                const isPresent = status === "present";
+                return (
+                  <div className="grid grid-cols-[.8fr_.8fr_.7fr_.6fr_auto] items-center gap-3 border-t border-white/[.05] bg-black/15 px-4 py-3 text-xs" key={`${row.registration}-${row.user}`}>
+                    <div>
+                      <p className="text-white/75">{row.name}</p>
+                      {row.teamName ? <p className="mt-1 text-[10px] text-violet-200/60">{row.teamName}</p> : null}
+                    </div>
+                    <span className="text-white/45">{row.uid || "-"}</span>
+                    <span className="text-white/45">{row.program || "-"}{row.semester ? ` / Sem ${row.semester}` : ""}</span>
+                    <span className="capitalize text-white/45">{row.mode}</span>
+                    <div className="flex min-w-48 items-center justify-end gap-3">
+                      <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider ${isPresent ? "bg-emerald-400/10 text-emerald-200" : "bg-rose-400/10 text-rose-200"}`}>
+                        {isPresent ? "Marked present" : "Marked absent"}
+                      </span>
+                      <button onClick={() => mark(row, isPresent ? "absent" : "present")} className={`rounded-lg px-3 py-2 ${isPresent ? "border border-rose-300/25 text-rose-200 hover:bg-rose-400/10" : "border border-emerald-300/25 text-emerald-200 hover:bg-emerald-400/10"}`}>
+                        {isPresent ? "Mark absent" : "Mark present"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <p className="mt-5 rounded-xl border border-white/[.06] bg-white/[.025] p-6 text-sm text-white/45">{selectedEvent ? "No registrations for this event yet." : "Create an event before marking attendance."}</p>
+        )}
+      </div>
+      <div className="glass rounded-xl p-5">
+        <p className="text-sm">Exports</p>
+        <p className="mt-3 text-xs leading-6 text-white/40">{participants.length} registered participant rows. PDF/XLSX export includes only candidates marked present.</p>
+        {selected ? <div className="mt-4 grid gap-3"><a className="rounded-xl border border-violet-300/20 bg-violet-500/10 px-4 py-3 text-center text-xs text-violet-100" href={`/api/attendance/export?event=${selected}&format=pdf`}>Download PDF attendance sheet</a><a className="rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-3 text-center text-xs text-white/65" href={`/api/attendance/export?event=${selected}&format=xlsx`}>Download Excel attendance sheet</a></div> : null}
+        <button onClick={() => setPanel("For team events, the leader and every added member are listed separately so the attendance sheet contains actual present students only.")} className="mt-4 rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-3 text-left text-xs text-white/60">How team attendance works</button>
+      </div>
+    </div>
+  );
+}
 
 function Settings({info,open}:{info:any;open:(drawer:any)=>void}){return <div className="mt-7 grid gap-4 lg:grid-cols-[1fr_.7fr]"><div className="glass rounded-xl p-5"><p className="text-sm">Club branding, faculty, and office bearers</p>{["logo","website","email","location","aboutTitle","vision","mission","facultyChampionName","facultyChampionPhoto","secretaryName","jointSecretaryOneName","jointSecretaryTwoName"].map((key)=><div className="mt-3 rounded-xl border border-white/[.06] bg-black/15 p-4 text-xs" key={key}><p className="text-white/35">{key}</p><p className="mt-2 break-all text-white/70">{info[key] || "Not set"}</p></div>)}</div><div className="glass rounded-xl p-5"><p className="text-sm">Settings actions</p><button onClick={()=>open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields})} className="mt-4 w-full rounded-xl bg-white px-4 py-3 text-xs font-semibold text-black">Update public settings</button><button onClick={()=>open({resource:"invites",title:"Invite portal operator",fields:extraFields.invites})} className="mt-3 w-full rounded-xl border border-violet-300/20 bg-violet-500/10 px-4 py-3 text-xs font-semibold text-violet-100">Invite operator</button><p className="mt-4 text-xs leading-6 text-white/40">These values drive About, Contact, logo, faculty champion photo, secretary, joint secretaries, and public branding. Operator accounts are invite-only.</p></div></div>}
 
