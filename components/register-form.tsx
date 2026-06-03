@@ -62,7 +62,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
       {canChoose ? (
         <div className="grid grid-cols-2 gap-2 rounded-xl border border-white/[.07] bg-black/25 p-2">
           {(["individual", "team"] as const).map((option) => (
-            <button type="button" onClick={() => setMode(option)} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${mode === option ? "bg-white text-black" : "text-white/50 hover:bg-white/[.06]"}`} key={option}>
+            <button type="button" onClick={() => setMode(option)} className={`rounded-full px-4 py-2 text-xs font-semibold transition ${mode === option ? "bg-white text-black shadow-[0_0_24px_rgba(255,255,255,.18)]" : "border border-white/[.08] bg-white/[.025] text-white/55 hover:border-violet-300/25 hover:bg-violet-500/[.08] hover:text-white"}`} key={option}>
               {option === "team" ? "Team" : "Individual"}
             </button>
           ))}
@@ -88,7 +88,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
         <div className="rounded-xl border border-white/[.07] bg-white/[.025] p-3">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-white/55">Team members</p>
-            <button type="button" onClick={() => setMemberCount((count) => Math.min(maxTeamSize, count + 1))} disabled={memberCount >= maxTeamSize} className="flex items-center gap-1 rounded-lg border border-white/[.08] px-3 py-2 text-[10px] text-violet-200 disabled:opacity-40">
+            <button type="button" onClick={() => setMemberCount((count) => Math.min(maxTeamSize, count + 1))} disabled={memberCount >= maxTeamSize} className="ghost-pill flex items-center gap-1 rounded-full px-3 py-2 text-[10px] text-violet-100 disabled:opacity-40">
               <Plus size={12} /> Add member
             </button>
           </div>
@@ -111,7 +111,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
         </div>
       ) : null}
 
-      <button disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-sm font-semibold text-black disabled:opacity-60">
+      <button disabled={loading} className="action-pill flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold disabled:opacity-60">
         {loading ? "Registering..." : mode === "team" ? "Register team" : "Register for this event"} <ArrowUpRight size={15}/>
       </button>
       {status ? <p className="rounded-lg bg-violet-500/10 p-3 text-center text-xs text-violet-100">{status}</p> : null}
