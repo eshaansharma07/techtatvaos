@@ -3,7 +3,20 @@ import { ArrowUpRight, Hexagon, Menu } from "lucide-react";
 import { getClubInfo } from "@/lib/public-data";
 
 export function Logo({ logo }: { logo?: string }) {
-  return <Link href="/" className="flex items-center gap-3 font-semibold tracking-tight"><span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl border border-violet-400/40 bg-violet-500/10 text-violet-300">{logo?<img src={logo} alt="" className="h-full w-full object-cover"/>:<Hexagon size={18}/>}</span><span>TECH TATVA <i className="font-normal text-white/40">/ OS</i></span></Link>;
+  return (
+    <Link href="/" className="group flex items-center gap-3 tracking-tight">
+      {logo ? (
+        <img src={logo} alt="Tech Tatva" className="h-12 w-12 object-contain drop-shadow-[0_0_18px_rgba(168,85,247,.28)] transition duration-300 group-hover:scale-105" />
+      ) : (
+        <span className="grid h-11 w-11 place-items-center text-violet-300">
+          <Hexagon size={28} />
+        </span>
+      )}
+      <span className="font-serif text-2xl font-semibold italic tracking-[-.04em] text-white md:text-3xl">
+        Tech <span className="bg-gradient-to-r from-white via-violet-200 to-fuchsia-200 bg-clip-text text-transparent">Tatva</span>
+      </span>
+    </Link>
+  );
 }
 export async function PublicShell({ children }: { children: React.ReactNode }) {
   const info = await getClubInfo();
