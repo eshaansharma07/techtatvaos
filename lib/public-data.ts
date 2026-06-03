@@ -28,6 +28,8 @@ export type PublicEvent = {
   capacity?: number;
   category?: string;
   status: string;
+  participationMode: "individual" | "team" | "both";
+  maxTeamSize: number;
   registrationOpen: boolean;
   startAt?: string;
   endAt?: string;
@@ -76,6 +78,8 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
       capacity: event.capacity,
       category: event.category,
       status: event.status,
+      participationMode: (event as any).participationMode || "individual",
+      maxTeamSize: (event as any).maxTeamSize || 1,
       registrationOpen: event.registrationOpen,
       startAt: event.startAt?.toISOString(),
       endAt: event.endAt?.toISOString(),
@@ -105,6 +109,8 @@ export async function getPublicEvent(slug: string) {
     capacity: record.capacity,
     category: record.category,
     status: record.status,
+    participationMode: record.participationMode || "individual",
+    maxTeamSize: record.maxTeamSize || 1,
     registrationOpen: record.registrationOpen,
     registrationStart: record.registrationStart?.toISOString(),
     registrationEnd: record.registrationEnd?.toISOString(),
@@ -216,8 +222,8 @@ export async function getAdminDashboardData() {
     Task.find({}).sort({ dueAt: 1 }).limit(200).populate("team", "name").lean(),
     Announcement.find({}).sort({ publishAt: -1 }).limit(200).lean(),
     Notification.find({}).sort({ createdAt: -1 }).limit(50).lean(),
-    Attendance.find({}).populate("event", "title").populate("user", "name uid").limit(500).lean(),
-    EventRegistration.find({}).populate("event", "title").populate("user", "name email uid").limit(500).lean(),
+    Attendance.find({}).populate("event", "title").populate("user", "name email uid registrationNumber program semester").limit(1000).lean(),
+    EventRegistration.find({}).populate("event", "title participationMode").populate("user", "name email uid registrationNumber program semester").limit(1000).lean(),
     Sponsor.find({}).sort({ name: 1 }).lean(),
     Achievement.find({}).sort({ awardedAt: -1 }).lean(),
     Gallery.find({}).sort({ createdAt: -1 }).lean(),

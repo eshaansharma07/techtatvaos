@@ -47,6 +47,7 @@ function normalizeTeamBody(input: Record<string, any>, create = false) {
 }
 
 const eventStatuses = new Set(["draft", "published", "active", "completed", "archived"]);
+const participationModes = new Set(["individual", "team", "both"]);
 
 function normalizeEventStatus(value: any, fallback = "published") {
   const status = String(value || fallback).toLowerCase().trim();
@@ -62,6 +63,8 @@ function normalizeEventBody(input: Record<string, any>, create = false) {
   const normalized: Record<string, any> = { ...body };
   if (body.slug || body.title) normalized.slug = body.slug || slugify(body.title);
   if (body.capacity !== undefined) normalized.capacity = Number(body.capacity);
+  if (body.maxTeamSize !== undefined) normalized.maxTeamSize = Math.max(1, Number(body.maxTeamSize) || 1);
+  if (body.participationMode !== undefined || create) normalized.participationMode = participationModes.has(String(body.participationMode)) ? body.participationMode : "individual";
   if (create || body.status !== undefined) normalized.status = normalizeEventStatus(body.status, "published");
   if (create || body.registrationOpen !== undefined) normalized.registrationOpen = body.registrationOpen === true || body.registrationOpen === "true";
   if (body.registrationStart) normalized.registrationStart = new Date(body.registrationStart);

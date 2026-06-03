@@ -6,12 +6,114 @@ import { RegisterForm } from "@/components/register-form";
 
 export const dynamic = "force-dynamic";
 
-const dateText = (value?: string) => value ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(new Date(value)) : "Date TBA";
-const timeText = (value?: string) => value ? new Intl.DateTimeFormat("en-IN", { timeStyle: "short" }).format(new Date(value)) : "Time TBA";
+const dateText = (value?: string) =>
+  value ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(new Date(value)) : "Date TBA";
 
-export default async function EventDetail({params}:{params:Promise<{slug:string}>}){
-  const {slug}=await params;
-  const e=await getPublicEvent(slug);
-  if(!e)return <PublicShell><section className="mx-auto max-w-4xl px-6 pb-24 pt-40"><Link href="/events" className="flex items-center gap-2 text-xs text-white/45"><ArrowLeft size={14}/> BACK TO EVENTS</Link><div className="edge mt-10 rounded-2xl bg-white/[.025] p-10"><h1 className="text-4xl">Event not found.</h1><p className="mt-4 text-sm leading-6 text-white/45">This event is not published, active, or does not exist.</p></div></section></PublicShell>;
-  return <PublicShell><section className="mx-auto max-w-7xl px-6 pb-24 pt-32"><Link href="/events" className="flex items-center gap-2 text-xs text-white/45"><ArrowLeft size={14}/> BACK TO EVENTS</Link><div className="relative mt-8 overflow-hidden rounded-3xl bg-gradient-to-br from-violet-800 to-fuchsia-700 p-8 md:p-14">{e.banner?<img src={e.banner} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60"/>:null}<div className="absolute inset-0 grid-bg opacity-25"/><div className="relative max-w-3xl"><span className="rounded-full bg-black/25 px-3 py-1.5 text-[10px] font-bold tracking-[.2em]">{(e.category||"EVENT").toUpperCase()}</span><h1 className="mt-8 text-5xl font-medium tracking-[-.06em] md:text-8xl">{e.title}</h1><p className="mt-6 max-w-2xl text-sm leading-7 text-white/75">{e.description || "No description has been added yet."}</p></div></div><div className="mt-6 grid gap-5 lg:grid-cols-[1fr_360px]"><div className="glass rounded-2xl p-7"><h2 className="text-xl">About the event</h2><p className="mt-4 whitespace-pre-line text-sm leading-7 text-white/45">{e.description || "Details will appear once an admin updates this event."}</p>{e.rules.length?<><h3 className="mt-9 text-sm">Rules</h3><div className="mt-4 grid gap-3 sm:grid-cols-2">{e.rules.map((x:string)=><p className="flex items-center gap-2 text-xs text-white/55" key={x}><Check size={14} className="text-violet-300"/>{x}</p>)}</div></>:null}{e.faqs.length?<div className="mt-9 space-y-3">{e.faqs.map((faq:any)=><div className="rounded-xl border border-white/[.07] bg-black/20 p-4" key={faq.question}><p className="text-sm">{faq.question}</p><p className="mt-2 text-xs leading-5 text-white/45">{faq.answer}</p></div>)}</div>:null}</div><aside className="glass rounded-2xl p-6"><h3 className="text-sm">Event details</h3><div className="mt-5 space-y-4 text-xs text-white/50"><p className="flex gap-3"><Calendar size={15} className="text-violet-300"/>{dateText(e.startAt)}</p><p className="flex gap-3"><Clock size={15} className="text-violet-300"/>{timeText(e.startAt)}</p><p className="flex gap-3"><MapPin size={15} className="text-violet-300"/>{e.venue || "Venue TBA"}</p><p className="flex gap-3"><Users size={15} className="text-violet-300"/>{e.registrations} / {e.capacity || "unlimited"} seats claimed</p></div>{e.registrationOpen?<RegisterForm eventId={e.id}/>:<p className="mt-7 rounded-xl border border-white/[.08] bg-white/[.035] p-4 text-center text-xs text-white/45">Registration is currently closed.</p>}<p className="mt-3 text-center text-[10px] text-white/30">Registrations write directly to MongoDB.</p></aside></div></section></PublicShell>
+const timeText = (value?: string) =>
+  value ? new Intl.DateTimeFormat("en-IN", { timeStyle: "short" }).format(new Date(value)) : "Time TBA";
+
+export default async function EventDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const event = await getPublicEvent(slug);
+
+  if (!event) {
+    return (
+      <PublicShell>
+        <section className="mx-auto max-w-4xl px-6 pb-24 pt-40">
+          <Link href="/events" className="flex items-center gap-2 text-xs text-white/45">
+            <ArrowLeft size={14} /> BACK TO EVENTS
+          </Link>
+          <div className="edge mt-10 rounded-2xl bg-white/[.025] p-10">
+            <h1 className="text-4xl">Event not found.</h1>
+            <p className="mt-4 text-sm leading-6 text-white/45">This event is not published, active, or does not exist.</p>
+          </div>
+        </section>
+      </PublicShell>
+    );
+  }
+
+  const modeLabel =
+    event.participationMode === "both"
+      ? "Individual or team"
+      : event.participationMode === "team"
+        ? "Team based"
+        : "Individual";
+
+  return (
+    <PublicShell>
+      <section className="mx-auto max-w-7xl px-6 pb-24 pt-32">
+        <Link href="/events" className="flex items-center gap-2 text-xs text-white/45">
+          <ArrowLeft size={14} /> BACK TO EVENTS
+        </Link>
+
+        <div className="relative mt-8 overflow-hidden rounded-3xl bg-gradient-to-br from-violet-800 to-fuchsia-700 p-8 md:p-14">
+          {event.banner ? <img src={event.banner} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" /> : null}
+          <div className="absolute inset-0 grid-bg opacity-25" />
+          <div className="relative max-w-3xl">
+            <span className="rounded-full bg-black/25 px-3 py-1.5 text-[10px] font-bold tracking-[.2em]">
+              {(event.category || "EVENT").toUpperCase()}
+            </span>
+            <h1 className="mt-8 text-5xl font-medium tracking-[-.06em] md:text-8xl">{event.title}</h1>
+            <p className="mt-6 max-w-2xl text-sm leading-7 text-white/75">{event.description || "No description has been added yet."}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_360px]">
+          <div className="glass rounded-2xl p-7">
+            <h2 className="text-xl">About the event</h2>
+            <p className="mt-4 whitespace-pre-line text-sm leading-7 text-white/45">
+              {event.description || "Details will appear once an admin updates this event."}
+            </p>
+
+            {event.rules.length ? (
+              <>
+                <h3 className="mt-9 text-sm">Rules</h3>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {event.rules.map((rule: string) => (
+                    <p className="flex items-center gap-2 text-xs text-white/55" key={rule}>
+                      <Check size={14} className="text-violet-300" />
+                      {rule}
+                    </p>
+                  ))}
+                </div>
+              </>
+            ) : null}
+
+            {event.faqs.length ? (
+              <div className="mt-9 space-y-3">
+                {event.faqs.map((faq: any) => (
+                  <div className="rounded-xl border border-white/[.07] bg-black/20 p-4" key={faq.question}>
+                    <p className="text-sm">{faq.question}</p>
+                    <p className="mt-2 text-xs leading-5 text-white/45">{faq.answer}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <aside className="glass rounded-2xl p-6">
+            <h3 className="text-sm">Event details</h3>
+            <div className="mt-5 space-y-4 text-xs text-white/50">
+              <p className="flex gap-3"><Calendar size={15} className="text-violet-300" />{dateText(event.startAt)}</p>
+              <p className="flex gap-3"><Clock size={15} className="text-violet-300" />{timeText(event.startAt)}</p>
+              <p className="flex gap-3"><MapPin size={15} className="text-violet-300" />{event.venue || "Venue TBA"}</p>
+              <p className="flex gap-3"><Users size={15} className="text-violet-300" />{event.registrations} / {event.capacity || "unlimited"} seats claimed</p>
+            </div>
+
+            <p className="mt-5 rounded-xl border border-white/[.07] bg-white/[.035] p-3 text-xs text-white/45">
+              Participation: {modeLabel}
+              {event.participationMode !== "individual" ? ` · Max team size ${event.maxTeamSize}` : ""}
+            </p>
+
+            {event.registrationOpen ? (
+              <RegisterForm eventId={event.id} participationMode={event.participationMode} maxTeamSize={event.maxTeamSize} />
+            ) : (
+              <p className="mt-7 rounded-xl border border-white/[.08] bg-white/[.035] p-4 text-center text-xs text-white/45">Registration is currently closed.</p>
+            )}
+            <p className="mt-3 text-center text-[10px] text-white/30">Registrations write directly to MongoDB.</p>
+          </aside>
+        </div>
+      </section>
+    </PublicShell>
+  );
 }
