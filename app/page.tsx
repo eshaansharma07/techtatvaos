@@ -21,13 +21,13 @@ export default async function Home() {
     [String(achievements.length), "Featured achievements"]
   ];
   return <PublicShell>
-    <section className="relative min-h-[940px] overflow-hidden pt-20">
+    <section className="relative min-h-[940px] overflow-hidden pt-32 md:pt-20">
       <Image src="/tech-tatva-hero.png" alt="" fill priority className="object-cover object-center opacity-60"/>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(217,70,239,.22),transparent_34%),radial-gradient(circle_at_18%_35%,rgba(124,58,237,.26),transparent_32%),linear-gradient(180deg,rgba(5,4,10,.32),#060509_88%)]"/>
       <div className="absolute inset-0 grid-bg opacity-[.16]"/>
       <div className="absolute left-1/2 top-28 h-72 w-72 -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-[100px]"/>
 
-      <div className="relative mx-auto grid min-h-[790px] max-w-7xl items-center gap-10 px-6 py-16 lg:grid-cols-[1.05fr_.75fr]">
+      <div className="relative mx-auto grid min-h-[790px] max-w-7xl items-center gap-10 px-6 py-12 md:py-16 lg:grid-cols-[1.05fr_.75fr]">
         <Reveal>
           <div>
             <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200/80">TECH TATVA</p>

@@ -335,7 +335,8 @@ body:before {
   display: grid;
   place-items: center;
   gap: 1.25rem;
-  padding: 2rem;
+  width: min(760px, calc(100vw - 48px));
+  padding: 2.35rem 4.5rem;
   border-radius: 2rem;
   border: 1px solid rgba(255,255,255,.09);
   background: rgba(10,8,14,.42);
@@ -346,6 +347,7 @@ body:before {
   animation: loaderIntro .8s cubic-bezier(.2,.8,.2,1) forwards;
 }
 .loader-core .brand-lockup {
+  gap: 1.3rem;
   transform: scale(1.18);
 }
 .loader-core p {
@@ -415,7 +417,20 @@ body:before {
   .brand-mark-wrap { height: 46px; width: 50px; }
   .brand-mark { height: 44px; width: 48px; }
   .brand-title { font-size: 1.7rem; }
-  .loader-core .brand-lockup { transform: scale(.98); }
+  .loader-core {
+    width: min(92vw, 420px);
+    padding: 2rem 1.25rem;
+    border-radius: 1.6rem;
+  }
+  .loader-core .brand-lockup {
+    gap: .85rem;
+    transform: scale(.98);
+  }
+  .loader-core p {
+    max-width: 260px;
+    text-align: center;
+    letter-spacing: .22em;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
