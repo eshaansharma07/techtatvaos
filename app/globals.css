@@ -67,6 +67,7 @@ body:before {
   content: "";
   position: absolute;
   inset: -40%;
+  pointer-events: none;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.38), transparent);
   transform: rotate(25deg) translateX(-120%);
   animation: portalSweep 5.5s ease-in-out infinite;
@@ -80,6 +81,7 @@ body:before {
   position: absolute;
   inset: 8px auto 8px 0;
   width: 3px;
+  pointer-events: none;
   border-radius: 999px;
   background: linear-gradient(#a78bfa, #f0abfc);
   opacity: 0;
@@ -123,8 +125,13 @@ body:before {
   top: -70%;
   width: 42%;
   height: 180%;
+  pointer-events: none;
   background: linear-gradient(90deg, transparent, rgba(216,180,254,.16), transparent);
   transform: rotate(24deg);
+}
+.portal-hero > * {
+  position: relative;
+  z-index: 1;
 }
 .portal-card {
   position: relative;
@@ -146,6 +153,7 @@ body:before {
 }
 .portal-card > * {
   position: relative;
+  z-index: 1;
 }
 .portal-chart {
   border: 1px solid rgba(255,255,255,.09);
