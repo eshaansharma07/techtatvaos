@@ -275,7 +275,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
         method: "POST",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
-        body: JSON.stringify({ event: selected, user: row.user, registration: row.registration, status })
+        body: JSON.stringify({ event: selected, user: row.user, registration: row.registration, status, action: status === "present" ? "mark_present" : "mark_absent" })
       });
       const saved = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -283,6 +283,10 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
         return;
       }
       const savedStatus = saved.status === "present" ? "present" : "absent";
+      if (savedStatus !== status) {
+        setPanel(`Attendance mismatch: requested ${status}, but server saved ${savedStatus}. Please try again.`);
+        return;
+      }
       setLocalStatus((state) => ({ ...state, [key]: savedStatus }));
       setPanel(`${row.name} marked ${savedStatus}. Refreshing attendance...`);
       await refresh();
@@ -331,9 +335,15 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
                       <span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider ${isPresent ? "bg-emerald-400/10 text-emerald-200" : "bg-rose-400/10 text-rose-200"}`}>
                         {isPresent ? "Marked present" : "Marked absent"}
                       </span>
-                      <button type="button" disabled={busy} onClick={(event) => { event.preventDefault(); event.stopPropagation(); void mark(row, isPresent ? "absent" : "present"); }} className={`rounded-lg px-3 py-2 disabled:cursor-wait disabled:opacity-60 ${isPresent ? "border border-rose-300/25 text-rose-200 hover:bg-rose-400/10" : "border border-emerald-300/25 text-emerald-200 hover:bg-emerald-400/10"}`}>
-                        {busy ? "Saving..." : isPresent ? "Mark absent" : "Mark present"}
-                      </button>
+                      {isPresent ? (
+                        <button type="button" disabled={busy} onClick={(event) => { event.preventDefault(); event.stopPropagation(); void mark(row, "absent"); }} className="rounded-lg border border-rose-300/25 px-3 py-2 text-rose-200 hover:bg-rose-400/10 disabled:cursor-wait disabled:opacity-60">
+                          {busy ? "Saving..." : "Mark absent"}
+                        </button>
+                      ) : (
+                        <button type="button" disabled={busy} onClick={(event) => { event.preventDefault(); event.stopPropagation(); void mark(row, "present"); }} className="rounded-lg border border-emerald-300/25 px-3 py-2 text-emerald-200 hover:bg-emerald-400/10 disabled:cursor-wait disabled:opacity-60">
+                          {busy ? "Saving..." : "Mark present"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 );

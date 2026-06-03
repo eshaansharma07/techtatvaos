@@ -19,7 +19,8 @@ export async function POST(req: NextRequest) {
   const event = String(body.event || "");
   const user = String(body.user || "");
   const registration = body.registration ? String(body.registration) : undefined;
-  const status = body.status === "present" ? "present" : body.status === "absent" ? "absent" : "";
+  const requestedStatus = body.action === "mark_present" ? "present" : body.action === "mark_absent" ? "absent" : body.status;
+  const status = requestedStatus === "present" ? "present" : requestedStatus === "absent" ? "absent" : "";
 
   if (!event || !user || !status) return NextResponse.json({ error: "event, user, and status are required" }, { status: 400 });
   if (!Types.ObjectId.isValid(event) || !Types.ObjectId.isValid(user)) return NextResponse.json({ error: "Valid event and user ids are required" }, { status: 400 });
