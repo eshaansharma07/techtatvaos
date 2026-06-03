@@ -18,11 +18,12 @@ function DetailCard({ label, value }: { label: string; value: string }) {
 
 export default async function TeamsPage() {
   const [teams, info] = await Promise.all([getPublicTeams(), getClubInfo()]);
-  const officeBearers = [
+  const leadership = [
+    { role: "FACULTY CHAMPION", name: info.facultyChampionName, email: info.facultyChampionEmail, phone: info.facultyChampionPhone, photo: info.facultyChampionPhoto },
     { role: "SECRETARY", name: info.secretaryName, email: info.secretaryEmail, photo: info.secretaryPhoto },
     { role: "JOINT SECRETARY", name: info.jointSecretaryOneName, email: info.jointSecretaryOneEmail, photo: info.jointSecretaryOnePhoto },
     { role: "JOINT SECRETARY", name: info.jointSecretaryTwoName, email: info.jointSecretaryTwoEmail, photo: info.jointSecretaryTwoPhoto }
-  ].filter((person) => person.name || person.email || person.photo);
+  ].filter((person) => person.name || person.email || person.phone || person.photo);
 
   return (
     <PublicShell>
@@ -36,31 +37,24 @@ export default async function TeamsPage() {
             Built to connect.
           </h1>
           <p className="mt-7 max-w-2xl text-sm leading-7 text-white/50 md:text-base md:leading-8">
-            Explore the public team structure, leadership assignments, faculty champions, and active members behind Tech Tatva.
+            Explore the public team structure, leadership assignments, and active members behind Tech Tatva.
           </p>
         </div>
 
-        <div className="relative mt-12 grid gap-4 lg:grid-cols-[.8fr_1.2fr]">
-          <div className="rounded-[1.5rem] border border-violet-300/15 bg-violet-500/[.06] p-5">
-            <p className="text-[10px] font-semibold tracking-[.22em] text-violet-200/70">FACULTY CHAMPION</p>
-            <p className="mt-5 text-2xl text-white/88">{info.facultyChampionName || "To be announced"}</p>
-            {info.facultyChampionEmail ? <p className="mt-2 text-sm text-white/45">{info.facultyChampionEmail}</p> : null}
-            {info.facultyChampionPhone ? <p className="mt-1 text-sm text-white/35">{info.facultyChampionPhone}</p> : null}
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {officeBearers.length ? officeBearers.map((person) => (
-              <div className="rounded-[1.5rem] border border-white/[.07] bg-white/[.035] p-5" key={`${person.role}-${person.name}`}>
-                {person.photo ? <img src={person.photo} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/[.06] text-violet-200"><Crown size={18} /></div>}
-                <p className="mt-4 text-[10px] font-semibold tracking-[.18em] text-white/35">{person.role}</p>
-                <p className="mt-2 text-lg text-white/85">{person.name || "To be announced"}</p>
-                {person.email ? <p className="mt-1 break-all text-xs text-white/38">{person.email}</p> : null}
-              </div>
-            )) : (
-              <div className="rounded-[1.5rem] border border-white/[.07] bg-white/[.035] p-5 text-sm text-white/45 md:col-span-3">
-                Secretary and joint secretary details will appear once updated from the portal.
-              </div>
-            )}
-          </div>
+        <div className="relative mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {leadership.length ? leadership.map((person) => (
+            <div className="rounded-[1.5rem] border border-white/[.07] bg-white/[.035] p-5" key={`${person.role}-${person.name}`}>
+              {person.photo ? <img src={person.photo} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/[.06] text-violet-200"><Crown size={18} /></div>}
+              <p className="mt-4 text-[10px] font-semibold tracking-[.18em] text-white/35">{person.role}</p>
+              <p className="mt-2 text-lg text-white/85">{person.name || "To be announced"}</p>
+              {person.email ? <p className="mt-1 break-all text-xs text-white/38">{person.email}</p> : null}
+              {person.phone ? <p className="mt-1 text-xs text-white/32">{person.phone}</p> : null}
+            </div>
+          )) : (
+            <div className="rounded-[1.5rem] border border-white/[.07] bg-white/[.035] p-5 text-sm text-white/45 md:col-span-2 xl:col-span-4">
+              Leadership details will appear once updated from the portal.
+            </div>
+          )}
         </div>
 
         <div className="relative mt-8 rounded-[2rem] border border-white/[.08] bg-white/[.025] p-4 backdrop-blur-xl md:p-6">
