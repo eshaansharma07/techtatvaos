@@ -19,14 +19,26 @@ function splitTeams(teams: PublicTeam[]) {
   return { technical, creative };
 }
 
-function PersonNode({ label, name, sub, photo, tone = "violet" }: { label: string; name?: string; sub?: string; photo?: string; tone?: "violet" | "cyan" | "fuchsia" }) {
-  const toneClass = tone === "cyan" ? "border-cyan-300/30 bg-cyan-500/10 text-cyan-100" : tone === "fuchsia" ? "border-fuchsia-300/30 bg-fuchsia-500/10 text-fuchsia-100" : "border-violet-300/30 bg-violet-500/10 text-violet-100";
+function PersonNode({ label, name, sub, photo, tone = "violet" }: { label: string; name?: string; sub?: string; photo?: string; tone?: "violet" | "cyan" | "fuchsia" | "emerald" | "amber" | "rose" }) {
+  const tones = {
+    violet: "border-violet-300/35 bg-gradient-to-br from-violet-500/24 via-purple-500/12 to-fuchsia-500/10 text-violet-100 shadow-violet-950/30",
+    cyan: "border-cyan-300/35 bg-gradient-to-br from-cyan-400/22 via-sky-500/12 to-violet-500/10 text-cyan-100 shadow-cyan-950/25",
+    fuchsia: "border-fuchsia-300/35 bg-gradient-to-br from-fuchsia-500/24 via-purple-500/12 to-pink-500/10 text-fuchsia-100 shadow-fuchsia-950/30",
+    emerald: "border-emerald-300/35 bg-gradient-to-br from-emerald-400/22 via-teal-500/12 to-cyan-500/10 text-emerald-100 shadow-emerald-950/25",
+    amber: "border-amber-300/35 bg-gradient-to-br from-amber-300/22 via-orange-500/12 to-fuchsia-500/10 text-amber-100 shadow-amber-950/25",
+    rose: "border-rose-300/35 bg-gradient-to-br from-rose-400/22 via-pink-500/12 to-violet-500/10 text-rose-100 shadow-rose-950/25"
+  };
+  const toneClass = tones[tone];
   return (
-    <div className={`relative mx-auto w-full max-w-[430px] rounded-2xl border p-4 text-center shadow-[0_0_36px_rgba(139,92,246,.14)] ${toneClass}`}>
-      {photo ? <img src={photo} alt="" className="mx-auto mb-3 h-14 w-14 rounded-2xl object-cover" /> : <Crown className="mx-auto mb-3" size={20} />}
+    <div className={`relative mx-auto w-full max-w-[430px] overflow-hidden rounded-2xl border p-4 text-center shadow-2xl backdrop-blur-xl ${toneClass}`}>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,.14),transparent_42%)]" />
+      <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
+      <div className="relative">
+      {photo ? <img src={photo} alt="" className="mx-auto mb-3 h-14 w-14 rounded-2xl border border-white/15 object-cover shadow-[0_0_24px_rgba(255,255,255,.1)]" /> : <Crown className="mx-auto mb-3" size={20} />}
       <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/52">{label}</p>
       <p className="mt-2 text-lg font-semibold text-white">{name || "Add details in portal"}</p>
       {sub ? <p className="mt-1 text-xs leading-5 text-white/55">{sub}</p> : null}
+      </div>
     </div>
   );
 }
@@ -38,7 +50,7 @@ function LeadershipRow({ info }: { info: Record<string, any> }) {
   ].filter((advisor) => advisor.name || advisor.photo || advisor.email);
   return (
     <div className={`mx-auto grid w-full max-w-5xl gap-4 ${advisors.length ? "md:grid-cols-3" : "md:grid-cols-1"}`}>
-      <PersonNode label="2. Secretary" name={info.secretaryName} sub={info.secretaryEmail} photo={info.secretaryPhoto} />
+      <PersonNode label="2. Secretary" name={info.secretaryName} sub={info.secretaryEmail} photo={info.secretaryPhoto} tone="violet" />
       {advisors.map((advisor, index) => (
         <PersonNode
           key={`${advisor.name || "advisor"}-${index}`}
@@ -46,7 +58,7 @@ function LeadershipRow({ info }: { info: Record<string, any> }) {
           name={advisor.name}
           sub={advisor.email}
           photo={advisor.photo}
-          tone="violet"
+          tone={index === 0 ? "amber" : "rose"}
         />
       ))}
     </div>
@@ -143,7 +155,7 @@ export default async function TeamsPage() {
           <div className="pointer-events-none absolute right-8 top-10 h-24 w-48 rounded-2xl border border-fuchsia-300/10" />
 
           <div className="relative">
-            <PersonNode label="1. Faculty Champion" name={info.facultyChampionName} sub={info.facultyChampionEmail || "Faculty guidance and club oversight"} photo={info.facultyChampionPhoto} />
+            <PersonNode label="1. Faculty Champion" name={info.facultyChampionName} sub={info.facultyChampionEmail || "Faculty guidance and club oversight"} photo={info.facultyChampionPhoto} tone="emerald" />
             <div className="mx-auto h-8 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
             <LeadershipRow info={info} />
             <div className="mx-auto h-12 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
