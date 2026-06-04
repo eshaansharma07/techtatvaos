@@ -7,6 +7,7 @@ import { audit, requirePortal } from "@/lib/portal";
 import {
   certificateFilename,
   certificateNumber,
+  renderCertificatePdf,
   renderCertificatePdfs,
   zipFiles,
   type CertificateRecipient
@@ -65,6 +66,8 @@ export async function GET(req: NextRequest) {
 
   const id = req.nextUrl.searchParams.get("event");
   const type = req.nextUrl.searchParams.get("type") === "winner" ? "winner" : "participation";
+  const format = req.nextUrl.searchParams.get("format") === "pdf" ? "pdf" : "zip";
+  const requestedCandidate = req.nextUrl.searchParams.get("candidate");
   if (!id) return NextResponse.json({ error: "event is required" }, { status: 400 });
   if (!Types.ObjectId.isValid(id)) return NextResponse.json({ error: "Invalid event id" }, { status: 400 });
 
@@ -120,6 +123,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "No winners selected for this event yet. Edit the event and choose 1st, 2nd, and/or 3rd place winners." }, { status: 404 });
     }
 
+    if (format === "pdf") {
+      if (winnerConfigs.length !== 1) {
+        return NextResponse.json({ error: "Choose a single winner place before downloading a PDF certificate." }, { status: 400 });
+      }
+      const pdf = await renderCertificatePdf("winner", winnerConfigs[0].config);
+      await audit(req, "portal.certificates.export", { entityType: "event", entityId: id, type, format, count: 1 });
+      return new NextResponse(new Uint8Array(pdf), {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${winnerConfigs[0].name}"`
+        }
+      });
+    }
+
     const winnerPdfs = await renderCertificatePdfs(winnerConfigs.map((entry) => ({ kind: "winner", config: entry.config })));
     const winnerFiles = winnerConfigs.map((entry, index) => ({ name: entry.name, content: winnerPdfs[index] }));
     const body = zipFiles(winnerFiles);
@@ -142,6 +160,7 @@ export async function GET(req: NextRequest) {
     for (const candidate of candidates) {
       const candidateId = objectId(candidate.user || candidate);
       if (!candidateId || seen.has(candidateId) || !presentIds.has(candidateId)) continue;
+      if (requestedCandidate && candidateId !== requestedCandidate) continue;
       const student = studentFromCandidate(candidate);
       if (student?.name) {
         students.push({ ...student, id: candidateId });
@@ -162,7 +181,21 @@ export async function GET(req: NextRequest) {
     };
   });
   if (!participationConfigs.length) {
-    return NextResponse.json({ error: "No present candidates were found for this event. Mark candidates present before exporting participation certificates." }, { status: 404 });
+    return NextResponse.json({ error: requestedCandidate ? "This candidate is not marked present for this event." : "No present candidates were found for this event. Mark candidates present before exporting participation certificates." }, { status: 404 });
+  }
+  if (format === "pdf") {
+    if (participationConfigs.length !== 1) {
+      return NextResponse.json({ error: "Choose a single present candidate before downloading a PDF certificate." }, { status: 400 });
+    }
+    const pdf = await renderCertificatePdf("participation", participationConfigs[0].config);
+    await audit(req, "portal.certificates.export", { entityType: "event", entityId: id, type, format, count: 1 });
+    return new NextResponse(new Uint8Array(pdf), {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${participationConfigs[0].name}"`
+      }
+    });
   }
   const participationPdfs = await renderCertificatePdfs(participationConfigs.map((entry) => ({ kind: "participation", config: entry.config })));
   const files = participationConfigs.map((entry, index) => ({ name: entry.name, content: participationPdfs[index] }));

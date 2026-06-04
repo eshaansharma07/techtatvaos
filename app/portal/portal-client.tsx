@@ -661,8 +661,6 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
     return [...leader, ...members];
   });
   const presentParticipants = participants.filter((row: any) => attendanceMap.get(`${selected}:${row.user}`)?.status === "present");
-  const hasWinners = Boolean(selectedEvent?.winnerFirst || selectedEvent?.winnerSecond || selectedEvent?.winnerThird);
-
   const guardedDownload = (valid: boolean, message: string) => (event: MouseEvent<HTMLAnchorElement>) => {
     if (!valid) {
       event.preventDefault();
@@ -676,7 +674,7 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm">Certificate generation</p>
-            <p className="mt-1 text-xs leading-5 text-white/38">Exports use your provided HTML certificate templates, inject real event/candidate/signature details, and download as ZIP files containing separate PDFs.</p>
+            <p className="mt-1 text-xs leading-5 text-white/38">Exports use your exact HTML certificate templates and download one clean PDF per participant or winner.</p>
           </div>
           <select value={selected} onChange={(event) => setSelected(event.target.value)} className="rounded-2xl border border-white/[.07] bg-black/40 px-3 py-2.5 text-xs text-white outline-none">
             <option value="">Select event</option>
@@ -700,16 +698,17 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
         </div>
 
         <div className="mt-5 overflow-hidden rounded-2xl border border-white/[.06]">
-          <div className="grid grid-cols-[.9fr_.6fr_.7fr_.45fr] gap-3 bg-white/[.035] px-4 py-3 text-[10px] uppercase tracking-wider text-white/35">
-            <span>Present candidate</span><span>UID</span><span>Program</span><span>Mode</span>
+          <div className="grid grid-cols-[.9fr_.55fr_.7fr_.4fr_auto] gap-3 bg-white/[.035] px-4 py-3 text-[10px] uppercase tracking-wider text-white/35">
+            <span>Present candidate</span><span>UID</span><span>Program</span><span>Mode</span><span>PDF</span>
           </div>
           <div className="max-h-[360px] overflow-y-auto">
             {presentParticipants.map((row: any) => (
-              <div className="grid grid-cols-[.9fr_.6fr_.7fr_.45fr] gap-3 border-t border-white/[.05] bg-black/15 px-4 py-3 text-xs" key={`${row.registration}-${row.user}`}>
+              <div className="grid grid-cols-[.9fr_.55fr_.7fr_.4fr_auto] items-center gap-3 border-t border-white/[.05] bg-black/15 px-4 py-3 text-xs" key={`${row.registration}-${row.user}`}>
                 <div><p className="text-white/75">{row.name || "Unnamed candidate"}</p>{row.teamName ? <p className="mt-1 text-[10px] text-violet-200/60">{row.teamName}</p> : null}</div>
                 <span className="text-white/45">{row.uid || "-"}</span>
                 <span className="text-white/45">{row.program || "-"}{row.semester ? ` / Sem ${row.semester}` : ""}</span>
                 <span className="capitalize text-white/45">{row.mode}</span>
+                <a download onClick={() => setPanel(`Downloading participation certificate for ${row.name || "candidate"}...`)} className="portal-command-button rounded-xl px-3 py-2 text-center text-[10px] font-semibold" href={`/api/certificates/export?event=${selected}&type=participation&format=pdf&candidate=${row.user}`}>PDF</a>
               </div>
             ))}
             {!presentParticipants.length ? <p className="border-t border-white/[.05] bg-black/15 px-4 py-6 text-sm text-white/45">No present candidates yet. Mark attendance present before exporting participation certificates.</p> : null}
@@ -719,10 +718,9 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
 
       <div className="glass rounded-xl p-5">
         <p className="text-sm">Certificate exports</p>
-        <p className="mt-3 text-xs leading-6 text-white/40">Every download is a ZIP. Inside it, each participant or winner gets one separate PDF file.</p>
-        <div className="mt-4 grid gap-3">
-          <a download onClick={guardedDownload(Boolean(selected && presentParticipants.length), "Select an event with candidates marked present before exporting participation certificates.")} className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold" href={selected ? `/api/certificates/export?event=${selected}&type=participation` : "#"}>Download participation PDFs ZIP</a>
-          <a download onClick={guardedDownload(Boolean(selected && hasWinners), "Select winner candidates in the Events tab before exporting winner certificates.")} className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70" href={selected ? `/api/certificates/export?event=${selected}&type=winner` : "#"}>Download winner PDFs ZIP</a>
+        <p className="mt-3 text-xs leading-6 text-white/40">Download certificates manually as individual PDFs. Mark attendance present first, then use the PDF button beside each candidate.</p>
+        <div className="mt-4 rounded-2xl border border-white/[.06] bg-white/[.025] p-4 text-xs leading-6 text-white/48">
+          {presentParticipants.length ? `${presentParticipants.length} present candidate PDFs are ready in the list.` : "No participation PDFs yet because no candidate is marked present for this event."}
         </div>
 
         <div className="mt-5 rounded-2xl border border-white/[.06] bg-black/20 p-4">
@@ -736,9 +734,9 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
         </div>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
-          <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerFirst), "Select a 1st place winner first.")} className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={selected ? `/api/certificates/export?event=${selected}&type=winner&place=1` : "#"}>1st PDF</a>
-          <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerSecond), "Select a 2nd place winner first.")} className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={selected ? `/api/certificates/export?event=${selected}&type=winner&place=2` : "#"}>2nd PDF</a>
-          <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerThird), "Select a 3rd place winner first.")} className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={selected ? `/api/certificates/export?event=${selected}&type=winner&place=3` : "#"}>3rd PDF</a>
+          <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerFirst), "Select a 1st place winner first.")} className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={selected ? `/api/certificates/export?event=${selected}&type=winner&format=pdf&place=1` : "#"}>1st PDF</a>
+          <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerSecond), "Select a 2nd place winner first.")} className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={selected ? `/api/certificates/export?event=${selected}&type=winner&format=pdf&place=2` : "#"}>2nd PDF</a>
+          <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerThird), "Select a 3rd place winner first.")} className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={selected ? `/api/certificates/export?event=${selected}&type=winner&format=pdf&place=3` : "#"}>3rd PDF</a>
         </div>
       </div>
     </div>
