@@ -4,7 +4,7 @@ export function getUploadSignature(folder="tech-tatva-os"){const timestamp=Math.
 export function cloudinaryConfigured() {
   return Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
 }
-export async function uploadToCloudinary(buffer: Buffer, options: { folder?: string; resourceType?: "image" | "video" | "auto" } = {}) {
+export async function uploadToCloudinary(buffer: Buffer, options: { folder?: string; resourceType?: "image" | "video" | "raw" | "auto" } = {}) {
   if (!cloudinaryConfigured()) throw new Error("Cloudinary is not configured");
   return new Promise<{ secure_url: string; public_id: string; resource_type: string }>((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(

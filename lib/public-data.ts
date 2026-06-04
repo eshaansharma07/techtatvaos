@@ -9,6 +9,9 @@ import {
   Event,
   EventRegistration,
   Gallery,
+  GeneratedDocument,
+  AIConversation,
+  Meeting,
   Notification,
   Sponsor,
   Task,
@@ -224,7 +227,10 @@ export async function getAdminDashboardData() {
     achievements,
     gallery,
     contactMessages,
-    clubInfo
+    clubInfo,
+    meetings,
+    generatedDocuments,
+    aiConversations
   ] = await Promise.all([
     User.find(clubMemberQuery).sort({ createdAt: -1 }).limit(300).populate("role", "name slug").populate("team", "name").lean(),
     Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").populate("coLeads", "name").lean(),
@@ -238,7 +244,10 @@ export async function getAdminDashboardData() {
     Achievement.find({}).sort({ awardedAt: -1 }).lean(),
     Gallery.find({}).sort({ createdAt: -1 }).lean(),
     ContactMessage.find({}).sort({ createdAt: -1 }).limit(200).lean(),
-    getClubInfo()
+    getClubInfo(),
+    Meeting.find({}).sort({ date: -1 }).limit(200).populate("organizer", "name email").populate("attendees", "name email").lean(),
+    GeneratedDocument.find({}).sort({ generatedAt: -1 }).limit(100).populate("event", "title").populate("meeting", "title").lean(),
+    AIConversation.find({}).sort({ createdAt: -1 }).limit(100).lean()
   ]);
   return serialize({
     users,
@@ -253,6 +262,9 @@ export async function getAdminDashboardData() {
     achievements,
     gallery,
     contactMessages,
-    clubInfo
+    clubInfo,
+    meetings,
+    generatedDocuments,
+    aiConversations
   });
 }

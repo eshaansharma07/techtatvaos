@@ -11,13 +11,15 @@ import {
   Sponsor,
   Task,
   Team,
-  User
+  User,
+  Meeting
 } from "@/lib/models";
 
 export const adminResources = [
   "users",
   "teams",
   "events",
+  "meetings",
   "tasks",
   "announcements",
   "sponsors",
@@ -112,6 +114,19 @@ async function syncTeamLeadership(teamId: any, lead?: any, coLeads: any[] = []) 
   ]);
 }
 
+function parseActionItems(value: any) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  return String(value)
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [task, assignedTo = "", deadline = "", status = "Pending"] = line.split("|").map((part) => part.trim());
+      return { task, assignedTo, deadline, status };
+    });
+}
+
 export async function createResource(resource: AdminResource, input: Record<string, any>, actorId?: string) {
   const body = clean(input);
   if (resource === "settings") {
@@ -137,6 +152,15 @@ export async function createResource(resource: AdminResource, input: Record<stri
   }
   if (resource === "events") {
     return Event.create(normalizeEventBody(body, true));
+  }
+  if (resource === "meetings") {
+    return Meeting.create({
+      ...body,
+      date: body.date ? new Date(body.date) : undefined,
+      organizer: refId(body.organizer),
+      attendees: refIds(body.attendees),
+      actionItems: parseActionItems(body.actionItems)
+    });
   }
   if (resource === "tasks") {
     return Task.create({ ...body, createdBy: actorId, dueAt: body.dueAt ? new Date(body.dueAt) : undefined });
@@ -170,6 +194,7 @@ export async function updateResource(resource: AdminResource, id: string, input:
     return user;
   }
   if (resource === "events") return Event.findByIdAndUpdate(id, normalizeEventBody(input), { new: true, runValidators: true });
+  if (resource === "meetings") return Meeting.findByIdAndUpdate(id, { ...body, date: body.date ? new Date(body.date) : undefined, organizer: refId(body.organizer), attendees: refIds(body.attendees), actionItems: parseActionItems(body.actionItems) }, { new: true });
   if (resource === "tasks") return Task.findByIdAndUpdate(id, { ...body, dueAt: body.dueAt ? new Date(body.dueAt) : undefined }, { new: true });
   if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { ...body, publishAt: body.publishAt ? new Date(body.publishAt) : undefined }, { new: true });
   if (resource === "sponsors") return Sponsor.findByIdAndUpdate(id, { ...body, active: body.active !== "false" }, { new: true });
@@ -189,6 +214,7 @@ export async function deleteResource(resource: AdminResource, id: string) {
     await Promise.all([EventRegistration.deleteMany({ event: id }), Attendance.deleteMany({ event: id })]);
     return Event.findByIdAndDelete(id);
   }
+  if (resource === "meetings") return Meeting.findByIdAndUpdate(id, { status: "archived" }, { new: true });
   if (resource === "tasks") return Task.findByIdAndDelete(id);
   if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { status: "archived" }, { new: true });
   if (resource === "sponsors") return Sponsor.findByIdAndUpdate(id, { active: false }, { new: true });
