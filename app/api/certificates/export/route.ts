@@ -114,10 +114,7 @@ export async function GET(req: NextRequest) {
     }));
 
     if (!winnerFiles.length) {
-      winnerFiles.push({
-        name: "README.txt",
-        content: "No winners selected for this event yet. Edit the event in the admin portal and choose 1st, 2nd, and/or 3rd place winners."
-      });
+      return NextResponse.json({ error: "No winners selected for this event yet. Edit the event and choose 1st, 2nd, and/or 3rd place winners." }, { status: 404 });
     }
 
     const body = zipFiles(winnerFiles);
@@ -160,10 +157,7 @@ export async function GET(req: NextRequest) {
     };
   }));
   if (!files.length) {
-    files.push({
-      name: "README.txt",
-      content: "No present candidates were found for this event. Mark candidates present before exporting participation certificates."
-    });
+    return NextResponse.json({ error: "No present candidates were found for this event. Mark candidates present before exporting participation certificates." }, { status: 404 });
   }
   const body = zipFiles(files);
 
