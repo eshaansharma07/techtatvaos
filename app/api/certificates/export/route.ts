@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
       headers: {
         "Cache-Control": "no-store, no-cache, must-revalidate",
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename=\"winner-certificates-${eventRecord.slug}.zip\"`
+        "Content-Disposition": `attachment; filename="winner-certificates-${fileSlug(eventRecord.slug)}.zip"`
       }
     });
   }
@@ -173,7 +173,7 @@ export async function GET(req: NextRequest) {
       headers: {
         "Cache-Control": "no-store, no-cache, must-revalidate",
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename=\"participation-certificates-${fileSlug(eventRecord.slug)}.zip\"`
+        "Content-Disposition": `attachment; filename="participation-certificates-${fileSlug(eventRecord.slug)}.zip"`
       }
     });
   } catch (error) {

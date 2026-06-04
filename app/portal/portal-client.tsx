@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type MouseEvent, useEffect, useMemo, useState } from "react";
 import { signOut } from "next-auth/react";
 import {
   Activity,
+  Award,
   Bell,
   Brain,
   CalendarDays,
@@ -23,7 +24,7 @@ import {
 } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
-type Module = "Overview" | "Members" | "Teams" | "Events" | "Attendance" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Settings";
+type Module = "Overview" | "Members" | "Teams" | "Events" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Settings";
 type Resource = "users" | "teams" | "events" | "meetings" | "tasks" | "announcements" | "sponsors" | "achievements" | "gallery" | "contacts" | "settings" | "invites";
 type Data = Record<string, any>;
 type Field = [string, string, string?];
@@ -34,6 +35,7 @@ const nav = [
   [Workflow, "Teams"],
   [CalendarDays, "Events"],
   [CheckCircle2, "Attendance"],
+  [Award, "Certificates"],
   [FileText, "Meetings"],
   [Brain, "AI"],
   [Workflow, "Tasks"],
@@ -42,7 +44,7 @@ const nav = [
   [Settings2, "Settings"]
 ] as const;
 
-const config: Record<Exclude<Module, "Overview" | "Attendance" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
+const config: Record<Exclude<Module, "Overview" | "Attendance" | "Certificates" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
   Members: { key: "users", resource: "users", fields: [["name","Name"],["email","Email","email"],["team","Team","team-select"],["image","Profile photo","upload:image"],["uid","UID"],["registrationNumber","Registration number"],["department","Department"],["program","Program"],["semester","Semester","number"],["phone","Phone"]] },
   Teams: { key: "teams", resource: "teams", fields: [["name","Team name"],["slug","Slug"],["description","Description"],["lead","Team lead","member-select"],["coLeads","Co-leads","member-multi-select"],["jointSecretaryLane","Reports under joint secretary","lane-select"],["order","Display order","number"],["active","Active: true/false"]] },
   Events: { key: "events", resource: "events", fields: [["title","Title"],["slug","Slug"],["description","Description"],["venue","Venue"],["capacity","Capacity","number"],["category","Category"],["team","Team","team-select"],["leads","Event leads","member-multi-select"],["participationMode","Participation type","participation-select"],["maxTeamSize","Maximum team size","number"],["winnerFirst","1st place winner","winner-select"],["winnerSecond","2nd place winner","winner-select"],["winnerThird","3rd place winner","winner-select"],["status","Public status","status-select"],["registrationOpen","Registration open","boolean-select"],["registrationStart","Registration start","datetime-local"],["registrationEnd","Registration end","datetime-local"],["startAt","Event start date/time","datetime-local"],["endAt","Event end date/time","datetime-local"],["banner","Event banner","upload:image"]] },
@@ -238,17 +240,17 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
   const filtered=rowsFor(active).filter((row:any[])=>row.join(" ").toLowerCase().includes(search.toLowerCase()));
 
   return <main className="portal-root">
-    <aside className="portal-sidebar fixed inset-y-0 left-0 hidden w-72 p-6 xl:block"><PortalLogo/><p className="mt-12 px-3 text-[10px] tracking-[.22em] text-white/25">INTERNAL PORTAL</p><nav className="mt-4 space-y-1.5">{nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`portal-nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm transition ${active===label?"portal-nav-active text-white":"text-white/42 hover:border-white/[.08] hover:bg-white/[.045] hover:text-white/75"}`}><Icon size={16}/>{label}</button>)}</nav><button onClick={()=>setActive("Settings")} className="absolute bottom-20 left-6 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-white/35 transition hover:bg-white/[.045] hover:text-white/75"><Settings2 size={15}/> System settings</button><button onClick={()=>signOut({callbackUrl:"/login"})} className="absolute bottom-7 left-6 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-white/35 transition hover:bg-rose-500/10 hover:text-rose-200"><LogOut size={15}/> Sign out</button></aside>
+    <aside className="portal-sidebar fixed inset-y-0 left-0 hidden w-72 overflow-y-auto p-6 xl:flex xl:flex-col"><PortalLogo/><p className="mt-10 px-3 text-[10px] tracking-[.22em] text-white/25">INTERNAL PORTAL</p><nav className="mt-4 flex-1 space-y-1.5 pb-6">{nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`portal-nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm transition ${active===label?"portal-nav-active text-white":"text-white/42 hover:border-white/[.08] hover:bg-white/[.045] hover:text-white/75"}`}><Icon size={16}/>{label}</button>)}</nav><div className="mt-auto border-t border-white/[.06] pt-4"><button onClick={()=>signOut({callbackUrl:"/login"})} className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm text-white/35 transition hover:bg-rose-500/10 hover:text-rose-200"><LogOut size={15}/> Sign out</button></div></aside>
     <section className="xl:pl-72"><header className="portal-topbar flex min-h-24 flex-wrap items-center justify-between gap-4 px-5 py-4 md:px-8"><div><p className="text-xs tracking-wide text-white/35">{new Date().toLocaleString("en-IN",{dateStyle:"full",timeStyle:"short"})}</p><h1 className="mt-1 text-xl font-semibold tracking-tight">Good day, {userName}.</h1></div><div className="flex flex-1 items-center justify-end gap-3"><label className="portal-search hidden min-w-80 items-center gap-3 rounded-2xl px-4 py-3 text-white/40 md:flex"><Search size={16}/><input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search live admin data..." className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/25"/></label><button onClick={refresh} className="portal-mini-button rounded-2xl p-3 text-white/55 transition hover:-translate-y-0.5 hover:text-white"><RefreshCw size={16} className={busy?"animate-spin":""}/></button><button onClick={()=>setNotifications(!notifications)} className="portal-mini-button relative rounded-2xl p-3 text-white/55 transition hover:-translate-y-0.5 hover:text-white"><Bell size={16}/>{counts.contacts?<i className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-pink-400 shadow-[0_0_14px_rgba(244,114,182,.75)]"/>:null}</button><div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 shadow-[0_0_30px_rgba(168,85,247,.28)]"/></div></header>
-    <div className="p-5 md:p-8"><Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>{active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}<div className="portal-action mt-4 rounded-2xl p-5"><p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p><p className="mt-3 text-sm leading-6 text-white/65">{panel}</p></div></div></section>
+    <div className="p-5 md:p-8"><Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>{active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}<div className="portal-action mt-4 rounded-2xl p-5"><p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p><p className="mt-3 text-sm leading-6 text-white/65">{panel}</p></div></div></section>
     {notifications?<div className="fixed right-5 top-24 z-50 w-[min(380px,calc(100vw-40px))] rounded-3xl border border-white/10 bg-[#111016]/95 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl"><p className="text-sm font-semibold">Open contact messages</p>{(data.contactMessages||[]).filter((m:any)=>m.status!=="resolved").slice(0,6).map((m:any)=><button onClick={()=>setPanel(`${m.name}: ${m.message}`)} className="portal-mini-button mt-3 block w-full rounded-2xl px-4 py-3 text-left text-xs text-white/60 transition hover:-translate-y-0.5 hover:text-white" key={idOf(m)}>{m.subject}</button>)}{!counts.contacts?<p className="mt-4 text-xs text-white/40">No unresolved messages.</p>:null}</div>:null}
     {drawer?<div className="fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm"><div className="ml-auto h-full max-w-xl overflow-y-auto rounded-3xl border border-white/10 bg-[#111016] p-6 shadow-2xl shadow-violet-950/25"><div className="flex items-center justify-between"><h2 className="text-xl font-semibold tracking-tight">{drawer.title}</h2><button onClick={()=>setDrawer(null)} className="portal-mini-button rounded-full px-3 py-1.5 text-xs text-white/55">Close</button></div><form action={submit} className="mt-6 grid gap-4">{drawer.fields.map(([name,label,type])=>{const source={...(drawer.defaults||{}),...(drawer.item||{})};const selected=rawValue(source,name);const formValue=Array.isArray(selected)?selected:String(selected??"");return <label className="text-[10px] tracking-wider text-white/35" key={name}>{label.toUpperCase()}{type==="status-select"?<select name={name} defaultValue={formValue || "published"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{["draft","published","active","completed","archived"].map((status)=><option value={status} key={status}>{status}</option>)}</select>:type==="participation-select"?<select name={name} defaultValue={formValue || "individual"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="individual">Individual only</option><option value="team">Team only</option><option value="both">Individual or team</option></select>:type==="boolean-select"?<select name={name} defaultValue={String(selected === true || selected === "true")} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="true">Yes</option><option value="false">No</option></select>:type==="lane-select"?<select name={name} defaultValue={formValue || "technical"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="technical">Joint Secretary (Technical & Operations)</option><option value="creative">Joint Secretary (Media & Creative)</option></select>:type==="team-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No team</option>{(data.teams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="winner-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No winner selected</option>{winnerOptions(data,drawer.item).map((candidate:any)=><option value={candidate.id} key={candidate.id}>{candidate.label}</option>)}</select>:type==="member-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No member selected</option>{(data.users||[]).filter((user:any)=>user.status!=="inactive").map((user:any)=><option value={idOf(user)} key={idOf(user)}>{memberLabel(user)}</option>)}</select>:type==="member-multi-select"?<select name={name} multiple defaultValue={Array.isArray(formValue)?formValue:[]} className="mt-2 min-h-36 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{(data.users||[]).filter((user:any)=>user.status!=="inactive").map((user:any)=><option value={idOf(user)} key={idOf(user)}>{memberLabel(user)}</option>)}</select>:type?.startsWith("upload")?<UploadControl name={name} current={Array.isArray(formValue)?"":formValue} upload={uploads[name]} uploading={Boolean(uploading[name])} onUpload={async(file)=>{setUploading((state)=>({...state,[name]:true}));setPanel(`Uploading ${file.name}...`);const form=new FormData();form.append("file",file);form.append("folder",`tech-tatva-os/${drawer.resource}`);const res=await fetch("/api/portal/upload",{method:"POST",body:form});const result=await res.json();setUploading((state)=>({...state,[name]:false}));if(!res.ok){setPanel(result.error || "Upload failed");return}setUploads((state)=>({...state,[name]:result}));setPanel(`Uploaded ${file.name}. Now save the form.`)}}/>:["description","body","aboutCopy","agenda","discussionPoints","decisionsTaken","actionItems","nextMeeting"].includes(name)?<textarea name={name} defaultValue={formValue} rows={5} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"/>:<input name={name} type={type||"text"} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"/>}</label>})}<p className="text-[10px] leading-4 text-white/35">Tip: hold Command/Ctrl to select multiple leads or co-leads.</p><button disabled={busy||Object.values(uploading).some(Boolean)} className="portal-command-button rounded-2xl py-3 text-sm font-semibold disabled:opacity-60">{busy?"Saving...":Object.values(uploading).some(Boolean)?"Uploading...":"Save changes"}</button></form></div></div>:null}
   </main>
 }
 
 function Header({active,data,open,setPanel}:{active:Module;data:Data;open:(drawer:any)=>void;setPanel:(text:string)=>void}){
-  const action=active==="Overview"?"Export summary":active==="Attendance"?"Generate attendance":active==="Settings"?"Update branding":active==="AI"?"Ask AI":`Add ${active.slice(0,-1)}`;
-  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-6 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-4xl font-semibold tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active==="AI"?"AI Desk":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">Live operational controls for members, teams, events, attendance, media, documents, and public club content.</p></div><button type="button" onClick={()=>{if(active==="Overview"){exportDashboardSummary(data);setPanel("Dashboard summary CSV downloaded.");}else if(active==="Attendance"){window.dispatchEvent(new Event("portal-download-attendance"));setPanel("Generating attendance sheet for the selected event...");}else if(active==="AI"){setPanel("Use the AI Desk below to generate reports, MOMs, and secretary answers from real MongoDB data.");}else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${active.slice(0,-1)}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:active==="Meetings"?{status:"completed"}:{}})}}} className="portal-command-button flex items-center gap-2 self-end rounded-2xl px-5 py-3 text-xs font-semibold transition hover:-translate-y-0.5">{active==="Overview"||active==="Attendance"?<Download size={14}/>:active==="AI"?<Brain size={14}/>:<Plus size={14}/>}<span>{action}</span></button></div>
+  const action=active==="Overview"?"Export summary":active==="Attendance"?"Generate attendance":active==="Certificates"?"Certificate tools":active==="Settings"?"Update branding":active==="AI"?"Ask AI":`Add ${active.slice(0,-1)}`;
+  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-6 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-4xl font-semibold tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active==="AI"?"AI Desk":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">Live operational controls for members, teams, events, attendance, media, documents, and public club content.</p></div><button type="button" onClick={()=>{if(active==="Overview"){exportDashboardSummary(data);setPanel("Dashboard summary CSV downloaded.");}else if(active==="Attendance"){window.dispatchEvent(new Event("portal-download-attendance"));setPanel("Generating attendance sheet for the selected event...");}else if(active==="Certificates"){setPanel("Choose an event below, select winners from Events if needed, then export PDF certificates as ZIP files.");}else if(active==="AI"){setPanel("Use the AI Desk below to generate reports, MOMs, and secretary answers from real MongoDB data.");}else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${active.slice(0,-1)}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:active==="Meetings"?{status:"completed"}:{}})}}} className="portal-command-button flex items-center gap-2 self-end rounded-2xl px-5 py-3 text-xs font-semibold transition hover:-translate-y-0.5">{active==="Overview"||active==="Attendance"?<Download size={14}/>:active==="Certificates"?<Award size={14}/>:active==="AI"?<Brain size={14}/>:<Plus size={14}/>}<span>{action}</span></button></div>
 }
 
 function Overview({counts,chart,setActive}:{counts:any;chart:any[];setActive:(m:Module)=>void}){const cards=[["Total members",counts.members,"Members",Users,"from-violet-400 to-fuchsia-300","Manage roster"],["Active teams",counts.teams,"Teams",Workflow,"from-cyan-300 to-violet-300","Assign leads"],["Published events",counts.events,"Events",CalendarDays,"from-fuchsia-300 to-pink-300","Open events"],["Open tasks",counts.tasks,"Tasks",CheckCircle2,"from-emerald-300 to-violet-300","Track work"]];return <><div className="portal-quick-grid mt-5">{cards.map(([label,value,module,Icon,accent,copy]:any)=><button onClick={()=>setActive(module)} className="portal-quick-card group rounded-[1.6rem] p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-violet-200/25" key={label}><div className="flex items-start justify-between gap-4"><span className={`grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br ${accent} text-black shadow-[0_0_30px_rgba(168,85,247,.24)]`}><Icon size={18}/></span><span className="rounded-full border border-white/[.08] bg-white/[.035] px-3 py-1 text-[10px] font-semibold tracking-[.14em] text-white/35 transition group-hover:text-white/60">OPEN</span></div><p className="mt-7 text-xs font-medium text-white/42">{label}</p><p className="mt-2 text-5xl font-semibold tracking-[-.07em] text-white">{value}</p><p className="mt-3 text-xs text-white/35">{copy}</p></button>)}</div><div className="mt-5 grid gap-4 xl:grid-cols-[1fr_.44fr]"><div className="portal-chart rounded-[1.75rem] p-6"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-lg font-semibold">System data volume</p><p className="mt-1 text-xs text-white/38">Realtime operational footprint across core modules.</p></div><span className="rounded-full border border-violet-300/20 bg-violet-500/10 px-3 py-1.5 text-[10px] font-semibold tracking-[.18em] text-violet-100">LIVE</span></div><div className="mt-6 h-80"><ResponsiveContainer><BarChart data={chart} barCategoryGap={42}><XAxis dataKey="m" axisLine={false} tickLine={false} tick={{fill:"#ffffff73",fontSize:11}}/><Tooltip cursor={{fill:"rgba(139,92,246,.08)"}} contentStyle={{background:"#111016",border:"1px solid #ffffff16",borderRadius:14,color:"#fff"}}/><Bar dataKey="v" fill="url(#portalBar)" radius={[12,12,4,4]}/><defs><linearGradient id="portalBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f0abfc"/><stop offset="45%" stopColor="#8b5cf6"/><stop offset="100%" stopColor="#4c1d95"/></linearGradient></defs></BarChart></ResponsiveContainer></div></div><div className="portal-chart rounded-[1.75rem] p-6"><p className="text-lg font-semibold">Quick access</p><p className="mt-1 text-xs leading-5 text-white/38">Jump into the most used operating modules.</p><div className="mt-5 grid gap-3">{(["Members","Events","Attendance","Settings"] as Module[]).map((module)=><button onClick={()=>setActive(module)} className="portal-mini-button flex items-center justify-between rounded-2xl px-4 py-3 text-left text-sm text-white/70 transition hover:-translate-y-0.5 hover:text-white" key={module}><span>{module}</span><span className="text-[10px] tracking-[.16em] text-violet-200/55">OPEN</span></button>)}</div></div></div></>}
@@ -356,13 +358,24 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: text })
     });
-    const result = await res.json().catch(() => ({}));
+    const raw = await res.text();
+    let result: any = {};
+    try {
+      result = raw ? JSON.parse(raw) : {};
+    } catch {
+      result = { error: raw.slice(0, 220) };
+    }
     setAsking(false);
     if (!res.ok) {
       setPanel(result.error || "Secretary Assistant failed.");
       return;
     }
-    setAnswer(result.response || "No response generated.");
+    const response = String(result.response || "").trim();
+    if (!response) {
+      setPanel(result.error || "AI returned an empty response. Try again.");
+      return;
+    }
+    setAnswer(response);
     setPanel("Secretary Assistant response generated and logged.");
   }
 
@@ -382,8 +395,8 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
             {events.map((event: any) => <option value={idOf(event)} key={idOf(event)}>{event.title}</option>)}
           </select>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <a aria-disabled={!eventId} onClick={(event) => { if (!eventId) event.preventDefault(); }} href={eventId ? `/api/ai/event-report?event=${eventId}&format=pdf` : "#"} className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold">Download report PDF</a>
-            <a aria-disabled={!eventId} onClick={(event) => { if (!eventId) event.preventDefault(); }} href={eventId ? `/api/ai/event-report?event=${eventId}&format=docx` : "#"} className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70">Download report DOCX</a>
+            <a download aria-disabled={!eventId} onClick={(event) => { if (!eventId) { event.preventDefault(); setPanel("Select an event before downloading a report."); } }} href={eventId ? `/api/ai/event-report?event=${eventId}&format=pdf` : "#"} className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold">Download report PDF</a>
+            <a download aria-disabled={!eventId} onClick={(event) => { if (!eventId) { event.preventDefault(); setPanel("Select an event before downloading a report."); } }} href={eventId ? `/api/ai/event-report?event=${eventId}&format=docx` : "#"} className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70">Download report DOCX</a>
           </div>
           <p className="mt-3 text-xs text-white/35">{selectedEvent ? `Selected: ${selectedEvent.title}` : "Create an event first if this list is empty."}</p>
         </div>
@@ -401,8 +414,8 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
             {meetings.map((meeting: any) => <option value={idOf(meeting)} key={idOf(meeting)}>{meeting.title}</option>)}
           </select>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <a aria-disabled={!meetingId} onClick={(event) => { if (!meetingId) event.preventDefault(); }} href={meetingId ? `/api/ai/mom?meeting=${meetingId}&format=pdf` : "#"} className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold">Download MOM PDF</a>
-            <a aria-disabled={!meetingId} onClick={(event) => { if (!meetingId) event.preventDefault(); }} href={meetingId ? `/api/ai/mom?meeting=${meetingId}&format=docx` : "#"} className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70">Download MOM DOCX</a>
+            <a download aria-disabled={!meetingId} onClick={(event) => { if (!meetingId) { event.preventDefault(); setPanel("Select a meeting before downloading MOM."); } }} href={meetingId ? `/api/ai/mom?meeting=${meetingId}&format=pdf` : "#"} className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold">Download MOM PDF</a>
+            <a download aria-disabled={!meetingId} onClick={(event) => { if (!meetingId) { event.preventDefault(); setPanel("Select a meeting before downloading MOM."); } }} href={meetingId ? `/api/ai/mom?meeting=${meetingId}&format=docx` : "#"} className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70">Download MOM DOCX</a>
           </div>
           <p className="mt-3 text-xs text-white/35">{selectedMeeting ? `Selected: ${selectedMeeting.title}` : "Create a meeting from the Meetings tab first."}</p>
         </div>
@@ -597,10 +610,135 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
       </div>
       <div className="glass rounded-xl p-5">
         <p className="text-sm">Exports</p>
-        <p className="mt-3 text-xs leading-6 text-white/40">{participants.length} registered participant rows. Attendance sheets and certificate packs include only candidates marked present for the selected event.</p>
+        <p className="mt-3 text-xs leading-6 text-white/40">{participants.length} registered participant rows. Attendance sheets include only candidates marked present for the selected event.</p>
         {selected ? <div className="mt-4 grid gap-3"><a className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold" href={`/api/attendance/export?event=${selected}&format=pdf`}>Download PDF attendance sheet</a><a className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70" href={`/api/attendance/export?event=${selected}&format=xlsx`}>Download Excel attendance sheet</a></div> : null}
-        {selected ? <div className="mt-4 grid gap-3 border-t border-white/[.06] pt-4"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/35">Certificates</p><a download className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold" href={`/api/certificates/export?event=${selected}&type=participation`}>Download participation certificates ZIP</a><a download className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70" href={`/api/certificates/export?event=${selected}&type=winner`}>Download all winner certificates ZIP</a><div className="grid gap-2 sm:grid-cols-3"><a download className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={`/api/certificates/export?event=${selected}&type=winner&place=1`}>1st place</a><a download className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={`/api/certificates/export?event=${selected}&type=winner&place=2`}>2nd place</a><a download className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={`/api/certificates/export?event=${selected}&type=winner&place=3`}>3rd place</a></div><button type="button" onClick={()=>selectedEvent?setPanel(`Edit ${selectedEvent.title} in Events and select 1st, 2nd, and 3rd place winners from registered candidates.`):setPanel("Select an event first.")} className="portal-mini-button rounded-2xl px-4 py-3 text-left text-xs text-white/68">How to choose winners</button></div> : null}
         <button onClick={() => setPanel("For team events, the leader and every added member are listed separately so the attendance sheet contains actual present students only.")} className="portal-mini-button mt-4 rounded-2xl px-4 py-3 text-left text-xs text-white/68 transition hover:-translate-y-0.5 hover:text-white">How team attendance works</button>
+      </div>
+    </div>
+  );
+}
+
+function winnerDisplay(event: any, key: "winnerFirst" | "winnerSecond" | "winnerThird") {
+  const winner = event?.[key];
+  if (!winner) return "Not selected";
+  if (typeof winner === "object") return `${winner.name || "Selected candidate"}${winner.uid ? ` / ${winner.uid}` : ""}`;
+  return "Selected candidate";
+}
+
+function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (value: string) => void; open: (drawer: any) => void }) {
+  const events = data.events || [];
+  const [selected, setSelected] = useState(events[0] ? idOf(events[0]) : "");
+  const selectedEvent = events.find((event: any) => idOf(event) === selected);
+  const attendanceMap = useMemo<Map<string, any>>(
+    () => new Map((data.attendance || []).map((row: any) => [`${idOf(row.event)}:${idOf(row.user)}`, row])),
+    [data.attendance]
+  );
+  const registrations = (data.registrations || []).filter((registration: any) => idOf(registration.event) === selected);
+  const participants = registrations.flatMap((registration: any) => {
+    const leader = registration.user
+      ? [{
+          registration: idOf(registration),
+          user: idOf(registration.user),
+          name: registration.user.name,
+          uid: registration.user.uid,
+          program: registration.user.program,
+          semester: registration.user.semester,
+          mode: registration.mode || "individual",
+          teamName: registration.teamName || ""
+        }]
+      : [];
+    const members = (registration.teamMembers || []).map((member: any) => ({
+      registration: idOf(registration),
+      user: idOf(member.user || member),
+      name: member.name || member.user?.name,
+      uid: member.uid || member.user?.uid,
+      program: member.program || member.user?.program,
+      semester: member.semester || member.user?.semester,
+      mode: "team",
+      teamName: registration.teamName || ""
+    }));
+    return [...leader, ...members];
+  });
+  const presentParticipants = participants.filter((row: any) => attendanceMap.get(`${selected}:${row.user}`)?.status === "present");
+  const hasWinners = Boolean(selectedEvent?.winnerFirst || selectedEvent?.winnerSecond || selectedEvent?.winnerThird);
+
+  const guardedDownload = (valid: boolean, message: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!valid) {
+      event.preventDefault();
+      setPanel(message);
+    }
+  };
+
+  return (
+    <div className="mt-7 grid gap-4 xl:grid-cols-[1fr_.42fr]">
+      <div className="glass rounded-xl p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm">Certificate generation</p>
+            <p className="mt-1 text-xs leading-5 text-white/38">Exports use your provided HTML certificate templates, inject real event/candidate/signature details, and download as ZIP files containing separate PDFs.</p>
+          </div>
+          <select value={selected} onChange={(event) => setSelected(event.target.value)} className="rounded-2xl border border-white/[.07] bg-black/40 px-3 py-2.5 text-xs text-white outline-none">
+            <option value="">Select event</option>
+            {events.map((event: any) => <option value={idOf(event)} key={idOf(event)}>{event.title}</option>)}
+          </select>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          <div className="rounded-2xl border border-white/[.07] bg-white/[.025] p-4">
+            <p className="text-[10px] uppercase tracking-[.18em] text-white/35">Registered</p>
+            <p className="mt-2 text-3xl font-semibold tracking-[-.04em]">{participants.length}</p>
+          </div>
+          <div className="rounded-2xl border border-emerald-300/15 bg-emerald-400/[.04] p-4">
+            <p className="text-[10px] uppercase tracking-[.18em] text-emerald-100/50">Present</p>
+            <p className="mt-2 text-3xl font-semibold tracking-[-.04em] text-emerald-100">{presentParticipants.length}</p>
+          </div>
+          <div className="rounded-2xl border border-violet-300/15 bg-violet-400/[.04] p-4">
+            <p className="text-[10px] uppercase tracking-[.18em] text-violet-100/50">Winner slots</p>
+            <p className="mt-2 text-3xl font-semibold tracking-[-.04em] text-violet-100">{[selectedEvent?.winnerFirst, selectedEvent?.winnerSecond, selectedEvent?.winnerThird].filter(Boolean).length}/3</p>
+          </div>
+        </div>
+
+        <div className="mt-5 overflow-hidden rounded-2xl border border-white/[.06]">
+          <div className="grid grid-cols-[.9fr_.6fr_.7fr_.45fr] gap-3 bg-white/[.035] px-4 py-3 text-[10px] uppercase tracking-wider text-white/35">
+            <span>Present candidate</span><span>UID</span><span>Program</span><span>Mode</span>
+          </div>
+          <div className="max-h-[360px] overflow-y-auto">
+            {presentParticipants.map((row: any) => (
+              <div className="grid grid-cols-[.9fr_.6fr_.7fr_.45fr] gap-3 border-t border-white/[.05] bg-black/15 px-4 py-3 text-xs" key={`${row.registration}-${row.user}`}>
+                <div><p className="text-white/75">{row.name || "Unnamed candidate"}</p>{row.teamName ? <p className="mt-1 text-[10px] text-violet-200/60">{row.teamName}</p> : null}</div>
+                <span className="text-white/45">{row.uid || "-"}</span>
+                <span className="text-white/45">{row.program || "-"}{row.semester ? ` / Sem ${row.semester}` : ""}</span>
+                <span className="capitalize text-white/45">{row.mode}</span>
+              </div>
+            ))}
+            {!presentParticipants.length ? <p className="border-t border-white/[.05] bg-black/15 px-4 py-6 text-sm text-white/45">No present candidates yet. Mark attendance present before exporting participation certificates.</p> : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="glass rounded-xl p-5">
+        <p className="text-sm">Certificate exports</p>
+        <p className="mt-3 text-xs leading-6 text-white/40">Every download is a ZIP. Inside it, each participant or winner gets one separate PDF file.</p>
+        <div className="mt-4 grid gap-3">
+          <a download onClick={guardedDownload(Boolean(selected && presentParticipants.length), "Select an event with candidates marked present before exporting participation certificates.")} className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold" href={selected ? `/api/certificates/export?event=${selected}&type=participation` : "#"}>Download participation PDFs ZIP</a>
+          <a download onClick={guardedDownload(Boolean(selected && hasWinners), "Select winner candidates in the Events tab before exporting winner certificates.")} className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70" href={selected ? `/api/certificates/export?event=${selected}&type=winner` : "#"}>Download winner PDFs ZIP</a>
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-white/[.06] bg-black/20 p-4">
+          <p className="text-[10px] uppercase tracking-[.18em] text-white/35">Winner selection</p>
+          <div className="mt-3 grid gap-2 text-xs text-white/62">
+            <p>1st place: <span className="text-white/85">{winnerDisplay(selectedEvent, "winnerFirst")}</span></p>
+            <p>2nd place: <span className="text-white/85">{winnerDisplay(selectedEvent, "winnerSecond")}</span></p>
+            <p>3rd place: <span className="text-white/85">{winnerDisplay(selectedEvent, "winnerThird")}</span></p>
+          </div>
+          <button type="button" onClick={() => selectedEvent ? open({ resource: "events", title: `Select winners for ${selectedEvent.title}`, fields: config.Events.fields, item: selectedEvent }) : setPanel("Select an event before choosing winners.")} className="portal-command-button mt-4 w-full rounded-2xl px-4 py-3 text-xs font-semibold">Choose / update winners</button>
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerFirst), "Select a 1st place winner first.")} className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={selected ? `/api/certificates/export?event=${selected}&type=winner&place=1` : "#"}>1st PDF</a>
+          <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerSecond), "Select a 2nd place winner first.")} className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={selected ? `/api/certificates/export?event=${selected}&type=winner&place=2` : "#"}>2nd PDF</a>
+          <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerThird), "Select a 3rd place winner first.")} className="portal-mini-button rounded-xl px-3 py-2 text-center text-[10px] text-white/60" href={selected ? `/api/certificates/export?event=${selected}&type=winner&place=3` : "#"}>3rd PDF</a>
+        </div>
       </div>
     </div>
   );
