@@ -148,9 +148,6 @@ export default async function TeamsPage() {
           <h1 className="gradient-text mt-5 text-4xl font-semibold tracking-[-.055em] md:text-6xl">
             Tech Tatva Club Network
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-white/50">
-            A public hierarchy generated from the teams, leads, co-leads, and members you maintain inside the portal.
-          </p>
         </div>
 
         <div className="relative mt-10 overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/72 p-5 shadow-2xl shadow-black/30 md:p-8">
