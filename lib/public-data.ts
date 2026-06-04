@@ -228,7 +228,7 @@ export async function getAdminDashboardData() {
   ] = await Promise.all([
     User.find(clubMemberQuery).sort({ createdAt: -1 }).limit(300).populate("role", "name slug").populate("team", "name").lean(),
     Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").populate("coLeads", "name").lean(),
-    Event.find({}).sort({ startAt: -1 }).limit(200).populate("team", "name").lean(),
+    Event.find({}).sort({ startAt: -1 }).limit(200).populate("team", "name").populate("winnerFirst", "name uid email program semester").populate("winnerSecond", "name uid email program semester").populate("winnerThird", "name uid email program semester").lean(),
     Task.find({}).sort({ dueAt: 1 }).limit(200).populate("team", "name").lean(),
     Announcement.find({}).sort({ publishAt: -1 }).limit(200).lean(),
     Notification.find({}).sort({ createdAt: -1 }).limit(50).lean(),

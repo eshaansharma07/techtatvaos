@@ -1,108 +1,166 @@
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { readFileSync } from "fs";
+import path from "path";
 
-type CertificateStudent = {
+export type CertificateKind = "participation" | "winner";
+
+export type CertificateRecipient = {
+  id?: string;
   uid?: string;
   name: string;
   program?: string;
   semester?: number;
+  position?: string;
+  positionEmoji?: string;
 };
 
-type CertificateSheet = {
-  clubName?: string;
-  logo?: string;
+export type CertificateConfig = {
+  recipientName: string;
   eventName: string;
-  date: string;
-  type: "participation" | "winner";
-  students: CertificateStudent[];
-  secretaryName?: string;
-  facultyName?: string;
+  position?: string;
+  positionEmoji?: string;
+  eventDate: string;
+  certNumber: string;
+  facultyChampion: string;
+  clubChampion?: string;
+  secretary: string;
 };
 
-const pageSize: [number, number] = [841.89, 595.28];
-const violet = rgb(0.36, 0.2, 0.82);
-const magenta = rgb(0.86, 0.18, 0.68);
-const ink = rgb(0.08, 0.07, 0.12);
-const muted = rgb(0.38, 0.36, 0.43);
+const templateCache = new Map<CertificateKind, string>();
 
-function center(page: any, font: any, text: string, y: number, size: number, color = ink) {
-  const width = font.widthOfTextAtSize(text, size);
-  page.drawText(text, { x: (pageSize[0] - width) / 2, y, size, font, color });
+function templateFor(kind: CertificateKind) {
+  const cached = templateCache.get(kind);
+  if (cached) return cached;
+  const filename = kind === "winner" ? "winner.html" : "participation.html";
+  const template = readFileSync(path.join(process.cwd(), "certificate-templates", filename), "utf8");
+  templateCache.set(kind, template);
+  return template;
 }
 
-function fit(font: any, value: string, size: number, maxWidth: number) {
-  let text = value || "";
-  while (text.length && font.widthOfTextAtSize(text, size) > maxWidth) text = text.slice(0, -1);
-  return text.length < value.length ? `${text.slice(0, -1)}.` : text;
+function jsString(value: string) {
+  return JSON.stringify(value || "");
 }
 
-async function embedLogo(pdf: PDFDocument, logo?: string) {
-  if (!logo) return null;
-  try {
-    const response = await fetch(logo, { cache: "no-store" });
-    if (!response.ok) return null;
-    const bytes = new Uint8Array(await response.arrayBuffer());
-    const lower = logo.toLowerCase();
-    if (lower.includes(".jpg") || lower.includes(".jpeg")) return await pdf.embedJpg(bytes);
-    return await pdf.embedPng(bytes);
-  } catch {
-    return null;
-  }
+function htmlEscape(value: string) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function drawCertificate(page: any, fonts: { regular: any; bold: any; italic: any }, student: CertificateStudent, sheet: CertificateSheet, logo: any) {
-  const { regular, bold, italic } = fonts;
-  page.drawRectangle({ x: 0, y: 0, width: pageSize[0], height: pageSize[1], color: rgb(0.985, 0.98, 1) });
-
-  page.drawRectangle({ x: 28, y: 28, width: pageSize[0] - 56, height: pageSize[1] - 56, borderWidth: 2.2, borderColor: violet });
-  page.drawRectangle({ x: 42, y: 42, width: pageSize[0] - 84, height: pageSize[1] - 84, borderWidth: 0.8, borderColor: magenta });
-
-  page.drawCircle({ x: 104, y: 492, size: 96, color: rgb(0.88, 0.82, 1), opacity: 0.22 });
-  page.drawCircle({ x: 744, y: 98, size: 130, color: rgb(0.96, 0.64, 0.88), opacity: 0.2 });
-  page.drawLine({ start: { x: 78, y: 122 }, end: { x: 764, y: 472 }, thickness: 1.3, color: rgb(0.64, 0.48, 0.95), opacity: 0.28 });
-  page.drawLine({ start: { x: 120, y: 92 }, end: { x: 720, y: 504 }, thickness: 0.7, color: rgb(0.9, 0.36, 0.78), opacity: 0.22 });
-
-  if (logo) {
-    const scaled = logo.scale(0.18);
-    const width = Math.min(74, scaled.width);
-    const height = scaled.height * (width / scaled.width);
-    page.drawImage(logo, { x: (pageSize[0] - width) / 2, y: 482, width, height });
-  }
-
-  center(page, bold, String(sheet.clubName || "TECH TATVA").toUpperCase(), 450, 18, violet);
-  center(page, regular, sheet.type === "winner" ? "CERTIFICATE OF ACHIEVEMENT" : "CERTIFICATE OF PARTICIPATION", 410, 34, ink);
-  center(page, italic, "This certificate is proudly presented to", 366, 15, muted);
-
-  center(page, bold, fit(bold, student.name, 42, 620), 314, 42, ink);
-  page.drawLine({ start: { x: 210, y: 302 }, end: { x: 632, y: 302 }, thickness: 1, color: rgb(0.7, 0.62, 0.86) });
-
-  const action = sheet.type === "winner" ? "for outstanding performance in" : "for active participation in";
-  center(page, regular, action, 264, 16, muted);
-  center(page, bold, fit(bold, sheet.eventName, 24, 620), 226, 24, violet);
-
-  const meta = [student.uid ? `UID: ${student.uid}` : "", student.program || "", student.semester ? `Semester ${student.semester}` : ""].filter(Boolean).join("  |  ");
-  if (meta) center(page, regular, meta, 190, 11, muted);
-  if (sheet.date) center(page, regular, `Date: ${sheet.date}`, 168, 11, muted);
-
-  page.drawLine({ start: { x: 116, y: 112 }, end: { x: 286, y: 112 }, thickness: 0.8, color: ink });
-  page.drawLine({ start: { x: 556, y: 112 }, end: { x: 726, y: 112 }, thickness: 0.8, color: ink });
-  center(page, regular, sheet.secretaryName || "Secretary", 92, 11, muted);
-  page.drawText(sheet.facultyName || "Faculty Champion", { x: 595 - (regular.widthOfTextAtSize(sheet.facultyName || "Faculty Champion", 11) / 2), y: 92, size: 11, font: regular, color: muted });
-
-  center(page, regular, "Generated by Tech Tatva OS", 60, 9, rgb(0.5, 0.46, 0.56));
+function replaceIdText(html: string, id: string, value: string) {
+  return html.replace(new RegExp(`(<[^>]+id=["']${id}["'][^>]*>)([\\s\\S]*?)(<\\/[^>]+>)`), `$1${htmlEscape(value)}$3`);
 }
 
-export async function certificatePdf(sheet: CertificateSheet) {
-  const pdf = await PDFDocument.create();
-  const regular = await pdf.embedFont(StandardFonts.Helvetica);
-  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
-  const italic = await pdf.embedFont(StandardFonts.HelveticaOblique);
-  const logo = await embedLogo(pdf, sheet.logo);
-  const students = sheet.students.length ? sheet.students : [{ name: "No present candidates" }];
+export function certificateNumber(eventSlug: string, kind: CertificateKind, recipient: CertificateRecipient, index: number) {
+  const eventCode = (eventSlug || "event").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) || "EVENT";
+  const personCode = (recipient.uid || recipient.id || recipient.name || String(index + 1)).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(-8) || String(index + 1).padStart(4, "0");
+  const prefix = kind === "winner" ? `WIN${index + 1}` : "PAR";
+  return `TT-${eventCode}-${prefix}-${personCode}`;
+}
 
-  students.forEach((student) => {
-    const page = pdf.addPage(pageSize);
-    drawCertificate(page, { regular, bold, italic }, student, sheet, logo);
+export function renderCertificateHtml(kind: CertificateKind, config: CertificateConfig) {
+  const position = config.position || "";
+  const positionEmoji = config.positionEmoji || "";
+  let html = templateFor(kind);
+  const configBlock = kind === "winner"
+    ? `const CONFIG = {
+  recipientName   : ${jsString(config.recipientName)},
+  eventName       : ${jsString(config.eventName)},
+  eventDate       : ${jsString(config.eventDate)},
+  certNumber      : ${jsString(config.certNumber)},
+  facultyChampion : ${jsString(config.facultyChampion)},
+  clubChampion    : ${jsString(config.clubChampion || "")},
+  secretary       : ${jsString(config.secretary)},
+  position        : ${jsString(position)},
+  positionEmoji   : ${jsString(positionEmoji)},
+};`
+    : `const CONFIG = {
+  recipientName   : ${jsString(config.recipientName)},
+  eventName       : ${jsString(config.eventName)},
+  eventDate       : ${jsString(config.eventDate)},
+  certNumber      : ${jsString(config.certNumber)},
+  facultyChampion : ${jsString(config.facultyChampion)},
+  clubChampion    : ${jsString(config.clubChampion || "")},
+  secretary       : ${jsString(config.secretary)},
+};`;
+
+  html = html.replace(/const CONFIG = \{[\s\S]*?\};/, configBlock);
+  html = replaceIdText(html, "cfg-recipient", config.recipientName);
+  html = replaceIdText(html, "cfg-event", config.eventName);
+  html = replaceIdText(html, "cfg-date", config.eventDate);
+  html = replaceIdText(html, "cfg-certno", `No. ${config.certNumber}`);
+  html = replaceIdText(html, "cfg-faculty", config.facultyChampion);
+  html = replaceIdText(html, "cfg-secretary", config.secretary);
+  if (kind === "winner") html = replaceIdText(html, "cfg-position", `${positionEmoji ? `${positionEmoji}  ` : ""}${position}`);
+  return html;
+}
+
+function slugFile(value: string) {
+  return (value || "certificate").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 80) || "certificate";
+}
+
+const crcTable = new Uint32Array(256).map((_, n) => {
+  let c = n;
+  for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  return c >>> 0;
+});
+
+function crc32(buffer: Buffer) {
+  let crc = 0xffffffff;
+  for (const byte of buffer) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function dosDateTime(date = new Date()) {
+  const time = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
+  const dosDate = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  return { time, date: dosDate };
+}
+
+function u16(value: number) {
+  const buffer = Buffer.alloc(2);
+  buffer.writeUInt16LE(value);
+  return buffer;
+}
+
+function u32(value: number) {
+  const buffer = Buffer.alloc(4);
+  buffer.writeUInt32LE(value >>> 0);
+  return buffer;
+}
+
+export function zipFiles(files: { name: string; content: string | Buffer }[]) {
+  const locals: Buffer[] = [];
+  const centrals: Buffer[] = [];
+  let offset = 0;
+  const stamp = dosDateTime();
+
+  files.forEach((file) => {
+    const name = Buffer.from(file.name, "utf8");
+    const content = Buffer.isBuffer(file.content) ? file.content : Buffer.from(file.content, "utf8");
+    const crc = crc32(content);
+    const local = Buffer.concat([
+      u32(0x04034b50), u16(20), u16(0), u16(0), u16(stamp.time), u16(stamp.date),
+      u32(crc), u32(content.length), u32(content.length), u16(name.length), u16(0), name, content
+    ]);
+    const central = Buffer.concat([
+      u32(0x02014b50), u16(20), u16(20), u16(0), u16(0), u16(stamp.time), u16(stamp.date),
+      u32(crc), u32(content.length), u32(content.length), u16(name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset), name
+    ]);
+    locals.push(local);
+    centrals.push(central);
+    offset += local.length;
   });
 
-  return Buffer.from(await pdf.save());
+  const centralDirectory = Buffer.concat(centrals);
+  const end = Buffer.concat([
+    u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(centralDirectory.length), u32(offset), u16(0)
+  ]);
+  return Buffer.concat([...locals, centralDirectory, end]);
+}
+
+export function certificateFilename(kind: CertificateKind, config: CertificateConfig) {
+  const prefix = kind === "winner" ? `winner-${slugFile(config.position || "place")}` : "participation";
+  return `${prefix}-${slugFile(config.recipientName)}-${slugFile(config.certNumber)}.html`;
 }

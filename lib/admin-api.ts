@@ -88,6 +88,9 @@ function normalizeEventBody(input: Record<string, any>, create = false) {
   if (body.startAt) normalized.startAt = new Date(body.startAt);
   if (body.endAt) normalized.endAt = new Date(body.endAt);
   if (body.leads !== undefined) normalized.leads = refIds(body.leads);
+  if ("winnerFirst" in input) normalized.winnerFirst = refId(input.winnerFirst) || null;
+  if ("winnerSecond" in input) normalized.winnerSecond = refId(input.winnerSecond) || null;
+  if ("winnerThird" in input) normalized.winnerThird = refId(input.winnerThird) || null;
   if (body.sponsors !== undefined) normalized.sponsors = refIds(body.sponsors);
   return normalized;
 }
