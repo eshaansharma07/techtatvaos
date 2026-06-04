@@ -43,14 +43,14 @@ function PersonNode({ label, name, sub, photo, tone = "violet" }: { label: strin
   );
 }
 
-function LeadershipRow({ info }: { info: Record<string, any> }) {
+function AdvisoryRow({ info }: { info: Record<string, any> }) {
   const advisors = [
     { name: info.studentAdvisorOneName, photo: info.studentAdvisorOnePhoto, email: info.studentAdvisorOneEmail },
     { name: info.studentAdvisorTwoName, photo: info.studentAdvisorTwoPhoto, email: info.studentAdvisorTwoEmail }
   ].filter((advisor) => advisor.name || advisor.photo || advisor.email);
   return (
     <div className={`mx-auto grid w-full max-w-5xl gap-4 ${advisors.length ? "md:grid-cols-3" : "md:grid-cols-1"}`}>
-      <PersonNode label="2. Secretary" name={info.secretaryName} sub={info.secretaryEmail} photo={info.secretaryPhoto} tone="violet" />
+      <PersonNode label="Faculty Champion" name={info.facultyChampionName} sub={info.facultyChampionEmail || "Faculty guidance and club oversight"} photo={info.facultyChampionPhoto} tone="emerald" />
       {advisors.map((advisor, index) => (
         <PersonNode
           key={`${advisor.name || "advisor"}-${index}`}
@@ -63,6 +63,10 @@ function LeadershipRow({ info }: { info: Record<string, any> }) {
       ))}
     </div>
   );
+}
+
+function OperationsRoot({ info }: { info: Record<string, any> }) {
+  return <PersonNode label="1. Secretary" name={info.secretaryName} sub={info.secretaryEmail} photo={info.secretaryPhoto} tone="violet" />;
 }
 
 function TeamBox({ team, index, palette }: { team: PublicTeam; index: number; palette: string[] }) {
@@ -154,28 +158,34 @@ export default async function TeamsPage() {
           <div className="pointer-events-none absolute left-8 top-8 h-28 w-40 rounded-full border border-cyan-300/10" />
           <div className="pointer-events-none absolute right-8 top-10 h-24 w-48 rounded-2xl border border-fuchsia-300/10" />
 
-          <div className="relative">
-            <PersonNode label="1. Faculty Champion" name={info.facultyChampionName} sub={info.facultyChampionEmail || "Faculty guidance and club oversight"} photo={info.facultyChampionPhoto} tone="emerald" />
-            <div className="mx-auto h-8 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
-            <LeadershipRow info={info} />
-            <div className="mx-auto h-12 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
-            <div className="mx-auto hidden h-px max-w-4xl bg-gradient-to-r from-cyan-300/0 via-cyan-300/50 to-fuchsia-300/50 md:block" />
+          <div className="relative grid gap-8">
+            <div className="rounded-[1.7rem] border border-emerald-300/15 bg-emerald-400/[.035] p-5">
+              <p className="mb-5 text-center text-[10px] font-semibold uppercase tracking-[.24em] text-emerald-100/55">Advisory Tree</p>
+              <AdvisoryRow info={info} />
+            </div>
 
-            <div className="mt-6 grid gap-8 xl:grid-cols-2">
-              <TeamLane
-                title="3. Joint Secretary (Technical & Operations)"
-                subtitle={technicalLead}
-                teams={technical}
-                palette={technicalColors}
-                tone="cyan"
-              />
-              <TeamLane
-                title="4. Joint Secretary (Media & Creative)"
-                subtitle={creativeLead}
-                teams={creative}
-                palette={creativeColors}
-                tone="fuchsia"
-              />
+            <div className="rounded-[1.7rem] border border-violet-300/15 bg-violet-400/[.035] p-5">
+              <p className="mb-5 text-center text-[10px] font-semibold uppercase tracking-[.24em] text-violet-100/55">Club Operations Tree</p>
+              <OperationsRoot info={info} />
+              <div className="mx-auto h-12 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
+              <div className="mx-auto hidden h-px max-w-4xl bg-gradient-to-r from-cyan-300/0 via-cyan-300/50 to-fuchsia-300/50 md:block" />
+
+              <div className="mt-6 grid gap-8 xl:grid-cols-2">
+                <TeamLane
+                  title="2. Joint Secretary (Technical & Operations)"
+                  subtitle={technicalLead}
+                  teams={technical}
+                  palette={technicalColors}
+                  tone="cyan"
+                />
+                <TeamLane
+                  title="3. Joint Secretary (Media & Creative)"
+                  subtitle={creativeLead}
+                  teams={creative}
+                  palette={creativeColors}
+                  tone="fuchsia"
+                />
+              </div>
             </div>
           </div>
         </div>
