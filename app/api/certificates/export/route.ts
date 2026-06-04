@@ -7,7 +7,7 @@ import { audit, requirePortal } from "@/lib/portal";
 import {
   certificateFilename,
   certificateNumber,
-  renderCertificatePdf,
+  renderCertificatePdfs,
   zipFiles,
   type CertificateRecipient
 } from "@/lib/services/certificate-export";
@@ -15,6 +15,7 @@ import {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 type CertificateStudent = { uid?: string; name: string; program?: string; semester?: number };
 
@@ -57,9 +58,10 @@ function studentFromUser(user: any): CertificateRecipient | null {
 }
 
 export async function GET(req: NextRequest) {
-  const blocked = await requirePortal(req);
-  if (blocked) return blocked;
-  if (!await auth()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const blocked = await requirePortal(req);
+    if (blocked) return blocked;
+    if (!await auth()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const id = req.nextUrl.searchParams.get("event");
   const type = req.nextUrl.searchParams.get("type") === "winner" ? "winner" : "participation";
@@ -99,7 +101,7 @@ export async function GET(req: NextRequest) {
       .map((meta, index) => ({ ...meta, index, user: studentFromUser(eventRecord[meta.key]) }))
       .filter((entry) => entry.user?.name && (!requestedPlace || String(entry.index + 1) === requestedPlace));
 
-    const winnerFiles: { name: string; content: string | Buffer }[] = await Promise.all(winnerEntries.map(async (entry) => {
+    const winnerConfigs = winnerEntries.map((entry) => {
       const recipient = entry.user as CertificateRecipient;
       const config = {
         ...base,
@@ -110,14 +112,16 @@ export async function GET(req: NextRequest) {
       };
       return {
         name: certificateFilename("winner", config),
-        content: await renderCertificatePdf("winner", config)
+        config
       };
-    }));
+    });
 
-    if (!winnerFiles.length) {
+    if (!winnerConfigs.length) {
       return NextResponse.json({ error: "No winners selected for this event yet. Edit the event and choose 1st, 2nd, and/or 3rd place winners." }, { status: 404 });
     }
 
+    const winnerPdfs = await renderCertificatePdfs(winnerConfigs.map((entry) => ({ kind: "winner", config: entry.config })));
+    const winnerFiles = winnerConfigs.map((entry, index) => ({ name: entry.name, content: winnerPdfs[index] }));
     const body = zipFiles(winnerFiles);
     await audit(req, "portal.certificates.export", { entityType: "event", entityId: id, type, count: winnerFiles.length });
     return new NextResponse(new Uint8Array(body), {
@@ -146,7 +150,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const files: { name: string; content: string | Buffer }[] = await Promise.all(students.map(async (student, index) => {
+  const participationConfigs = students.map((student, index) => {
     const config = {
       ...base,
       recipientName: student.name,
@@ -154,20 +158,26 @@ export async function GET(req: NextRequest) {
     };
     return {
       name: certificateFilename("participation", config),
-      content: await renderCertificatePdf("participation", config)
+      config
     };
-  }));
-  if (!files.length) {
+  });
+  if (!participationConfigs.length) {
     return NextResponse.json({ error: "No present candidates were found for this event. Mark candidates present before exporting participation certificates." }, { status: 404 });
   }
+  const participationPdfs = await renderCertificatePdfs(participationConfigs.map((entry) => ({ kind: "participation", config: entry.config })));
+  const files = participationConfigs.map((entry, index) => ({ name: entry.name, content: participationPdfs[index] }));
   const body = zipFiles(files);
 
   await audit(req, "portal.certificates.export", { entityType: "event", entityId: id, type, count: students.length });
-  return new NextResponse(new Uint8Array(body), {
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate",
-      "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename=\"participation-certificates-${fileSlug(eventRecord.slug)}.zip\"`
-    }
-  });
+    return new NextResponse(new Uint8Array(body), {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "Content-Type": "application/zip",
+        "Content-Disposition": `attachment; filename=\"participation-certificates-${fileSlug(eventRecord.slug)}.zip\"`
+      }
+    });
+  } catch (error) {
+    console.error("Certificate export failed", error);
+    return NextResponse.json({ error: "Certificate export failed. Please try again after a moment." }, { status: 500 });
+  }
 }

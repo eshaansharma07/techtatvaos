@@ -27,6 +27,11 @@ export type CertificateConfig = {
   secretary: string;
 };
 
+type CertificatePdfJob = {
+  kind: CertificateKind;
+  config: CertificateConfig;
+};
+
 const templateCache = new Map<CertificateKind, string>();
 const chromium = ((chromiumPackage as any).default || chromiumPackage) as typeof chromiumPackage;
 
@@ -104,7 +109,12 @@ function slugFile(value: string) {
 }
 
 export async function renderCertificatePdf(kind: CertificateKind, config: CertificateConfig) {
-  const html = renderCertificateHtml(kind, config).replace(
+  const [pdf] = await renderCertificatePdfs([{ kind, config }]);
+  return pdf;
+}
+
+function printableCertificateHtml(kind: CertificateKind, config: CertificateConfig) {
+  return renderCertificateHtml(kind, config).replace(
     "</style>",
     `@page { size: A4 landscape; margin: 0; }
 @media print {
@@ -114,6 +124,10 @@ export async function renderCertificatePdf(kind: CertificateKind, config: Certif
 }
 </style>`
   );
+}
+
+export async function renderCertificatePdfs(jobs: CertificatePdfJob[]) {
+  if (!jobs.length) return [];
   const browser = await puppeteer.launch({
     args: chromium.args,
     defaultViewport: { width: 1600, height: 1131, deviceScaleFactor: 1 },
@@ -121,17 +135,25 @@ export async function renderCertificatePdf(kind: CertificateKind, config: Certif
     headless: true
   });
   try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 45000 });
-    await page.waitForNetworkIdle({ idleTime: 800, timeout: 45000 }).catch(() => undefined);
-    await page.emulateMediaType("print");
-    const pdf = await page.pdf({
-      format: "A4",
-      landscape: true,
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 }
-    });
-    return Buffer.from(pdf);
+    const pdfs: Buffer[] = [];
+    for (const job of jobs) {
+      const page = await browser.newPage();
+      try {
+        await page.setContent(printableCertificateHtml(job.kind, job.config), { waitUntil: "domcontentloaded", timeout: 30000 });
+        await page.emulateMediaType("print");
+        const pdf = await page.pdf({
+          format: "A4",
+          landscape: true,
+          printBackground: true,
+          margin: { top: 0, right: 0, bottom: 0, left: 0 },
+          preferCSSPageSize: true
+        });
+        pdfs.push(Buffer.from(pdf));
+      } finally {
+        await page.close().catch(() => undefined);
+      }
+    }
+    return pdfs;
   } finally {
     await browser.close();
   }
