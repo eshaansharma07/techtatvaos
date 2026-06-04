@@ -7,7 +7,7 @@ import { audit, requirePortal } from "@/lib/portal";
 import {
   certificateFilename,
   certificateNumber,
-  renderCertificateHtml,
+  renderCertificatePdf,
   zipFiles,
   type CertificateRecipient
 } from "@/lib/services/certificate-export";
@@ -94,23 +94,24 @@ export async function GET(req: NextRequest) {
 
   if (type === "winner") {
     const requestedPlace = req.nextUrl.searchParams.get("place");
-    const winnerFiles = positionMeta
+    const winnerEntries = positionMeta
       .map((meta, index) => ({ ...meta, index, user: studentFromUser(eventRecord[meta.key]) }))
-      .filter((entry) => entry.user?.name && (!requestedPlace || String(entry.index + 1) === requestedPlace))
-      .map((entry) => {
-        const recipient = entry.user as CertificateRecipient;
-        const config = {
-          ...base,
-          recipientName: recipient.name,
-          position: entry.position,
-          positionEmoji: entry.positionEmoji,
-          certNumber: certificateNumber(eventRecord.slug, "winner", recipient, entry.index)
-        };
-        return {
-          name: certificateFilename("winner", config),
-          content: renderCertificateHtml("winner", config)
-        };
-      });
+      .filter((entry) => entry.user?.name && (!requestedPlace || String(entry.index + 1) === requestedPlace));
+
+    const winnerFiles: { name: string; content: string | Buffer }[] = await Promise.all(winnerEntries.map(async (entry) => {
+      const recipient = entry.user as CertificateRecipient;
+      const config = {
+        ...base,
+        recipientName: recipient.name,
+        position: entry.position,
+        positionEmoji: entry.positionEmoji,
+        certNumber: certificateNumber(eventRecord.slug, "winner", recipient, entry.index)
+      };
+      return {
+        name: certificateFilename("winner", config),
+        content: await renderCertificatePdf("winner", config)
+      };
+    }));
 
     if (!winnerFiles.length) {
       winnerFiles.push({
@@ -147,7 +148,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const files = students.map((student, index) => {
+  const files: { name: string; content: string | Buffer }[] = await Promise.all(students.map(async (student, index) => {
     const config = {
       ...base,
       recipientName: student.name,
@@ -155,9 +156,9 @@ export async function GET(req: NextRequest) {
     };
     return {
       name: certificateFilename("participation", config),
-      content: renderCertificateHtml("participation", config)
+      content: await renderCertificatePdf("participation", config)
     };
-  });
+  }));
   if (!files.length) {
     files.push({
       name: "README.txt",
