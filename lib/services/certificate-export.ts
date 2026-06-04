@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import path from "path";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import chromiumPackage from "@sparticuz/chromium";
+import puppeteer from "puppeteer-core";
 
 export type CertificateKind = "participation" | "winner";
 
@@ -27,6 +28,7 @@ export type CertificateConfig = {
 };
 
 const templateCache = new Map<CertificateKind, string>();
+const chromium = ((chromiumPackage as any).default || chromiumPackage) as typeof chromiumPackage;
 
 function templateFor(kind: CertificateKind) {
   const cached = templateCache.get(kind);
@@ -101,90 +103,38 @@ function slugFile(value: string) {
   return (value || "certificate").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 80) || "certificate";
 }
 
-function clean(value: string) {
-  return String(value || "").replace(/[^\x20-\x7E]/g, "").trim();
-}
-
-function textWidth(font: any, value: string, size: number) {
-  return font.widthOfTextAtSize(value, size);
-}
-
-function centerText(page: any, value: string, y: number, font: any, size: number, color = rgb(1, 1, 1)) {
-  const text = clean(value);
-  page.drawText(text, { x: (842 - textWidth(font, text, size)) / 2, y, size, font, color });
-}
-
-function fitText(font: any, value: string, size: number, maxWidth: number) {
-  let text = clean(value);
-  while (text.length && textWidth(font, text, size) > maxWidth) text = text.slice(0, -1);
-  return text.length < clean(value).length ? `${text.slice(0, -1)}.` : text;
-}
-
-function drawLine(page: any, y: number, x1 = 86, x2 = 756, color = rgb(0.42, 0.22, 0.72)) {
-  page.drawLine({ start: { x: x1, y }, end: { x: x2, y }, thickness: 1.1, color, opacity: 0.75 });
-}
-
-async function embedClubImage(pdf: PDFDocument) {
-  try {
-    const image = readFileSync(path.join(process.cwd(), "public", "tech-tatva-hero.png"));
-    return await pdf.embedPng(image);
-  } catch {
-    return null;
-  }
-}
-
 export async function renderCertificatePdf(kind: CertificateKind, config: CertificateConfig) {
-  const pdf = await PDFDocument.create();
-  const page = pdf.addPage([842, 595]);
-  const regular = await pdf.embedFont(StandardFonts.Helvetica);
-  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
-  const serif = await pdf.embedFont(StandardFonts.TimesRomanBoldItalic);
-  const italic = await pdf.embedFont(StandardFonts.HelveticaOblique);
-  const image = await embedClubImage(pdf);
-
-  page.drawRectangle({ x: 0, y: 0, width: 842, height: 595, color: rgb(0.018, 0.014, 0.033) });
-  page.drawRectangle({ x: 20, y: 20, width: 802, height: 555, borderWidth: 2.2, borderColor: rgb(0.84, 0.73, 1), opacity: 0.9 });
-  page.drawRectangle({ x: 34, y: 34, width: 774, height: 527, borderWidth: 0.7, borderColor: rgb(0.46, 0.25, 0.76), opacity: 0.75 });
-  page.drawCircle({ x: 128, y: 464, size: 110, color: rgb(0.22, 0.06, 0.42), opacity: 0.32 });
-  page.drawCircle({ x: 704, y: 158, size: 130, color: rgb(0.42, 0.08, 0.28), opacity: 0.28 });
-  page.drawRectangle({ x: 70, y: 78, width: 702, height: 440, borderWidth: 0.8, borderColor: rgb(0.24, 0.17, 0.34), color: rgb(0.05, 0.04, 0.075), opacity: 0.92 });
-
-  if (image) {
-    page.drawImage(image, { x: 94, y: 420, width: 110, height: 55, opacity: 0.9 });
-    page.drawImage(image, { x: 260, y: 110, width: 322, height: 161, opacity: 0.055 });
+  const html = renderCertificateHtml(kind, config).replace(
+    "</style>",
+    `@page { size: A4 landscape; margin: 0; }
+@media print {
+  html, body { width: 297mm; height: 210mm; margin: 0 !important; padding: 0 !important; background: #d0d4e0 !important; }
+  body { display: flex !important; align-items: center !important; justify-content: center !important; }
+  .cert { width: 297mm !important; height: 210mm !important; max-width: none !important; box-shadow: none !important; }
+}
+</style>`
+  );
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: { width: 1600, height: 1131, deviceScaleFactor: 1 },
+    executablePath: await chromium.executablePath(),
+    headless: true
+  });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await page.waitForNetworkIdle({ idleTime: 800, timeout: 45000 }).catch(() => undefined);
+    await page.emulateMediaType("print");
+    const pdf = await page.pdf({
+      format: "A4",
+      landscape: true,
+      printBackground: true,
+      margin: { top: 0, right: 0, bottom: 0, left: 0 }
+    });
+    return Buffer.from(pdf);
+  } finally {
+    await browser.close();
   }
-
-  centerText(page, "TECH TATVA", 474, serif, 31, rgb(1, 1, 1));
-  centerText(page, kind === "winner" ? "CERTIFICATE OF ACHIEVEMENT" : "CERTIFICATE OF PARTICIPATION", 440, bold, 18, rgb(0.87, 0.73, 1));
-  drawLine(page, 424, 250, 592, rgb(0.92, 0.34, 0.9));
-
-  centerText(page, "This certificate is proudly presented to", 384, italic, 14, rgb(0.73, 0.7, 0.78));
-  centerText(page, fitText(serif, config.recipientName, 44, 650), 326, serif, 44, rgb(1, 1, 1));
-  drawLine(page, 309, 176, 666, rgb(0.84, 0.73, 1));
-
-  const body = kind === "winner"
-    ? `for securing ${clean(config.position || "a winning position")} in`
-    : "for active participation in";
-  centerText(page, body, 276, regular, 14, rgb(0.76, 0.73, 0.82));
-  centerText(page, fitText(bold, config.eventName, 26, 620), 237, bold, 26, rgb(0.96, 0.9, 1));
-  centerText(page, config.eventDate ? `held on ${config.eventDate}` : "organized by Tech Tatva", 208, regular, 13, rgb(0.7, 0.68, 0.77));
-
-  page.drawText(`Certificate ID: ${clean(config.certNumber)}`, { x: 94, y: 104, size: 10.5, font: regular, color: rgb(0.72, 0.68, 0.78) });
-  page.drawText("Faculty Champion", { x: 94, y: 158, size: 9, font: regular, color: rgb(0.62, 0.58, 0.68) });
-  page.drawText(fitText(bold, config.facultyChampion, 12, 190), { x: 94, y: 140, size: 12, font: bold, color: rgb(1, 1, 1) });
-  page.drawLine({ start: { x: 94, y: 133 }, end: { x: 270, y: 133 }, thickness: 0.7, color: rgb(0.7, 0.62, 0.86) });
-
-  page.drawText("Club Champion", { x: 334, y: 158, size: 9, font: regular, color: rgb(0.62, 0.58, 0.68) });
-  page.drawText(fitText(bold, config.clubChampion || "Tech Tatva", 12, 190), { x: 334, y: 140, size: 12, font: bold, color: rgb(1, 1, 1) });
-  page.drawLine({ start: { x: 334, y: 133 }, end: { x: 510, y: 133 }, thickness: 0.7, color: rgb(0.7, 0.62, 0.86) });
-
-  page.drawText("Secretary", { x: 574, y: 158, size: 9, font: regular, color: rgb(0.62, 0.58, 0.68) });
-  page.drawText(fitText(bold, config.secretary, 12, 190), { x: 574, y: 140, size: 12, font: bold, color: rgb(1, 1, 1) });
-  page.drawLine({ start: { x: 574, y: 133 }, end: { x: 750, y: 133 }, thickness: 0.7, color: rgb(0.7, 0.62, 0.86) });
-
-  page.drawText("Generated by Tech Tatva OS", { x: 612, y: 104, size: 10, font: regular, color: rgb(0.58, 0.54, 0.66) });
-
-  return Buffer.from(await pdf.save());
 }
 
 const crcTable = new Uint32Array(256).map((_, n) => {
