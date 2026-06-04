@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import path from "path";
 import chromiumPackage from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
+import { PDFDocument, rgb, StandardFonts, type PDFFont, type RGB } from "pdf-lib";
 
 export type CertificateKind = "participation" | "winner";
 
@@ -109,8 +110,59 @@ function slugFile(value: string) {
 }
 
 export async function renderCertificatePdf(kind: CertificateKind, config: CertificateConfig) {
-  const [pdf] = await renderCertificatePdfs([{ kind, config }]);
-  return pdf;
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([841.89, 595.28]);
+  const backgroundPath = path.join(process.cwd(), "certificate-templates", "docx-backgrounds", kind === "winner" ? "winner.jpg" : "participation.jpg");
+  const background = await pdfDoc.embedJpg(readFileSync(backgroundPath));
+  page.drawImage(background, { x: 0, y: 0, width: 841.89, height: 595.28 });
+
+  const serif = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+  const serifBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+  const serifItalic = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic);
+  const sans = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const sansBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const ink = rgb(0.025, 0.03, 0.12);
+  const muted = rgb(0.39, 0.41, 0.5);
+  const blue = rgb(0.1, 0.22, 0.62);
+  const gold = rgb(0.57, 0.43, 0.08);
+  const fill = kind === "winner" ? rgb(0.985, 0.975, 0.935) : rgb(0.965, 0.975, 0.995);
+
+  const drawCentered = (text: string, y: number, font: PDFFont, size: number, color: RGB, maxWidth = 520) => {
+    const clean = String(text || "").trim();
+    if (!clean) return;
+    let fontSize = size;
+    while (font.widthOfTextAtSize(clean, fontSize) > maxWidth && fontSize > 8) fontSize -= 1;
+    page.drawText(clean, {
+      x: (841.89 - font.widthOfTextAtSize(clean, fontSize)) / 2,
+      y,
+      size: fontSize,
+      font,
+      color
+    });
+  };
+  const cover = (x: number, y: number, width: number, height: number) => {
+    page.drawRectangle({ x, y, width, height, color: fill, opacity: 0.96 });
+  };
+
+  cover(255, 246, 335, 42);
+  drawCentered(config.recipientName, 258, serifBold, 30, ink, 360);
+  cover(290, 196, 265, 22);
+  drawCentered(config.eventName, 204, sansBold, 8.5, kind === "winner" ? gold : blue, 280);
+  cover(306, 132, 120, 24);
+  drawCentered(config.facultyChampion, 142, serifItalic, 10.5, ink, 150);
+  cover(448, 132, 120, 24);
+  drawCentered(config.secretary, 142, serifItalic, 10.5, ink, 150);
+  cover(78, 13, 120, 11);
+  page.drawText(`NO. ${config.certNumber}`.toUpperCase(), { x: 84, y: 16, size: 6.5, font: sans, color: muted });
+  cover(714, 13, 95, 11);
+  page.drawText((config.eventDate || "").toUpperCase(), { x: 724, y: 16, size: 6.5, font: sans, color: muted });
+
+  if (kind === "winner") {
+    cover(375, 241, 94, 18);
+    drawCentered(config.position || "Winner", 247, sansBold, 8.5, gold, 115);
+  }
+
+  return Buffer.from(await pdfDoc.save());
 }
 
 function printableCertificateHtml(kind: CertificateKind, config: CertificateConfig) {
