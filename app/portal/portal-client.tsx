@@ -401,8 +401,9 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
       </div>
       <div className="glass rounded-xl p-5">
         <p className="text-sm">Exports</p>
-        <p className="mt-3 text-xs leading-6 text-white/40">{participants.length} registered participant rows. PDF/XLSX export includes only candidates marked present.</p>
+        <p className="mt-3 text-xs leading-6 text-white/40">{participants.length} registered participant rows. Attendance sheets and certificate packs include only candidates marked present for the selected event.</p>
         {selected ? <div className="mt-4 grid gap-3"><a className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold" href={`/api/attendance/export?event=${selected}&format=pdf`}>Download PDF attendance sheet</a><a className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70" href={`/api/attendance/export?event=${selected}&format=xlsx`}>Download Excel attendance sheet</a></div> : null}
+        {selected ? <div className="mt-4 grid gap-3 border-t border-white/[.06] pt-4"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/35">Certificates</p><a className="portal-command-button rounded-2xl px-4 py-3 text-center text-xs font-semibold" href={`/api/certificates/export?event=${selected}&type=participation`}>Download participation certificates</a><a className="portal-mini-button rounded-2xl px-4 py-3 text-center text-xs text-white/70" href={`/api/certificates/export?event=${selected}&type=winner`}>Download winner certificates</a></div> : null}
         <button onClick={() => setPanel("For team events, the leader and every added member are listed separately so the attendance sheet contains actual present students only.")} className="portal-mini-button mt-4 rounded-2xl px-4 py-3 text-left text-xs text-white/68 transition hover:-translate-y-0.5 hover:text-white">How team attendance works</button>
       </div>
     </div>

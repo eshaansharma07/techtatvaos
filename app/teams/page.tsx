@@ -1,120 +1,159 @@
-import { ChevronRight, Crown, Network, ShieldCheck, Users } from "lucide-react";
+import { Crown, Network, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
-import { getClubInfo, getPublicTeams } from "@/lib/public-data";
+import { getClubInfo, getPublicTeams, type PublicTeam } from "@/lib/public-data";
 
 export const dynamic = "force-dynamic";
 
-function DetailCard({ label, value }: { label: string; value: string }) {
+const creativeWords = ["design", "media", "creative", "content", "marketing", "social", "outreach", "sponsor", "photography", "video"];
+const technicalColors = ["from-sky-500/22 to-cyan-400/10", "from-yellow-400/22 to-amber-500/10", "from-rose-500/22 to-red-500/10"];
+const creativeColors = ["from-emerald-400/22 to-teal-400/10", "from-fuchsia-500/22 to-purple-500/10", "from-pink-500/22 to-violet-500/10"];
+
+function splitTeams(teams: PublicTeam[]) {
+  const creative: PublicTeam[] = [];
+  const technical: PublicTeam[] = [];
+  teams.forEach((team) => {
+    const text = `${team.name} ${team.description || ""}`.toLowerCase();
+    if (creativeWords.some((word) => text.includes(word))) creative.push(team);
+    else technical.push(team);
+  });
+  return { technical, creative };
+}
+
+function PersonNode({ label, name, sub, photo, tone = "violet" }: { label: string; name?: string; sub?: string; photo?: string; tone?: "violet" | "cyan" | "fuchsia" }) {
+  const toneClass = tone === "cyan" ? "border-cyan-300/30 bg-cyan-500/10 text-cyan-100" : tone === "fuchsia" ? "border-fuchsia-300/30 bg-fuchsia-500/10 text-fuchsia-100" : "border-violet-300/30 bg-violet-500/10 text-violet-100";
   return (
-    <div className="rounded-2xl border border-white/[.06] bg-white/[.035] p-4">
-      <p className="text-[10px] font-semibold tracking-[.18em] text-white/32">{label}</p>
-      <p className="mt-3 flex items-center gap-2 text-sm text-white/72">
-        <Users size={14} className="text-violet-300" />
-        {value}
-      </p>
+    <div className={`relative mx-auto w-full max-w-[430px] rounded-2xl border p-4 text-center shadow-[0_0_36px_rgba(139,92,246,.14)] ${toneClass}`}>
+      {photo ? <img src={photo} alt="" className="mx-auto mb-3 h-14 w-14 rounded-2xl object-cover" /> : <Crown className="mx-auto mb-3" size={20} />}
+      <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/52">{label}</p>
+      <p className="mt-2 text-lg font-semibold text-white">{name || "Add details in portal"}</p>
+      {sub ? <p className="mt-1 text-xs leading-5 text-white/55">{sub}</p> : null}
+    </div>
+  );
+}
+
+function TeamBox({ team, index, palette }: { team: PublicTeam; index: number; palette: string[] }) {
+  const gradient = palette[index % palette.length];
+  return (
+    <div className={`relative rounded-[1.4rem] border border-white/[.08] bg-gradient-to-br ${gradient} p-4 backdrop-blur-xl`}>
+      <div className="rounded-2xl border border-white/10 bg-black/30 p-3 text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/48">Team Lead Group</p>
+        <p className="mt-2 text-sm font-semibold text-white">{team.lead || "Lead to be assigned"}</p>
+      </div>
+
+      <div className="mx-auto h-7 w-px bg-white/20" />
+
+      <div className="rounded-2xl border border-white/10 bg-black/34 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-base font-semibold text-white">{team.name}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[.18em] text-white/38">{team.members} active members</p>
+          </div>
+          <Network className="text-white/45" size={17} />
+        </div>
+        {team.description ? <p className="mt-3 line-clamp-3 text-xs leading-5 text-white/50">{team.description}</p> : null}
+
+        <div className="mt-4 grid gap-2">
+          {team.coLeads.length ? (
+            <div className="rounded-xl border border-white/[.08] bg-white/[.035] px-3 py-2">
+              <p className="text-[9px] font-semibold uppercase tracking-[.16em] text-white/36">Co-leads</p>
+              <p className="mt-1 text-xs text-white/70">{team.coLeads.join(", ")}</p>
+            </div>
+          ) : null}
+          {team.memberNames.length ? team.memberNames.slice(0, 6).map((member) => (
+            <div className="flex items-center gap-2 rounded-xl border border-white/[.08] bg-black/24 px-3 py-2 text-xs text-white/68" key={member}>
+              <ShieldCheck size={12} className="text-violet-200" />
+              {member}
+            </div>
+          )) : <p className="rounded-xl border border-white/[.08] bg-black/24 px-3 py-2 text-xs text-white/42">Members will appear after you assign them.</p>}
+          {team.memberNames.length > 6 ? <p className="text-[10px] text-white/35">+ {team.memberNames.length - 6} more members</p> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TeamLane({ title, subtitle, teams, palette, tone }: { title: string; subtitle: string; teams: PublicTeam[]; palette: string[]; tone: "cyan" | "fuchsia" }) {
+  return (
+    <div className="relative">
+      <PersonNode label={title} name={subtitle} tone={tone} />
+      <div className="mx-auto h-10 w-px bg-gradient-to-b from-white/40 to-white/0" />
+      {teams.length ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {teams.map((team, index) => <TeamBox team={team} index={index} palette={palette} key={team.id} />)}
+        </div>
+      ) : (
+        <div className="rounded-[1.4rem] border border-white/[.08] bg-white/[.025] p-6 text-center text-sm text-white/42">
+          Add teams in the portal to populate this lane.
+        </div>
+      )}
     </div>
   );
 }
 
 export default async function TeamsPage() {
   const [teams, info] = await Promise.all([getPublicTeams(), getClubInfo()]);
-  const leadership = [
-    { role: "FACULTY CHAMPION", name: info.facultyChampionName, email: info.facultyChampionEmail, phone: info.facultyChampionPhone, photo: info.facultyChampionPhoto },
-    { role: "SECRETARY", name: info.secretaryName, email: info.secretaryEmail, photo: info.secretaryPhoto },
-    { role: "JOINT SECRETARY", name: info.jointSecretaryOneName, email: info.jointSecretaryOneEmail, photo: info.jointSecretaryOnePhoto },
-    { role: "JOINT SECRETARY", name: info.jointSecretaryTwoName, email: info.jointSecretaryTwoEmail, photo: info.jointSecretaryTwoPhoto }
-  ].filter((person) => person.name || person.email || person.phone || person.photo);
+  const { technical, creative } = splitTeams(teams);
+  const secretarySub = info.secretaryEmail || "Final community director";
+  const technicalLead = info.jointSecretaryOneName || "Joint Secretary";
+  const creativeLead = info.jointSecretaryTwoName || "Joint Secretary";
 
   return (
     <PublicShell>
       <section className="relative mx-auto max-w-7xl px-6 pb-28 pt-36 md:pt-44">
-        <div className="pointer-events-none absolute left-10 top-36 h-80 w-80 rounded-full bg-violet-500/10 blur-[140px]" />
-        <div className="pointer-events-none absolute right-0 top-72 h-80 w-80 rounded-full bg-fuchsia-500/10 blur-[140px]" />
+        <div className="pointer-events-none absolute left-10 top-36 h-80 w-80 rounded-full bg-cyan-500/10 blur-[140px]" />
+        <div className="pointer-events-none absolute right-0 top-72 h-96 w-96 rounded-full bg-fuchsia-500/10 blur-[150px]" />
 
-        <div className="relative max-w-4xl">
-          <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200/75">THE NETWORK</p>
-          <h1 className="gradient-text mt-6 text-5xl font-medium leading-[.96] tracking-[-.065em] md:text-7xl lg:text-8xl">
-            Built to connect.
+        <div className="aurora-shell relative rounded-[2.3rem] px-6 py-10 text-center md:px-10">
+          <p className="flex items-center justify-center gap-2 text-[10px] font-semibold tracking-[.34em] text-violet-200/75">
+            <Sparkles size={13} />
+            ORGANIZATIONAL STRUCTURE
+          </p>
+          <h1 className="gradient-text mt-5 text-4xl font-semibold tracking-[-.055em] md:text-6xl">
+            Tech Tatva Society Network
           </h1>
-          <p className="mt-7 max-w-2xl text-sm leading-7 text-white/50 md:text-base md:leading-8">
-            Explore the public team structure, leadership assignments, and active members behind Tech Tatva.
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-white/50">
+            A public hierarchy generated from the teams, leads, co-leads, and members you maintain inside the portal.
           </p>
         </div>
 
-        <div className="relative mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {leadership.length ? leadership.map((person) => (
-            <div className="rounded-[1.5rem] border border-white/[.07] bg-white/[.035] p-5" key={`${person.role}-${person.name}`}>
-              {person.photo ? <img src={person.photo} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/[.06] text-violet-200"><Crown size={18} /></div>}
-              <p className="mt-4 text-[10px] font-semibold tracking-[.18em] text-white/35">{person.role}</p>
-              <p className="mt-2 text-lg text-white/85">{person.name || "To be announced"}</p>
-              {person.email ? <p className="mt-1 break-all text-xs text-white/38">{person.email}</p> : null}
-              {person.phone ? <p className="mt-1 text-xs text-white/32">{person.phone}</p> : null}
-            </div>
-          )) : (
-            <div className="rounded-[1.5rem] border border-white/[.07] bg-white/[.035] p-5 text-sm text-white/45 md:col-span-2 xl:col-span-4">
-              Leadership details will appear once updated from the portal.
-            </div>
-          )}
-        </div>
+        <div className="relative mt-10 overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/72 p-5 shadow-2xl shadow-black/30 md:p-8">
+          <div className="absolute inset-0 grid-bg opacity-20" />
+          <div className="pointer-events-none absolute left-8 top-8 h-28 w-40 rounded-full border border-cyan-300/10" />
+          <div className="pointer-events-none absolute right-8 top-10 h-24 w-48 rounded-2xl border border-fuchsia-300/10" />
 
-        <div className="relative mt-8 rounded-[2rem] border border-white/[.08] bg-white/[.025] p-4 backdrop-blur-xl md:p-6">
-          <div className="flex items-center gap-4 rounded-2xl border border-violet-300/20 bg-violet-500/10 p-5">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-black/20 text-violet-200">
-              <Network size={20} />
-            </span>
-            <div>
-              <p className="text-base text-white/88">Tech Tatva</p>
-              <p className="mt-1 text-[10px] font-semibold tracking-[.18em] text-white/35">CLUB NETWORK</p>
+          <div className="relative">
+            <PersonNode label="1. Secretary" name={info.secretaryName} sub={secretarySub} photo={info.secretaryPhoto} />
+            <div className="mx-auto h-12 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
+            <div className="mx-auto hidden h-px max-w-4xl bg-gradient-to-r from-cyan-300/0 via-cyan-300/50 to-fuchsia-300/50 md:block" />
+
+            <div className="mt-6 grid gap-8 xl:grid-cols-2">
+              <TeamLane
+                title="2. Joint Secretary (Technical & Operations)"
+                subtitle={technicalLead}
+                teams={technical}
+                palette={technicalColors}
+                tone="cyan"
+              />
+              <TeamLane
+                title="3. Joint Secretary (Media & Creative)"
+                subtitle={creativeLead}
+                teams={creative}
+                palette={creativeColors}
+                tone="fuchsia"
+              />
             </div>
           </div>
-
-          <div className="mt-5 grid gap-4">
-            {teams.length ? (
-              teams.map((team, index) => (
-                <details className="group rounded-[1.5rem] border border-white/[.07] bg-black/18 p-4 transition hover:border-violet-300/20 hover:bg-white/[.035]" open={index === 0} key={team.id}>
-                  <summary className="flex cursor-pointer list-none items-center gap-4">
-                    <ChevronRight size={17} className="text-violet-200 transition group-open:rotate-90" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-lg font-medium text-white/88">{team.name}</p>
-                      <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/38">{team.description || "Team details coming soon."}</p>
-                    </div>
-                    <span className="rounded-full border border-white/[.08] bg-white/[.035] px-3 py-1 text-xs text-violet-200">
-                      {team.members} members
-                    </span>
-                  </summary>
-
-                  <div className="mt-5 grid gap-3 md:grid-cols-2">
-                    <DetailCard label="TEAM LEAD" value={team.lead || "To be announced"} />
-                    <DetailCard label="CO-LEADS" value={team.coLeads.length ? team.coLeads.join(", ") : "To be announced"} />
-                  </div>
-
-                  <div className="mt-4 rounded-2xl border border-white/[.06] bg-white/[.025] p-4">
-                    <div className="flex items-center gap-2 text-[10px] font-semibold tracking-[.18em] text-white/35">
-                      <ShieldCheck size={13} className="text-violet-300" />
-                      ACTIVE MEMBERS
-                    </div>
-                    {team.memberNames.length ? (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {team.memberNames.map((member) => (
-                          <span className="inline-flex items-center gap-2 rounded-full border border-white/[.08] bg-black/25 px-3 py-2 text-xs text-white/65" key={member}>
-                            <Crown size={12} className="text-violet-300" />
-                            {member}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="mt-4 text-sm text-white/38">No active members assigned yet.</p>
-                    )}
-                  </div>
-                </details>
-              ))
-            ) : (
-              <div className="rounded-2xl border border-white/[.08] bg-white/[.025] p-8 text-sm text-white/45">
-                Team information is coming soon.
-              </div>
-            )}
-          </div>
         </div>
+
+        {!teams.length ? (
+          <div className="premium-card mt-8 rounded-[1.6rem] p-8 text-center">
+            <Users className="mx-auto text-violet-200" size={24} />
+            <p className="mt-4 text-lg text-white/80">No teams are published yet.</p>
+            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-white/42">
+              Create teams and assign leads/members from the portal. This page will build the structure automatically from that data.
+            </p>
+          </div>
+        ) : null}
       </section>
     </PublicShell>
   );
