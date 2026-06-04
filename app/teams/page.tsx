@@ -13,7 +13,7 @@ function splitTeams(teams: PublicTeam[]) {
   const technical: PublicTeam[] = [];
   teams.forEach((team) => {
     const text = `${team.name} ${team.description || ""}`.toLowerCase();
-    if (creativeWords.some((word) => text.includes(word))) creative.push(team);
+    if (team.jointSecretaryLane === "creative" || (!team.jointSecretaryLane && creativeWords.some((word) => text.includes(word)))) creative.push(team);
     else technical.push(team);
   });
   return { technical, creative };
@@ -27,6 +27,28 @@ function PersonNode({ label, name, sub, photo, tone = "violet" }: { label: strin
       <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/52">{label}</p>
       <p className="mt-2 text-lg font-semibold text-white">{name || "Add details in portal"}</p>
       {sub ? <p className="mt-1 text-xs leading-5 text-white/55">{sub}</p> : null}
+    </div>
+  );
+}
+
+function LeadershipRow({ info }: { info: Record<string, any> }) {
+  const advisors = [
+    { name: info.studentAdvisorOneName, photo: info.studentAdvisorOnePhoto, email: info.studentAdvisorOneEmail },
+    { name: info.studentAdvisorTwoName, photo: info.studentAdvisorTwoPhoto, email: info.studentAdvisorTwoEmail }
+  ].filter((advisor) => advisor.name || advisor.photo || advisor.email);
+  return (
+    <div className={`mx-auto grid w-full max-w-5xl gap-4 ${advisors.length ? "md:grid-cols-3" : "md:grid-cols-1"}`}>
+      <PersonNode label="2. Secretary" name={info.secretaryName} sub={info.secretaryEmail} photo={info.secretaryPhoto} />
+      {advisors.map((advisor, index) => (
+        <PersonNode
+          key={`${advisor.name || "advisor"}-${index}`}
+          label={`Student Advisor ${index + 1}`}
+          name={advisor.name}
+          sub={advisor.email}
+          photo={advisor.photo}
+          tone="violet"
+        />
+      ))}
     </div>
   );
 }
@@ -93,7 +115,6 @@ function TeamLane({ title, subtitle, teams, palette, tone }: { title: string; su
 export default async function TeamsPage() {
   const [teams, info] = await Promise.all([getPublicTeams(), getClubInfo()]);
   const { technical, creative } = splitTeams(teams);
-  const secretarySub = info.secretaryEmail || "Final community director";
   const technicalLead = info.jointSecretaryOneName || "Joint Secretary";
   const creativeLead = info.jointSecretaryTwoName || "Joint Secretary";
 
@@ -124,7 +145,7 @@ export default async function TeamsPage() {
           <div className="relative">
             <PersonNode label="1. Faculty Champion" name={info.facultyChampionName} sub={info.facultyChampionEmail || "Faculty guidance and club oversight"} photo={info.facultyChampionPhoto} />
             <div className="mx-auto h-8 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
-            <PersonNode label="2. Core Operations" name={info.secretaryName} sub={secretarySub} photo={info.secretaryPhoto} />
+            <LeadershipRow info={info} />
             <div className="mx-auto h-12 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
             <div className="mx-auto hidden h-px max-w-4xl bg-gradient-to-r from-cyan-300/0 via-cyan-300/50 to-fuchsia-300/50 md:block" />
 

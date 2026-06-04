@@ -41,6 +41,7 @@ const refId = (value: any) => {
   return String(value);
 };
 const refIds = (value: any) => (Array.isArray(value) ? value : [value]).map(refId).filter(Boolean);
+const jointSecretaryLanes = new Set(["technical", "creative"]);
 
 function normalizeTeamBody(input: Record<string, any>, create = false) {
   const body = clean(input);
@@ -48,6 +49,7 @@ function normalizeTeamBody(input: Record<string, any>, create = false) {
   if (body.slug || body.name) normalized.slug = body.slug || slugify(body.name);
   if (body.order !== undefined) normalized.order = Number(body.order);
   if (body.coLeads !== undefined) normalized.coLeads = Array.isArray(body.coLeads) ? body.coLeads : [body.coLeads];
+  if (body.jointSecretaryLane !== undefined || create) normalized.jointSecretaryLane = jointSecretaryLanes.has(String(body.jointSecretaryLane)) ? body.jointSecretaryLane : "technical";
   if (create || body.active !== undefined) normalized.active = body.active !== false && body.active !== "false";
   return normalized;
 }

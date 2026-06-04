@@ -44,6 +44,7 @@ export type PublicTeam = {
   description?: string;
   lead?: string;
   coLeads: string[];
+  jointSecretaryLane?: "technical" | "creative";
   facultyChampionName?: string;
   members: number;
   memberNames: string[];
@@ -155,6 +156,7 @@ export async function getPublicTeams(): Promise<PublicTeam[]> {
       description: team.description,
       lead: (team.lead as unknown as { name?: string })?.name,
       coLeads: (team.coLeads || []).map((lead: any) => lead.name).filter(Boolean),
+      jointSecretaryLane: (team as any).jointSecretaryLane || "technical",
       facultyChampionName: team.facultyChampionName,
       members: memberMap.get(String(team._id))?.length || 0,
       memberNames: memberMap.get(String(team._id)) || []
