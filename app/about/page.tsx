@@ -1,102 +1,214 @@
+import Link from "next/link";
+import { ArrowUpRight, CircuitBoard, Compass, Layers3, Radar, Sparkles, Target, Zap } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
+import { Reveal } from "@/components/reveal";
 import { getClubInfo } from "@/lib/public-data";
 
 export const dynamic = "force-dynamic";
 
-function softText(value?: string) {
-  return value?.trim() || "This section will appear once the club admin updates it from the portal.";
-}
-
-function splitText(value?: string) {
-  const text = softText(value);
-  const explicitParagraphs = text.split(/\n+/).map((item) => item.trim()).filter(Boolean);
-  if (explicitParagraphs.length > 1) return explicitParagraphs;
-  return text
+function sentences(value?: string) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
     .split(/(?<=[.!?])\s+/)
     .map((item) => item.trim())
     .filter(Boolean);
 }
 
-function StoryCard({ label, text }: { label: string; text?: string }) {
-  const blocks = splitText(text);
-  const intro = blocks.slice(0, 2).join(" ");
-  const points = blocks.slice(2);
+function precise(value: string | undefined, fallback: string, count = 1) {
+  const parts = sentences(value);
+  return (parts.length ? parts.slice(0, count).join(" ") : fallback).trim();
+}
 
+function bullets(value: string | undefined, fallback: string[]) {
+  const parts = sentences(value).slice(1, 4);
+  return parts.length ? parts : fallback;
+}
+
+function SignalCard({ icon: Icon, label, title, copy }: { icon: any; label: string; title: string; copy: string }) {
   return (
-    <article className="group relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-white/[.035] p-6 shadow-2xl shadow-black/20 backdrop-blur-xl transition duration-500 hover:border-violet-300/25 hover:bg-white/[.055] md:p-8">
-      <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-violet-500/10 blur-3xl transition group-hover:bg-fuchsia-500/15" />
-      <p className="relative text-[10px] font-semibold tracking-[.28em] text-violet-200/80">{label}</p>
-      <p className="relative mt-6 max-w-prose text-xl font-medium leading-8 tracking-[-.02em] text-white/82">
-        {intro}
-      </p>
-      {points.length ? (
-        <div className="relative mt-7 grid gap-3">
-          {points.map((point, index) => (
-            <div className="grid grid-cols-[auto_1fr] gap-3 rounded-2xl border border-white/[.06] bg-black/20 p-4" key={`${label}-${index}`}>
-              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-violet-300 shadow-[0_0_18px_rgba(196,181,253,.7)]" />
-              <p className="text-sm leading-7 text-white/55">{point}</p>
-            </div>
-          ))}
-        </div>
-      ) : null}
+    <article className="about-signal-card group rounded-[2rem] p-6 md:p-7">
+      <div className="flex items-center justify-between">
+        <span className="grid h-12 w-12 place-items-center rounded-2xl border border-violet-200/15 bg-violet-400/10 text-violet-100">
+          <Icon size={18} />
+        </span>
+        <span className="text-[10px] font-semibold tracking-[.22em] text-white/28">LIVE</span>
+      </div>
+      <p className="mt-8 text-[10px] font-semibold tracking-[.28em] text-violet-200/75">{label}</p>
+      <h2 className="mt-3 text-2xl font-semibold tracking-[-.045em] text-white md:text-3xl">{title}</h2>
+      <p className="mt-4 text-sm leading-7 text-white/48">{copy}</p>
     </article>
+  );
+}
+
+function Principle({ index, title, copy }: { index: string; title: string; copy: string }) {
+  return (
+    <div className="about-principle rounded-[1.45rem] p-5">
+      <p className="text-[10px] font-semibold tracking-[.2em] text-fuchsia-200/70">{index}</p>
+      <h3 className="mt-5 text-lg font-semibold tracking-[-.03em] text-white">{title}</h3>
+      <p className="mt-3 text-sm leading-6 text-white/42">{copy}</p>
+    </div>
   );
 }
 
 export default async function About() {
   const info = await getClubInfo();
   const history = Array.isArray(info.history) ? info.history : [];
-  const aboutBlocks = splitText(info.aboutCopy);
+  const heroCopy = precise(
+    info.aboutCopy,
+    "Tech Tatva is a student-led technical club built for events, projects, collaboration, and real execution.",
+    2
+  );
+  const vision = precise(
+    info.vision,
+    "A focused student community where ideas move from curiosity to working outcomes."
+  );
+  const mission = precise(
+    info.mission,
+    "Create practical learning spaces through events, teams, workshops, and disciplined execution."
+  );
+  const operatingPoints = bullets(info.mission, [
+    "Run clean technical events with measurable participation.",
+    "Build team ownership across design, operations, media, and technology.",
+    "Turn student energy into documented, repeatable club systems."
+  ]);
+  const timeline = history.length ? history.slice(0, 4) : [
+    { year: "01", text: "Admin-published milestones will appear here when the club is ready to make them public." },
+    { year: "02", text: "Until then, the page stays intentional instead of inventing legacy claims." }
+  ];
 
   return (
     <PublicShell>
-      <section className="relative mx-auto max-w-7xl px-6 pb-28 pt-36 md:pt-44">
-        <div className="pointer-events-none absolute left-1/2 top-20 h-72 w-72 -translate-x-1/2 rounded-full bg-violet-500/15 blur-[120px]" />
-        <div className="pointer-events-none absolute right-0 top-80 h-80 w-80 rounded-full bg-fuchsia-500/10 blur-[140px]" />
+      <section className="about-stage relative overflow-hidden px-6 pb-24 pt-40 md:pt-48">
+        <div className="absolute inset-0 grid-bg opacity-[.12]" />
+        <div className="about-orb about-orb-one" />
+        <div className="about-orb about-orb-two" />
 
-        <div className="relative mx-auto max-w-4xl text-center">
-          <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200/75">OUR STORY</p>
-          <h1 className="gradient-text mt-6 text-5xl font-medium leading-[.96] tracking-[-.065em] md:text-7xl lg:text-8xl">
-            {info.aboutTitle || "About Tech Tatva"}
-          </h1>
-          <div className="mx-auto mt-7 grid max-w-2xl gap-3 text-sm leading-7 text-white/50 md:text-base md:leading-8">
-            {aboutBlocks.slice(0, 3).map((block, index) => (
-              <p key={`about-${index}`}>{block}</p>
-            ))}
-          </div>
-        </div>
+        <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_.78fr] lg:items-center">
+          <Reveal>
+            <div>
+              <p className="inline-flex rounded-full border border-violet-200/15 bg-white/[.035] px-4 py-2 text-[10px] font-semibold tracking-[.28em] text-violet-100/80">
+                ABOUT TECH TATVA
+              </p>
+              <h1 className="mt-7 max-w-5xl text-6xl font-semibold leading-[.88] tracking-[-.085em] text-white md:text-8xl lg:text-[112px]">
+                Built for students who execute.
+              </h1>
+              <p className="mt-8 max-w-2xl text-base leading-8 text-white/52 md:text-lg md:leading-9">
+                {heroCopy}
+              </p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link href="/events" className="action-pill inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5">
+                  Explore events <ArrowUpRight size={15} />
+                </Link>
+                <Link href="/teams" className="ghost-pill inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm transition hover:-translate-y-0.5">
+                  See teams <Radar size={15} />
+                </Link>
+              </div>
+            </div>
+          </Reveal>
 
-        <div className="relative mt-16 grid gap-5 xl:grid-cols-2">
-          <StoryCard label="VISION" text={info.vision} />
-          <StoryCard label="MISSION" text={info.mission} />
-        </div>
-
-        <div className="relative mt-20 grid gap-8 lg:grid-cols-[.72fr_1fr] lg:items-start">
-          <div className="lg:sticky lg:top-28">
-            <p className="text-[10px] font-semibold tracking-[.3em] text-violet-200/70">LEGACY</p>
-            <h2 className="mt-4 max-w-sm text-4xl font-medium tracking-[-.045em] text-white/90 md:text-5xl">
-              A quieter timeline, built from real updates.
-            </h2>
-            <p className="mt-5 max-w-sm text-sm leading-7 text-white/42">
-              Add milestones from the portal when you want them public. Until then, this page stays clean instead of inventing filler.
-            </p>
-          </div>
-
-          {history.length ? (
-            <div className="rounded-[2rem] border border-white/[.08] bg-white/[.025] p-3 backdrop-blur-xl">
-              {history.map((item: any) => (
-                <div className="grid gap-4 rounded-[1.4rem] border border-transparent px-5 py-5 transition hover:border-white/[.08] hover:bg-white/[.035] md:grid-cols-[100px_1fr]" key={`${item.year}-${item.text}`}>
-                  <p className="text-xs font-semibold tracking-[.18em] text-violet-200/75">{item.year}</p>
-                  <p className="text-sm leading-7 text-white/55">{item.text}</p>
+          <Reveal delay={0.12}>
+            <div className="about-console rounded-[2.4rem] p-5">
+              <div className="about-radar mx-auto grid h-72 w-72 place-items-center rounded-full md:h-96 md:w-96">
+                <div className="about-radar-line" />
+                <div className="grid h-28 w-28 place-items-center rounded-[2rem] border border-white/10 bg-black/35 text-violet-100 shadow-[0_0_70px_rgba(168,85,247,.22)]">
+                  <CircuitBoard size={42} />
                 </div>
+              </div>
+              <div className="mt-5 grid grid-cols-3 gap-3">
+                {["LEARN", "BUILD", "LEAD"].map((item) => (
+                  <div className="rounded-2xl border border-white/[.07] bg-white/[.035] px-4 py-4 text-center" key={item}>
+                    <p className="text-[10px] font-semibold tracking-[.18em] text-white/46">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-10">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <Reveal>
+            <SignalCard icon={Compass} label="VISION" title="Direction before decoration." copy={vision} />
+          </Reveal>
+          <Reveal delay={0.08}>
+            <SignalCard icon={Target} label="MISSION" title="Operate with clarity." copy={mission} />
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-24">
+        <Reveal>
+          <div className="about-band rounded-[2.2rem] p-7 md:p-10">
+            <div className="grid gap-10 lg:grid-cols-[.75fr_1fr] lg:items-end">
+              <div>
+                <p className="text-[10px] font-semibold tracking-[.3em] text-violet-200/75">OPERATING PRINCIPLES</p>
+                <h2 className="mt-5 text-4xl font-semibold leading-[.95] tracking-[-.06em] text-white md:text-6xl">
+                  Precise work. Public proof.
+                </h2>
+              </div>
+              <p className="max-w-2xl text-sm leading-7 text-white/45 md:text-base md:leading-8">
+                The club should feel fast, organized, and useful. Every event, team, and report should reduce confusion and help students move.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {operatingPoints.map((point, index) => (
+                <Principle key={point} index={`0${index + 1}`} title={["Make it real", "Keep it clean", "Scale the system"][index] || "Move with intent"} copy={point} />
               ))}
             </div>
-          ) : (
-            <div className="rounded-[2rem] border border-white/[.08] bg-white/[.025] p-8 text-sm leading-7 text-white/45 backdrop-blur-xl">
-              Timeline entries are not added yet.
+          </div>
+        </Reveal>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 pb-32">
+        <div className="grid gap-10 lg:grid-cols-[.55fr_1fr]">
+          <Reveal>
+            <div className="lg:sticky lg:top-32">
+              <p className="text-[10px] font-semibold tracking-[.3em] text-fuchsia-200/75">LEGACY SIGNAL</p>
+              <h2 className="mt-5 max-w-sm text-4xl font-semibold leading-[.98] tracking-[-.055em] text-white md:text-5xl">
+                Milestones, without the noise.
+              </h2>
+              <p className="mt-5 max-w-md text-sm leading-7 text-white/42">
+                Public history appears only when the portal has real entries. Clean pages beat fake filler.
+              </p>
             </div>
-          )}
+          </Reveal>
+          <div className="relative">
+            <div className="absolute left-5 top-4 h-[calc(100%-2rem)] w-px bg-gradient-to-b from-violet-300/70 via-fuchsia-300/25 to-transparent" />
+            <div className="grid gap-4">
+              {timeline.map((item: any, index: number) => (
+                <Reveal key={`${item.year}-${item.text}`} delay={index * 0.05}>
+                  <div className="about-timeline-card relative ml-12 rounded-[1.6rem] p-5">
+                    <span className="absolute -left-[3.25rem] top-6 grid h-10 w-10 place-items-center rounded-full border border-violet-200/30 bg-[#090711] text-[10px] font-semibold text-violet-100 shadow-[0_0_28px_rgba(168,85,247,.22)]">
+                      {item.year}
+                    </span>
+                    <p className="text-sm leading-7 text-white/58">{item.text}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 pb-28">
+        <Reveal>
+          <div className="aurora-shell rounded-[2.2rem] px-7 py-12 md:px-12">
+            <Sparkles className="absolute right-8 top-8 h-20 w-20 text-white/[.04]" />
+            <p className="text-[10px] font-semibold tracking-[.3em] text-violet-200/70">THE CLUB LAYER</p>
+            <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[.98] tracking-[-.055em] text-white md:text-6xl">
+              Events, teams, attendance, certificates, and reports in one living system.
+            </h2>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/events" className="action-pill inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold">
+                Enter events <Zap size={15} />
+              </Link>
+              <Link href="/contact" className="ghost-pill inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm">
+                Contact the club <Layers3 size={15} />
+              </Link>
+            </div>
+          </div>
+        </Reveal>
       </section>
     </PublicShell>
   );
