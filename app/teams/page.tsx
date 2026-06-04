@@ -109,7 +109,7 @@ export default async function TeamsPage() {
             ORGANIZATIONAL STRUCTURE
           </p>
           <h1 className="gradient-text mt-5 text-4xl font-semibold tracking-[-.055em] md:text-6xl">
-            Tech Tatva Society Network
+            Tech Tatva Club Network
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-white/50">
             A public hierarchy generated from the teams, leads, co-leads, and members you maintain inside the portal.
@@ -122,20 +122,22 @@ export default async function TeamsPage() {
           <div className="pointer-events-none absolute right-8 top-10 h-24 w-48 rounded-2xl border border-fuchsia-300/10" />
 
           <div className="relative">
-            <PersonNode label="1. Secretary" name={info.secretaryName} sub={secretarySub} photo={info.secretaryPhoto} />
+            <PersonNode label="1. Faculty Champion" name={info.facultyChampionName} sub={info.facultyChampionEmail || "Faculty guidance and club oversight"} photo={info.facultyChampionPhoto} />
+            <div className="mx-auto h-8 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
+            <PersonNode label="2. Core Operations" name={info.secretaryName} sub={secretarySub} photo={info.secretaryPhoto} />
             <div className="mx-auto h-12 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
             <div className="mx-auto hidden h-px max-w-4xl bg-gradient-to-r from-cyan-300/0 via-cyan-300/50 to-fuchsia-300/50 md:block" />
 
             <div className="mt-6 grid gap-8 xl:grid-cols-2">
               <TeamLane
-                title="2. Joint Secretary (Technical & Operations)"
+                title="3. Joint Secretary (Technical & Operations)"
                 subtitle={technicalLead}
                 teams={technical}
                 palette={technicalColors}
                 tone="cyan"
               />
               <TeamLane
-                title="3. Joint Secretary (Media & Creative)"
+                title="4. Joint Secretary (Media & Creative)"
                 subtitle={creativeLead}
                 teams={creative}
                 palette={creativeColors}
