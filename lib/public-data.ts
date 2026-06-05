@@ -155,15 +155,29 @@ export async function getPublicTeams(): Promise<PublicTeam[]> {
     .sort({ order: 1, name: 1 })
     .populate("lead", "name")
     .populate("coLeads", "name")
+    .populate("members", "name memberType status")
     .lean();
-  const members = await User.find({ team: { $in: teams.map((team) => team._id) }, memberType: "club_member", status: "active" })
+  const teamIds = teams.map((team) => team._id);
+  const members = await User.find({ $or: [{ teams: { $in: teamIds } }, { team: { $in: teamIds } }], memberType: "club_member", status: "active" })
     .sort({ name: 1 })
-    .select("name team")
+    .select("name team teams")
     .lean();
-  const memberMap = new Map<string, string[]>();
+  const memberMap = new Map<string, Set<string>>();
+  const addMember = (teamId: any, name?: string) => {
+    if (!teamId || !name) return;
+    const key = String(teamId);
+    const current = memberMap.get(key) || new Set<string>();
+    current.add(name);
+    memberMap.set(key, current);
+  };
+  for (const team of teams) {
+    for (const member of ((team as any).members || [])) {
+      if (member?.memberType === "club_member" && member?.status === "active") addMember(team._id, member.name);
+    }
+  }
   for (const member of members) {
-    const key = String(member.team);
-    memberMap.set(key, [...(memberMap.get(key) || []), member.name]);
+    const assignedTeams = (member.teams && member.teams.length) ? member.teams : member.team ? [member.team] : [];
+    for (const teamId of assignedTeams) addMember(teamId, member.name);
   }
   return serialize(
     teams.map((team) => ({
@@ -175,8 +189,8 @@ export async function getPublicTeams(): Promise<PublicTeam[]> {
       coLeads: (team.coLeads || []).map((lead: any) => lead.name).filter(Boolean),
       jointSecretaryLane: (team as any).jointSecretaryLane || "technical",
       facultyChampionName: team.facultyChampionName,
-      members: memberMap.get(String(team._id))?.length || 0,
-      memberNames: memberMap.get(String(team._id)) || []
+      members: memberMap.get(String(team._id))?.size || 0,
+      memberNames: Array.from(memberMap.get(String(team._id)) || [])
     }))
   );
 }
@@ -334,7 +348,7 @@ export async function getAdminDashboardData() {
     generatedDocuments,
     aiConversations
   ] = await Promise.all([
-    User.find(clubMemberQuery).sort({ createdAt: -1 }).limit(300).populate("role", "name slug").populate("team", "name").lean(),
+    User.find(clubMemberQuery).sort({ createdAt: -1 }).limit(300).populate("role", "name slug").populate("team", "name").populate("teams", "name").lean(),
     Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").populate("coLeads", "name").lean(),
     Event.find({}).sort({ startAt: -1 }).limit(200).populate("team", "name").populate("winnerFirst", "name uid email program semester").populate("winnerSecond", "name uid email program semester").populate("winnerThird", "name uid email program semester").lean(),
     Task.find({}).sort({ dueAt: 1 }).limit(200).populate("team", "name").lean(),
