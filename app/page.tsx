@@ -10,6 +10,14 @@ export const dynamic = "force-dynamic";
 
 const SectionTitle = ({ eyebrow, title, copy }: { eyebrow: string; title: string; copy?: string }) => <div className="mb-10 max-w-2xl"><p className="mb-4 text-[10px] font-semibold tracking-[.3em] text-violet-300">{eyebrow}</p><h2 className="text-3xl font-medium tracking-tight md:text-5xl">{title}</h2>{copy&&<p className="mt-4 text-sm leading-7 text-white/45">{copy}</p>}</div>;
 const EmptyState = ({ title, copy, href, action }: { title: string; copy: string; href?: string; action?: string }) => <div className="premium-card rounded-[1.6rem] p-8 text-center"><p className="text-sm text-white/75">{title}</p><p className="mx-auto mt-3 max-w-md text-xs leading-6 text-white/42">{copy}</p>{href&&action?<Link className="ghost-pill mt-5 inline-flex rounded-full px-5 py-2 text-xs text-violet-100" href={href}>{action}</Link>:null}</div>;
+const mobileQuickLinks = [
+  ["Events", "/events", "Register"],
+  ["Teams", "/teams", "Structure"],
+  ["Hall of Fame", "/hall-of-fame", "Legacy"],
+  ["Gallery", "/gallery", "Albums"],
+  ["About", "/about", "Story"],
+  ["Contact", "/contact", "Reach out"]
+] as const;
 
 export default async function Home() {
   const { clubInfo, events, teams, achievements, sponsors, gallery, stats } = await getPublicHomeData();
@@ -44,6 +52,17 @@ export default async function Home() {
               <Link href="/teams" className="ghost-pill flex min-h-14 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm transition hover:-translate-y-0.5 hover:border-violet-200/35">
                 Explore teams <ChevronRight size={16}/>
               </Link>
+            </div>
+            <div className="mt-7 grid grid-cols-2 gap-3 md:hidden">
+              {mobileQuickLinks.map(([label, href, eyebrow]) => (
+                <Link href={href} key={href} className="group rounded-3xl border border-white/[.08] bg-white/[.045] p-4 shadow-[inset_0_1px_rgba(255,255,255,.05)] backdrop-blur-xl transition active:scale-[.98]">
+                  <span className="text-[9px] font-semibold uppercase tracking-[.2em] text-violet-200/62">{eyebrow}</span>
+                  <span className="mt-3 flex items-center justify-between gap-3 text-lg font-semibold tracking-[-.03em] text-white">
+                    {label}
+                    <ArrowUpRight size={16} className="text-white/42 transition group-active:translate-x-0.5 group-active:-translate-y-0.5"/>
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
         </Reveal>
