@@ -301,16 +301,21 @@ body:before {
   box-shadow: inset 0 1px rgba(255,255,255,.06);
 }
 .mobile-menu {
-  transition: opacity .25s ease;
+  animation: mobileMenuIn .22s ease both;
 }
 .mobile-menu-link {
-  transform: translateX(0);
+  animation: mobileMenuLinkIn .22s ease both;
   box-shadow: inset 0 1px rgba(255,255,255,.05);
 }
+@keyframes mobileMenuIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes mobileMenuLinkIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 @media (max-width: 767px) {
-  .mobile-menu.pointer-events-none .mobile-menu-link {
-    transform: translateX(18px);
-  }
   .premium-card,
   .aurora-shell,
   .glass {
