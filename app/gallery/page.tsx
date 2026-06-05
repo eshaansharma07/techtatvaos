@@ -18,7 +18,7 @@ export default async function Gallery() {
         </div>
 
         {albums.length ? (
-          <div className="mt-6 grid auto-rows-[300px] gap-4 md:mt-10 md:auto-rows-[240px] md:grid-cols-3">
+          <div className="mt-6 grid auto-rows-[380px] gap-4 md:mt-10 md:auto-rows-[320px] md:grid-cols-3">
             {albums.map((album: any, index: number) => {
               const asset = album.assets?.[0];
               return (
@@ -28,15 +28,19 @@ export default async function Gallery() {
                   className={`premium-card group relative overflow-hidden rounded-[1.6rem] bg-gradient-to-br ${["from-violet-800 to-fuchsia-700", "from-zinc-800 to-purple-800", "from-rose-800 to-orange-700"][index % 3]} ${index === 0 || index === 4 ? "md:row-span-2" : ""}`}
                 >
                   {asset?.url ? asset.kind === "video" ? (
-                    <video src={asset.url} muted playsInline className="absolute inset-0 h-full w-full object-cover opacity-75 transition duration-700 group-hover:scale-105 group-hover:opacity-95" />
+                    <video src={asset.url} muted playsInline className="absolute inset-x-0 top-0 h-[68%] w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
                   ) : (
-                    <img src={asset.url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-75 transition duration-700 group-hover:scale-105 group-hover:opacity-95" />
+                    <img src={asset.url} alt="" loading="lazy" className="absolute inset-x-0 top-0 h-[68%] w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
                   ) : null}
                   <div className="absolute inset-0 grid-bg opacity-25" />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent p-5">
-                    <p className="text-lg font-semibold">{album.title}</p>
-                    <p className="mt-1 text-xs text-violet-100/70">{album.event || "Club gallery"}</p>
-                    <p className="mt-3 text-[10px] uppercase tracking-[.22em] text-white/42">{album.assetCount || album.assets?.length || 0} media items / Album {String(index + 1).padStart(2, "0")}</p>
+                  <div className="absolute inset-x-0 bottom-0 min-h-[34%] border-t border-white/10 bg-black/88 p-5 backdrop-blur-xl">
+                    <p className="text-[10px] font-semibold uppercase tracking-[.24em] text-violet-100/60">Album title</p>
+                    <p className="mt-2 text-2xl font-semibold leading-tight tracking-[-.04em] text-white">{album.title}</p>
+                    <p className="mt-2 text-xs text-violet-100/75">{album.event || "Club gallery"}</p>
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-[10px] uppercase tracking-[.22em] text-white/42">{album.assetCount || album.assets?.length || 0} media items / Album {String(index + 1).padStart(2, "0")}</p>
+                      <span className="rounded-full border border-violet-200/20 bg-violet-500/12 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.18em] text-violet-100">Tap for more details</span>
+                    </div>
                   </div>
                   <span className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[10px] tracking-wider text-white/70 backdrop-blur">OPEN ALBUM</span>
                 </Link>
