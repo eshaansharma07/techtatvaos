@@ -21,27 +21,27 @@ export default async function Home() {
     [String(achievements.length), "Featured achievements"]
   ];
   return <PublicShell>
-    <section className="relative min-h-[940px] overflow-hidden pt-32 md:pt-20">
-      <Image src="/tech-tatva-hero.png" alt="" fill priority className="object-cover object-center opacity-60"/>
+    <section className="relative min-h-[820px] overflow-hidden pt-20 md:min-h-[940px] md:pt-20">
+      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-center opacity-55 md:opacity-60"/>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(217,70,239,.22),transparent_34%),radial-gradient(circle_at_18%_35%,rgba(124,58,237,.26),transparent_32%),linear-gradient(180deg,rgba(5,4,10,.32),#060509_88%)]"/>
       <div className="absolute inset-0 grid-bg opacity-[.16]"/>
       <div className="absolute left-1/2 top-28 h-72 w-72 -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-[100px]"/>
 
-      <div className="relative mx-auto grid min-h-[790px] max-w-7xl items-center gap-10 px-6 py-12 md:py-16 lg:grid-cols-[1.05fr_.75fr]">
+      <div className="relative mx-auto grid min-h-[700px] max-w-7xl items-center gap-8 px-5 py-10 md:min-h-[790px] md:px-6 md:py-16 lg:grid-cols-[1.05fr_.75fr]">
         <Reveal>
           <div>
             <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200/80">TECH TATVA</p>
-            <h1 className="mt-6 max-w-5xl text-6xl font-semibold leading-[.9] tracking-[-.08em] text-white md:text-8xl lg:text-[118px]">
+            <h1 className="mt-5 max-w-5xl text-[4.05rem] font-semibold leading-[.88] tracking-[-.08em] text-white md:mt-6 md:text-8xl lg:text-[118px]">
               Enter the next room.
             </h1>
-            <p className="mt-8 max-w-2xl text-base leading-8 text-white/58">
+            <p className="mt-6 max-w-2xl text-[15px] leading-7 text-white/62 md:mt-8 md:text-base md:leading-8 md:text-white/58">
               Discover real club events, register as a candidate, explore teams, and follow the work Tech Tatva publishes for students.
             </p>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Link href="/events" className="action-pill group flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5">
+            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap md:mt-10">
+              <Link href="/events" className="action-pill group flex min-h-14 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5">
                 Browse registrations <ArrowRight size={16} className="transition group-hover:translate-x-0.5"/>
               </Link>
-              <Link href="/teams" className="ghost-pill flex items-center gap-2 rounded-full px-6 py-3 text-sm transition hover:-translate-y-0.5 hover:border-violet-200/35">
+              <Link href="/teams" className="ghost-pill flex min-h-14 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm transition hover:-translate-y-0.5 hover:border-violet-200/35">
                 Explore teams <ChevronRight size={16}/>
               </Link>
             </div>
@@ -49,7 +49,7 @@ export default async function Home() {
         </Reveal>
 
         <Reveal delay={.12}>
-          <div className="relative">
+          <div className="relative hidden lg:block">
             <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-violet-500/18 via-fuchsia-500/10 to-transparent blur-2xl"/>
             <div className="aurora-shell relative rounded-[2rem] p-5">
               <div className="rounded-[1.5rem] border border-white/[.08] bg-white/[.035] p-5">
@@ -85,11 +85,11 @@ export default async function Home() {
         </Reveal>
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl grid-cols-2 gap-3 px-6 md:grid-cols-4">{statRows.map(([n,l])=><div key={l} className="premium-card rounded-2xl px-6 py-6 transition duration-300 hover:-translate-y-1 hover:border-violet-200/25"><p className="text-3xl font-semibold tracking-[-.04em]">{n}</p><p className="mt-2 text-[10px] tracking-[.16em] text-white/35">{l.toUpperCase()}</p></div>)}</div>
+      <div className="relative mx-auto grid max-w-7xl grid-cols-2 gap-3 px-5 md:grid-cols-4 md:px-6">{statRows.map(([n,l])=><div key={l} className="premium-card rounded-2xl px-5 py-5 transition duration-300 hover:-translate-y-1 hover:border-violet-200/25 md:px-6 md:py-6"><p className="text-2xl font-semibold tracking-[-.04em] md:text-3xl">{n}</p><p className="mt-2 text-[9px] tracking-[.14em] text-white/35 md:text-[10px] md:tracking-[.16em]">{l.toUpperCase()}</p></div>)}</div>
     </section>
-    <section className="mx-auto max-w-7xl px-6 py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="ghost-pill mt-7 inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
-    <section className="border-y border-white/[.06] bg-white/[.018]"><div className="mx-auto grid max-w-7xl gap-14 px-6 py-28 lg:grid-cols-[.9fr_1.1fr]"><Reveal><SectionTitle eyebrow="ONE SYSTEM / MANY DISCIPLINES" title="Teams building the future." copy="Explore the public team structure and the disciplines behind club work."/><Link className="ghost-pill inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm" href="/teams">Explore the network <ArrowRight size={15}/></Link></Reveal><div className="grid gap-4 sm:grid-cols-2">{teams.length?teams.slice(0,6).map((team,i)=><Reveal key={team.id} delay={i*.04}><div className="premium-card group rounded-2xl p-5 transition duration-300 hover:-translate-y-1 hover:border-violet-300/25"><div className="flex justify-between"><Orbit size={18} className="text-violet-300"/><span className="rounded-full bg-white/[.045] px-3 py-1 text-xs text-white/35">{team.members}</span></div><h3 className="mt-7 text-base font-semibold">{team.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{team.description || "Team details coming soon."}</p></div></Reveal>):<EmptyState title="Team information is coming soon." copy="The public team structure has not been published yet."/>}</div></div></section>
+    <section className="mx-auto max-w-7xl px-5 py-20 md:px-6 md:py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="ghost-pill mt-7 inline-flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
+    <section className="border-y border-white/[.06] bg-white/[.018]"><div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 md:px-6 md:py-28 lg:grid-cols-[.9fr_1.1fr] lg:gap-14"><Reveal><SectionTitle eyebrow="ONE SYSTEM / MANY DISCIPLINES" title="Teams building the future." copy="Explore the public team structure and the disciplines behind club work."/><Link className="ghost-pill inline-flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm" href="/teams">Explore the network <ArrowRight size={15}/></Link></Reveal><div className="grid gap-4 sm:grid-cols-2">{teams.length?teams.slice(0,6).map((team,i)=><Reveal key={team.id} delay={i*.04}><div className="premium-card group rounded-2xl p-5 transition duration-300 hover:-translate-y-1 hover:border-violet-300/25"><div className="flex justify-between"><Orbit size={18} className="text-violet-300"/><span className="rounded-full bg-white/[.045] px-3 py-1 text-xs text-white/35">{team.members}</span></div><h3 className="mt-7 text-base font-semibold">{team.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{team.description || "Team details coming soon."}</p></div></Reveal>):<EmptyState title="Team information is coming soon." copy="The public team structure has not been published yet."/>}</div></div></section>
     {achievements.length || sponsors.length || gallery.length ? <section className="mx-auto max-w-7xl px-6 py-20"><div className="grid gap-4 md:grid-cols-3">{achievements.slice(0,3).map((item:any)=><div className="glass rounded-2xl p-6" key={item._id}><p className="text-[10px] tracking-[.2em] text-violet-300">{item.kind || "ACHIEVEMENT"}</p><p className="mt-4 text-lg">{item.title}</p><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p></div>)}</div></section> : null}
-    <section className="mx-auto max-w-7xl px-6 py-28"><div className="aurora-shell rounded-3xl px-7 py-16 md:px-16"><Zap className="absolute -right-6 -top-8 h-52 w-52 text-white/[.035]"/><p className="text-[10px] tracking-[.3em] text-violet-200">ACCESS THE NETWORK</p><h2 className="mt-6 max-w-2xl text-4xl font-medium tracking-tight md:text-6xl">The future needs people who show up early.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-white/50">Find your team, enter the room, and start making something that matters.</p><Link href="/contact" className="action-pill mt-8 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold">Connect with us <ArrowUpRight size={15}/></Link></div></section>
+    <section className="mx-auto max-w-7xl px-5 py-20 md:px-6 md:py-28"><div className="aurora-shell rounded-3xl px-6 py-12 md:px-16 md:py-16"><Zap className="absolute -right-6 -top-8 h-52 w-52 text-white/[.035]"/><p className="text-[10px] tracking-[.3em] text-violet-200">ACCESS THE NETWORK</p><h2 className="mt-6 max-w-2xl text-4xl font-medium tracking-tight md:text-6xl">The future needs people who show up early.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-white/50">Find your team, enter the room, and start making something that matters.</p><Link href="/contact" className="action-pill mt-8 inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold">Connect with us <ArrowUpRight size={15}/></Link></div></section>
   </PublicShell>;
 }

@@ -1,5 +1,6 @@
 import { Crown, Network, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
+import { MobileTeamAccordion } from "@/components/mobile-team-accordion";
 import { getClubInfo, getPublicTeams, type PublicTeam } from "@/lib/public-data";
 
 export const dynamic = "force-dynamic";
@@ -136,21 +137,25 @@ export default async function TeamsPage() {
 
   return (
     <PublicShell>
-      <section className="relative mx-auto max-w-7xl px-6 pb-28 pt-36 md:pt-44">
+      <section className="relative mx-auto max-w-7xl px-5 pb-20 pt-28 md:px-6 md:pb-28 md:pt-44">
         <div className="pointer-events-none absolute left-10 top-36 h-80 w-80 rounded-full bg-cyan-500/10 blur-[140px]" />
         <div className="pointer-events-none absolute right-0 top-72 h-96 w-96 rounded-full bg-fuchsia-500/10 blur-[150px]" />
 
-        <div className="aurora-shell relative rounded-[2.3rem] px-6 py-10 text-center md:px-10">
+        <div className="aurora-shell relative rounded-[2rem] px-5 py-9 text-center md:rounded-[2.3rem] md:px-10 md:py-10">
           <p className="flex items-center justify-center gap-2 text-[10px] font-semibold tracking-[.34em] text-violet-200/75">
             <Sparkles size={13} />
             ORGANIZATIONAL STRUCTURE
           </p>
-          <h1 className="gradient-text mt-5 text-4xl font-semibold tracking-[-.055em] md:text-6xl">
+          <h1 className="gradient-text mt-5 text-[3.25rem] font-semibold leading-[.94] tracking-[-.055em] md:text-6xl">
             Tech Tatva Club Network
           </h1>
         </div>
 
-        <div className="relative mt-10 overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/72 p-5 shadow-2xl shadow-black/30 md:p-8">
+        <div className="mt-6 md:hidden">
+          <MobileTeamAccordion technical={technical} creative={creative} />
+        </div>
+
+        <div className="relative mt-10 hidden overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/72 p-5 shadow-2xl shadow-black/30 md:block md:p-8">
           <div className="absolute inset-0 grid-bg opacity-20" />
           <div className="pointer-events-none absolute left-8 top-8 h-28 w-40 rounded-full border border-cyan-300/10" />
           <div className="pointer-events-none absolute right-8 top-10 h-24 w-48 rounded-2xl border border-fuchsia-300/10" />

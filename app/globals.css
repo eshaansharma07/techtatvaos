@@ -300,6 +300,47 @@ body:before {
   background: linear-gradient(135deg, rgba(139,92,246,.12), rgba(236,72,153,.055));
   box-shadow: inset 0 1px rgba(255,255,255,.06);
 }
+.mobile-menu {
+  transition: opacity .25s ease;
+}
+.mobile-menu-link {
+  transform: translateX(0);
+  box-shadow: inset 0 1px rgba(255,255,255,.05);
+}
+@media (max-width: 767px) {
+  .mobile-menu.pointer-events-none .mobile-menu-link {
+    transform: translateX(18px);
+  }
+  .premium-card,
+  .aurora-shell,
+  .glass {
+    backdrop-filter: blur(16px);
+  }
+  input,
+  textarea,
+  select,
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+  .portal-root {
+    background:
+      radial-gradient(circle at 18% 8%, rgba(139,92,246,.24), transparent 34%),
+      radial-gradient(circle at 86% 18%, rgba(236,72,153,.14), transparent 32%),
+      linear-gradient(135deg, #05040a 0%, #0b0912 42%, #050408 100%);
+  }
+  .portal-quick-grid {
+    grid-template-columns: 1fr;
+  }
+  .portal-chart {
+    overflow: hidden;
+  }
+}
 
 .about-stage {
   min-height: 820px;
