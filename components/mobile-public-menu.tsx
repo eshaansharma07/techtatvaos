@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 
 const links = [
@@ -17,6 +17,13 @@ const links = [
 export function MobilePublicMenu() {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   return (
     <>
       <button
@@ -28,9 +35,10 @@ export function MobilePublicMenu() {
         <Menu size={20} />
       </button>
 
-      <div className={`mobile-menu fixed inset-0 z-[90] md:hidden ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}>
-        <div className="absolute inset-0 bg-[#05040a]/88 backdrop-blur-2xl" onClick={() => setOpen(false)} />
-        <div className={`relative ml-auto flex h-full w-full max-w-sm flex-col border-l border-white/10 bg-gradient-to-b from-white/[.09] via-[#100b18]/95 to-black/95 p-6 shadow-2xl shadow-black/50 transition duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
+      <div className={`mobile-menu fixed inset-0 z-[999] overflow-y-auto bg-[#05040a] md:hidden ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(168,85,247,.34),transparent_34%),radial-gradient(circle_at_80%_30%,rgba(236,72,153,.2),transparent_32%),linear-gradient(180deg,#05040a,#090612_58%,#030207)]" />
+        <div className="pointer-events-none absolute inset-0 grid-bg opacity-[.08]" />
+        <div className={`relative flex min-h-dvh w-full flex-col p-6 pt-[max(1.5rem,env(safe-area-inset-top))] shadow-2xl shadow-black/50 transition duration-300 ${open ? "translate-y-0" : "translate-y-4"}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[.32em] text-violet-200/70">Tech Tatva</p>
@@ -46,13 +54,13 @@ export function MobilePublicMenu() {
             </button>
           </div>
 
-          <nav className="mt-12 grid gap-3">
+          <nav className="mt-10 grid gap-3">
             {links.map(([label, href], index) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setOpen(false)}
-                className="mobile-menu-link group flex min-h-16 items-center justify-between rounded-3xl border border-white/[.08] bg-white/[.045] px-5 text-lg font-semibold tracking-[-.02em] text-white transition active:scale-[.98]"
+                className="mobile-menu-link group flex min-h-[4.35rem] items-center justify-between rounded-3xl border border-white/[.1] bg-white/[.065] px-5 text-lg font-semibold tracking-[-.02em] text-white shadow-[inset_0_1px_rgba(255,255,255,.06)] transition active:scale-[.98]"
                 style={{ transitionDelay: open ? `${index * 28}ms` : "0ms" }}
               >
                 <span>{label}</span>
@@ -61,7 +69,7 @@ export function MobilePublicMenu() {
             ))}
           </nav>
 
-          <div className="mt-auto rounded-3xl border border-violet-200/15 bg-violet-500/10 p-5">
+          <div className="mt-8 rounded-3xl border border-violet-200/18 bg-violet-500/12 p-5">
             <p className="text-sm leading-6 text-white/68">Fast access for events, teams, registrations, and contact from one mobile-first panel.</p>
           </div>
         </div>

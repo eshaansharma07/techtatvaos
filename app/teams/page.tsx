@@ -152,7 +152,7 @@ export default async function TeamsPage() {
         </div>
 
         <div className="mt-6 md:hidden">
-          <MobileTeamAccordion technical={technical} creative={creative} />
+          <MobileTeamAccordion technical={technical} creative={creative} info={info} />
         </div>
 
         <div className="relative mt-10 hidden overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/72 p-5 shadow-2xl shadow-black/30 md:block md:p-8">
