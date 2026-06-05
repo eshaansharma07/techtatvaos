@@ -44,5 +44,5 @@ export async function markAttendanceStatus(input: {
 
   return Attendance.findById(record._id)
     .populate("event", "title")
-    .populate("user", "name email uid registrationNumber program semester");
+    .populate("user", "name email uid program semester");
 }

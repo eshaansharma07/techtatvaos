@@ -26,7 +26,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
           name: formData.get(`member_${slot}_name`),
           email: formData.get(`member_${slot}_email`),
           uid: formData.get(`member_${slot}_uid`),
-          registrationNumber: formData.get(`member_${slot}_registrationNumber`),
           program: formData.get(`member_${slot}_program`),
           semester: formData.get(`member_${slot}_semester`)
         };
@@ -52,7 +51,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
     ["name", "Name", "text"],
     ["email", "Email", "email"],
     ["uid", "UID", "text"],
-    ["registrationNumber", "Registration number", "text"],
     ["program", "Program", "text"],
     ["semester", "Semester", "number"]
   ] as const;
@@ -80,7 +78,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
       {fields.map(([name, label, type]) => (
         <label className="block text-[10px] tracking-wider text-white/35" key={name}>
           {label.toUpperCase()}
-          <input name={name} required={name !== "registrationNumber"} type={type} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50" />
+          <input name={name} required type={type} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50" />
         </label>
       ))}
 
@@ -101,7 +99,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                   <p className="text-[10px] tracking-wider text-white/35">MEMBER {slot}</p>
                   <div className="mt-3 grid gap-2">
                     {fields.map(([field, label, type]) => (
-                      <input key={field} name={`member_${slot}_` + field} placeholder={label} required={field !== "registrationNumber"} type={type} className="rounded-lg border border-white/[.07] bg-black/25 px-3 py-2.5 text-xs text-white outline-none placeholder:text-white/25 focus:border-violet-400/50" />
+                      <input key={field} name={`member_${slot}_` + field} placeholder={label} required type={type} className="rounded-lg border border-white/[.07] bg-black/25 px-3 py-2.5 text-xs text-white outline-none placeholder:text-white/25 focus:border-violet-400/50" />
                     ))}
                   </div>
                 </div>

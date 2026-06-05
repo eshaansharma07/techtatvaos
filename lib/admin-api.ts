@@ -61,7 +61,7 @@ function normalizeTeamBody(input: Record<string, any>, create = false) {
 function memberEmail(body: Record<string, any>) {
   const raw = String(body.email || "").trim().toLowerCase();
   if (raw && raw !== "undefined" && raw.includes("@")) return raw;
-  const basis = String(body.uid || body.registrationNumber || body.name || new Types.ObjectId().toString());
+  const basis = String(body.uid || body.name || new Types.ObjectId().toString());
   return `${slugify(basis)}@members.techtatvaos.local`;
 }
 

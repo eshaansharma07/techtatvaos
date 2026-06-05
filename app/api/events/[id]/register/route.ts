@@ -9,7 +9,6 @@ type PublicParticipant = {
   name?: string;
   email?: string;
   uid?: string;
-  registrationNumber?: string;
   program?: string;
   semester?: string | number;
 };
@@ -27,12 +26,10 @@ function isValidParticipant(input: PublicParticipant) {
 async function upsertParticipant(input: PublicParticipant) {
   const email = clean(input.email).toLowerCase();
   const uid = clean(input.uid);
-  const registrationNumber = clean(input.registrationNumber);
   const query = {
     $or: [
       { email },
-      ...(uid ? [{ uid }] : []),
-      ...(registrationNumber ? [{ registrationNumber }] : [])
+      ...(uid ? [{ uid }] : [])
     ]
   };
   const set: Record<string, unknown> = {
@@ -43,7 +40,6 @@ async function upsertParticipant(input: PublicParticipant) {
     semester: semesterOf(input.semester),
     status: "active"
   };
-  if (registrationNumber) set.registrationNumber = registrationNumber;
   return User.findOneAndUpdate(
     query,
     {
@@ -100,7 +96,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         name: member.name,
         email: member.email,
         uid: member.uid,
-        registrationNumber: member.registrationNumber,
         program: member.program,
         semester: member.semester ?? semesterOf(memberInputs[index]?.semester)
       }));
@@ -128,7 +123,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode }, { status: 201 });
   } catch (error: any) {
     if (error?.code === 11000) {
-      return NextResponse.json({ error: "A candidate with this email, UID, or registration number is already registered. Use the same details or update the existing candidate." }, { status: 409 });
+      return NextResponse.json({ error: "A candidate with this email or UID is already registered. Use the same details or update the existing candidate." }, { status: 409 });
     }
     return NextResponse.json({ error: error instanceof Error ? error.message : "Registration failed." }, { status: 500 });
   }

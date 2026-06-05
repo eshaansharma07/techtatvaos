@@ -7,7 +7,6 @@ import { rateLimit } from "@/lib/rate-limit";
 const contactInput=z.object({
   name:z.string().min(2).max(120),
   email:z.string().email(),
-  registrationNumber:z.string().max(80).optional().or(z.literal("")),
   subject:z.string().min(2).max(160),
   message:z.string().min(5).max(4000)
 });
