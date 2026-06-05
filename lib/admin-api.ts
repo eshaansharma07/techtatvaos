@@ -99,6 +99,41 @@ function normalizeEventBody(input: Record<string, any>, create = false) {
   return normalized;
 }
 
+function parseGalleryAssets(value: any) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  try {
+    const parsed = JSON.parse(String(value));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeGalleryBody(input: Record<string, any>) {
+  const body = clean(input);
+  const normalized: Record<string, any> = { ...body };
+  if ("event" in input) normalized.event = refId(input.event) || null;
+  if ("published" in input) normalized.published = input.published === true || input.published === "true";
+  if ("assets" in input) {
+    normalized.assets = parseGalleryAssets(input.assets)
+      .filter((asset: any) => asset?.url)
+      .map((asset: any) => ({
+        url: String(asset.url),
+        publicId: asset.publicId ? String(asset.publicId) : undefined,
+        kind: asset.kind === "video" || asset.resourceType === "video" ? "video" : "image",
+        caption: asset.caption ? String(asset.caption) : ""
+      }));
+  } else if (body.url) {
+    normalized.assets = [{ url: body.url, publicId: body.publicId, kind: body.kind || "image", caption: body.caption }];
+  }
+  delete normalized.url;
+  delete normalized.publicId;
+  delete normalized.kind;
+  delete normalized.caption;
+  return normalized;
+}
+
 async function syncMemberTeam(userId: any, nextTeam?: any, previousTeam?: any) {
   const user = new Types.ObjectId(String(userId));
   const next = nextTeam ? String(nextTeam) : "";
@@ -173,11 +208,7 @@ export async function createResource(resource: AdminResource, input: Record<stri
   if (resource === "sponsors") return Sponsor.create({ ...body, active: body.active !== "false" });
   if (resource === "achievements") return Achievement.create({ ...body, awardedAt: body.awardedAt ? new Date(body.awardedAt) : undefined, featured: body.featured === true || body.featured === "true" });
   if (resource === "gallery") {
-    return Gallery.create({
-      title: body.title,
-      published: body.published !== "false",
-      assets: body.url ? [{ url: body.url, publicId: body.publicId, kind: body.kind || "image", caption: body.caption }] : []
-    });
+    return Gallery.create(normalizeGalleryBody(input));
   }
   if (resource === "hallOfFame") return HallOfFame.create({ ...body, year: body.year ? Number(body.year) : undefined, order: body.order ? Number(body.order) : undefined, active: body.active !== "false" });
   if (resource === "contacts") return ContactMessage.findByIdAndUpdate(body.id, { status: body.status }, { new: true });
@@ -202,7 +233,7 @@ export async function updateResource(resource: AdminResource, id: string, input:
   if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { ...body, publishAt: body.publishAt ? new Date(body.publishAt) : undefined }, { new: true });
   if (resource === "sponsors") return Sponsor.findByIdAndUpdate(id, { ...body, active: body.active !== "false" }, { new: true });
   if (resource === "achievements") return Achievement.findByIdAndUpdate(id, { ...body, awardedAt: body.awardedAt ? new Date(body.awardedAt) : undefined, featured: body.featured === true || body.featured === "true" }, { new: true });
-  if (resource === "gallery") return Gallery.findByIdAndUpdate(id, body.url ? { title: body.title, published: body.published !== "false", assets: [{ url: body.url, publicId: body.publicId, kind: body.kind || "image", caption: body.caption }] } : body, { new: true });
+  if (resource === "gallery") return Gallery.findByIdAndUpdate(id, normalizeGalleryBody(input), { new: true });
   if (resource === "hallOfFame") return HallOfFame.findByIdAndUpdate(id, { ...body, year: body.year ? Number(body.year) : undefined, order: body.order ? Number(body.order) : undefined, active: body.active !== "false" }, { new: true });
   if (resource === "contacts") return ContactMessage.findByIdAndUpdate(id, { status: body.status }, { new: true });
 }

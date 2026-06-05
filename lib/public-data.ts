@@ -19,6 +19,7 @@ import {
   Team,
   User
 } from "@/lib/models";
+import { Types } from "mongoose";
 
 const serialize = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 
@@ -187,8 +188,26 @@ export async function getPublicGallery() {
     id: String(row._id),
     title: row.title,
     event: (row.event as unknown as { title?: string })?.title,
-    assets: row.assets || []
+    assets: row.assets || [],
+    assetCount: row.assets?.length || 0
   })));
+}
+
+export async function getPublicGalleryAlbum(id: string) {
+  await connectDB();
+  if (!Types.ObjectId.isValid(id)) return null;
+  const row = await Gallery.findOne({ _id: id, published: true }).populate("event", "title slug startAt").lean() as any;
+  if (!row) return null;
+  const event = row.event as unknown as { title?: string; slug?: string; startAt?: Date };
+  return serialize({
+    id: String(row._id),
+    title: row.title,
+    event: event?.title,
+    eventSlug: event?.slug,
+    eventDate: event?.startAt?.toISOString(),
+    assets: row.assets || [],
+    assetCount: row.assets?.length || 0
+  });
 }
 
 export async function getHallOfFameData() {
@@ -325,7 +344,7 @@ export async function getAdminDashboardData() {
     EventRegistration.find({}).populate("event", "title participationMode").populate("user", "name email uid registrationNumber program semester").limit(1000).lean(),
     Sponsor.find({}).sort({ name: 1 }).lean(),
     Achievement.find({}).sort({ awardedAt: -1 }).lean(),
-    Gallery.find({}).sort({ createdAt: -1 }).lean(),
+    Gallery.find({}).sort({ createdAt: -1 }).populate("event", "title").lean(),
     HallOfFame.find({}).sort({ category: 1, order: 1, year: -1, name: 1 }).lean(),
     ContactMessage.find({}).sort({ createdAt: -1 }).limit(200).lean(),
     getClubInfo(),
