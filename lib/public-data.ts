@@ -57,7 +57,7 @@ export type PublicTeam = {
 export type HallMember = {
   id: string;
   name: string;
-  category: "secretary" | "president" | "team_lead" | "top_contributor" | "alumni";
+  category: "secretary" | "joint_secretary" | "team_lead" | "top_contributor" | "alumni";
   title?: string;
   subtitle?: string;
   batch?: string;
@@ -208,6 +208,25 @@ export async function getHallOfFameData() {
     image: clubInfo.secretaryPhoto
   }] : [];
 
+  const jointSecretaries: HallMember[] = [
+    clubInfo.jointSecretaryOneName ? {
+      id: "joint-secretary-technical",
+      name: clubInfo.jointSecretaryOneName,
+      category: "joint_secretary" as const,
+      title: "Joint Secretary (Technical & Operations)",
+      subtitle: clubInfo.jointSecretaryOneEmail,
+      image: clubInfo.jointSecretaryOnePhoto
+    } : null,
+    clubInfo.jointSecretaryTwoName ? {
+      id: "joint-secretary-creative",
+      name: clubInfo.jointSecretaryTwoName,
+      category: "joint_secretary" as const,
+      title: "Joint Secretary (Media & Creative)",
+      subtitle: clubInfo.jointSecretaryTwoEmail,
+      image: clubInfo.jointSecretaryTwoPhoto
+    } : null
+  ].filter(Boolean) as HallMember[];
+
   const teamLeads: HallMember[] = teams
     .filter((team: any) => team.lead?.name)
     .map((team: any) => ({
@@ -231,10 +250,10 @@ export async function getHallOfFameData() {
     image: row.image
   }));
 
-  const items = [...secretary, ...manual, ...teamLeads];
+  const items = [...secretary, ...jointSecretaries, ...manual, ...teamLeads];
   return serialize({
     secretary,
-    presidents: items.filter((item) => item.category === "president"),
+    jointSecretaries,
     teamLeads,
     topContributors: items.filter((item) => item.category === "top_contributor"),
     alumni: items.filter((item) => item.category === "alumni")

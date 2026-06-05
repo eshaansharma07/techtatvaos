@@ -1,4 +1,4 @@
-import { Award, Crown, Medal, Sparkles, Star, Trophy, Users } from "lucide-react";
+import { Award, Crown, Medal, Sparkles, Star, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
 import { getHallOfFameData, type HallMember } from "@/lib/public-data";
 
@@ -59,7 +59,7 @@ function EmptyLegacy({ label }: { label: string }) {
   );
 }
 
-function LegacySection({ title, eyebrow, icon: Icon, people, tone }: { title: string; eyebrow: string; icon: typeof Trophy; people: HallMember[]; tone: keyof typeof tones }) {
+function LegacySection({ title, eyebrow, icon: Icon, people, tone }: { title: string; eyebrow: string; icon: typeof Crown; people: HallMember[]; tone: keyof typeof tones }) {
   return (
     <section className="mt-6 rounded-[2rem] border border-white/[.08] bg-white/[.02] p-5 md:mt-8 md:p-7">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -82,7 +82,7 @@ function LegacySection({ title, eyebrow, icon: Icon, people, tone }: { title: st
 
 export default async function HallOfFamePage() {
   const hall = await getHallOfFameData();
-  const total = hall.secretary.length + hall.presidents.length + hall.teamLeads.length + hall.topContributors.length + hall.alumni.length;
+  const total = hall.secretary.length + hall.jointSecretaries.length + hall.teamLeads.length + hall.topContributors.length + hall.alumni.length;
 
   return (
     <PublicShell>
@@ -103,7 +103,7 @@ export default async function HallOfFamePage() {
             A living record of the people who shaped Tech Tatva: office bearers, leads, contributors, and alumni.
           </p>
           <div className="relative mt-7 flex flex-wrap justify-center gap-3">
-            {["Secretary", "Presidents", "Team Leads", "Top Contributors", "Alumni"].map((item) => (
+            {["Secretary", "Joint Secretaries", "Team Leads", "Top Contributors", "Alumni"].map((item) => (
               <span className="ghost-pill rounded-full px-4 py-2 text-[10px] font-semibold tracking-[.14em] text-white/58" key={item}>{item.toUpperCase()}</span>
             ))}
           </div>
@@ -121,7 +121,7 @@ export default async function HallOfFamePage() {
             <p className="mt-4 text-6xl font-semibold tracking-[-.08em] text-white">{total}</p>
             <p className="mt-3 text-sm leading-6 text-white/45">Published records drawn from the portal, team structure, and club settings.</p>
             <div className="mt-6 grid grid-cols-2 gap-3 text-xs text-white/48">
-              <span className="rounded-2xl border border-white/[.07] bg-black/20 p-3">{hall.presidents.length} Presidents</span>
+              <span className="rounded-2xl border border-white/[.07] bg-black/20 p-3">{hall.jointSecretaries.length} Jt. Secretaries</span>
               <span className="rounded-2xl border border-white/[.07] bg-black/20 p-3">{hall.teamLeads.length} Leads</span>
               <span className="rounded-2xl border border-white/[.07] bg-black/20 p-3">{hall.topContributors.length} Contributors</span>
               <span className="rounded-2xl border border-white/[.07] bg-black/20 p-3">{hall.alumni.length} Alumni</span>
@@ -129,7 +129,7 @@ export default async function HallOfFamePage() {
           </div>
         </div>
 
-        <LegacySection title="Presidents" eyebrow="Past leadership" icon={Trophy} people={hall.presidents} tone="amber" />
+        <LegacySection title="Joint Secretaries" eyebrow="Office bearers" icon={Crown} people={hall.jointSecretaries} tone="amber" />
         <LegacySection title="Team Leads" eyebrow="Execution layer" icon={Medal} people={hall.teamLeads} tone="cyan" />
         <LegacySection title="Top Contributors" eyebrow="People who moved the club" icon={Award} people={hall.topContributors} tone="fuchsia" />
         <LegacySection title="Alumni" eyebrow="The long memory" icon={Users} people={hall.alumni} tone="emerald" />

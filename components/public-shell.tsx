@@ -8,7 +8,7 @@ const publicLinks = [
   ["ABOUT", "/about"],
   ["EVENTS", "/events"],
   ["TEAMS", "/teams"],
-  ["HALL", "/hall-of-fame"],
+  ["HALL OF FAME", "/hall-of-fame"],
   ["GALLERY", "/gallery"]
 ] as const;
 
