@@ -10,6 +10,7 @@ import {
   EventRegistration,
   Gallery,
   GeneratedDocument,
+  HallOfFame,
   AIConversation,
   Meeting,
   Notification,
@@ -51,6 +52,18 @@ export type PublicTeam = {
   facultyChampionName?: string;
   members: number;
   memberNames: string[];
+};
+
+export type HallMember = {
+  id: string;
+  name: string;
+  category: "secretary" | "president" | "team_lead" | "top_contributor" | "alumni";
+  title?: string;
+  subtitle?: string;
+  batch?: string;
+  year?: number;
+  image?: string;
+  team?: string;
 };
 
 export async function getClubInfo() {
@@ -178,6 +191,56 @@ export async function getPublicGallery() {
   })));
 }
 
+export async function getHallOfFameData() {
+  await connectDB();
+  const [clubInfo, teams, hallRows] = await Promise.all([
+    getClubInfo(),
+    Team.find({ active: true }).sort({ order: 1, name: 1 }).populate("lead", "name image uid program").lean(),
+    HallOfFame.find({ active: true }).sort({ category: 1, order: 1, year: -1, name: 1 }).lean()
+  ]);
+
+  const secretary: HallMember[] = clubInfo.secretaryName ? [{
+    id: "secretary",
+    name: clubInfo.secretaryName,
+    category: "secretary",
+    title: "Secretary",
+    subtitle: clubInfo.secretaryEmail,
+    image: clubInfo.secretaryPhoto
+  }] : [];
+
+  const teamLeads: HallMember[] = teams
+    .filter((team: any) => team.lead?.name)
+    .map((team: any) => ({
+      id: `team-${String(team._id)}`,
+      name: team.lead.name,
+      category: "team_lead",
+      title: `${team.name} Lead`,
+      subtitle: team.lead.program || team.lead.uid,
+      image: team.lead.image,
+      team: team.name
+    }));
+
+  const manual: HallMember[] = hallRows.map((row: any) => ({
+    id: String(row._id),
+    name: row.name,
+    category: row.category,
+    title: row.title,
+    subtitle: row.subtitle,
+    batch: row.batch,
+    year: row.year,
+    image: row.image
+  }));
+
+  const items = [...secretary, ...manual, ...teamLeads];
+  return serialize({
+    secretary,
+    presidents: items.filter((item) => item.category === "president"),
+    teamLeads,
+    topContributors: items.filter((item) => item.category === "top_contributor"),
+    alumni: items.filter((item) => item.category === "alumni")
+  });
+}
+
 export async function getPublicHomeData() {
   await connectDB();
   const [clubInfo, events, teams, achievements, sponsors, gallery] = await Promise.all([
@@ -226,6 +289,7 @@ export async function getAdminDashboardData() {
     sponsors,
     achievements,
     gallery,
+    hallOfFame,
     contactMessages,
     clubInfo,
     meetings,
@@ -243,6 +307,7 @@ export async function getAdminDashboardData() {
     Sponsor.find({}).sort({ name: 1 }).lean(),
     Achievement.find({}).sort({ awardedAt: -1 }).lean(),
     Gallery.find({}).sort({ createdAt: -1 }).lean(),
+    HallOfFame.find({}).sort({ category: 1, order: 1, year: -1, name: 1 }).lean(),
     ContactMessage.find({}).sort({ createdAt: -1 }).limit(200).lean(),
     getClubInfo(),
     Meeting.find({}).sort({ date: -1 }).limit(200).populate("organizer", "name email").populate("attendees", "name email").lean(),
@@ -261,6 +326,7 @@ export async function getAdminDashboardData() {
     sponsors,
     achievements,
     gallery,
+    hallOfFame,
     contactMessages,
     clubInfo,
     meetings,

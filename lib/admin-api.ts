@@ -8,6 +8,7 @@ import {
   Event,
   EventRegistration,
   Gallery,
+  HallOfFame,
   Sponsor,
   Task,
   Team,
@@ -25,6 +26,7 @@ export const adminResources = [
   "sponsors",
   "achievements",
   "gallery",
+  "hallOfFame",
   "contacts",
   "settings"
 ] as const;
@@ -177,6 +179,7 @@ export async function createResource(resource: AdminResource, input: Record<stri
       assets: body.url ? [{ url: body.url, publicId: body.publicId, kind: body.kind || "image", caption: body.caption }] : []
     });
   }
+  if (resource === "hallOfFame") return HallOfFame.create({ ...body, year: body.year ? Number(body.year) : undefined, order: body.order ? Number(body.order) : undefined, active: body.active !== "false" });
   if (resource === "contacts") return ContactMessage.findByIdAndUpdate(body.id, { status: body.status }, { new: true });
 }
 
@@ -200,6 +203,7 @@ export async function updateResource(resource: AdminResource, id: string, input:
   if (resource === "sponsors") return Sponsor.findByIdAndUpdate(id, { ...body, active: body.active !== "false" }, { new: true });
   if (resource === "achievements") return Achievement.findByIdAndUpdate(id, { ...body, awardedAt: body.awardedAt ? new Date(body.awardedAt) : undefined, featured: body.featured === true || body.featured === "true" }, { new: true });
   if (resource === "gallery") return Gallery.findByIdAndUpdate(id, body.url ? { title: body.title, published: body.published !== "false", assets: [{ url: body.url, publicId: body.publicId, kind: body.kind || "image", caption: body.caption }] } : body, { new: true });
+  if (resource === "hallOfFame") return HallOfFame.findByIdAndUpdate(id, { ...body, year: body.year ? Number(body.year) : undefined, order: body.order ? Number(body.order) : undefined, active: body.active !== "false" }, { new: true });
   if (resource === "contacts") return ContactMessage.findByIdAndUpdate(id, { status: body.status }, { new: true });
 }
 
@@ -220,5 +224,6 @@ export async function deleteResource(resource: AdminResource, id: string) {
   if (resource === "sponsors") return Sponsor.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "achievements") return Achievement.findByIdAndDelete(id);
   if (resource === "gallery") return Gallery.findByIdAndUpdate(id, { published: false }, { new: true });
+  if (resource === "hallOfFame") return HallOfFame.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "contacts") return ContactMessage.findByIdAndUpdate(id, { status: "resolved" }, { new: true });
 }

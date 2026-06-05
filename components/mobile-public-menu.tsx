@@ -9,6 +9,7 @@ const links = [
   ["About", "/about"],
   ["Events", "/events"],
   ["Teams", "/teams"],
+  ["Hall of Fame", "/hall-of-fame"],
   ["Gallery", "/gallery"],
   ["Contact", "/contact"],
   ["Login", "/login"]
