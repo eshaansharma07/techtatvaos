@@ -210,9 +210,16 @@ export async function updateResource(resource: AdminResource, id: string, input:
 export async function deleteResource(resource: AdminResource, id: string) {
   if (resource === "teams") return Team.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "users") {
-    const user = await User.findByIdAndUpdate(id, { status: "inactive" }, { new: true });
-    if (user?.team) await syncMemberTeam(user._id, undefined, user.team);
-    return user;
+    const user = await User.findById(id).select("team").lean();
+    const userObjectId = new Types.ObjectId(String(id));
+    await Promise.all([
+      Team.updateMany({ $or: [{ members: userObjectId }, { coLeads: userObjectId }] }, { $pull: { members: userObjectId, coLeads: userObjectId } }),
+      Team.updateMany({ lead: userObjectId }, { $unset: { lead: "" }, $pull: { members: userObjectId, coLeads: userObjectId } }),
+      Attendance.deleteMany({ user: userObjectId }),
+      EventRegistration.deleteMany({ user: userObjectId })
+    ]);
+    if ((user as any)?.team) await syncMemberTeam(id, undefined, (user as any).team);
+    return User.findByIdAndDelete(id);
   }
   if (resource === "events") {
     await Promise.all([EventRegistration.deleteMany({ event: id }), Attendance.deleteMany({ event: id })]);
