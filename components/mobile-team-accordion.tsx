@@ -78,6 +78,7 @@ export function MobileTeamAccordion({ technical, creative, info }: { technical: 
   ] as const;
   const advisors = [
     { label: "Faculty Champion", name: info.facultyChampionName, sub: info.facultyChampionEmail || "Faculty guidance and club oversight", photo: info.facultyChampionPhoto, tone: "emerald" as const },
+    { label: "Co-Faculty Champion", name: info.coFacultyChampionName, sub: info.coFacultyChampionEmail || info.coFacultyChampionPhone, photo: info.coFacultyChampionPhoto, tone: "emerald" as const },
     { label: "Student Advisor 1", name: info.studentAdvisorOneName, sub: info.studentAdvisorOneEmail, photo: info.studentAdvisorOnePhoto, tone: "amber" as const },
     { label: "Student Advisor 2", name: info.studentAdvisorTwoName, sub: info.studentAdvisorTwoEmail, photo: info.studentAdvisorTwoPhoto, tone: "rose" as const }
   ].filter((person) => person.name || person.sub || person.photo || person.label === "Faculty Champion");

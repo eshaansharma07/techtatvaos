@@ -117,6 +117,7 @@ export async function GET(req: NextRequest) {
 
   [
     ["Advisory", "Faculty Champion", { name: info.facultyChampionName, email: info.facultyChampionEmail, phone: info.facultyChampionPhone }, "Advisory tree"],
+    ["Advisory", "Co-Faculty Champion", { name: info.coFacultyChampionName, email: info.coFacultyChampionEmail, phone: info.coFacultyChampionPhone }, "Advisory tree"],
     ["Advisory", "Student Advisor 1", { name: info.studentAdvisorOneName, email: info.studentAdvisorOneEmail }, "Advisory tree"],
     ["Advisory", "Student Advisor 2", { name: info.studentAdvisorTwoName, email: info.studentAdvisorTwoEmail }, "Advisory tree"],
     ["Club Operations", "Secretary", { name: info.secretaryName, email: info.secretaryEmail }, "Operations tree root"],
