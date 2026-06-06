@@ -1,5 +1,4 @@
 import "server-only";
-import { unstable_cache } from "next/cache";
 import { connectDB } from "@/lib/db";
 import {
   Achievement,
@@ -68,15 +67,13 @@ export type HallMember = {
   team?: string;
 };
 
-const PUBLIC_DATA_REVALIDATE_SECONDS = 30;
-
-async function getClubInfoRaw() {
+export async function getClubInfo() {
   await connectDB();
   const rows = await ClubInfo.find({}).lean();
   return Object.fromEntries(rows.map((row) => [row.key, row.value])) as Record<string, any>;
 }
 
-async function getPublicEventsRaw(limit?: number): Promise<PublicEvent[]> {
+export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   await connectDB();
   const events = await Event.find({ status: { $in: ["published", "active", "completed"] } })
     .sort({ startAt: 1 })
@@ -111,7 +108,7 @@ async function getPublicEventsRaw(limit?: number): Promise<PublicEvent[]> {
   );
 }
 
-async function getPublicEventRaw(slug: string) {
+export async function getPublicEvent(slug: string) {
   await connectDB();
   const event = await Event.findOne({ slug, status: { $in: ["published", "active", "completed"] } })
     .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors")
@@ -154,7 +151,7 @@ async function getPublicEventRaw(slug: string) {
   });
 }
 
-async function getPublicTeamsRaw(): Promise<PublicTeam[]> {
+export async function getPublicTeams(): Promise<PublicTeam[]> {
   await connectDB();
   const teams = await Team.find({ active: true })
     .sort({ order: 1, name: 1 })
@@ -201,7 +198,7 @@ async function getPublicTeamsRaw(): Promise<PublicTeam[]> {
   );
 }
 
-async function getPublicGalleryRaw() {
+export async function getPublicGallery() {
   await connectDB();
   const rows = await Gallery.aggregate([
     { $match: { published: true } },
@@ -234,7 +231,7 @@ async function getPublicGalleryRaw() {
   })));
 }
 
-async function getPublicGalleryAlbumRaw(id: string) {
+export async function getPublicGalleryAlbum(id: string) {
   await connectDB();
   if (!Types.ObjectId.isValid(id)) return null;
   const row = await Gallery.findOne({ _id: id, published: true }).populate("event", "title slug startAt").lean() as any;
@@ -251,10 +248,10 @@ async function getPublicGalleryAlbumRaw(id: string) {
   });
 }
 
-async function getHallOfFameDataRaw() {
+export async function getHallOfFameData() {
   await connectDB();
   const [clubInfo, teams, hallRows] = await Promise.all([
-    getClubInfoRaw(),
+    getClubInfo(),
     Team.find({ active: true }).sort({ order: 1, name: 1 }).populate("lead", "name image uid program").lean(),
     HallOfFame.find({ active: true }).sort({ category: 1, order: 1, year: -1, name: 1 }).lean()
   ]);
@@ -320,10 +317,10 @@ async function getHallOfFameDataRaw() {
   });
 }
 
-async function getPublicHomeDataRaw() {
+export async function getPublicHomeData() {
   await connectDB();
   const [clubInfo, events, teams, achievements, sponsors, gallery] = await Promise.all([
-    getClubInfoRaw(),
+    getClubInfo(),
     getPublicEvents(4),
     getPublicTeams(),
     Achievement.find({ featured: true }).sort({ awardedAt: -1 }).limit(3).select("kind title description awardedAt").lean(),
@@ -345,46 +342,6 @@ async function getPublicHomeDataRaw() {
     stats: { members, events: eventCount, teams: teamCount }
   });
 }
-
-export const getClubInfo = unstable_cache(getClubInfoRaw, ["public-club-info"], {
-  revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
-  tags: ["public-club-info"]
-});
-
-export const getPublicEvents = unstable_cache(getPublicEventsRaw, ["public-events"], {
-  revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
-  tags: ["public-events"]
-});
-
-export const getPublicEvent = unstable_cache(getPublicEventRaw, ["public-event"], {
-  revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
-  tags: ["public-event"]
-});
-
-export const getPublicTeams = unstable_cache(getPublicTeamsRaw, ["public-teams"], {
-  revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
-  tags: ["public-teams"]
-});
-
-export const getPublicGallery = unstable_cache(getPublicGalleryRaw, ["public-gallery"], {
-  revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
-  tags: ["public-gallery"]
-});
-
-export const getPublicGalleryAlbum = unstable_cache(getPublicGalleryAlbumRaw, ["public-gallery-album"], {
-  revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
-  tags: ["public-gallery-album"]
-});
-
-export const getHallOfFameData = unstable_cache(getHallOfFameDataRaw, ["public-hall-of-fame"], {
-  revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
-  tags: ["public-hall-of-fame"]
-});
-
-export const getPublicHomeData = unstable_cache(getPublicHomeDataRaw, ["public-home-data"], {
-  revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
-  tags: ["public-home-data"]
-});
 
 export async function getAdminDashboardData() {
   await connectDB();
@@ -428,7 +385,7 @@ export async function getAdminDashboardData() {
     Gallery.find({}).sort({ createdAt: -1 }).populate("event", "title").lean(),
     HallOfFame.find({}).sort({ category: 1, order: 1, year: -1, name: 1 }).lean(),
     ContactMessage.find({}).sort({ createdAt: -1 }).limit(200).lean(),
-    getClubInfoRaw(),
+    getClubInfo(),
     Meeting.find({}).sort({ date: -1 }).limit(200).populate("organizer", "name email").populate("attendees", "name email").lean(),
     GeneratedDocument.find({}).sort({ generatedAt: -1 }).limit(100).populate("event", "title").populate("meeting", "title").lean(),
     AIConversation.find({}).sort({ createdAt: -1 }).limit(100).lean()
