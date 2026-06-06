@@ -52,8 +52,8 @@ function AdvisoryRow({ info }: { info: Record<string, any> }) {
   ].filter((advisor) => advisor.name || advisor.photo || advisor.email);
   return (
     <div className={`mx-auto grid w-full max-w-6xl gap-4 ${advisors.length + (coFaculty ? 2 : 1) >= 4 ? "md:grid-cols-4" : advisors.length + (coFaculty ? 2 : 1) >= 3 ? "md:grid-cols-3" : advisors.length + (coFaculty ? 2 : 1) >= 2 ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
-      <PersonNode label="Faculty Champion" name={info.facultyChampionName} sub={info.facultyChampionEmail || "Faculty guidance and club oversight"} photo={info.facultyChampionPhoto} tone="emerald" />
-      {coFaculty ? <PersonNode label="Co-Faculty Champion" name={info.coFacultyChampionName} sub={info.coFacultyChampionEmail || "Faculty guidance and club oversight"} photo={info.coFacultyChampionPhoto} tone="emerald" /> : null}
+      <PersonNode label="Faculty Champion" name={info.facultyChampionName} sub={info.facultyChampionEmail} photo={info.facultyChampionPhoto} tone="emerald" />
+      {coFaculty ? <PersonNode label="Co-Faculty Champion" name={info.coFacultyChampionName} sub={info.coFacultyChampionEmail || info.coFacultyChampionPhone} photo={info.coFacultyChampionPhoto} tone="emerald" /> : null}
       {advisors.map((advisor, index) => (
         <PersonNode
           key={`${advisor.name || "advisor"}-${index}`}
