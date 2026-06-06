@@ -114,6 +114,28 @@ function rawValue(item:any, key:string): string | number | boolean | string[] {c
 function teamNamesOf(member:any){const teams=asArray(member?.teams);const names=teams.map((team:any)=>team?.name || (typeof team==="string"?team:"")).filter(Boolean);const legacy=member?.team;return names.length?names.join(", "):(legacy?.name || (typeof legacy==="string"?legacy:""))}
 function memberLabel(member:any){const teams=teamNamesOf(member);return `${member.name || "Unnamed member"}${teams ? ` / ${teams}` : ""}`}
 function leadRolesOf(member:any,teams:any[]){const userId=idOf(member);return (teams||[]).filter((team:any)=>idOf(team.lead)===userId || asArray(team.coLeads).some((lead:any)=>idOf(lead)===userId)).map((team:any)=>`${idOf(team.lead)===userId?"Lead":"Co-lead"}: ${team.name}`).join(", ")}
+function normalizePortalData(input:Data):Data{
+  const data=input || {};
+  return {
+    ...data,
+    users:asArray(data.users).map((user:any)=>({...user,teams:asArray(user?.teams).filter(Boolean),team:user?.team || null})),
+    teams:asArray(data.teams).map((team:any)=>({...team,coLeads:asArray(team?.coLeads).filter(Boolean),members:asArray(team?.members).filter(Boolean)})),
+    events:asArray(data.events),
+    tasks:asArray(data.tasks),
+    announcements:asArray(data.announcements),
+    attendance:asArray(data.attendance),
+    registrations:asArray(data.registrations),
+    sponsors:asArray(data.sponsors),
+    achievements:asArray(data.achievements),
+    gallery:asArray(data.gallery).map((album:any)=>({...album,assets:asArray(album?.assets)})),
+    hallOfFame:asArray(data.hallOfFame),
+    contactMessages:asArray(data.contactMessages),
+    meetings:asArray(data.meetings),
+    generatedDocuments:asArray(data.generatedDocuments),
+    aiConversations:asArray(data.aiConversations),
+    clubInfo:data.clubInfo || {}
+  };
+}
 function winnerOptions(data:Data,event:any){const eventId=event?idOf(event):"";const options=new Map<string,string>();(data.registrations||[]).filter((registration:any)=>!eventId||idOf(registration.event)===eventId).forEach((registration:any)=>{if(registration.user)options.set(idOf(registration.user),`${registration.user.name || "Unnamed"}${registration.user.uid?` / ${registration.user.uid}`:""}`);(registration.teamMembers||[]).forEach((member:any)=>{const userId=idOf(member.user||member);if(userId)options.set(userId,`${member.name || member.user?.name || "Unnamed"}${member.uid || member.user?.uid?` / ${member.uid || member.user?.uid}`:""}`)})});return Array.from(options.entries()).map(([id,label])=>({id,label}))}
 function downloadTextFile(filename:string, contents:string, type="text/csv;charset=utf-8"){
   const blob=new Blob([contents],{type});
@@ -145,7 +167,7 @@ function exportDashboardSummary(data:Data){
 function PortalLogo(){return <a href="/portal" className="group flex items-center gap-3 font-semibold tracking-tight"><span className="portal-logo-mark grid h-11 w-11 place-items-center rounded-2xl border border-violet-300/30 bg-violet-500/10 text-violet-200"><Hexagon size={20}/></span><span className="leading-tight"><span className="block text-sm tracking-[.08em] text-white">TECH TATVA</span><i className="block text-xs font-normal tracking-[.18em] text-violet-200/45">PORTAL OS</i></span></a>}
 
 export function PortalClient({ initialData, userName }: { initialData: Data; userName: string }) {
-  const [data,setData]=useState(initialData);
+  const [data,setData]=useState(()=>normalizePortalData(initialData));
   const [active,setActive]=useState<Module>("Overview");
   const [search,setSearch]=useState("");
   const [panel,setPanel]=useState("Welcome. Add real club data from the modules; empty public pages stay empty until you publish.");
@@ -177,7 +199,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
   async function refresh(){
     setBusy(true);
     const res=await fetch("/api/admin/events",{cache:"no-store"});
-    if(res.ok)setData(await res.json());
+    if(res.ok)setData(normalizePortalData(await res.json()));
     setBusy(false);
     setPanel("Dashboard refreshed from MongoDB.");
   }
@@ -236,7 +258,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
 
   function rowsFor(module:Module){
     if(module==="Members")return (data.users||[]).map((u:any)=>[u.name,u.email && u.email !== "undefined" ? u.email : "-",u.uid||"-",teamNamesOf(u)||"-",leadRolesOf(u,data.teams)||u.status||"active",u]);
-    if(module==="Teams")return (data.teams||[]).map((t:any)=>[t.name,valueOf(t,"lead") || "No lead",(t.coLeads||[]).map((lead:any)=>lead.name).filter(Boolean).join(", ") || "No co-leads",`${t.members?.length||0} members`,t.active===false?"inactive":"active",t]);
+    if(module==="Teams")return (data.teams||[]).map((t:any)=>[t.name,valueOf(t,"lead") || "No lead",asArray(t.coLeads).map((lead:any)=>lead?.name || (typeof lead==="string"?lead:"")).filter(Boolean).join(", ") || "No co-leads",`${asArray(t.members).length} members`,t.active===false?"inactive":"active",t]);
     if(module==="Events")return (data.events||[]).map((e:any)=>[e.title,e.status,e.registrationOpen?"open":"closed",e.venue||"-",e.startAt?new Date(e.startAt).toLocaleString():"TBA",e]);
     if(module==="Meetings")return (data.meetings||[]).map((m:any)=>[m.title,m.status||"draft",m.date?new Date(m.date).toLocaleDateString():"No date",m.venue||"-",valueOf(m,"organizer")||"-",m]);
     if(module==="Tasks")return (data.tasks||[]).map((t:any)=>[t.title,t.status,t.priority||"medium",t.dueAt?new Date(t.dueAt).toLocaleString():"No due date",valueOf(t,"team")||"-",t]);
