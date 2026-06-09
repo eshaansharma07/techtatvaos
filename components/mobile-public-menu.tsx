@@ -19,17 +19,17 @@ export function MobilePublicMenu() {
 
   return (
     <nav className="w-full md:hidden" aria-label="Mobile navigation">
-      <div className="grid grid-cols-4 gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {links.map(([label, href]) => {
           const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link
               href={href}
               key={href}
-              className={`flex min-h-10 items-center justify-center rounded-2xl border px-2 py-2 text-center text-[9px] font-semibold uppercase tracking-[.12em] transition active:scale-[.97] ${
+              className={`flex min-h-11 shrink-0 items-center justify-center rounded-full border px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[.12em] transition active:scale-[.97] ${
                 active
-                  ? "border-violet-200/35 bg-violet-400/18 text-white shadow-[0_0_22px_rgba(168,85,247,.18)]"
-                  : "border-white/[.08] bg-white/[.045] text-white/52"
+                  ? "border-stone-950 bg-stone-950 text-white shadow-[0_14px_34px_rgba(82,52,30,.16)]"
+                  : "border-stone-200 bg-white text-stone-600"
               }`}
             >
               {label}

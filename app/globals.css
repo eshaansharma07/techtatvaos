@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --tt-ink: #08040a;
   --tt-plum: #170b19;
   --tt-graphite: #181018;
@@ -21,17 +21,14 @@
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at 8% -8%, rgba(253,186,116,.16), transparent 34%),
-    radial-gradient(circle at 90% 4%, rgba(232,121,166,.14), transparent 32%),
-    linear-gradient(180deg, #100712 0%, var(--tt-ink) 46%, #060306 100%);
-  color: #fffaf7;
+  background: #faf8f5;
+  color: #231a16;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
 }
 body:before {
-  content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .2; z-index: 20;
+  content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .055; z-index: 20;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
 }
 .glass {
@@ -758,6 +755,178 @@ body:before {
 }
 @keyframes loaderGrid {
   to { background-position: 0 46px, 46px 0; }
+}
+
+/* Editorial light-theme reset for the public website. Functionality stays unchanged;
+   this layer replaces the previous dark product language without rewriting every route. */
+.public-site {
+  min-height: 100vh;
+  color: #241b16;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(253,186,116,.16), transparent 30%),
+    radial-gradient(circle at 92% 4%, rgba(232,121,166,.12), transparent 28%),
+    linear-gradient(180deg, #fffdf8 0%, #faf8f5 44%, #f8f5f0 100%);
+}
+.public-site [class*="bg-ink"],
+.public-site [class*="bg-[#050"],
+.public-site [class*="bg-[#060"],
+.public-site [class*="bg-[#070"],
+.public-site [class*="bg-[#080"],
+.public-site [class*="bg-[#090"],
+.public-site [class*="bg-[#0a"],
+.public-site [class*="bg-[#0b"],
+.public-site [class*="bg-black"],
+.public-site [class*="from-black"],
+.public-site [class*="via-black"],
+.public-site [class*="to-black"] {
+  background: #fffdf8 !important;
+}
+.public-site [class*="text-white"] {
+  color: #2a211b !important;
+}
+.public-site [class*="text-violet"],
+.public-site [class*="text-fuchsia"],
+.public-site [class*="text-purple"] {
+  color: #9f5f76 !important;
+}
+.public-site [class*="border-white"] {
+  border-color: rgba(88,65,46,.13) !important;
+}
+.public-site [class*="shadow-black"],
+.public-site [class*="shadow-violet"],
+.public-site [class*="shadow-fuchsia"] {
+  box-shadow: 0 28px 80px rgba(88,65,46,.11) !important;
+}
+.public-site .grid-bg {
+  background-image: none !important;
+}
+.public-site .glass,
+.public-site .premium-card,
+.public-site .aurora-shell,
+.public-site .about-console,
+.public-site .about-signal-card,
+.public-site .about-band,
+.public-site .about-principle,
+.public-site .about-timeline-card {
+  border: 1px solid rgba(88,65,46,.12);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.9), rgba(255,250,241,.72)),
+    #fffdf8;
+  color: #241b16;
+  box-shadow: 0 28px 80px rgba(88,65,46,.1), inset 0 1px rgba(255,255,255,.9);
+  backdrop-filter: blur(10px);
+}
+.public-site .premium-card:after,
+.public-site .aurora-shell:before,
+.public-site .about-console:before,
+.public-site .about-signal-card:before,
+.public-site .about-band:before,
+.public-site .about-signal-card:after,
+.public-site .about-principle:after,
+.public-site .about-timeline-card:after {
+  display: none !important;
+}
+.public-site .gradient-text {
+  background: linear-gradient(100deg, #2a211b 0%, #7d5548 45%, #b76e79 72%, #d9965b 100%);
+  -webkit-background-clip: text;
+  color: transparent !important;
+}
+.public-site .action-pill {
+  border: 1px solid rgba(88,65,46,.16);
+  background: linear-gradient(135deg, #2a211b, #6b3f34);
+  color: #fffdf8 !important;
+  box-shadow: 0 18px 44px rgba(88,65,46,.16);
+}
+.public-site .ghost-pill {
+  border: 1px solid rgba(88,65,46,.14);
+  background: rgba(255,255,255,.76);
+  color: #2a211b !important;
+  box-shadow: 0 12px 34px rgba(88,65,46,.07), inset 0 1px rgba(255,255,255,.9);
+}
+.public-site .edge {
+  border-color: rgba(88,65,46,.12);
+}
+.public-site .brand-title {
+  color: #2a211b;
+  text-shadow: none;
+}
+.public-site .brand-title span {
+  background: linear-gradient(100deg, #2a211b 0%, #8e5545 48%, #c8778c 76%, #d9965b 100%);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.public-site .brand-title:before,
+.public-site .brand-title:after,
+.public-site .brand-scan,
+.public-site .brand-mark-aura,
+.public-site .brand-orb {
+  display: none;
+}
+.public-site .brand-mark-wrap:before,
+.public-site .brand-mark-wrap:after {
+  border-color: rgba(88,65,46,.1);
+  animation: none;
+}
+.public-site .brand-mark {
+  filter: drop-shadow(0 10px 18px rgba(88,65,46,.1));
+}
+.public-site .site-loader {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(253,186,116,.18), transparent 34%),
+    linear-gradient(180deg, #fffdf8, #faf8f5);
+}
+.public-site .loader-grid,
+.public-site .loader-ring {
+  display: none;
+}
+.public-site .loader-core {
+  border-color: rgba(88,65,46,.12);
+  background: rgba(255,253,248,.82);
+  box-shadow: 0 28px 80px rgba(88,65,46,.12);
+}
+.public-site .loader-core p {
+  color: rgba(88,65,46,.45);
+}
+.public-site section {
+  color: #241b16;
+}
+.public-site p {
+  color: inherit;
+}
+.public-site img,
+.public-site video {
+  filter: none !important;
+}
+.public-site input,
+.public-site textarea,
+.public-site select {
+  border-color: rgba(88,65,46,.13) !important;
+  background: rgba(255,255,255,.78) !important;
+  color: #2a211b !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.85);
+}
+.public-site input::placeholder,
+.public-site textarea::placeholder {
+  color: rgba(88,65,46,.36) !important;
+}
+.public-site .about-stage {
+  background:
+    radial-gradient(circle at 14% 12%, rgba(253,186,116,.16), transparent 30%),
+    radial-gradient(circle at 86% 0%, rgba(232,121,166,.11), transparent 28%),
+    linear-gradient(180deg, #fffdf8, #faf8f5 82%);
+}
+.public-site .about-orb,
+.public-site .about-radar,
+.public-site .about-radar-line {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .public-site {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(253,186,116,.16), transparent 30%),
+      linear-gradient(180deg, #fffdf8, #faf8f5 74%, #f8f5f0);
+  }
 }
 
 @media (max-width: 640px) {

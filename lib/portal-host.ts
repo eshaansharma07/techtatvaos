@@ -14,7 +14,7 @@ export function isPortalHost(req: NextRequest) {
   const host = hostOf(req);
   if (!host) return false;
   if (portalHosts.includes(host)) return true;
-  if (process.env.NODE_ENV !== "production" && ["localhost", "127.0.0.1"].includes(host)) return true;
+  if (process.env.NODE_ENV !== "production" && process.env.PORTAL_LOCALHOST === "true" && ["localhost", "127.0.0.1"].includes(host)) return true;
   return false;
 }
 
