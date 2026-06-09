@@ -6,12 +6,11 @@ import type { PublicTeam } from "@/lib/public-data";
 
 type ClubInfo = Record<string, any>;
 
-function PersonCard({ label, name, sub, photo, tone = "violet" }: { label: string; name?: string; sub?: string; photo?: string; tone?: "violet" | "cyan" | "fuchsia" | "emerald" | "amber" | "rose" }) {
+function PersonCard({ label, name, sub, photo, tone = "violet" }: { label: string; name?: string; sub?: string; photo?: string; tone?: "violet" | "emerald" | "fuchsia" | "amber" | "rose" }) {
   const tones = {
     violet: "border-violet-300/24 bg-violet-500/12",
-    cyan: "border-cyan-300/24 bg-cyan-500/12",
-    fuchsia: "border-fuchsia-300/24 bg-fuchsia-500/12",
     emerald: "border-emerald-300/24 bg-emerald-500/12",
+    fuchsia: "border-fuchsia-300/24 bg-fuchsia-500/12",
     amber: "border-amber-300/24 bg-amber-500/12",
     rose: "border-rose-300/24 bg-rose-500/12"
   };
@@ -73,7 +72,7 @@ function TeamPanel({ team }: { team: PublicTeam }) {
 
 export function MobileTeamAccordion({ technical, creative, info }: { technical: PublicTeam[]; creative: PublicTeam[]; info: ClubInfo }) {
   const groups = [
-    ["Joint Secretary (Technical & Operations)", info.jointSecretaryOneName || "Assign Joint Secretary", technical, "cyan"],
+    ["Joint Secretary (Technical & Operations)", info.jointSecretaryOneName || "Assign Joint Secretary", technical, "emerald"],
     ["Joint Secretary (Media & Creative)", info.jointSecretaryTwoName || "Assign Joint Secretary", creative, "fuchsia"]
   ] as const;
   const advisors = [

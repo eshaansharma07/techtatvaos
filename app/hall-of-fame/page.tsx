@@ -6,9 +6,8 @@ export const dynamic = "force-dynamic";
 
 const tones = {
   violet: "border-violet-300/24 from-violet-500/20 via-purple-500/10 to-fuchsia-500/10 shadow-violet-950/24",
-  cyan: "border-cyan-300/24 from-cyan-400/18 via-sky-500/10 to-violet-500/10 shadow-cyan-950/20",
+  emerald: "border-emerald-300/24 from-emerald-400/18 via-amber-500/10 to-violet-500/10 shadow-emerald-950/20",
   fuchsia: "border-fuchsia-300/24 from-fuchsia-500/20 via-pink-500/10 to-violet-500/10 shadow-fuchsia-950/24",
-  emerald: "border-emerald-300/24 from-emerald-400/18 via-teal-500/10 to-cyan-500/10 shadow-emerald-950/20",
   amber: "border-amber-300/24 from-amber-300/18 via-orange-500/10 to-fuchsia-500/10 shadow-amber-950/20"
 };
 
@@ -130,7 +129,7 @@ export default async function HallOfFamePage() {
         </div>
 
         <LegacySection title="Joint Secretaries" eyebrow="Office bearers" icon={Crown} people={hall.jointSecretaries} tone="amber" />
-        <LegacySection title="Team Leads" eyebrow="Execution layer" icon={Medal} people={hall.teamLeads} tone="cyan" />
+        <LegacySection title="Team Leads" eyebrow="Execution layer" icon={Medal} people={hall.teamLeads} tone="emerald" />
         <LegacySection title="Top Contributors" eyebrow="People who moved the club" icon={Award} people={hall.topContributors} tone="fuchsia" />
         <LegacySection title="Alumni" eyebrow="The long memory" icon={Users} people={hall.alumni} tone="emerald" />
       </section>

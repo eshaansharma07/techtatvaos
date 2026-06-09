@@ -123,7 +123,7 @@ export async function renderCertificatePdf(kind: CertificateKind, config: Certif
   const sansBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const ink = rgb(0.025, 0.03, 0.12);
   const muted = rgb(0.39, 0.41, 0.5);
-  const blue = rgb(0.1, 0.22, 0.62);
+  const plum = rgb(0.34, 0.12, 0.42);
   const gold = rgb(0.57, 0.43, 0.08);
   const fill = kind === "winner" ? rgb(0.985, 0.975, 0.935) : rgb(0.965, 0.975, 0.995);
 
@@ -147,7 +147,7 @@ export async function renderCertificatePdf(kind: CertificateKind, config: Certif
   cover(255, 246, 335, 42);
   drawCentered(config.recipientName, 258, serifBold, 30, ink, 360);
   cover(290, 196, 265, 22);
-  drawCentered(config.eventName, 204, sansBold, 8.5, kind === "winner" ? gold : blue, 280);
+  drawCentered(config.eventName, 204, sansBold, 8.5, kind === "winner" ? gold : plum, 280);
   cover(306, 132, 120, 24);
   drawCentered(config.facultyChampion, 142, serifItalic, 10.5, ink, 150);
   cover(448, 132, 120, 24);

@@ -6,8 +6,8 @@ import { getClubInfo, getPublicTeams, type PublicTeam } from "@/lib/public-data"
 export const dynamic = "force-dynamic";
 
 const creativeWords = ["design", "media", "creative", "content", "marketing", "social", "outreach", "sponsor", "photography", "video"];
-const technicalColors = ["from-sky-500/22 to-cyan-400/10", "from-yellow-400/22 to-amber-500/10", "from-rose-500/22 to-red-500/10"];
-const creativeColors = ["from-emerald-400/22 to-teal-400/10", "from-fuchsia-500/22 to-purple-500/10", "from-pink-500/22 to-violet-500/10"];
+const technicalColors = ["from-amber-500/22 to-emerald-400/10", "from-yellow-400/22 to-amber-500/10", "from-rose-500/22 to-red-500/10"];
+const creativeColors = ["from-rose-400/22 to-orange-400/10", "from-fuchsia-500/22 to-purple-500/10", "from-pink-500/22 to-violet-500/10"];
 
 function splitTeams(teams: PublicTeam[]) {
   const creative: PublicTeam[] = [];
@@ -20,12 +20,11 @@ function splitTeams(teams: PublicTeam[]) {
   return { technical, creative };
 }
 
-function PersonNode({ label, name, sub, photo, tone = "violet" }: { label: string; name?: string; sub?: string; photo?: string; tone?: "violet" | "cyan" | "fuchsia" | "emerald" | "amber" | "rose" }) {
+function PersonNode({ label, name, sub, photo, tone = "violet" }: { label: string; name?: string; sub?: string; photo?: string; tone?: "violet" | "emerald" | "fuchsia" | "amber" | "rose" }) {
   const tones = {
     violet: "border-violet-300/35 bg-gradient-to-br from-violet-500/24 via-purple-500/12 to-fuchsia-500/10 text-violet-100 shadow-violet-950/30",
-    cyan: "border-cyan-300/35 bg-gradient-to-br from-cyan-400/22 via-sky-500/12 to-violet-500/10 text-cyan-100 shadow-cyan-950/25",
+    emerald: "border-emerald-300/35 bg-gradient-to-br from-emerald-400/22 via-amber-500/12 to-violet-500/10 text-emerald-100 shadow-emerald-950/25",
     fuchsia: "border-fuchsia-300/35 bg-gradient-to-br from-fuchsia-500/24 via-purple-500/12 to-pink-500/10 text-fuchsia-100 shadow-fuchsia-950/30",
-    emerald: "border-emerald-300/35 bg-gradient-to-br from-emerald-400/22 via-teal-500/12 to-cyan-500/10 text-emerald-100 shadow-emerald-950/25",
     amber: "border-amber-300/35 bg-gradient-to-br from-amber-300/22 via-orange-500/12 to-fuchsia-500/10 text-amber-100 shadow-amber-950/25",
     rose: "border-rose-300/35 bg-gradient-to-br from-rose-400/22 via-pink-500/12 to-violet-500/10 text-rose-100 shadow-rose-950/25"
   };
@@ -113,7 +112,7 @@ function TeamBox({ team, index, palette }: { team: PublicTeam; index: number; pa
   );
 }
 
-function TeamLane({ title, subtitle, teams, palette, tone }: { title: string; subtitle: string; teams: PublicTeam[]; palette: string[]; tone: "cyan" | "fuchsia" }) {
+function TeamLane({ title, subtitle, teams, palette, tone }: { title: string; subtitle: string; teams: PublicTeam[]; palette: string[]; tone: "emerald" | "fuchsia" }) {
   return (
     <div className="relative">
       <PersonNode label={title} name={subtitle} tone={tone} />
@@ -140,7 +139,7 @@ export default async function TeamsPage() {
   return (
     <PublicShell>
       <section className="relative mx-auto max-w-7xl px-5 pb-20 pt-28 md:px-6 md:pb-28 md:pt-44">
-        <div className="pointer-events-none absolute left-10 top-36 h-80 w-80 rounded-full bg-cyan-500/10 blur-[140px]" />
+        <div className="pointer-events-none absolute left-10 top-36 h-80 w-80 rounded-full bg-emerald-500/10 blur-[140px]" />
         <div className="pointer-events-none absolute right-0 top-72 h-96 w-96 rounded-full bg-fuchsia-500/10 blur-[150px]" />
 
         <div className="aurora-shell relative rounded-[2rem] px-5 py-9 text-center md:rounded-[2.3rem] md:px-10 md:py-10">
@@ -159,7 +158,7 @@ export default async function TeamsPage() {
 
         <div className="relative mt-10 hidden overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/72 p-5 shadow-2xl shadow-black/30 md:block md:p-8">
           <div className="absolute inset-0 grid-bg opacity-20" />
-          <div className="pointer-events-none absolute left-8 top-8 h-28 w-40 rounded-full border border-cyan-300/10" />
+          <div className="pointer-events-none absolute left-8 top-8 h-28 w-40 rounded-full border border-emerald-300/10" />
           <div className="pointer-events-none absolute right-8 top-10 h-24 w-48 rounded-2xl border border-fuchsia-300/10" />
 
           <div className="relative grid gap-8">
@@ -172,7 +171,7 @@ export default async function TeamsPage() {
               <p className="mb-5 text-center text-[10px] font-semibold uppercase tracking-[.24em] text-violet-100/55">Club Operations Tree</p>
               <OperationsRoot info={info} />
               <div className="mx-auto h-12 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
-              <div className="mx-auto hidden h-px max-w-4xl bg-gradient-to-r from-cyan-300/0 via-cyan-300/50 to-fuchsia-300/50 md:block" />
+              <div className="mx-auto hidden h-px max-w-4xl bg-gradient-to-r from-emerald-300/0 via-emerald-300/50 to-fuchsia-300/50 md:block" />
 
               <div className="mt-6 grid gap-8 xl:grid-cols-2">
                 <TeamLane
@@ -180,7 +179,7 @@ export default async function TeamsPage() {
                   subtitle={technicalLead}
                   teams={technical}
                   palette={technicalColors}
-                  tone="cyan"
+                  tone="emerald"
                 />
                 <TeamLane
                   title="3. Joint Secretary (Media & Creative)"

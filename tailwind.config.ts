@@ -5,10 +5,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: "#060509",
-        graphite: "#111016",
+        ink: "#08040a",
+        graphite: "#181018",
         violet: "#8b5cf6",
-        magenta: "#ec4899"
+        magenta: "#ec4899",
+        rose: "#e879a6",
+        peach: "#fdba74",
+        cream: "#fff7ed"
       },
       fontFamily: { sans: ["var(--font-inter)", "Inter", "sans-serif"] },
       animation: { "slow-spin": "spin 24s linear infinite", float: "float 7s ease-in-out infinite" },

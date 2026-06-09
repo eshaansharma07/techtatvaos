@@ -52,20 +52,20 @@ export async function templatePdf(kind: "event_report" | "mom", content: Generat
   const { width, height } = page.getSize();
   const regular = await pdf.embedFont(StandardFonts.TimesRoman);
   const bold = await pdf.embedFont(StandardFonts.TimesRomanBold);
-  const blue = rgb(0.05, 0.09, 0.25);
+  const plum = rgb(0.15, 0.07, 0.16);
 
-  page.drawText(content.title.slice(0, 90), { x: 68, y: height - 126, size: 13, font: bold, color: blue });
+  page.drawText(content.title.slice(0, 90), { x: 68, y: height - 126, size: 13, font: bold, color: plum });
   if (content.subtitle) page.drawText(content.subtitle.slice(0, 110), { x: 68, y: height - 144, size: 9, font: regular, color: rgb(0.25, 0.25, 0.28) });
 
   let y = height - 174;
   for (const [label, value] of content.fields.slice(0, 10)) {
-    page.drawText(`${label}:`, { x: 68, y, size: 9, font: bold, color: blue });
+    page.drawText(`${label}:`, { x: 68, y, size: 9, font: bold, color: plum });
     page.drawText(String(value || "-").slice(0, 88), { x: 166, y, size: 9, font: regular, color: rgb(0, 0, 0) });
     y -= 14;
   }
 
   y -= 8;
-  page.drawText(kind === "mom" ? "Minutes of Meeting" : "Post Activity Summary", { x: 68, y, size: 11, font: bold, color: blue });
+  page.drawText(kind === "mom" ? "Minutes of Meeting" : "Post Activity Summary", { x: 68, y, size: 11, font: bold, color: plum });
   y -= 18;
   for (const paragraph of content.paragraphs) {
     for (const line of wrap(regular, paragraph, 9, width - 136)) {
@@ -78,7 +78,7 @@ export async function templatePdf(kind: "event_report" | "mom", content: Generat
   }
 
   if (kind === "mom" && content.actionItems?.length && y > 122) {
-    page.drawText("Action Items", { x: 68, y, size: 10, font: bold, color: blue });
+    page.drawText("Action Items", { x: 68, y, size: 10, font: bold, color: plum });
     y -= 14;
     for (const item of content.actionItems.slice(0, 6)) {
       const line = `${item.task || "-"} | ${item.assignedTo || "-"} | ${item.deadline || "-"} | ${item.status || "Pending"}`;
@@ -88,7 +88,7 @@ export async function templatePdf(kind: "event_report" | "mom", content: Generat
   }
 
   if (kind === "event_report" && content.captions?.length && y > 122) {
-    page.drawText("Photo Captions", { x: 68, y, size: 10, font: bold, color: blue });
+    page.drawText("Photo Captions", { x: 68, y, size: 10, font: bold, color: plum });
     y -= 14;
     content.captions.slice(0, 5).forEach((caption, index) => {
       page.drawText(`${index + 1}. ${caption}`.slice(0, 120), { x: 78, y, size: 8, font: regular, color: rgb(0, 0, 0) });
