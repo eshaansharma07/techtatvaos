@@ -30,11 +30,11 @@ function PersonNode({ label, name, sub, photo, tone = "violet" }: { label: strin
   };
   const toneClass = tones[tone];
   return (
-    <div className={`relative mx-auto w-full max-w-[430px] overflow-hidden rounded-2xl border p-4 text-center shadow-2xl backdrop-blur-xl ${toneClass}`}>
+    <div className={`relative mx-auto w-full max-w-[430px] overflow-hidden rounded-[1.65rem] border p-5 text-center shadow-2xl backdrop-blur-xl ${toneClass}`}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,.14),transparent_42%)]" />
       <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
       <div className="relative">
-      {photo ? <img src={photo} alt="" className="mx-auto mb-3 h-14 w-14 rounded-2xl border border-white/15 object-cover shadow-[0_0_24px_rgba(255,255,255,.1)]" /> : <Crown className="mx-auto mb-3" size={20} />}
+      {photo ? <img src={photo} alt="" className="mx-auto mb-3 h-16 w-16 rounded-2xl border border-white/15 object-cover shadow-[0_0_24px_rgba(255,255,255,.1)]" /> : <Crown className="mx-auto mb-3" size={20} />}
       <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/52">{label}</p>
       <p className="mt-2 text-lg font-semibold text-white">{name || "Add details in portal"}</p>
       {sub ? <p className="mt-1 text-xs leading-5 text-white/55">{sub}</p> : null}
@@ -74,18 +74,18 @@ function OperationsRoot({ info }: { info: Record<string, any> }) {
 function TeamBox({ team, index, palette }: { team: PublicTeam; index: number; palette: string[] }) {
   const gradient = palette[index % palette.length];
   return (
-    <div className={`relative rounded-[1.4rem] border border-white/[.08] bg-gradient-to-br ${gradient} p-4 backdrop-blur-xl`}>
-      <div className="rounded-2xl border border-white/10 bg-black/30 p-3 text-center">
+    <div className={`relative rounded-[1.75rem] border border-white/[.08] bg-gradient-to-br ${gradient} p-4 backdrop-blur-xl`}>
+      <div className="rounded-[1.25rem] border border-white/10 bg-black/30 p-4 text-center">
         <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/48">Team Lead Group</p>
         <p className="mt-2 text-sm font-semibold text-white">{team.lead || "Lead to be assigned"}</p>
       </div>
 
       <div className="mx-auto h-7 w-px bg-white/20" />
 
-      <div className="rounded-2xl border border-white/10 bg-black/34 p-4">
+      <div className="rounded-[1.35rem] border border-white/10 bg-black/34 p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-base font-semibold text-white">{team.name}</p>
+            <p className="text-lg font-semibold tracking-[-.035em] text-white">{team.name}</p>
             <p className="mt-1 text-[10px] uppercase tracking-[.18em] text-white/38">{team.members} active members</p>
           </div>
           <Network className="text-white/45" size={17} />
@@ -118,7 +118,7 @@ function TeamLane({ title, subtitle, teams, palette, tone }: { title: string; su
       <PersonNode label={title} name={subtitle} tone={tone} />
       <div className="mx-auto h-10 w-px bg-gradient-to-b from-white/40 to-white/0" />
       {teams.length ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
           {teams.map((team, index) => <TeamBox team={team} index={index} palette={palette} key={team.id} />)}
         </div>
       ) : (
@@ -138,16 +138,18 @@ export default async function TeamsPage() {
 
   return (
     <PublicShell>
-      <section className="relative mx-auto max-w-7xl px-5 pb-20 pt-28 md:px-6 md:pb-28 md:pt-44">
+      <section className="relative mx-auto max-w-7xl px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
         <div className="pointer-events-none absolute left-10 top-36 h-80 w-80 rounded-full bg-emerald-500/10 blur-[140px]" />
         <div className="pointer-events-none absolute right-0 top-72 h-96 w-96 rounded-full bg-fuchsia-500/10 blur-[150px]" />
 
-        <div className="aurora-shell relative rounded-[2rem] px-5 py-9 text-center md:rounded-[2.3rem] md:px-10 md:py-10">
+        <div className="aurora-shell relative overflow-hidden rounded-[2.2rem] px-5 py-10 text-center md:rounded-[2.8rem] md:px-10 md:py-16">
+          <div className="absolute inset-0 grid-bg opacity-20" />
+          <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-violet-300/12 blur-[100px]" />
           <p className="flex items-center justify-center gap-2 text-[10px] font-semibold tracking-[.34em] text-violet-200/75">
             <Sparkles size={13} />
             ORGANIZATIONAL STRUCTURE
           </p>
-          <h1 className="gradient-text mt-5 text-[3.25rem] font-semibold leading-[.94] tracking-[-.055em] md:text-6xl">
+          <h1 className="gradient-text relative mt-5 text-[3.35rem] font-semibold leading-[.9] tracking-[-.07em] md:text-7xl">
             Tech Tatva Club Network
           </h1>
         </div>
@@ -156,18 +158,18 @@ export default async function TeamsPage() {
           <MobileTeamAccordion technical={technical} creative={creative} info={info} />
         </div>
 
-        <div className="relative mt-10 hidden overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/72 p-5 shadow-2xl shadow-black/30 md:block md:p-8">
+        <div className="relative mt-10 hidden overflow-hidden rounded-[2.4rem] border border-white/[.08] bg-[#05070d]/72 p-5 shadow-2xl shadow-black/30 md:block md:p-8">
           <div className="absolute inset-0 grid-bg opacity-20" />
           <div className="pointer-events-none absolute left-8 top-8 h-28 w-40 rounded-full border border-emerald-300/10" />
           <div className="pointer-events-none absolute right-8 top-10 h-24 w-48 rounded-2xl border border-fuchsia-300/10" />
 
           <div className="relative grid gap-8">
-            <div className="rounded-[1.7rem] border border-emerald-300/15 bg-emerald-400/[.035] p-5">
+            <div className="rounded-[2rem] border border-emerald-300/15 bg-emerald-400/[.035] p-6">
               <p className="mb-5 text-center text-[10px] font-semibold uppercase tracking-[.24em] text-emerald-100/55">Advisory Tree</p>
               <AdvisoryRow info={info} />
             </div>
 
-            <div className="rounded-[1.7rem] border border-violet-300/15 bg-violet-400/[.035] p-5">
+            <div className="rounded-[2rem] border border-violet-300/15 bg-violet-400/[.035] p-6">
               <p className="mb-5 text-center text-[10px] font-semibold uppercase tracking-[.24em] text-violet-100/55">Club Operations Tree</p>
               <OperationsRoot info={info} />
               <div className="mx-auto h-12 w-px bg-gradient-to-b from-violet-200/60 to-violet-200/0" />
