@@ -142,14 +142,14 @@ export default async function TeamsPage() {
         <div className="pointer-events-none absolute left-10 top-36 h-80 w-80 rounded-full bg-emerald-500/10 blur-[140px]" />
         <div className="pointer-events-none absolute right-0 top-72 h-96 w-96 rounded-full bg-fuchsia-500/10 blur-[150px]" />
 
-        <div className="aurora-shell relative overflow-hidden rounded-[2.2rem] px-5 py-10 text-center md:rounded-[2.8rem] md:px-10 md:py-16">
+        <div className="team-hero-compact aurora-shell relative overflow-hidden rounded-[2rem] px-5 py-9 text-center md:rounded-[2.2rem] md:px-10 md:py-10">
           <div className="absolute inset-0 grid-bg opacity-20" />
           <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-violet-300/12 blur-[100px]" />
           <p className="flex items-center justify-center gap-2 text-[10px] font-semibold tracking-[.34em] text-violet-200/75">
             <Sparkles size={13} />
             ORGANIZATIONAL STRUCTURE
           </p>
-          <h1 className="gradient-text relative mt-5 text-[3.35rem] font-semibold leading-[.9] tracking-[-.07em] md:text-7xl">
+          <h1 className="gradient-text relative mt-4 text-[2.8rem] font-semibold leading-[.94] tracking-[-.065em] md:text-5xl lg:text-6xl">
             Tech Tatva Club Network
           </h1>
         </div>
