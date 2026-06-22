@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock3, FileUp, Github, Linkedin, Link as LinkIcon, Loader2, Lock, Pencil, ShieldCheck, Sparkles, Upload, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, CalendarDays, Clock3, Code2, FileText, FileUp, Github, Handshake, Linkedin, Link as LinkIcon, Loader2, Lock, Megaphone, Palette, Pencil, ShieldCheck, Sparkles, UserRound, Users, Video } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 type Team = { id: string; name: string; slug: string; description?: string; icon?: string };
@@ -43,6 +44,23 @@ const statusCopy: Record<string, string> = {
   closed: "Applications Closed",
   full: "Registration Full"
 };
+
+const teamIconMap: Record<string, LucideIcon> = {
+  media: Video,
+  operations: Users,
+  technical: Code2,
+  design: Palette,
+  marketing: Megaphone,
+  sponsorship: Handshake,
+  content: FileText,
+  "event-management": CalendarDays,
+  "human-resources": UserRound
+};
+
+function TeamIcon({ slug }: { slug: string }) {
+  const Icon = teamIconMap[slug] || Sparkles;
+  return <Icon size={22} className="text-violet-200" />;
+}
 
 function empty(value: unknown) {
   return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
@@ -161,7 +179,7 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
           <AnimatePresence mode="wait">
             <motion.div key={step} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: .24 }} className="mt-6">
               {step === 0 ? <LandingPanel open={open} status={data.settings.status} closingDate={data.settings.closingDate} /> : null}
-              {step === 1 ? <PersonalPanel form={form} update={update} uploadFile={uploadFile} files={files} uploading={uploading} /> : null}
+              {step === 1 ? <PersonalPanel form={form} update={update} /> : null}
               {step === 2 ? <TeamPanel teams={data.teams} selected={team} onSelect={(id) => { setTeam(id); setRole(""); setAnswers({}); }} /> : null}
               {step === 3 ? <RolePanel roles={teamRoles} selected={role} onSelect={setRole} team={selectedTeam} /> : null}
               {step === 4 ? <QuestionPanel questions={visibleQuestions} answers={answers} setAnswers={setAnswers} uploadFile={uploadFile} files={files} uploading={uploading} /> : null}
@@ -172,7 +190,7 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
 
           {step < steps.length ? <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/[.07] pt-5">
             <button type="button" onClick={() => setStep((value) => Math.max(value - 1, 0))} className="ghost-pill inline-flex min-h-12 items-center gap-2 rounded-full px-5 text-sm disabled:opacity-40" disabled={step === 0}><ArrowLeft size={16} /> Back</button>
-            {step === steps.length - 1 ? <button disabled={busy || !canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />} Submit application</button> : <button type="button" onClick={next} disabled={!canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">Continue <ArrowRight size={16} /></button>}
+            {step === steps.length - 1 ? <button type="submit" disabled={busy || !canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />} Submit application</button> : <button type="button" onClick={next} disabled={!canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">Continue <ArrowRight size={16} /></button>}
           </div> : null}
         </form>
       </div>
@@ -184,8 +202,8 @@ function LandingPanel({ open, status, closingDate }: { open: boolean; status: st
   return <div className="grid gap-4 md:grid-cols-2"><div className="rounded-[1.5rem] border border-white/[.08] bg-white/[.035] p-6"><Sparkles className="text-amber-200" /><h2 className="mt-6 text-3xl font-semibold tracking-[-.04em]">A sharper way to join.</h2><p className="mt-3 text-sm leading-7 text-white/50">No endless form. Each step asks for what helps teams understand your fit, craft, and intent.</p></div><div className="rounded-[1.5rem] border border-white/[.08] bg-black/20 p-6"><Users className="text-violet-200" /><h3 className="mt-6 text-2xl font-semibold tracking-[-.04em]">{open ? "Start when ready." : statusCopy[status]}</h3><p className="mt-3 text-sm leading-7 text-white/48">{open ? `Applications are live${closingDate ? ` until ${new Date(closingDate).toLocaleDateString("en-IN")}` : ""}.` : "The form is currently unavailable. You can still explore the teams and return when recruitment opens."}</p></div></div>;
 }
 
-function PersonalPanel({ form, update, uploadFile, files, uploading }: any) {
-  return <div><h2 className="text-3xl font-semibold tracking-[-.04em]">Your signal.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{personalFields.map(([name, label, type]) => <label className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/35" key={name}>{label}{["linkedin", "github", "portfolio"].includes(name) ? <span className="ml-1 text-white/25">(Optional)</span> : null}<input value={form[name] || ""} onChange={(event) => update(name, event.target.value)} type={type} required={!["linkedin", "github", "portfolio"].includes(name)} className="mt-2 w-full rounded-2xl border border-white/[.08] bg-black/25 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none focus:border-violet-300/45" /></label>)}</div><div className="mt-5 grid gap-3 md:grid-cols-3">{["Resume", "Portfolio PDF", "Media Sample"].map((label) => <UploadBox key={label} label={label} uploadFile={uploadFile} file={files.find((item: FileAsset) => item.label === label)} uploading={uploading === label} />)}</div></div>;
+function PersonalPanel({ form, update }: { form: Record<string, any>; update: (name: string, value: any) => void }) {
+  return <div><h2 className="text-3xl font-semibold tracking-[-.04em]">Your signal.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{personalFields.map(([name, label, type]) => <label className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/35" key={name}>{label}{["linkedin", "github", "portfolio"].includes(name) ? <span className="ml-1 text-white/25">(Optional)</span> : null}<input value={form[name] || ""} onChange={(event) => update(name, event.target.value)} type={type} required={!["linkedin", "github", "portfolio"].includes(name)} className="mt-2 w-full rounded-2xl border border-white/[.08] bg-black/25 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none focus:border-violet-300/45" /></label>)}</div></div>;
 }
 
 function UploadBox({ label, uploadFile, file, uploading }: { label: string; uploadFile: (label: string, file?: File) => void; file?: FileAsset; uploading: boolean }) {
@@ -193,7 +211,7 @@ function UploadBox({ label, uploadFile, file, uploading }: { label: string; uplo
 }
 
 function TeamPanel({ teams, selected, onSelect }: { teams: Team[]; selected: string; onSelect: (id: string) => void }) {
-  return <div><h2 className="text-3xl font-semibold tracking-[-.04em]">Choose one team.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{teams.map((team) => <button type="button" onClick={() => onSelect(team.id)} className={`group rounded-[1.4rem] border p-5 text-left transition hover:-translate-y-1 ${selected === team.id ? "border-amber-200/55 bg-amber-200/[.08]" : "border-white/[.08] bg-white/[.03] hover:border-violet-200/30"}`} key={team.id}><span className="grid h-11 w-11 place-items-center rounded-2xl bg-white/[.06] text-xl">{team.icon || "TT"}</span><h3 className="mt-5 text-xl font-semibold">{team.name}</h3><p className="mt-2 text-sm leading-6 text-white/45">{team.description || "Create meaningful work with this team."}</p></button>)}</div>{!teams.length ? <p className="rounded-2xl border border-white/[.08] bg-white/[.03] p-6 text-white/45">No recruitment teams are active yet.</p> : null}</div>;
+  return <div><h2 className="text-3xl font-semibold tracking-[-.04em]">Choose one team.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{teams.map((team) => <button type="button" onClick={() => onSelect(team.id)} className={`group rounded-[1.4rem] border p-5 text-left transition hover:-translate-y-1 ${selected === team.id ? "border-amber-200/55 bg-amber-200/[.08] shadow-[0_0_40px_rgba(251,191,36,.08)]" : "border-white/[.08] bg-white/[.03] hover:border-violet-200/30"}`} key={team.id}><span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/[.08] bg-gradient-to-br from-violet-500/20 via-fuchsia-500/10 to-amber-400/10"><TeamIcon slug={team.slug} /></span><h3 className="mt-5 text-xl font-semibold">{team.name}</h3><p className="mt-2 text-sm leading-6 text-white/45">{team.description || "Create meaningful work with this team."}</p></button>)}</div>{!teams.length ? <p className="rounded-2xl border border-white/[.08] bg-white/[.03] p-6 text-white/45">No recruitment teams are active yet.</p> : null}</div>;
 }
 
 function RolePanel({ roles, selected, onSelect, team }: { roles: Role[]; selected: string; onSelect: (id: string) => void; team?: Team }) {
