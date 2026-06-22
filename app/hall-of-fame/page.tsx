@@ -95,7 +95,7 @@ export default async function HallOfFamePage() {
             <Sparkles size={13} />
             CLUB LEGACY
           </p>
-          <h1 className="gradient-text relative mx-auto mt-5 max-w-4xl text-[3.35rem] font-semibold leading-[.92] tracking-[-.065em] md:text-7xl">
+          <h1 className="gradient-text relative mx-auto mt-5 max-w-4xl text-3xl xs:text-5xl font-semibold leading-[.92] tracking-[-.065em] md:text-7xl">
             Hall of Fame
           </h1>
           <p className="relative mx-auto mt-5 max-w-2xl text-[15px] leading-7 text-white/52 md:text-sm">

@@ -39,7 +39,7 @@ export default async function Home() {
         <Reveal>
           <div>
             <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200/80">TECH TATVA</p>
-            <h1 className="mt-5 max-w-5xl text-4xl xs:text-5xl sm:text-6xl font-semibold leading-[1.1] tracking-[-0.04em] text-white md:mt-6 md:text-7xl lg:text-[104px] lg:leading-[1.05]">
+            <h1 className="mt-5 max-w-5xl text-3xl xs:text-4xl sm:text-6xl font-semibold leading-[1.1] tracking-[-0.04em] text-white md:mt-6 md:text-7xl lg:text-[104px] lg:leading-[1.05]">
               Enter the next room.
             </h1>
             <p className="mt-6 max-w-2xl text-[15px] leading-8 text-white/66 md:mt-8 md:text-lg md:leading-9 md:text-white/62">

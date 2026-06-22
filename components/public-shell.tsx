@@ -27,7 +27,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
         <Link href="/contact" className="public-header-cta hidden min-h-11 items-center gap-2 rounded-full px-5 text-xs font-semibold tracking-[.12em] md:inline-flex">
           CONNECT <ArrowUpRight size={14}/>
         </Link>
-        <MobilePublicMenu/>
+        <MobilePublicMenu logo={info.logo}/>
       </div>
     </header>
     <div className="h-20 md:hidden" />

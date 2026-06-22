@@ -12,7 +12,7 @@ export default async function Contact() {
       <section className="mx-auto grid max-w-7xl gap-5 px-5 pb-20 pt-32 md:gap-8 md:px-6 md:pb-28 md:pt-44 lg:grid-cols-[.85fr_1.15fr]">
         <div className="aurora-shell rounded-[2rem] p-6 md:rounded-[2.6rem] md:p-12">
           <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200">CONNECT</p>
-          <h1 className="mt-5 text-[4.35rem] font-semibold leading-[.86] tracking-[-.08em] md:text-8xl">
+          <h1 className="mt-5 text-3xl xs:text-5xl font-semibold leading-[.86] tracking-[-.08em] md:text-8xl">
             Start the conversation.
           </h1>
           <p className="mt-6 text-[15px] leading-8 text-white/58 md:text-base">

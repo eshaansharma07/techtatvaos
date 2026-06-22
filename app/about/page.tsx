@@ -89,7 +89,7 @@ export default async function About() {
               <p className="inline-flex rounded-full border border-violet-200/15 bg-white/[.035] px-4 py-2 text-[10px] font-semibold tracking-[.28em] text-violet-100/80">
                 ABOUT TECH TATVA
               </p>
-              <h1 className="mt-7 max-w-5xl text-6xl font-semibold leading-[.88] tracking-[-.085em] text-white md:text-8xl lg:text-[112px]">
+              <h1 className="mt-7 max-w-5xl text-3xl xs:text-5xl font-semibold leading-[.88] tracking-[-.085em] text-white md:text-8xl lg:text-[112px]">
                 Built for students who execute.
               </h1>
               <p className="mt-8 max-w-2xl text-base leading-8 text-white/52 md:text-lg md:leading-9">
@@ -143,7 +143,7 @@ export default async function About() {
             <div className="grid gap-10 lg:grid-cols-[.75fr_1fr] lg:items-end">
               <div>
                 <p className="text-[10px] font-semibold tracking-[.3em] text-violet-200/75">OPERATING PRINCIPLES</p>
-                <h2 className="mt-5 text-4xl font-semibold leading-[.95] tracking-[-.06em] text-white md:text-6xl">
+                <h2 className="mt-5 text-3xl font-semibold leading-[.95] tracking-[-.06em] text-white md:text-6xl">
                   Precise work. Public proof.
                 </h2>
               </div>
@@ -179,7 +179,7 @@ export default async function About() {
               {timeline.map((item: any, index: number) => (
                 <Reveal key={`${item.year}-${item.text}`} delay={index * 0.05}>
                   <div className="about-timeline-card relative ml-12 rounded-[1.6rem] p-5">
-                    <span className="absolute -left-[3.25rem] top-6 grid h-10 w-10 place-items-center rounded-full border border-violet-200/30 bg-[#090711] text-[10px] font-semibold text-violet-100 shadow-[0_0_28px_rgba(168,85,247,.22)]">
+                    <span className="absolute -left-12 top-6 grid h-10 w-10 place-items-center rounded-full border border-violet-200/30 bg-[#090711] text-[10px] font-semibold text-violet-100 shadow-[0_0_28px_rgba(168,85,247,.22)]">
                       {item.year}
                     </span>
                     <p className="text-sm leading-7 text-white/58">{item.text}</p>
@@ -196,7 +196,7 @@ export default async function About() {
           <div className="aurora-shell rounded-[2.2rem] px-7 py-12 md:px-12">
             <Sparkles className="absolute right-8 top-8 h-20 w-20 text-white/[.04]" />
             <p className="text-[10px] font-semibold tracking-[.3em] text-violet-200/70">THE CLUB LAYER</p>
-            <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[.98] tracking-[-.055em] text-white md:text-6xl">
+            <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-[.98] tracking-[-.055em] text-white md:text-6xl">
               Events, teams, attendance, certificates, and reports in one living system.
             </h2>
             <div className="mt-8 flex flex-wrap gap-3">

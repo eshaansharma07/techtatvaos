@@ -11,7 +11,7 @@ export default async function Gallery() {
       <section className="mx-auto max-w-7xl px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
         <div className="aurora-shell rounded-[2rem] px-6 py-10 md:rounded-[2.6rem] md:px-14 md:py-14">
           <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200">THE ARCHIVE</p>
-          <h1 className="mt-5 max-w-4xl text-[4.35rem] font-semibold leading-[.86] tracking-[-.08em] md:text-8xl">Proof of work.</h1>
+          <h1 className="mt-5 max-w-4xl text-3xl xs:text-5xl font-semibold leading-[.86] tracking-[-.08em] md:text-8xl">Proof of work.</h1>
           <p className="mt-6 max-w-2xl text-[15px] leading-8 text-white/56 md:text-base">
             Event albums published by the club. Open an album to view every photo, video, and caption attached to that moment.
           </p>

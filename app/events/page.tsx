@@ -16,7 +16,7 @@ export default async function EventsPage() {
           <div className="grid gap-10 lg:grid-cols-[1fr_.7fr] lg:items-end">
             <div>
               <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200">CLUB CALENDAR</p>
-              <h1 className="gradient-text mt-5 text-[4.35rem] font-semibold leading-[.86] tracking-[-.08em] md:text-8xl">
+              <h1 className="gradient-text mt-5 text-3xl xs:text-5xl font-semibold leading-[.86] tracking-[-.08em] md:text-8xl">
                 Events worth showing up for.
               </h1>
               <p className="mt-6 max-w-2xl text-[15px] leading-8 text-white/58 md:text-base">
