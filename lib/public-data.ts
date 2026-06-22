@@ -190,18 +190,26 @@ export async function getPublicTeams(): Promise<PublicTeam[]> {
     for (const teamId of assignedTeams) addMember(teamId, member.name);
   }
   return serialize(
-    teams.map((team) => ({
-      id: String(team._id),
-      name: team.name,
-      slug: team.slug,
-      description: team.description,
-      lead: (team.lead as unknown as { name?: string })?.name,
-      coLeads: (team.coLeads || []).map((lead: any) => lead.name).filter(Boolean),
-      jointSecretaryLane: (team as any).jointSecretaryLane || "technical",
-      facultyChampionName: team.facultyChampionName,
-      members: memberMap.get(String(team._id))?.size || 0,
-      memberNames: Array.from(memberMap.get(String(team._id)) || [])
-    }))
+    teams.map((team) => {
+      const leadName = (team.lead as unknown as { name?: string })?.name;
+      const coLeadsNames = (team.coLeads || []).map((lead: any) => lead.name).filter(Boolean);
+      const excluded = new Set([leadName, ...coLeadsNames].filter(Boolean));
+      const allMembers = Array.from(memberMap.get(String(team._id)) || []);
+      const filteredMembers = allMembers.filter((name) => !excluded.has(name));
+
+      return {
+        id: String(team._id),
+        name: team.name,
+        slug: team.slug,
+        description: team.description,
+        lead: leadName,
+        coLeads: coLeadsNames,
+        jointSecretaryLane: (team as any).jointSecretaryLane || "technical",
+        facultyChampionName: team.facultyChampionName,
+        members: filteredMembers.length,
+        memberNames: filteredMembers
+      };
+    })
   );
 }
 
@@ -277,7 +285,7 @@ export async function getHallOfFameData() {
       id: "joint-secretary-technical",
       name: clubInfo.jointSecretaryOneName,
       category: "joint_secretary" as const,
-      title: "Joint Secretary (Technical & Operations)",
+      title: "Joint Secretary",
       subtitle: clubInfo.jointSecretaryOneEmail,
       image: clubInfo.jointSecretaryOnePhoto
     } : null,
@@ -285,7 +293,7 @@ export async function getHallOfFameData() {
       id: "joint-secretary-creative",
       name: clubInfo.jointSecretaryTwoName,
       category: "joint_secretary" as const,
-      title: "Joint Secretary (Media & Creative)",
+      title: "Joint Secretary",
       subtitle: clubInfo.jointSecretaryTwoEmail,
       image: clubInfo.jointSecretaryTwoPhoto
     } : null
@@ -418,7 +426,8 @@ export async function getRecruitmentPublicData() {
       closingDate: settings.closingDate?.toISOString(),
       announcementBanner: settings.announcementBanner,
       customSuccessMessage: settings.customSuccessMessage,
-      maximumApplications: settings.maximumApplications
+      maximumApplications: settings.maximumApplications,
+      whatsappGroupLink: settings.whatsappGroupLink
     },
     teams: teams.map((team: any) => ({
       id: String(team._id),

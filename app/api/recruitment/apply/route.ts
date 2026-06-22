@@ -19,18 +19,18 @@ const optionalUrl = z
   .refine((value) => !value || /^https?:\/\/.+/i.test(value), { message: "Enter a valid URL starting with http:// or https://" });
 
 const applySchema = z.object({
-  fullName: z.string().trim().min(2).max(120),
-  uid: z.string().trim().min(3).max(40),
-  course: z.string().trim().min(1).max(80),
-  branch: z.string().trim().min(1).max(80),
-  year: z.string().trim().min(1).max(20),
-  email: z.string().trim().email().max(160),
-  phone: z.string().trim().min(7).max(20),
+  fullName: z.string().trim().min(2, "Full name must be at least 2 characters").max(120),
+  uid: z.string().trim().min(3, "UID must be at least 3 characters").max(40),
+  course: z.string().trim().min(1, "Course is required").max(80),
+  branch: z.string().trim().min(1, "Branch is required").max(80),
+  year: z.string().trim().min(1, "Year is required").max(20),
+  email: z.string().trim().email("Enter a valid email address").max(160),
+  phone: z.string().trim().min(7, "Phone number must be at least 7 digits").max(20, "Phone number is too long"),
   linkedin: optionalUrl,
   github: optionalUrl,
   portfolio: optionalUrl,
-  team: z.string().min(1),
-  role: z.string().min(1),
+  team: z.string().min(1, "Please select a team"),
+  role: z.string().min(1, "Please select a role"),
   answers: z.record(z.any()).default({}),
   files: z
     .array(
@@ -83,6 +83,16 @@ export async function POST(req: NextRequest) {
     const gate = await assertRecruitmentOpen(settings || {}, input.team);
     if (!gate.ok) return NextResponse.json({ error: gate.error }, { status: 403 });
     if (!team || !role) return NextResponse.json({ error: "Choose an active team and role." }, { status: 400 });
+    if (team.slug === "technical") {
+      const githubUrl = input.github || "";
+      if (!githubUrl.trim()) {
+        return NextResponse.json({ error: "GitHub profile URL is required for Technical Team applicants." }, { status: 400 });
+      }
+      const isValid = /^https?:\/\/(www\.)?github\.com\/[a-z0-9](-?[a-z0-9]){0,38}\/?$/i.test(githubUrl);
+      if (!isValid) {
+        return NextResponse.json({ error: "Please enter a valid GitHub profile URL (e.g., https://github.com/username)." }, { status: 400 });
+      }
+    }
     if (team.applicationLimit && gate.teamCount !== undefined && gate.teamCount >= team.applicationLimit) {
       return NextResponse.json({ error: "This team is no longer accepting applications." }, { status: 403 });
     }

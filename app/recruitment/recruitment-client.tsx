@@ -10,7 +10,7 @@ type Team = { id: string; name: string; slug: string; description?: string; icon
 type Role = { id: string; team: string; name: string; slug: string; description?: string };
 type Question = { id: string; team: string; role?: string; label: string; helpText?: string; type: string; options: string[]; required: boolean };
 type RecruitmentData = {
-  settings: { status: string; registrationEnabled: boolean; openingDate?: string; closingDate?: string; announcementBanner?: string; customSuccessMessage?: string };
+  settings: { status: string; registrationEnabled: boolean; openingDate?: string; closingDate?: string; announcementBanner?: string; customSuccessMessage?: string; whatsappGroupLink?: string };
   teams: Team[];
   roles: Role[];
   questions: Question[];
@@ -33,7 +33,6 @@ const personalFields = [
   ["email", "Email", "email"],
   ["phone", "Phone Number", "tel"],
   ["linkedin", "LinkedIn", "url"],
-  ["github", "GitHub", "url"],
   ["portfolio", "Portfolio", "url"]
 ] as const;
 
@@ -71,7 +70,9 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
   const teamRoles = data.roles.filter((item) => item.team === team);
   const visibleQuestions = data.questions.filter((question) => question.team === team && (!question.role || question.role === role));
   const open = data.settings.registrationEnabled && ["open", "closing_soon"].includes(data.settings.status);
-  const steps = ["Signal", "Identity", "Team", "Role", "Questions", "Review"];
+  const steps = selectedTeam?.slug === "technical"
+    ? ["Signal", "Identity", "Team", "Role", "GitHub", "Questions", "Review"]
+    : ["Signal", "Identity", "Team", "Role", "Questions", "Review"];
   const progress = ((step + 1) / steps.length) * 100;
 
   if (!open && step < steps.length) {
@@ -82,17 +83,41 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
     setForm((state) => ({ ...state, [name]: value }));
   }
 
+  function isValidGithubUrl(value: string) {
+    const normalized = normalizeOptionalUrl(value);
+    return /^https?:\/\/(www\.)?github\.com\/[a-z0-9](-?[a-z0-9]){0,38}\/?$/i.test(normalized);
+  }
+
   function canContinue() {
     if (step === 0) return open;
     if (step === 1) return personalFields.filter(([name]) => !["linkedin", "github", "portfolio"].includes(name)).every(([name]) => !empty(form[name]));
     if (step === 2) return Boolean(team);
     if (step === 3) return Boolean(role);
-    if (step === 4) return visibleQuestions.every((question) => !question.required || !empty(answers[question.id]));
+    if (selectedTeam?.slug === "technical") {
+      if (step === 4) {
+        const gh = form.github || "";
+        return gh.trim() !== "" && isValidGithubUrl(gh);
+      }
+      if (step === 5) return visibleQuestions.every((question) => !question.required || !empty(answers[question.id]));
+    } else {
+      if (step === 4) return visibleQuestions.every((question) => !question.required || !empty(answers[question.id]));
+    }
     return true;
   }
 
   function next() {
     setError("");
+    if (selectedTeam?.slug === "technical" && step === 4) {
+      const gh = form.github || "";
+      if (gh.trim() === "") {
+        setError("GitHub profile URL is required for Technical Team applicants.");
+        return;
+      }
+      if (!isValidGithubUrl(gh)) {
+        setError("Please enter a valid GitHub profile URL (e.g., https://github.com/username).");
+        return;
+      }
+    }
     if (!canContinue()) {
       setError("Complete the required fields before moving forward.");
       return;
@@ -181,9 +206,19 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
               {step === 1 ? <PersonalPanel form={form} update={update} /> : null}
               {step === 2 ? <TeamPanel teams={data.teams} selected={team} onSelect={(id) => { setTeam(id); setRole(""); setAnswers({}); }} /> : null}
               {step === 3 ? <RolePanel roles={teamRoles} selected={role} onSelect={setRole} team={selectedTeam} /> : null}
-              {step === 4 ? <QuestionPanel questions={visibleQuestions} answers={answers} setAnswers={setAnswers} uploadFile={uploadFile} files={files} uploading={uploading} /> : null}
-              {step === 5 ? <ReviewPanel form={form} team={selectedTeam} role={selectedRole} questions={visibleQuestions} answers={answers} files={files} onEdit={setStep} /> : null}
-              {step >= steps.length ? <SuccessPanel message={success} /> : null}
+              {selectedTeam?.slug === "technical" ? (
+                <>
+                  {step === 4 ? <GithubPanel form={form} update={update} error={error} setError={setError} /> : null}
+                  {step === 5 ? <QuestionPanel questions={visibleQuestions} answers={answers} setAnswers={setAnswers} uploadFile={uploadFile} files={files} uploading={uploading} /> : null}
+                  {step === 6 ? <ReviewPanel form={form} team={selectedTeam} role={selectedRole} questions={visibleQuestions} answers={answers} files={files} onEdit={setStep} /> : null}
+                </>
+              ) : (
+                <>
+                  {step === 4 ? <QuestionPanel questions={visibleQuestions} answers={answers} setAnswers={setAnswers} uploadFile={uploadFile} files={files} uploading={uploading} /> : null}
+                  {step === 5 ? <ReviewPanel form={form} team={selectedTeam} role={selectedRole} questions={visibleQuestions} answers={answers} files={files} onEdit={setStep} /> : null}
+                </>
+              )}
+              {step >= steps.length ? <SuccessPanel message={success} whatsappLink={data.settings.whatsappGroupLink} /> : null}
             </motion.div>
           </AnimatePresence>
 
@@ -239,6 +274,36 @@ function QuestionInput({ question, value, onChange, uploadFile, files, uploading
   return <input value={value || ""} onChange={(event) => onChange(event.target.value)} type={question.type === "number" ? "number" : question.type === "url" ? "url" : "text"} className={inputClass} />;
 }
 
+function GithubPanel({ form, update, error, setError }: { form: Record<string, any>; update: (name: string, value: any) => void; error?: string; setError: (err: string) => void }) {
+  const value = form.github || "";
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    update("github", e.target.value);
+    if (error) setError("");
+  };
+
+  return (
+    <div>
+      <h2 className="text-3xl font-semibold tracking-[-.04em]">GitHub Profile.</h2>
+      <p className="mt-2 text-sm leading-6 text-white/45">
+        Since you are applying for the Technical Team, a GitHub profile is required to review your projects and contributions.
+      </p>
+      <div className="mt-6">
+        <label className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/35">
+          GitHub Profile URL <span className="text-rose-200">*</span>
+          <input
+            value={value}
+            onChange={handleChange}
+            placeholder="https://github.com/your-username"
+            type="text"
+            className="mt-2 w-full rounded-2xl border border-white/[.08] bg-black/25 px-4 py-3 text-sm text-white outline-none focus:border-violet-300/45"
+            required
+          />
+        </label>
+      </div>
+    </div>
+  );
+}
+
 function ClosedRecruitmentView({ data }: { data: RecruitmentData }) {
   const copy = closedCopy[data.settings.status] || closedCopy.closed;
   return (
@@ -269,6 +334,82 @@ function ReviewPanel({ form, team, role, questions, answers, files, onEdit }: an
   return <div><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-3xl font-semibold tracking-[-.04em]">Review everything.</h2><button type="button" onClick={() => onEdit(1)} className="ghost-pill inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs"><Pencil size={13} /> Edit details</button></div><div className="mt-5 grid gap-4"><div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-5"><p className="text-xl font-semibold">{form.fullName}</p><p className="mt-2 text-sm text-white/45">{form.uid} / {form.course} / {form.branch} / {form.year}</p><p className="mt-2 text-sm text-white/45">{form.email} / {form.phone}</p><div className="mt-3 flex flex-wrap gap-2">{links.map(([label, href, Icon]: any) => <a href={href} className="ghost-pill inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs" key={label}><Icon size={13} /> {label}</a>)}</div></div><div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-5"><div className="flex items-center justify-between gap-3"><div><p className="text-sm text-white/40">Selected path</p><p className="mt-2 text-xl font-semibold">{team?.name || "-"} / {role?.name || "-"}</p></div><button type="button" onClick={() => onEdit(2)} className="ghost-pill rounded-full px-3 py-2 text-xs">Edit team</button></div></div>{questions.map((question: Question) => <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-5" key={question.id}><p className="text-sm font-semibold text-white/72">{question.label}</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/45">{Array.isArray(answers[question.id]) ? answers[question.id].join(", ") : answers[question.id] || "-"}</p></div>)}{files.length ? <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-5"><p className="text-sm font-semibold text-white/72">Uploads</p><div className="mt-3 flex flex-wrap gap-2">{files.map((file: FileAsset) => <a className="ghost-pill rounded-full px-3 py-2 text-xs" href={file.url} key={file.url}>{file.label}</a>)}</div></div> : null}</div></div>;
 }
 
-function SuccessPanel({ message }: { message: string }) {
-  return <div className="grid min-h-[520px] place-items-center text-center"><div><motion.span initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 180, damping: 16 }} className="mx-auto grid h-24 w-24 place-items-center rounded-full border border-emerald-200/25 bg-emerald-300/[.08] text-emerald-100"><CheckCircle2 size={42} /></motion.span><motion.h2 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="mt-8 text-4xl font-semibold tracking-[-.05em]">Application received.</motion.h2><motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mx-auto mt-4 max-w-md text-sm leading-7 text-white/52">{message || "We will review your application and reach out with the next steps."}</motion.p><motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}><Link href="/" className="action-pill mt-8 inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold"><Check size={16} /> Return home</Link></motion.div></div></div>;
+function SuccessPanel({ message, whatsappLink }: { message: string; whatsappLink?: string }) {
+  return (
+    <div className="grid min-h-[540px] place-items-center text-center px-4">
+      <div className="max-w-md w-full">
+        {/* Animated Checkmark Icon */}
+        <motion.span
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 180, damping: 16 }}
+          className="mx-auto grid h-24 w-24 place-items-center rounded-full border border-emerald-400/20 bg-emerald-500/10 text-emerald-300 shadow-[0_0_50px_rgba(16,185,129,0.15)] mb-8"
+        >
+          <CheckCircle2 size={46} strokeWidth={1.8} className="text-emerald-300" />
+        </motion.span>
+
+        {/* Heading */}
+        <motion.h2
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+          className="text-4xl font-semibold tracking-[-.05em] text-white"
+        >
+          Application received.
+        </motion.h2>
+
+        {/* Sub-text */}
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-4 text-sm leading-7 text-white/55"
+        >
+          {message || "Your application was submitted successfully. We have sent a confirmation email with your registration details."}
+        </motion.p>
+
+        {/* WhatsApp section (Impossible to miss primary CTA) */}
+        {whatsappLink ? (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.28 }}
+            className="mt-8 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03] p-5 shadow-[inset_0_1px_rgba(255,255,255,0.02)]"
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-[.2em] text-emerald-400/80">CRITICAL NEXT STEP</p>
+            <p className="mt-2 text-xs leading-5 text-white/45">
+              You must join the official Tech Tatva recruitment group to get updates on interviews and selection tasks.
+            </p>
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex min-h-[3.25rem] w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(16,185,129,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(16,185,129,0.34)] duration-300"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              <span>Join WhatsApp Group</span>
+            </a>
+          </motion.div>
+        ) : null}
+
+        {/* Secondary Return Home Button */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.36 }}
+          className="mt-6"
+        >
+          <Link
+            href="/"
+            className="ghost-pill inline-flex min-h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-full px-6 text-xs text-white/55 hover:text-white hover:bg-white/[.04] transition duration-300"
+          >
+            <Check size={14} />
+            <span>Return to Home</span>
+          </Link>
+        </motion.div>
+      </div>
+    </div>
+  );
 }

@@ -177,14 +177,14 @@ export default async function TeamsPage() {
 
               <div className="mt-6 grid gap-8 xl:grid-cols-2">
                 <TeamLane
-                  title="2. Joint Secretary (Technical & Operations)"
+                  title="2. Joint Secretary"
                   subtitle={technicalLead}
                   teams={technical}
                   palette={technicalColors}
                   tone="emerald"
                 />
                 <TeamLane
-                  title="3. Joint Secretary (Media & Creative)"
+                  title="3. Joint Secretary"
                   subtitle={creativeLead}
                   teams={creative}
                   palette={creativeColors}

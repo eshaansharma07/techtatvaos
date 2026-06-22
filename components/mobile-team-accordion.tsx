@@ -72,8 +72,8 @@ function TeamPanel({ team }: { team: PublicTeam }) {
 
 export function MobileTeamAccordion({ technical, creative, info }: { technical: PublicTeam[]; creative: PublicTeam[]; info: ClubInfo }) {
   const groups = [
-    ["Joint Secretary (Technical & Operations)", info.jointSecretaryOneName || "Assign Joint Secretary", technical, "emerald"],
-    ["Joint Secretary (Media & Creative)", info.jointSecretaryTwoName || "Assign Joint Secretary", creative, "fuchsia"]
+    ["Joint Secretary", info.jointSecretaryOneName || "Assign Joint Secretary", technical, "emerald", "technical"],
+    ["Joint Secretary", info.jointSecretaryTwoName || "Assign Joint Secretary", creative, "fuchsia", "creative"]
   ] as const;
   const advisors = [
     { label: "Faculty Champion", name: info.facultyChampionName, sub: info.facultyChampionEmail, photo: info.facultyChampionPhoto, tone: "emerald" as const },
@@ -99,8 +99,8 @@ export function MobileTeamAccordion({ technical, creative, info }: { technical: 
             <PersonCard label="1. Secretary" name={info.secretaryName} sub={info.secretaryEmail} photo={info.secretaryPhoto} tone="violet" />
           </section>
 
-          {groups.map(([title, secretary, teams, tone]) => (
-            <section key={title} className="rounded-[1.6rem] border border-white/[.08] bg-white/[.025] p-3">
+          {groups.map(([title, secretary, teams, tone, key]) => (
+            <section key={key} className="rounded-[1.6rem] border border-white/[.08] bg-white/[.025] p-3">
               <PersonCard label={title} name={secretary} tone={tone} />
               <div className="mx-auto h-6 w-px bg-white/18" />
               <div className="grid gap-3">

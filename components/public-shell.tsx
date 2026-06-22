@@ -48,14 +48,29 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
           </div>
           <Link href="/contact" className="action-pill flex min-h-14 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition hover:-translate-y-0.5">Start a conversation <ArrowUpRight size={16}/></Link>
         </div>
-        <div className="university-affiliation">
-          <span className="university-affiliation-label">A student club of</span>
-          <img
-            src="/chandigarh-university-logo.png"
-            alt="Chandigarh University"
-            className="university-affiliation-logo"
-            loading="lazy"
-          />
+        <div className="mt-10 border-t border-white/[.06] pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <span className="text-[9px] font-semibold tracking-[.2em] text-white/35 uppercase block mb-3">Affiliation</span>
+            <div className="inline-flex items-center justify-center rounded-xl bg-white/[0.97] px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:bg-white hover:scale-[1.02] transition duration-300">
+              <img
+                src="/chandigarh-university-logo.png"
+                alt="Chandigarh University"
+                className="h-7 w-auto object-contain"
+                loading="lazy"
+              />
+            </div>
+          </div>
+          <div>
+            <span className="text-[9px] font-semibold tracking-[.2em] text-white/35 uppercase block mb-3 md:text-right">Sponsors &amp; Partners</span>
+            <div className="flex flex-wrap items-center gap-3 md:justify-end">
+              <div className="flex h-11 items-center justify-center rounded-xl border border-white/[.06] bg-white/[.025] px-4 text-xs font-semibold tracking-wider text-white/35 select-none hover:bg-white/[.05] transition duration-300">
+                IBM
+              </div>
+              <div className="flex h-11 items-center justify-center rounded-xl border border-dashed border-white/[.08] bg-transparent px-4 text-[10px] font-semibold tracking-wider text-white/20 select-none">
+                + Partner
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

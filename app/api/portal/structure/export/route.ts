@@ -121,8 +121,8 @@ export async function GET(req: NextRequest) {
     ["Advisory", "Student Advisor 1", { name: info.studentAdvisorOneName, email: info.studentAdvisorOneEmail }, "Advisory tree"],
     ["Advisory", "Student Advisor 2", { name: info.studentAdvisorTwoName, email: info.studentAdvisorTwoEmail }, "Advisory tree"],
     ["Club Operations", "Secretary", { name: info.secretaryName, email: info.secretaryEmail }, "Operations tree root"],
-    ["Club Operations", "Joint Secretary - Technical & Operations", { name: info.jointSecretaryOneName, email: info.jointSecretaryOneEmail }, "Technical/operations lane"],
-    ["Club Operations", "Joint Secretary - Media & Creative", { name: info.jointSecretaryTwoName, email: info.jointSecretaryTwoEmail }, "Media/creative lane"]
+    ["Club Operations", "Joint Secretary", { name: info.jointSecretaryOneName, email: info.jointSecretaryOneEmail }, "Technical/operations lane"],
+    ["Club Operations", "Joint Secretary", { name: info.jointSecretaryTwoName, email: info.jointSecretaryTwoEmail }, "Media/creative lane"]
   ].forEach(([section, role, person, notes]: any) => {
     if (person?.name || person?.email) ws.addRow(personRow(section, role, person, notes));
   });
