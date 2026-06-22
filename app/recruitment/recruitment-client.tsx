@@ -189,7 +189,7 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
 
           {step < steps.length ? <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/[.07] pt-5">
             <button type="button" onClick={() => setStep((value) => Math.max(value - 1, 0))} className="ghost-pill inline-flex min-h-12 items-center gap-2 rounded-full px-5 text-sm disabled:opacity-40" disabled={step === 0}><ArrowLeft size={16} /> Back</button>
-            {step === steps.length - 1 ? <button disabled={busy || !canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />} Submit application</button> : <button type="button" onClick={next} disabled={!canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">Continue <ArrowRight size={16} /></button>}
+            {step === steps.length - 1 ? <button type="submit" disabled={busy || !canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />} Submit application</button> : <button type="button" onClick={next} disabled={!canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">Continue <ArrowRight size={16} /></button>}
           </div> : null}
         </form>
       </div>
