@@ -14,14 +14,21 @@ import {
   AIConversation,
   Meeting,
   Notification,
+  RecruitmentApplication,
+  RecruitmentQuestion,
+  RecruitmentRole,
+  RecruitmentSettings,
+  RecruitmentTeam,
   Sponsor,
   Task,
   Team,
   User
 } from "@/lib/models";
 import { Types } from "mongoose";
+import { computeRecruitmentStatus } from "@/lib/recruitment";
 
 const serialize = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 export type PublicEvent = {
   id: string;
@@ -343,6 +350,80 @@ export async function getPublicHomeData() {
   });
 }
 
+async function ensureRecruitmentDefaults() {
+  const existing = await RecruitmentTeam.countDocuments({});
+  if (existing) return;
+  const defaults = [
+    ["Media Team","media","Create stories through photography, videography, and design.","Media","Video Editor,Photographer,Graphic Designer,Videographer,Motion Graphics,Social Media Manager"],
+    ["Operations Team","operations","Execute and manage events with calm precision.","Ops","Outreach,Logistics,Hospitality,Registration,Volunteer Management"],
+    ["Technical Team","technical","Build products and digital experiences for the club.","Tech","Frontend,Backend,Full Stack,AI/ML,UI/UX,Cybersecurity"],
+    ["Design Team","design","Shape the visual identity of Tech Tatva.","Design","Graphic Designer,Illustrator,Branding,UI Designer"],
+    ["Marketing Team","marketing","Grow reach, campaigns, and community engagement.","Mkt","Campaigns,Campus Outreach,Social Strategy,Analytics"],
+    ["Sponsorship Team","sponsorship","Build partnerships with brands and institutions.","SP","Partnerships,Pitch Decks,Brand Relations,Research"],
+    ["Content Team","content","Create compelling written and editorial content.","Text","Copywriter,Editor,Script Writer,Blog Writer"],
+    ["Event Management","event-management","Plan and execute memorable event experiences.","EM","Event Planner,Stage Management,Guest Coordination,Experience Design"],
+    ["Human Resources","human-resources","Build and strengthen the club community.","HR","Recruitment,Member Experience,Training,Documentation"]
+  ];
+  const teams = await RecruitmentTeam.insertMany(defaults.map(([name, slug, description, icon], order) => ({ name, slug, description, icon, order, active: true })));
+  await RecruitmentRole.insertMany(teams.flatMap((team: any, index: number) => String(defaults[index][4]).split(",").map((name, order) => ({ team: team._id, name, slug: slugify(name), order, active: true }))));
+  await RecruitmentQuestion.insertMany(teams.map((team: any, order: number) => ({ team: team._id, label: `Why do you want to join ${team.name}?`, type: "long_text", required: true, order, active: true })));
+}
+
+export async function getRecruitmentPublicData() {
+  await connectDB();
+  await ensureRecruitmentDefaults();
+  let settings = await RecruitmentSettings.findOne({ key: "default" }).lean() as any;
+  if (!settings) {
+    settings = await RecruitmentSettings.create({ key: "default", status: "open", registrationEnabled: true });
+  }
+  const now = new Date();
+  const totalApplications = await RecruitmentApplication.countDocuments({});
+  const computedStatus = computeRecruitmentStatus(settings, totalApplications, now);
+  const [teams, roles, questions] = await Promise.all([
+    RecruitmentTeam.find({ active: true }).sort({ order: 1, name: 1 }).lean(),
+    RecruitmentRole.find({ active: true }).sort({ order: 1, name: 1 }).lean(),
+    RecruitmentQuestion.find({ active: true }).sort({ order: 1, createdAt: 1 }).lean()
+  ]);
+  return serialize({
+    settings: {
+      id: String(settings._id),
+      status: computedStatus,
+      registrationEnabled: Boolean(settings.registrationEnabled),
+      openingDate: settings.openingDate?.toISOString(),
+      closingDate: settings.closingDate?.toISOString(),
+      announcementBanner: settings.announcementBanner,
+      customSuccessMessage: settings.customSuccessMessage,
+      maximumApplications: settings.maximumApplications
+    },
+    teams: teams.map((team: any) => ({
+      id: String(team._id),
+      name: team.name,
+      slug: team.slug,
+      description: team.description,
+      icon: team.icon,
+      applicationLimit: team.applicationLimit
+    })),
+    roles: roles.map((role: any) => ({
+      id: String(role._id),
+      team: String(role.team),
+      name: role.name,
+      slug: role.slug,
+      description: role.description
+    })),
+    questions: questions.map((question: any) => ({
+      id: String(question._id),
+      team: String(question.team),
+      role: question.role ? String(question.role) : "",
+      label: question.label,
+      helpText: question.helpText,
+      type: question.type,
+      options: question.options || [],
+      required: Boolean(question.required)
+    })),
+    totalApplications
+  });
+}
+
 export async function getAdminDashboardData() {
   await connectDB();
   const clubMemberQuery = {
@@ -370,7 +451,12 @@ export async function getAdminDashboardData() {
     clubInfo,
     meetings,
     generatedDocuments,
-    aiConversations
+    aiConversations,
+    recruitmentSettings,
+    recruitmentTeams,
+    recruitmentRoles,
+    recruitmentQuestions,
+    recruitmentApplications
   ] = await Promise.all([
     User.find(clubMemberQuery).sort({ createdAt: -1 }).limit(300).populate("role", "name slug").populate("team", "name").populate("teams", "name").lean(),
     Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").populate("coLeads", "name").lean(),
@@ -388,7 +474,12 @@ export async function getAdminDashboardData() {
     getClubInfo(),
     Meeting.find({}).sort({ date: -1 }).limit(200).populate("organizer", "name email").populate("attendees", "name email").lean(),
     GeneratedDocument.find({}).sort({ generatedAt: -1 }).limit(100).populate("event", "title").populate("meeting", "title").lean(),
-    AIConversation.find({}).sort({ createdAt: -1 }).limit(100).lean()
+    AIConversation.find({}).sort({ createdAt: -1 }).limit(100).lean(),
+    RecruitmentSettings.find({}).sort({ createdAt: -1 }).lean(),
+    RecruitmentTeam.find({}).sort({ order: 1, name: 1 }).lean(),
+    RecruitmentRole.find({}).sort({ order: 1, name: 1 }).populate("team", "name").lean(),
+    RecruitmentQuestion.find({}).sort({ order: 1, createdAt: 1 }).populate("team", "name").populate("role", "name").lean(),
+    RecruitmentApplication.find({}).sort({ submittedAt: -1 }).limit(1000).populate("team", "name").populate("role", "name").lean()
   ]);
   return serialize({
     users,
@@ -407,6 +498,11 @@ export async function getAdminDashboardData() {
     clubInfo,
     meetings,
     generatedDocuments,
-    aiConversations
+    aiConversations,
+    recruitmentSettings,
+    recruitmentTeams,
+    recruitmentRoles,
+    recruitmentQuestions,
+    recruitmentApplications
   });
 }

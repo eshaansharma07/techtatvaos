@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { sendApplicationStatusEmail } from "@/lib/recruitment-mail";
 import {
   Achievement,
   Announcement,
@@ -13,7 +14,12 @@ import {
   Task,
   Team,
   User,
-  Meeting
+  Meeting,
+  RecruitmentApplication,
+  RecruitmentQuestion,
+  RecruitmentRole,
+  RecruitmentSettings,
+  RecruitmentTeam
 } from "@/lib/models";
 
 export const adminResources = [
@@ -28,7 +34,12 @@ export const adminResources = [
   "gallery",
   "hallOfFame",
   "contacts",
-  "settings"
+  "settings",
+  "recruitmentSettings",
+  "recruitmentTeams",
+  "recruitmentRoles",
+  "recruitmentQuestions",
+  "recruitmentApplications"
 ] as const;
 
 export type AdminResource = (typeof adminResources)[number];
@@ -80,6 +91,9 @@ function memberEmail(body: Record<string, any>) {
 
 const eventStatuses = new Set(["draft", "published", "active", "completed", "archived"]);
 const participationModes = new Set(["individual", "team", "both"]);
+const recruitmentStatuses = new Set(["opening_soon", "open", "closing_soon", "closed", "full"]);
+const applicationStatuses = new Set(["pending", "shortlisted", "accepted", "rejected", "on_hold"]);
+const questionTypes = new Set(["short_text", "long_text", "number", "multiple_choice", "checkbox", "dropdown", "rating", "url", "file_upload"]);
 
 function normalizeEventStatus(value: any, fallback = "published") {
   const status = String(value || fallback).toLowerCase().trim();
@@ -188,6 +202,57 @@ function parseActionItems(value: any) {
     });
 }
 
+function normalizeRecruitmentSettings(input: Record<string, any>) {
+  const body = clean(input);
+  const normalized: Record<string, any> = { ...body, key: "default" };
+  if (body.status !== undefined) normalized.status = recruitmentStatuses.has(String(body.status)) ? body.status : "open";
+  if ("registrationEnabled" in input) normalized.registrationEnabled = input.registrationEnabled === true || input.registrationEnabled === "true";
+  if ("confirmationEmailEnabled" in input) normalized.confirmationEmailEnabled = input.confirmationEmailEnabled === true || input.confirmationEmailEnabled === "true";
+  if ("emailOnAccepted" in input) normalized.emailOnAccepted = input.emailOnAccepted === true || input.emailOnAccepted === "true";
+  if ("emailOnRejected" in input) normalized.emailOnRejected = input.emailOnRejected === true || input.emailOnRejected === "true";
+  if ("emailOnShortlisted" in input) normalized.emailOnShortlisted = input.emailOnShortlisted === true || input.emailOnShortlisted === "true";
+  if ("emailOnInterview" in input) normalized.emailOnInterview = input.emailOnInterview === true || input.emailOnInterview === "true";
+  if ("autoCloseAfterDeadline" in input) normalized.autoCloseAfterDeadline = input.autoCloseAfterDeadline === true || input.autoCloseAfterDeadline === "true";
+  if ("manualOverride" in input) normalized.manualOverride = input.manualOverride === true || input.manualOverride === "true";
+  if (body.openingDate) normalized.openingDate = new Date(body.openingDate);
+  if (body.closingDate) normalized.closingDate = new Date(body.closingDate);
+  if (body.maximumApplications !== undefined) normalized.maximumApplications = Number(body.maximumApplications) || undefined;
+  return normalized;
+}
+
+function normalizeRecruitmentTeam(input: Record<string, any>, create = false) {
+  const body = clean(input);
+  const normalized: Record<string, any> = { ...body };
+  if (body.slug || body.name) normalized.slug = body.slug || slugify(body.name);
+  if (body.order !== undefined) normalized.order = Number(body.order) || 0;
+  if (body.applicationLimit !== undefined) normalized.applicationLimit = Number(body.applicationLimit) || undefined;
+  if (create || "active" in input) normalized.active = input.active !== false && input.active !== "false";
+  return normalized;
+}
+
+function normalizeRecruitmentRole(input: Record<string, any>, create = false) {
+  const body = clean(input);
+  const normalized: Record<string, any> = { ...body };
+  if (body.slug || body.name) normalized.slug = body.slug || slugify(body.name);
+  if ("team" in input) normalized.team = refId(input.team);
+  if (body.order !== undefined) normalized.order = Number(body.order) || 0;
+  if (create || "active" in input) normalized.active = input.active !== false && input.active !== "false";
+  return normalized;
+}
+
+function normalizeRecruitmentQuestion(input: Record<string, any>, create = false) {
+  const body = clean(input);
+  const normalized: Record<string, any> = { ...body };
+  if ("team" in input) normalized.team = refId(input.team);
+  if ("role" in input) normalized.role = refId(input.role) || null;
+  if (body.order !== undefined) normalized.order = Number(body.order) || 0;
+  if (create || "required" in input) normalized.required = input.required === true || input.required === "true";
+  if (create || "active" in input) normalized.active = input.active !== false && input.active !== "false";
+  if (body.type !== undefined) normalized.type = questionTypes.has(String(body.type)) ? body.type : "long_text";
+  if (body.options !== undefined) normalized.options = Array.isArray(body.options) ? body.options : String(body.options).split(/\n|,/).map((option) => option.trim()).filter(Boolean);
+  return normalized;
+}
+
 export async function createResource(resource: AdminResource, input: Record<string, any>, actorId?: string) {
   const body = clean(input);
   if (resource === "settings") {
@@ -237,6 +302,11 @@ export async function createResource(resource: AdminResource, input: Record<stri
   }
   if (resource === "hallOfFame") return HallOfFame.create({ ...body, year: body.year ? Number(body.year) : undefined, order: body.order ? Number(body.order) : undefined, active: body.active !== "false" });
   if (resource === "contacts") return ContactMessage.findByIdAndUpdate(body.id, { status: body.status }, { new: true });
+  if (resource === "recruitmentSettings") return RecruitmentSettings.findOneAndUpdate({ key: "default" }, normalizeRecruitmentSettings(body), { upsert: true, new: true, setDefaultsOnInsert: true });
+  if (resource === "recruitmentTeams") return RecruitmentTeam.create(normalizeRecruitmentTeam(body, true));
+  if (resource === "recruitmentRoles") return RecruitmentRole.create(normalizeRecruitmentRole(body, true));
+  if (resource === "recruitmentQuestions") return RecruitmentQuestion.create(normalizeRecruitmentQuestion(body, true));
+  if (resource === "recruitmentApplications") return RecruitmentApplication.create(body);
 }
 
 export async function updateResource(resource: AdminResource, id: string, input: Record<string, any>) {
@@ -261,6 +331,38 @@ export async function updateResource(resource: AdminResource, id: string, input:
   if (resource === "gallery") return Gallery.findByIdAndUpdate(id, normalizeGalleryBody(input), { new: true });
   if (resource === "hallOfFame") return HallOfFame.findByIdAndUpdate(id, { ...body, year: body.year ? Number(body.year) : undefined, order: body.order ? Number(body.order) : undefined, active: body.active !== "false" }, { new: true });
   if (resource === "contacts") return ContactMessage.findByIdAndUpdate(id, { status: body.status }, { new: true });
+  if (resource === "recruitmentSettings") return RecruitmentSettings.findByIdAndUpdate(id, normalizeRecruitmentSettings(input), { new: true, runValidators: true });
+  if (resource === "recruitmentTeams") return RecruitmentTeam.findByIdAndUpdate(id, normalizeRecruitmentTeam(input), { new: true, runValidators: true });
+  if (resource === "recruitmentRoles") return RecruitmentRole.findByIdAndUpdate(id, normalizeRecruitmentRole(input), { new: true, runValidators: true });
+  if (resource === "recruitmentQuestions") return RecruitmentQuestion.findByIdAndUpdate(id, normalizeRecruitmentQuestion(input), { new: true, runValidators: true });
+  if (resource === "recruitmentApplications") {
+    const status = applicationStatuses.has(String(body.status)) ? body.status : undefined;
+    const update: Record<string, any> = {};
+    if (body.adminNotes !== undefined) update.adminNotes = body.adminNotes;
+    if (status) update.status = status;
+    const push: Record<string, any> = {};
+    if (status) push.timeline = { action: status, note: body.adminNotes || "", at: new Date() };
+    const application = await RecruitmentApplication.findByIdAndUpdate(
+      id,
+      { ...(Object.keys(update).length ? { $set: update } : {}), ...(Object.keys(push).length ? { $push: push } : {}) },
+      { new: true, runValidators: true }
+    ).populate("team", "name").populate("role", "name").lean() as any;
+    if (application && status) {
+      const settings = await RecruitmentSettings.findOne({ key: "default" }).lean() as any;
+      await sendApplicationStatusEmail(
+        settings || {},
+        {
+          fullName: application.fullName,
+          email: application.email,
+          teamName: application.team?.name,
+          roleName: application.role?.name
+        },
+        status,
+        body.adminNotes
+      );
+    }
+    return application;
+  }
 }
 
 export async function deleteResource(resource: AdminResource, id: string) {
@@ -289,4 +391,8 @@ export async function deleteResource(resource: AdminResource, id: string) {
   if (resource === "gallery") return Gallery.findByIdAndUpdate(id, { published: false }, { new: true });
   if (resource === "hallOfFame") return HallOfFame.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "contacts") return ContactMessage.findByIdAndUpdate(id, { status: "resolved" }, { new: true });
+  if (resource === "recruitmentTeams") return RecruitmentTeam.findByIdAndUpdate(id, { active: false }, { new: true });
+  if (resource === "recruitmentRoles") return RecruitmentRole.findByIdAndUpdate(id, { active: false }, { new: true });
+  if (resource === "recruitmentQuestions") return RecruitmentQuestion.findByIdAndUpdate(id, { active: false }, { new: true });
+  if (resource === "recruitmentApplications") return RecruitmentApplication.findByIdAndUpdate(id, { status: "rejected", $push: { timeline: { action: "rejected", note: "Archived from portal", at: new Date() } } }, { new: true });
 }

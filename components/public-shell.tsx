@@ -6,6 +6,7 @@ import { MobilePublicMenu } from "@/components/mobile-public-menu";
 
 const publicLinks = [
   ["ABOUT", "/about"],
+  ["RECRUITMENT", "/recruitment"],
   ["EVENTS", "/events"],
   ["TEAMS", "/teams"],
   ["HALL OF FAME", "/hall-of-fame"],
