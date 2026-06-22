@@ -351,22 +351,47 @@ export async function getPublicHomeData() {
 }
 
 async function ensureRecruitmentDefaults() {
+  const iconSeed = {
+    media: "🎥",
+    operations: "⚙️",
+    technical: "💻",
+    design: "🎨",
+    marketing: "📢",
+    sponsorship: "🤝",
+    content: "✍️",
+    "event-management": "🎭",
+    "human-resources": "👥"
+  };
   const existing = await RecruitmentTeam.countDocuments({});
-  if (existing) return;
-  const defaults = [
-    ["Media Team","media","Create stories through photography, videography, and design.","Media","Video Editor,Photographer,Graphic Designer,Videographer,Motion Graphics,Social Media Manager"],
-    ["Operations Team","operations","Execute and manage events with calm precision.","Ops","Outreach,Logistics,Hospitality,Registration,Volunteer Management"],
-    ["Technical Team","technical","Build products and digital experiences for the club.","Tech","Frontend,Backend,Full Stack,AI/ML,UI/UX,Cybersecurity"],
-    ["Design Team","design","Shape the visual identity of Tech Tatva.","Design","Graphic Designer,Illustrator,Branding,UI Designer"],
-    ["Marketing Team","marketing","Grow reach, campaigns, and community engagement.","Mkt","Campaigns,Campus Outreach,Social Strategy,Analytics"],
-    ["Sponsorship Team","sponsorship","Build partnerships with brands and institutions.","SP","Partnerships,Pitch Decks,Brand Relations,Research"],
-    ["Content Team","content","Create compelling written and editorial content.","Text","Copywriter,Editor,Script Writer,Blog Writer"],
-    ["Event Management","event-management","Plan and execute memorable event experiences.","EM","Event Planner,Stage Management,Guest Coordination,Experience Design"],
-    ["Human Resources","human-resources","Build and strengthen the club community.","HR","Recruitment,Member Experience,Training,Documentation"]
-  ];
-  const teams = await RecruitmentTeam.insertMany(defaults.map(([name, slug, description, icon], order) => ({ name, slug, description, icon, order, active: true })));
-  await RecruitmentRole.insertMany(teams.flatMap((team: any, index: number) => String(defaults[index][4]).split(",").map((name, order) => ({ team: team._id, name, slug: slugify(name), order, active: true }))));
-  await RecruitmentQuestion.insertMany(teams.map((team: any, order: number) => ({ team: team._id, label: `Why do you want to join ${team.name}?`, type: "long_text", required: true, order, active: true })));
+  if (!existing) {
+    const defaults = [
+      ["Media Team", "media", "Create stories through photography, videography, and design.", "Video Editor,Photographer,Graphic Designer,Videographer,Motion Graphics,Social Media Manager"],
+      ["Operations Team", "operations", "Execute and manage events with calm precision.", "Outreach,Logistics,Hospitality,Registration,Volunteer Management"],
+      ["Technical Team", "technical", "Build products and digital experiences for the club.", "Frontend,Backend,Full Stack,AI/ML,UI/UX,Cybersecurity"],
+      ["Design Team", "design", "Shape the visual identity of Tech Tatva.", "Graphic Designer,Illustrator,Branding,UI Designer"],
+      ["Marketing Team", "marketing", "Grow reach, campaigns, and community engagement.", "Campaigns,Campus Outreach,Social Strategy,Analytics"],
+      ["Sponsorship Team", "sponsorship", "Build partnerships with brands and institutions.", "Partnerships,Pitch Decks,Brand Relations,Research"],
+      ["Content Team", "content", "Create compelling written and editorial content.", "Copywriter,Editor,Script Writer,Blog Writer"],
+      ["Event Management", "event-management", "Plan and execute memorable event experiences.", "Event Planner,Stage Management,Guest Coordination,Experience Design"],
+      ["Human Resources", "human-resources", "Build and strengthen the club community.", "Recruitment,Member Experience,Training,Documentation"]
+    ];
+    const teams = await RecruitmentTeam.insertMany(
+      defaults.map(([name, slug, description], order) => ({
+        name,
+        slug,
+        description,
+        icon: iconSeed[slug as keyof typeof iconSeed],
+        order,
+        active: true
+      }))
+    );
+    await RecruitmentRole.insertMany(teams.flatMap((team: any, index: number) => String(defaults[index][3]).split(",").map((name, order) => ({ team: team._id, name, slug: slugify(name), order, active: true }))));
+    await RecruitmentQuestion.insertMany(teams.map((team: any, order: number) => ({ team: team._id, label: `Why do you want to join ${team.name}?`, type: "long_text", required: true, order, active: true })));
+    return;
+  }
+  await Promise.all(
+    Object.entries(iconSeed).map(([slug, icon]) => RecruitmentTeam.updateMany({ slug, icon: { $in: ["Media", "Ops", "Tech", "Design", "Mkt", "SP", "Text", "EM", "HR", null, ""] } }, { $set: { icon } }))
+  );
 }
 
 export async function getRecruitmentPublicData() {

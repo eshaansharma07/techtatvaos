@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
-export const portalHost = (process.env.PORTAL_HOST || "portal.techtatva.in").toLowerCase();
-const portalHosts = (process.env.PORTAL_HOSTS || `${portalHost},techtatvaos-portal.vercel.app`)
+export const portalHost = (process.env.PORTAL_HOST || "techtatvaos-portal.vercel.app").toLowerCase();
+const portalHosts = (process.env.PORTAL_HOSTS || `${portalHost},portal.techtatva.in`)
   .split(",")
   .map((host) => host.trim().toLowerCase())
   .filter(Boolean);

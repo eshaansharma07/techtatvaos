@@ -2,9 +2,9 @@
 
 import { FormEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, CalendarDays, Clock3, Code2, FileText, FileUp, Github, Handshake, Linkedin, Link as LinkIcon, Loader2, Lock, Megaphone, Palette, Pencil, ShieldCheck, Sparkles, UserRound, Users, Video } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock3, FileUp, Github, Linkedin, Link as LinkIcon, Loader2, Lock, Pencil, ShieldCheck, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
+import { getRecruitmentTeamIcon } from "@/lib/recruitment-team-icons";
 
 type Team = { id: string; name: string; slug: string; description?: string; icon?: string };
 type Role = { id: string; team: string; name: string; slug: string; description?: string };
@@ -44,23 +44,6 @@ const statusCopy: Record<string, string> = {
   closed: "Applications Closed",
   full: "Registration Full"
 };
-
-const teamIconMap: Record<string, LucideIcon> = {
-  media: Video,
-  operations: Users,
-  technical: Code2,
-  design: Palette,
-  marketing: Megaphone,
-  sponsorship: Handshake,
-  content: FileText,
-  "event-management": CalendarDays,
-  "human-resources": UserRound
-};
-
-function TeamIcon({ slug }: { slug: string }) {
-  const Icon = teamIconMap[slug] || Sparkles;
-  return <Icon size={22} className="text-violet-200" />;
-}
 
 function empty(value: unknown) {
   return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
@@ -140,7 +123,7 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
     const result = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) {
-      setError(result.error || "Application could not be submitted.");
+      setError(result.error || (res.status === 404 ? "Application service is unavailable. Please try again shortly." : "Application could not be submitted."));
       return;
     }
     setSuccess(result.message || "Application received.");
@@ -190,7 +173,7 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
 
           {step < steps.length ? <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/[.07] pt-5">
             <button type="button" onClick={() => setStep((value) => Math.max(value - 1, 0))} className="ghost-pill inline-flex min-h-12 items-center gap-2 rounded-full px-5 text-sm disabled:opacity-40" disabled={step === 0}><ArrowLeft size={16} /> Back</button>
-            {step === steps.length - 1 ? <button type="submit" disabled={busy || !canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />} Submit application</button> : <button type="button" onClick={next} disabled={!canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">Continue <ArrowRight size={16} /></button>}
+            {step === steps.length - 1 ? <button disabled={busy || !canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />} Submit application</button> : <button type="button" onClick={next} disabled={!canContinue()} className="action-pill inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold disabled:opacity-60">Continue <ArrowRight size={16} /></button>}
           </div> : null}
         </form>
       </div>
@@ -211,7 +194,11 @@ function UploadBox({ label, uploadFile, file, uploading }: { label: string; uplo
 }
 
 function TeamPanel({ teams, selected, onSelect }: { teams: Team[]; selected: string; onSelect: (id: string) => void }) {
-  return <div><h2 className="text-3xl font-semibold tracking-[-.04em]">Choose one team.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{teams.map((team) => <button type="button" onClick={() => onSelect(team.id)} className={`group rounded-[1.4rem] border p-5 text-left transition hover:-translate-y-1 ${selected === team.id ? "border-amber-200/55 bg-amber-200/[.08] shadow-[0_0_40px_rgba(251,191,36,.08)]" : "border-white/[.08] bg-white/[.03] hover:border-violet-200/30"}`} key={team.id}><span className="grid h-12 w-12 place-items-center rounded-2xl border border-white/[.08] bg-gradient-to-br from-violet-500/20 via-fuchsia-500/10 to-amber-400/10"><TeamIcon slug={team.slug} /></span><h3 className="mt-5 text-xl font-semibold">{team.name}</h3><p className="mt-2 text-sm leading-6 text-white/45">{team.description || "Create meaningful work with this team."}</p></button>)}</div>{!teams.length ? <p className="rounded-2xl border border-white/[.08] bg-white/[.03] p-6 text-white/45">No recruitment teams are active yet.</p> : null}</div>;
+  return <div><h2 className="text-3xl font-semibold tracking-[-.04em]">Choose one team.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{teams.map((team) => {
+    const visual = getRecruitmentTeamIcon(team.slug, team.icon);
+    const Icon = visual.Icon;
+    return <button type="button" onClick={() => onSelect(team.id)} className={`group rounded-[1.4rem] border p-5 text-left transition hover:-translate-y-1 ${selected === team.id ? "border-amber-200/55 bg-amber-200/[.08] shadow-[0_18px_60px_rgba(251,191,36,.12)]" : "border-white/[.08] bg-white/[.03] hover:border-violet-200/30"}`} key={team.id}><span className={`grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br ${visual.accent} ring-1 ring-white/10 transition group-hover:scale-105`}><Icon size={22} strokeWidth={1.8} /><span className="sr-only">{visual.emoji}</span></span><div className="mt-5 flex items-center gap-2"><span className="text-lg">{visual.emoji}</span><h3 className="text-xl font-semibold">{team.name}</h3></div><p className="mt-2 text-sm leading-6 text-white/45">{team.description || "Create meaningful work with this team."}</p></button>;
+  })}</div>{!teams.length ? <p className="rounded-2xl border border-white/[.08] bg-white/[.03] p-6 text-white/45">No recruitment teams are active yet.</p> : null}</div>;
 }
 
 function RolePanel({ roles, selected, onSelect, team }: { roles: Role[]; selected: string; onSelect: (id: string) => void; team?: Team }) {
