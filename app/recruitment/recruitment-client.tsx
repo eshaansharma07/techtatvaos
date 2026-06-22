@@ -191,10 +191,30 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
 
         <form onSubmit={submit} className="premium-card min-h-[680px] rounded-[2rem] p-4 md:p-6">
           <div className="rounded-[1.5rem] border border-white/[.07] bg-black/20 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap gap-2">{steps.map((label, index) => <button type="button" onClick={() => index <= step ? setStep(index) : null} className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] ${index === step ? "bg-white text-black" : index < step ? "bg-emerald-400/10 text-emerald-200" : "bg-white/[.05] text-white/32"}`} key={label}>{label}</button>)}</div>
-              <span className="text-[10px] uppercase tracking-[.18em] text-white/35">{Math.min(step + 1, steps.length)} / {steps.length}</span>
+            {/* Mobile Header Progress */}
+            <div className="flex flex-col gap-2 md:hidden">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-300/80">Step {Math.min(step + 1, steps.length)} of {steps.length}</p>
+                  <h3 className="text-sm font-semibold text-white mt-0.5">{steps[step] || "Review"}</h3>
+                </div>
+                <span className="text-[10px] font-mono text-white/45">{Math.round(success ? 100 : progress)}%</span>
+              </div>
             </div>
+
+            {/* Desktop Header Progress */}
+            <div className="hidden md:flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-3 border-b border-white/[0.04] pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-300/80">Step {Math.min(step + 1, steps.length)} of {steps.length}</span>
+                  <span className="text-white/20">|</span>
+                  <span className="text-xs font-semibold text-white/80">{steps[step] || "Review"}</span>
+                </div>
+                <span className="text-[10px] font-mono text-white/45">{Math.round(success ? 100 : progress)}% completed</span>
+              </div>
+              <div className="flex flex-wrap gap-2">{steps.map((label, index) => <button type="button" onClick={() => index <= step ? setStep(index) : null} className={`rounded-full px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.14em] transition ${index === step ? "bg-white text-black" : index < step ? "bg-emerald-400/10 text-emerald-200" : "bg-white/[.05] text-white/32"}`} key={label}>{label}</button>)}</div>
+            </div>
+            
             <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[.06]"><div className="h-full rounded-full bg-gradient-to-r from-amber-200 via-pink-300 to-violet-300 transition-all" style={{ width: `${success ? 100 : progress}%` }} /></div>
           </div>
 

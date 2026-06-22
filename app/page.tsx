@@ -39,7 +39,7 @@ export default async function Home() {
         <Reveal>
           <div>
             <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200/80">TECH TATVA</p>
-            <h1 className="mt-5 max-w-5xl text-5xl font-semibold leading-[1.1] tracking-[-0.04em] text-white md:mt-6 md:text-7xl lg:text-[104px] lg:leading-[1.05]">
+            <h1 className="mt-5 max-w-5xl text-4xl xs:text-5xl sm:text-6xl font-semibold leading-[1.1] tracking-[-0.04em] text-white md:mt-6 md:text-7xl lg:text-[104px] lg:leading-[1.05]">
               Enter the next room.
             </h1>
             <p className="mt-6 max-w-2xl text-[15px] leading-8 text-white/66 md:mt-8 md:text-lg md:leading-9 md:text-white/62">
@@ -68,7 +68,7 @@ export default async function Home() {
         </Reveal>
 
         <Reveal delay={.12}>
-          <div className="relative hidden lg:block">
+          <div className="relative mt-10 lg:mt-0 block lg:block">
             <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-violet-500/18 via-fuchsia-500/10 to-transparent blur-2xl"/>
             <div className="aurora-shell relative rounded-[2rem] p-5">
               <div className="rounded-[1.5rem] border border-white/[.08] bg-white/[.035] p-5">
