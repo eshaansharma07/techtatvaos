@@ -394,5 +394,5 @@ export async function deleteResource(resource: AdminResource, id: string) {
   if (resource === "recruitmentTeams") return RecruitmentTeam.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "recruitmentRoles") return RecruitmentRole.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "recruitmentQuestions") return RecruitmentQuestion.findByIdAndUpdate(id, { active: false }, { new: true });
-  if (resource === "recruitmentApplications") return RecruitmentApplication.findByIdAndUpdate(id, { status: "rejected", $push: { timeline: { action: "rejected", note: "Archived from portal", at: new Date() } } }, { new: true });
+  if (resource === "recruitmentApplications") return RecruitmentApplication.findByIdAndDelete(id);
 }

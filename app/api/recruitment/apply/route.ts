@@ -11,7 +11,11 @@ const optionalUrl = z
   .string()
   .trim()
   .optional()
-  .transform((value) => value || "")
+  .transform((value) => {
+    const text = value || "";
+    if (!text) return "";
+    return /^https?:\/\//i.test(text) ? text : `https://${text}`;
+  })
   .refine((value) => !value || /^https?:\/\/.+/i.test(value), { message: "Enter a valid URL starting with http:// or https://" });
 
 const applySchema = z.object({

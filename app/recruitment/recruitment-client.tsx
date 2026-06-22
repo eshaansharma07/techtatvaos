@@ -49,6 +49,12 @@ function empty(value: unknown) {
   return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
 }
 
+function normalizeOptionalUrl(value: unknown) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  return /^https?:\/\//i.test(text) ? text : `https://${text}`;
+}
+
 export function RecruitmentClient({ data }: { data: RecruitmentData }) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<Record<string, any>>({});
@@ -115,10 +121,20 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
     if (!canContinue()) return;
     setBusy(true);
     setError("");
+    const payload = {
+      ...form,
+      linkedin: normalizeOptionalUrl(form.linkedin),
+      github: normalizeOptionalUrl(form.github),
+      portfolio: normalizeOptionalUrl(form.portfolio),
+      team,
+      role,
+      answers,
+      files
+    };
     const res = await fetch("/api/recruitment/apply", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, team, role, answers, files })
+      body: JSON.stringify(payload)
     });
     const result = await res.json().catch(() => ({}));
     setBusy(false);
@@ -186,7 +202,10 @@ function LandingPanel({ open, status, closingDate }: { open: boolean; status: st
 }
 
 function PersonalPanel({ form, update }: { form: Record<string, any>; update: (name: string, value: any) => void }) {
-  return <div><h2 className="text-3xl font-semibold tracking-[-.04em]">Your signal.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{personalFields.map(([name, label, type]) => <label className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/35" key={name}>{label}{["linkedin", "github", "portfolio"].includes(name) ? <span className="ml-1 text-white/25">(Optional)</span> : null}<input value={form[name] || ""} onChange={(event) => update(name, event.target.value)} type={type} required={!["linkedin", "github", "portfolio"].includes(name)} className="mt-2 w-full rounded-2xl border border-white/[.08] bg-black/25 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none focus:border-violet-300/45" /></label>)}</div></div>;
+  return <div><h2 className="text-3xl font-semibold tracking-[-.04em]">Your signal.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{personalFields.map(([name, label, type]) => {
+    const optionalLink = ["linkedin", "github", "portfolio"].includes(name);
+    return <label className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/35" key={name}>{label}{optionalLink ? <span className="ml-1 text-white/25">(Optional)</span> : null}<input value={form[name] || ""} onChange={(event) => update(name, event.target.value)} onBlur={() => optionalLink ? update(name, normalizeOptionalUrl(form[name])) : null} type={optionalLink ? "text" : type} inputMode={optionalLink ? "url" : undefined} required={!optionalLink} className="mt-2 w-full rounded-2xl border border-white/[.08] bg-black/25 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none focus:border-violet-300/45" /></label>;
+  })}</div></div>;
 }
 
 function UploadBox({ label, uploadFile, file, uploading }: { label: string; uploadFile: (label: string, file?: File) => void; file?: FileAsset; uploading: boolean }) {
