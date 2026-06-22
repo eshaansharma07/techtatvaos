@@ -60,17 +60,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
               />
             </div>
           </div>
-          <div>
-            <span className="text-[9px] font-semibold tracking-[.2em] text-white/35 uppercase block mb-3 md:text-right">Sponsors &amp; Partners</span>
-            <div className="flex flex-wrap items-center gap-3 md:justify-end">
-              <div className="flex h-11 items-center justify-center rounded-xl border border-white/[.06] bg-white/[.025] px-4 text-xs font-semibold tracking-wider text-white/35 select-none hover:bg-white/[.05] transition duration-300">
-                IBM
-              </div>
-              <div className="flex h-11 items-center justify-center rounded-xl border border-dashed border-white/[.08] bg-transparent px-4 text-[10px] font-semibold tracking-wider text-white/20 select-none">
-                + Partner
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </footer>
