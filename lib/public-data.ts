@@ -47,6 +47,7 @@ export type PublicEvent = {
   endAt?: string;
   team?: string;
   registrations: number;
+  certEventLogo?: string;
 };
 
 export type PublicTeam = {
@@ -118,7 +119,7 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
 export async function getPublicEvent(slug: string) {
   await connectDB();
   const event = await Event.findOne({ slug, status: { $in: ["published", "active", "completed"] } })
-    .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors")
+    .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
     .populate("team", "name")
     .populate("leads", "name email")
     .populate("sponsors", "name logo website level")
@@ -154,6 +155,7 @@ export async function getPublicEvent(slug: string) {
       website: sponsor.website,
       level: sponsor.level
     })),
+    certEventLogo: record.certEventLogo || "",
     registrations
   });
 }

@@ -51,6 +51,11 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           <div className="pointer-events-none absolute right-[-12%] top-[-20%] h-96 w-96 rounded-full bg-fuchsia-400/16 blur-[120px]" />
           <div className="relative grid items-center gap-8 lg:grid-cols-[.86fr_1.14fr]">
             <div className="max-w-3xl">
+              {event.certEventLogo ? (
+                <div className="mb-5 inline-flex items-center justify-center rounded-2xl bg-white/[0.04] border border-white/10 p-3 h-14 w-14 backdrop-blur-md">
+                  <img src={event.certEventLogo} alt="" className="h-full w-full object-contain" />
+                </div>
+              ) : null}
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-[10px] font-bold tracking-[.24em] text-violet-100/80">
                 <Sparkles size={12} />
                 {(event.category || "EVENT").toUpperCase()}
