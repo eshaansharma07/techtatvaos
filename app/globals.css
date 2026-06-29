@@ -698,9 +698,9 @@ body:before {
 }
 .brand-orb {
   position: absolute;
-  left: -18px;
-  height: 78px;
-  width: 78px;
+  left: -12px;
+  height: 52px;
+  width: 52px;
   border-radius: 999px;
   background: radial-gradient(circle, rgba(168,85,247,.32), transparent 64%);
   filter: blur(18px);
@@ -711,8 +711,8 @@ body:before {
 .brand-mark-wrap {
   position: relative;
   display: grid;
-  height: 56px;
-  width: 64px;
+  height: 38px;
+  width: 44px;
   place-items: center;
   overflow: visible;
 }
@@ -745,8 +745,8 @@ body:before {
 .brand-mark {
   position: relative;
   z-index: 2;
-  height: 54px;
-  width: 60px;
+  height: 36px;
+  width: 40px;
   object-fit: contain;
   filter: drop-shadow(0 0 12px rgba(168,85,247,.46)) drop-shadow(0 0 24px rgba(236,72,153,.18));
   animation: brandFloat 4.4s ease-in-out infinite;
@@ -755,8 +755,8 @@ body:before {
   position: relative;
   z-index: 2;
   display: grid;
-  height: 48px;
-  width: 48px;
+  height: 32px;
+  width: 32px;
   place-items: center;
   color: #c4b5fd;
   filter: drop-shadow(0 0 18px rgba(168,85,247,.4));
@@ -785,7 +785,7 @@ body:before {
   position: relative;
   display: inline-block;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.75rem, 3vw, 2.75rem);
+  font-size: clamp(1.2rem, 1.8vw, 1.45rem);
   font-style: italic;
   font-weight: 800;
   letter-spacing: -.055em;
@@ -926,10 +926,10 @@ body:before {
 }
 
 @media (max-width: 640px) {
-  .brand-lockup { gap: .55rem; }
-  .brand-mark-wrap { height: 46px; width: 50px; }
-  .brand-mark { height: 44px; width: 48px; }
-  .brand-title { font-size: 1.7rem; }
+  .brand-lockup { gap: .5rem; }
+  .brand-mark-wrap { height: 32px; width: 36px; }
+  .brand-mark { height: 30px; width: 32px; }
+  .brand-title { font-size: 1.15rem; }
   .loader-core {
     width: min(92vw, 420px);
     padding: 2rem 1.25rem;
