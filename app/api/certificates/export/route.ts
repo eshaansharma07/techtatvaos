@@ -164,8 +164,8 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Certificate export failed", error);
-    return NextResponse.json({ error: "Certificate export failed. Please try again after a moment." }, { status: 500 });
+    return NextResponse.json({ error: `Certificate export failed: ${error.message || error}` }, { status: 500 });
   }
 }
