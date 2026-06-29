@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+import path from "path";
 import { PDFDocument, rgb, StandardFonts, degrees, type PDFFont, type PDFPage, type RGB } from "pdf-lib";
 
 export type CertificateKind = "participation" | "winner";
@@ -33,18 +35,17 @@ type CertificatePdfJob = {
 const A4_WIDTH = 841.89;
 const A4_HEIGHT = 595.28;
 
-// Color palette matching the HTML templates
+// Modern warm light color palette
 const COLORS = {
-  darkNavy: rgb(13 / 255, 17 / 255, 64 / 255),       // #0d1140
-  mediumBlue: rgb(44 / 255, 68 / 255, 208 / 255),     // #2c44d0
-  lightBlue: rgb(98 / 255, 120 / 255, 224 / 255),     // #6278e0
-  paleBlue: rgb(128 / 255, 144 / 255, 192 / 255),     // #8090c0
-  headerBg: rgb(10 / 255, 10 / 255, 24 / 255),        // #0a0a18
-  bodyBg: rgb(244 / 255, 246 / 255, 255 / 255),       // #f4f6ff
-  footerBg: rgb(232 / 255, 236 / 255, 255 / 255),     // #e8ecff
+  bg: rgb(253 / 255, 253 / 255, 254 / 255),           // Clean off-white background
+  slate900: rgb(15 / 255, 23 / 255, 42 / 255),         // Slate-900 for title & primary labels
+  slate600: rgb(71 / 255, 85 / 255, 105 / 255),        // Slate-600 for body/description text
+  slate400: rgb(148 / 255, 163 / 255, 184 / 255),      // Slate-400 for dividers
+  indigo: rgb(67 / 255, 56 / 255, 202 / 255),          // Indigo brand color for name/accent
+  gold: rgb(197 / 255, 160 / 255, 89 / 255),           // Gold for winner badge and borders
+  goldBg: rgb(254 / 255, 249 / 255, 195 / 255),        // Light yellow-gold badge background
   white: rgb(1, 1, 1),
-  sigName: rgb(26 / 255, 40 / 255, 128 / 255),        // #1a2880
-  gold: rgb(160 / 255, 128 / 255, 80 / 255),          // #a08050 (winner accent)
+  sigName: rgb(30 / 255, 41 / 255, 59 / 255),          // Dark slate for signature names
 };
 
 function slugFile(value: string) {
@@ -63,7 +64,6 @@ export function certificateFilename(kind: CertificateKind, config: CertificateCo
   return `${prefix}-${slugFile(config.recipientName)}-${slugFile(config.certNumber)}.pdf`;
 }
 
-// unused but kept for backwards compat
 export function renderCertificateHtml(kind: CertificateKind, config: CertificateConfig) {
   return "";
 }
@@ -77,43 +77,43 @@ function drawCenteredText(page: PDFPage, text: string, y: number, font: PDFFont,
   page.drawText(text, { x: Math.max(x, 20), y, size, font, color, maxWidth });
 }
 
-function drawSignatureBlock(page: PDFPage, centerX: number, baseY: number, name: string, role: string, fonts: { italic: PDFFont; sans: PDFFont }) {
-  const lineWidth = 100;
+function drawSignatureBlock(page: PDFPage, centerX: number, baseY: number, name: string, role: string, fonts: { italic: PDFFont; sans: PDFFont; sansBold: PDFFont }) {
+  const lineWidth = 120;
   const lineY = baseY + 26;
 
   // Signature line
   page.drawLine({
     start: { x: centerX - lineWidth / 2, y: lineY },
     end: { x: centerX + lineWidth / 2, y: lineY },
-    thickness: 0.8,
-    color: COLORS.mediumBlue,
-    opacity: 0.5,
+    thickness: 0.5,
+    color: COLORS.slate400,
+    opacity: 0.6,
   });
 
-  // Signature name (italic serif)
+  // Signature name (Times Italic)
   if (name) {
-    const nameWidth = fonts.italic.widthOfTextAtSize(name, 10);
+    const nameWidth = fonts.italic.widthOfTextAtSize(name, 11);
     page.drawText(name, {
       x: centerX - nameWidth / 2,
       y: lineY + 6,
-      size: 10,
+      size: 11,
       font: fonts.italic,
       color: COLORS.sigName,
     });
   }
 
-  // Role label
-  const roleWidth = fonts.sans.widthOfTextAtSize(role.toUpperCase(), 6);
+  // Role label (Sleek uppercase Sans)
+  const roleWidth = fonts.sansBold.widthOfTextAtSize(role.toUpperCase(), 7);
   page.drawText(role.toUpperCase(), {
     x: centerX - roleWidth / 2,
     y: baseY + 12,
-    size: 6,
-    font: fonts.sans,
-    color: COLORS.paleBlue,
+    size: 7,
+    font: fonts.sansBold,
+    color: COLORS.slate600,
   });
 }
 
-// --- Main PDF generation using pdf-lib ---
+// --- Main PDF generation ---
 
 async function buildCertificatePdf(kind: CertificateKind, config: CertificateConfig): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
@@ -127,149 +127,124 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
   const timesBold = await doc.embedFont(StandardFonts.TimesRomanBold);
 
   const isWinner = kind === "winner";
-  const accentColor = isWinner ? COLORS.gold : COLORS.mediumBlue;
-  const lightAccent = isWinner ? rgb(160 / 255, 128 / 255, 80 / 255) : COLORS.lightBlue;
+  const accentColor = isWinner ? COLORS.gold : COLORS.indigo;
+
+  // Load and embed logos from the public folder dynamically
+  let cuLogo: any = null;
+  let ttLogo: any = null;
+  try {
+    const cuLogoBytes = readFileSync(path.join(process.cwd(), "public/chandigarh-university-logo.png"));
+    cuLogo = await doc.embedPng(cuLogoBytes);
+  } catch (e) {
+    console.error("Failed to load CU logo", e);
+  }
+
+  try {
+    const ttLogoBytes = readFileSync(path.join(process.cwd(), "public/logo-colour.png"));
+    ttLogo = await doc.embedPng(ttLogoBytes);
+  } catch (e) {
+    console.error("Failed to load Tech Tatva logo", e);
+  }
 
   // ── Background ──
   page.drawRectangle({
     x: 0, y: 0, width: A4_WIDTH, height: A4_HEIGHT,
-    color: COLORS.bodyBg,
+    color: COLORS.bg,
   });
 
-  // ── Header strip (dark band) ──
-  const headerHeight = A4_HEIGHT * 0.14;
-  const headerY = A4_HEIGHT - headerHeight;
+  // ── Modern Double Border Insets ──
   page.drawRectangle({
-    x: 0, y: headerY, width: A4_WIDTH, height: headerHeight,
-    color: COLORS.headerBg,
-  });
-
-  // Gradient line under header
-  page.drawLine({
-    start: { x: 0, y: headerY },
-    end: { x: A4_WIDTH, y: headerY },
-    thickness: 2.5,
-    color: accentColor,
-    opacity: 0.7,
-  });
-
-  // Header text — university name on left, club name on right
-  const headerTextY = headerY + headerHeight / 2 - 6;
-  page.drawText("CHANDIGARH UNIVERSITY", {
-    x: 40,
-    y: headerTextY + 4,
-    size: 13,
-    font: helveticaBold,
-    color: COLORS.white,
-  });
-
-  page.drawText("TECH TATVA", {
-    x: A4_WIDTH - 40 - helveticaBold.widthOfTextAtSize("TECH TATVA", 13),
-    y: headerTextY + 8,
-    size: 13,
-    font: helveticaBold,
-    color: rgb(1, 1, 1),
-  });
-  page.drawText("TECHNICAL SOCIETY", {
-    x: A4_WIDTH - 40 - helvetica.widthOfTextAtSize("TECHNICAL SOCIETY", 7),
-    y: headerTextY - 4,
-    size: 7,
-    font: helvetica,
-    color: rgb(1, 1, 1),
-    opacity: 0.5,
-  });
-
-  // ── Inner border ──
-  const borderInset = 18;
-  const borderTop = headerY - 8;
-  const borderBottom = A4_HEIGHT * 0.06 + 8;
-  page.drawRectangle({
-    x: borderInset + 10,
-    y: borderBottom,
-    width: A4_WIDTH - 2 * (borderInset + 10),
-    height: borderTop - borderBottom,
-    borderColor: accentColor,
-    borderWidth: 0.6,
+    x: 20,
+    y: 20,
+    width: A4_WIDTH - 40,
+    height: A4_HEIGHT - 40,
+    borderColor: COLORS.slate400,
+    borderWidth: 1,
     opacity: 0,
-    borderOpacity: 0.2,
+    borderOpacity: 0.3,
   });
 
-  // ── Grid watermark pattern ──
-  const gridSpacing = 22;
-  for (let gx = borderInset + 10; gx < A4_WIDTH - borderInset; gx += gridSpacing) {
+  page.drawRectangle({
+    x: 25,
+    y: 25,
+    width: A4_WIDTH - 50,
+    height: A4_HEIGHT - 50,
+    borderColor: COLORS.gold,
+    borderWidth: 0.5,
+    opacity: 0,
+    borderOpacity: 0.4,
+  });
+
+  // Corner grid design details (modern design accent)
+  const drawCornerAccent = (cx: number, cy: number, dx: number, dy: number) => {
     page.drawLine({
-      start: { x: gx, y: borderBottom },
-      end: { x: gx, y: borderTop },
-      thickness: 0.3,
-      color: accentColor,
-      opacity: 0.03,
+      start: { x: cx, y: cy },
+      end: { x: cx + dx, y: cy },
+      thickness: 1,
+      color: COLORS.gold,
+    });
+    page.drawLine({
+      start: { x: cx, y: cy },
+      end: { x: cx, y: cy + dy },
+      thickness: 1,
+      color: COLORS.gold,
+    });
+  };
+  
+  const accentOffset = 32;
+  const accentLen = 15;
+  drawCornerAccent(accentOffset, accentOffset, accentLen, accentLen); // Bottom-left
+  drawCornerAccent(A4_WIDTH - accentOffset, accentOffset, -accentLen, accentLen); // Bottom-right
+  drawCornerAccent(accentOffset, A4_HEIGHT - accentOffset, accentLen, -accentLen); // Top-left
+  drawCornerAccent(A4_WIDTH - accentOffset, A4_HEIGHT - accentOffset, -accentLen, -accentLen); // Top-right
+
+  // ── Header Section ──
+  // Chandigarh University Logo (Left)
+  if (cuLogo) {
+    page.drawImage(cuLogo, {
+      x: 48,
+      y: A4_HEIGHT - 82,
+      width: 120,
+      height: 40,
     });
   }
-  for (let gy = borderBottom; gy < borderTop; gy += gridSpacing) {
-    page.drawLine({
-      start: { x: borderInset + 10, y: gy },
-      end: { x: A4_WIDTH - borderInset - 10, y: gy },
-      thickness: 0.3,
-      color: accentColor,
-      opacity: 0.03,
+
+  // Tech Tatva Club Logo (Right)
+  if (ttLogo) {
+    page.drawImage(ttLogo, {
+      x: A4_WIDTH - 96,
+      y: A4_HEIGHT - 85,
+      width: 45,
+      height: 45,
     });
   }
 
-  // ── Certificate body content ──
-  const centerY = (headerY + borderBottom) / 2;
-  let currentY = centerY + 120;
+  // Sleek Divider line under header
+  page.drawLine({
+    start: { x: 48, y: A4_HEIGHT - 98 },
+    end: { x: A4_WIDTH - 48, y: A4_HEIGHT - 98 },
+    thickness: 0.5,
+    color: COLORS.slate400,
+    opacity: 0.3,
+  });
 
-  // Sub-heading
-  const subText = isWinner ? "CERTIFICATE OF ACHIEVEMENT" : "CERTIFICATE";
-  drawCenteredText(page, subText, currentY, helvetica, 7, lightAccent);
-  currentY -= 6;
+  // ── Content Layout ──
+  let currentY = A4_HEIGHT - 145;
 
-  // Main title
-  const titleLine1 = isWinner ? "Certificate of" : "Certificate of";
-  const titleLine2 = isWinner ? "Achievement" : "Participation";
-  drawCenteredText(page, titleLine1, currentY, timesRoman, 32, COLORS.darkNavy);
-  currentY -= 36;
-  drawCenteredText(page, titleLine2, currentY, timesItalic, 32, lightAccent);
+  // Title
+  const titleText = isWinner ? "CERTIFICATE OF EXCELLENCE" : "CERTIFICATE OF PARTICIPATION";
+  drawCenteredText(page, titleText, currentY, timesBold, 22, COLORS.slate900);
   currentY -= 20;
 
-  // Ornamental divider
-  const dividerWidth = 200;
-  const divCenterX = A4_WIDTH / 2;
-  page.drawLine({
-    start: { x: divCenterX - dividerWidth / 2, y: currentY },
-    end: { x: divCenterX - 5, y: currentY },
-    thickness: 0.8,
-    color: accentColor,
-    opacity: 0.4,
-  });
-  // Diamond
-  const diamondSize = 3;
-  page.drawRectangle({
-    x: divCenterX - diamondSize,
-    y: currentY - diamondSize,
-    width: diamondSize * 2,
-    height: diamondSize * 2,
-    color: accentColor,
-    rotate: degrees(45),
-  });
-  page.drawLine({
-    start: { x: divCenterX + 5, y: currentY },
-    end: { x: divCenterX + dividerWidth / 2, y: currentY },
-    thickness: 0.8,
-    color: accentColor,
-    opacity: 0.4,
-  });
-  currentY -= 18;
+  // Subtitle / presented label
+  drawCenteredText(page, "THIS CERTIFICATE IS PROUDLY PRESENTED TO", currentY, helvetica, 7.5, COLORS.slate600);
+  currentY -= 36;
 
-  // "PROUDLY PRESENTED TO"
-  drawCenteredText(page, "PROUDLY PRESENTED TO", currentY, helvetica, 7, COLORS.paleBlue);
-  currentY -= 22;
-
-  // Recipient name
+  // Recipient Name
   const recipientName = config.recipientName || "Recipient Name";
-  drawCenteredText(page, recipientName, currentY, timesBold, 28, COLORS.darkNavy);
+  drawCenteredText(page, recipientName, currentY, timesBold, 28, COLORS.indigo);
 
-  // Underline for name
+  // Decorative name underline
   const nameWidth = timesBold.widthOfTextAtSize(recipientName, 28);
   const nameX = (A4_WIDTH - nameWidth) / 2;
   currentY -= 6;
@@ -277,104 +252,91 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
     start: { x: nameX, y: currentY },
     end: { x: nameX + nameWidth, y: currentY },
     thickness: 1.2,
-    color: accentColor,
-    opacity: 0.6,
+    color: COLORS.gold,
+    opacity: 0.7,
   });
-  currentY -= 12;
+  currentY -= 24;
 
-  // Position badge (winner only)
+  // Winner Category Badge (if winner)
   if (isWinner && config.position) {
-    const posText = config.position.trim();
-    const badgeWidth = helveticaBold.widthOfTextAtSize(posText, 9) + 36;
+    const posText = config.position.toUpperCase();
+    const badgeWidth = helveticaBold.widthOfTextAtSize(posText, 9) + 20;
     const badgeX = (A4_WIDTH - badgeWidth) / 2;
+    
+    // Draw pill badge
     page.drawRectangle({
       x: badgeX,
-      y: currentY - 6,
+      y: currentY - 5,
       width: badgeWidth,
-      height: 20,
-      borderColor: accentColor,
-      borderWidth: 0.8,
-      color: COLORS.footerBg,
+      height: 18,
+      color: COLORS.goldBg,
+      borderColor: COLORS.gold,
+      borderWidth: 0.5,
     });
-    const posTextX = badgeX + (badgeWidth - helveticaBold.widthOfTextAtSize(posText, 9)) / 2;
+    
     page.drawText(posText, {
-      x: posTextX,
-      y: currentY,
+      x: badgeX + 10,
+      y: currentY + 1,
       size: 9,
       font: helveticaBold,
-      color: accentColor,
+      color: COLORS.gold,
     });
-    currentY -= 22;
+    currentY -= 28;
   }
 
-  // Event description
-  currentY -= 6;
-  const eventLine1 = `for ${isWinner ? "outstanding performance" : "active participation"} in the event`;
-  drawCenteredText(page, eventLine1, currentY, helvetica, 8, COLORS.paleBlue);
-  currentY -= 16;
-  drawCenteredText(page, config.eventName.toUpperCase(), currentY, helveticaBold, 10, accentColor);
-  currentY -= 14;
+  // Description text paragraph
+  const descLine1 = isWinner 
+    ? "for outstanding performance and securing rank in the event" 
+    : "for successfully participating in the event";
+  
+  drawCenteredText(page, descLine1, currentY, helvetica, 9.5, COLORS.slate600);
+  currentY -= 18;
+  
+  drawCenteredText(page, config.eventName.toUpperCase(), currentY, helveticaBold, 11, accentColor);
+  currentY -= 18;
+  
+  const descLine3 = `held on ${config.eventDate} organized by Tech Tatva Club, Chandigarh University.`;
+  drawCenteredText(page, descLine3, currentY, helvetica, 9.5, COLORS.slate600);
 
-  const orgLine = `organized by Tech Tatva, Chandigarh University`;
-  drawCenteredText(page, orgLine, currentY, helvetica, 8, COLORS.paleBlue);
-  currentY -= 14;
-
-  if (config.eventDate) {
-    drawCenteredText(page, `on ${config.eventDate}`, currentY, helvetica, 8, COLORS.paleBlue);
-  }
-
-  // ── Signatures ──
-  const sigY = borderBottom + 30;
+  // ── Signature Blocks ──
+  const sigY = 65;
   const sigSpacing = A4_WIDTH / 4;
 
-  const sigData = [
+  const sigs = [
     { name: config.hod || "", role: "Head of Department" },
     { name: config.facultyAdvisor || "", role: "Faculty Advisor" },
     { name: config.coFacultyAdvisor || "", role: "Co-Faculty Advisor" },
   ];
 
-  sigData.forEach((sig, i) => {
+  sigs.forEach((sig, i) => {
     drawSignatureBlock(page, sigSpacing * (i + 1), sigY, sig.name, sig.role, {
       italic: timesItalic,
       sans: helvetica,
+      sansBold: helveticaBold,
     });
   });
 
-  // ── Footer bar ──
-  const footerHeight = A4_HEIGHT * 0.055;
-  page.drawRectangle({
-    x: 0, y: 0, width: A4_WIDTH, height: footerHeight,
-    color: COLORS.footerBg,
-  });
-
-  // Gradient line above footer
-  page.drawLine({
-    start: { x: 0, y: footerHeight },
-    end: { x: A4_WIDTH, y: footerHeight },
-    thickness: 1.5,
-    color: accentColor,
-    opacity: 0.5,
-  });
-
-  // Footer text
-  const footerTextY = footerHeight / 2 - 3;
-  page.drawText("CHANDIGARH UNIVERSITY  |  TECH TATVA TECHNICAL SOCIETY", {
-    x: 32,
-    y: footerTextY,
-    size: 6,
+  // ── Footer minimal details ──
+  const footerY = 32;
+  page.drawText("TECH TATVA CLUB  |  CHANDIGARH UNIVERSITY", {
+    x: 48,
+    y: footerY,
+    size: 7,
     font: helvetica,
-    color: COLORS.paleBlue,
+    color: COLORS.slate600,
+    opacity: 0.6,
   });
 
   if (config.certNumber) {
     const certNoText = `No. ${config.certNumber}`;
-    const certNoWidth = helvetica.widthOfTextAtSize(certNoText, 6);
+    const certNoWidth = helvetica.widthOfTextAtSize(certNoText, 7);
     page.drawText(certNoText, {
-      x: A4_WIDTH - 32 - certNoWidth,
-      y: footerTextY,
-      size: 6,
+      x: A4_WIDTH - 48 - certNoWidth,
+      y: footerY,
+      size: 7,
       font: helvetica,
-      color: COLORS.paleBlue,
+      color: COLORS.slate600,
+      opacity: 0.6,
     });
   }
 
@@ -389,7 +351,6 @@ export async function renderCertificatePdfs(jobs: CertificatePdfJob[]): Promise<
   if (!jobs.length) return [];
   
   const results: Buffer[] = [];
-  // Process in batches of 8 for efficiency
   const batchSize = 8;
   for (let i = 0; i < jobs.length; i += batchSize) {
     const batch = jobs.slice(i, i + batchSize);
