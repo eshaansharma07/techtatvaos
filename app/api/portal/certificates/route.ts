@@ -160,7 +160,8 @@ export async function GET(req: NextRequest) {
       certEventDate: (event as any).certEventDate || new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "long", year: "numeric" }).format(new Date((event as any).startAt || Date.now())).replace(/^0/, "") || "",
       certHod: (event as any).certHod || branding.hodName || "",
       certFacultyAdvisor: (event as any).certFacultyAdvisor || branding.facultyAdvisorName || "",
-      certCoFacultyAdvisor: (event as any).certCoFacultyAdvisor || branding.coFacultyAdvisorName || ""
+      certCoFacultyAdvisor: (event as any).certCoFacultyAdvisor || branding.coFacultyAdvisorName || "",
+      certEventLogo: (event as any).certEventLogo || ""
     };
 
     return NextResponse.json({
@@ -200,7 +201,8 @@ export async function POST(req: NextRequest) {
           certEventDate: settings.certEventDate,
           certHod: settings.certHod,
           certFacultyAdvisor: settings.certFacultyAdvisor,
-          certCoFacultyAdvisor: settings.certCoFacultyAdvisor
+          certCoFacultyAdvisor: settings.certCoFacultyAdvisor,
+          certEventLogo: settings.certEventLogo
         }
       });
     }

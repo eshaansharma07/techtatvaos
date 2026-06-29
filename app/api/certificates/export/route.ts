@@ -83,6 +83,7 @@ export async function GET(req: NextRequest) {
         hod: event.certHod || branding.hodName || "",
         facultyAdvisor: event.certFacultyAdvisor || branding.facultyAdvisorName || "",
         coFacultyAdvisor: event.certCoFacultyAdvisor || branding.coFacultyAdvisorName || "",
+        certEventLogo: event.certEventLogo || "",
         position: cert.rank !== "Participation" ? cert.rank : undefined,
         positionEmoji: cert.rank !== "Participation" ? (emojiMap[cert.rank] || "") : undefined
       };
@@ -134,6 +135,7 @@ export async function GET(req: NextRequest) {
           hod: (event as any).certHod || branding.hodName || "",
           facultyAdvisor: (event as any).certFacultyAdvisor || branding.facultyAdvisorName || "",
           coFacultyAdvisor: (event as any).certCoFacultyAdvisor || branding.coFacultyAdvisorName || "",
+          certEventLogo: (event as any).certEventLogo || "",
           position: cert.rank !== "Participation" ? cert.rank : undefined,
           positionEmoji: cert.rank !== "Participation" ? (emojiMap[cert.rank] || "") : undefined
         };

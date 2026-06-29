@@ -2073,7 +2073,8 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
     certEventDate: "",
     certHod: "",
     certFacultyAdvisor: "",
-    certCoFacultyAdvisor: ""
+    certCoFacultyAdvisor: "",
+    certEventLogo: ""
   });
 
   const [candidates, setCandidates] = useState<any[]>([]);
@@ -2102,7 +2103,8 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
         certEventDate: "",
         certHod: "",
         certFacultyAdvisor: "",
-        certCoFacultyAdvisor: ""
+        certCoFacultyAdvisor: "",
+        certEventLogo: ""
       });
       return;
     }
@@ -2420,6 +2422,31 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
                 <div className="sm:col-span-2">
                   <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Co-Faculty Advisor Name</label>
                   <input type="text" value={settings.certCoFacultyAdvisor} onChange={e => setSettings({...settings, certCoFacultyAdvisor: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/50" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Event Logo</label>
+                  <div className="flex gap-2">
+                    <input type="text" value={settings.certEventLogo || ""} onChange={e => setSettings({...settings, certEventLogo: e.target.value})} placeholder="Event Logo URL or Upload" className="flex-1 rounded-lg border border-white/[.07] bg-black/25 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/50" />
+                    <label className="portal-mini-button cursor-pointer flex items-center justify-center rounded-xl bg-white/[0.06] px-3 py-2 text-[10px] font-bold text-white hover:bg-white/[0.1] transition">
+                      Upload
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setPanel(`Uploading ${file.name}...`);
+                        const form = new FormData();
+                        form.append("file", file);
+                        form.append("folder", "tech-tatva-os/events");
+                        const res = await fetch("/api/portal/upload", { method: "POST", body: form });
+                        const result = await res.json();
+                        if (!res.ok) {
+                          setPanel(result.error || "Upload failed");
+                          return;
+                        }
+                        setSettings(prev => ({ ...prev, certEventLogo: result.url }));
+                        setPanel(`Uploaded ${file.name}. Save changes to apply.`);
+                      }} />
+                    </label>
+                  </div>
                 </div>
               </div>
               

@@ -24,6 +24,7 @@ export type CertificateConfig = {
   hod?: string;
   facultyAdvisor?: string;
   coFacultyAdvisor?: string;
+  certEventLogo?: string;
 };
 
 type CertificatePdfJob = {
@@ -35,7 +36,7 @@ type CertificatePdfJob = {
 const A4_WIDTH = 841.89;
 const A4_HEIGHT = 595.28;
 
-// Modern warm light color palette
+// Modern premium color palette
 const COLORS = {
   bg: rgb(253 / 255, 253 / 255, 254 / 255),           // Clean off-white background
   slate900: rgb(15 / 255, 23 / 255, 42 / 255),         // Slate-900 for title & primary labels
@@ -129,7 +130,7 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
   const isWinner = kind === "winner";
   const accentColor = isWinner ? COLORS.gold : COLORS.indigo;
 
-  // Load and embed logos from the public folder dynamically
+  // Load and embed standard logos from the public folder dynamically
   let cuLogo: any = null;
   let ttLogo: any = null;
   try {
@@ -146,11 +147,59 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
     console.error("Failed to load Tech Tatva logo", e);
   }
 
+  // Load and embed custom Event Logo from remote URL if provided
+  let eventLogoImage: any = null;
+  if (config.certEventLogo) {
+    try {
+      const res = await fetch(config.certEventLogo);
+      if (res.ok) {
+        const arrayBuffer = await res.arrayBuffer();
+        const imageBuffer = Buffer.from(arrayBuffer);
+        if (config.certEventLogo.toLowerCase().includes(".png")) {
+          eventLogoImage = await doc.embedPng(imageBuffer);
+        } else {
+          eventLogoImage = await doc.embedJpg(imageBuffer);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load custom event logo from URL", e);
+    }
+  }
+
   // ── Background ──
   page.drawRectangle({
     x: 0, y: 0, width: A4_WIDTH, height: A4_HEIGHT,
     color: COLORS.bg,
   });
+
+  // ── Watermark Geometric Background Grids (constellations) ──
+  const drawConcentricCircles = (cx: number, cy: number, maxRadius: number) => {
+    for (let r = 30; r <= maxRadius; r += 30) {
+      page.drawCircle({
+        x: cx,
+        y: cy,
+        size: r,
+        borderColor: COLORS.gold,
+        borderWidth: 0.4,
+        opacity: 0,
+        borderOpacity: 0.04,
+      });
+    }
+  };
+
+  drawConcentricCircles(45, 45, 180); // Bottom-left corner
+  drawConcentricCircles(A4_WIDTH - 45, A4_HEIGHT - 45, 180); // Top-right corner
+
+  // ── Tech Tatva Center Watermark Logo ──
+  if (ttLogo) {
+    page.drawImage(ttLogo, {
+      x: (A4_WIDTH - 240) / 2,
+      y: (A4_HEIGHT - 240) / 2 - 20,
+      width: 240,
+      height: 240,
+      opacity: 0.035, // Faint watermark
+    });
+  }
 
   // ── Modern Double Border Insets ──
   page.drawRectangle({
@@ -159,20 +208,20 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
     width: A4_WIDTH - 40,
     height: A4_HEIGHT - 40,
     borderColor: COLORS.slate400,
-    borderWidth: 1,
+    borderWidth: 1.5,
     opacity: 0,
     borderOpacity: 0.3,
   });
 
   page.drawRectangle({
-    x: 25,
-    y: 25,
-    width: A4_WIDTH - 50,
-    height: A4_HEIGHT - 50,
+    x: 26,
+    y: 26,
+    width: A4_WIDTH - 52,
+    height: A4_HEIGHT - 52,
     borderColor: COLORS.gold,
     borderWidth: 0.5,
     opacity: 0,
-    borderOpacity: 0.4,
+    borderOpacity: 0.5,
   });
 
   // Corner grid design details (modern design accent)
@@ -180,13 +229,13 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
     page.drawLine({
       start: { x: cx, y: cy },
       end: { x: cx + dx, y: cy },
-      thickness: 1,
+      thickness: 1.5,
       color: COLORS.gold,
     });
     page.drawLine({
       start: { x: cx, y: cy },
       end: { x: cx, y: cy + dy },
-      thickness: 1,
+      thickness: 1.5,
       color: COLORS.gold,
     });
   };
@@ -229,7 +278,21 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
   });
 
   // ── Content Layout ──
-  let currentY = A4_HEIGHT - 145;
+  let currentY = A4_HEIGHT - 135;
+
+  // Custom Event Logo (if uploaded by admin)
+  if (eventLogoImage) {
+    page.drawImage(eventLogoImage, {
+      x: (A4_WIDTH - 46) / 2,
+      y: currentY - 46,
+      width: 46,
+      height: 46,
+    });
+    currentY -= 62;
+  } else {
+    // Add extra vertical spacing if no custom event logo is present
+    currentY -= 15;
+  }
 
   // Title
   const titleText = isWinner ? "CERTIFICATE OF EXCELLENCE" : "CERTIFICATE OF PARTICIPATION";
