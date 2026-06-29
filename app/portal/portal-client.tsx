@@ -2064,54 +2064,309 @@ function winnerDisplay(event: any, key: "winnerFirst" | "winnerSecond" | "winner
 function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (value: string) => void; open: (drawer: any) => void }) {
   const events = data.events || [];
   const [selected, setSelected] = useState(events[0] ? idOf(events[0]) : "");
-  const selectedEvent = events.find((event: any) => idOf(event) === selected);
-  const attendanceMap = useMemo<Map<string, any>>(
-    () => new Map((data.attendance || []).map((row: any) => [`${idOf(row.event)}:${idOf(row.user)}`, row])),
-    [data.attendance]
-  );
-  const registrations = (data.registrations || []).filter((registration: any) => idOf(registration.event) === selected);
-  const participants = registrations.flatMap((registration: any) => {
-    const leader = registration.user
-      ? [{
-          registration: idOf(registration),
-          user: idOf(registration.user),
-          name: registration.user.name,
-          uid: registration.user.uid,
-          program: registration.user.program,
-          semester: registration.user.semester,
-          mode: registration.mode || "individual",
-          teamName: registration.teamName || ""
-        }]
-      : [];
-    const members = (registration.teamMembers || []).map((member: any) => ({
-      registration: idOf(registration),
-      user: idOf(member.user || member),
-      name: member.name || member.user?.name,
-      uid: member.uid || member.user?.uid,
-      program: member.program || member.user?.program,
-      semester: member.semester || member.user?.semester,
-      mode: "team",
-      teamName: registration.teamName || ""
-    }));
-    return [...leader, ...members];
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
+  const [settings, setSettings] = useState({
+    certEventName: "",
+    certEventDate: "",
+    certHod: "",
+    certFacultyAdvisor: "",
+    certCoFacultyAdvisor: ""
   });
-  const presentParticipants = participants.filter((row: any) => attendanceMap.get(`${selected}:${row.user}`)?.status === "present");
-  const guardedDownload = (valid: boolean, message: string) => (event: MouseEvent<HTMLAnchorElement>) => {
-    if (!valid) {
-      event.preventDefault();
-      setPanel(message);
+
+  const [candidates, setCandidates] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [rankFilter, setRankFilter] = useState("All");
+  const [selectedCands, setSelectedCands] = useState<string[]>([]);
+  const [bulkRank, setBulkRank] = useState("Participation");
+
+  // Add Candidate modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newCand, setNewCand] = useState({
+    recipientName: "",
+    uid: "",
+    email: "",
+    program: "",
+    semester: "",
+    rank: "Participation"
+  });
+
+  // Fetch certificate settings & candidates
+  useEffect(() => {
+    if (!selected) {
+      setCandidates([]);
+      setSettings({
+        certEventName: "",
+        certEventDate: "",
+        certHod: "",
+        certFacultyAdvisor: "",
+        certCoFacultyAdvisor: ""
+      });
+      return;
+    }
+
+    let active = true;
+    async function fetchCertData() {
+      setLoading(true);
+      setPanel("Loading candidates and certificate settings...");
+      try {
+        const res = await fetch(`/api/portal/certificates?event=${selected}`);
+        const json = await res.json();
+        if (active) {
+          if (res.ok) {
+            setSettings(json.settings || {});
+            setCandidates(json.candidates || []);
+            setPanel(`Loaded ${json.candidates?.length || 0} candidates for the selected event.`);
+          } else {
+            setPanel(json.error || "Failed to load certificate data");
+          }
+        }
+      } catch (e) {
+        console.error(e);
+        if (active) setPanel("Failed to load certificate data.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    fetchCertData();
+    return () => { active = false; };
+  }, [selected, setPanel]);
+
+  // Save configurations and candidates
+  async function saveSettingsAndRanks(candList = candidates, silent = false) {
+    if (!selected) return false;
+    setSaving(true);
+    if (!silent) setPanel("Saving certificate settings and candidates list...");
+    try {
+      const res = await fetch("/api/portal/certificates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: selected,
+          settings,
+          candidates: candList
+        })
+      });
+      const json = await res.json();
+      if (res.ok) {
+        if (json.certificates) {
+          setCandidates(prev => prev.map(c => {
+            const match = json.certificates.find((dbC: any) => 
+              (dbC.user && c.user && dbC.user === c.user) ||
+              (dbC.recipientName === c.recipientName && dbC.email === c.email)
+            );
+            if (match) {
+              return {
+                ...c,
+                id: idOf(match),
+                certNumber: match.certNumber || c.certNumber,
+                isGenerated: !!match.certNumber
+              };
+            }
+            return c;
+          }));
+        }
+        if (!silent) setPanel("Certificate configuration saved successfully.");
+        return true;
+      } else {
+        setPanel(json.error || "Failed to save configurations.");
+      }
+    } catch (e) {
+      console.error(e);
+      setPanel("Failed to save configurations.");
+    } finally {
+      setSaving(false);
+    }
+    return false;
+  }
+
+  // Generate ZIP of all certificates
+  async function generateAllCertificates() {
+    if (!selected) return;
+
+    if (!settings.certHod || !settings.certFacultyAdvisor) {
+      setPanel("Validation Error: Please make sure HOD Name and Faculty Advisor Name are set before generating.");
+      return;
+    }
+
+    const emptyNameCand = candidates.find(c => !c.recipientName?.trim());
+    if (emptyNameCand) {
+      setPanel("Validation Error: All candidates must have a non-empty name.");
+      return;
+    }
+
+    setGenerating(true);
+    setPanel("Saving configurations and allocating certificate numbers...");
+
+    try {
+      const preparedCandidates = candidates.map(c => ({
+        ...c,
+        generateCertNum: !c.certNumber
+      }));
+
+      const saveOk = await saveSettingsAndRanks(preparedCandidates, true);
+      if (!saveOk) {
+        setGenerating(false);
+        return;
+      }
+
+      setPanel("Rendering certificates in high-fidelity parallel batches and compiling ZIP...");
+
+      const res = await fetch(`/api/certificates/export?event=${selected}&format=zip`);
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error || "Certificate generation failed.");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `certificates-${selected}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      setPanel("Success! Zipped certificates successfully downloaded.");
+
+      // Refresh candidates list
+      const refreshRes = await fetch(`/api/portal/certificates?event=${selected}`);
+      const refreshJson = await refreshRes.json();
+      if (refreshRes.ok) {
+        setCandidates(refreshJson.candidates || []);
+      }
+    } catch (e: any) {
+      console.error(e);
+      setPanel(e.message || "Failed to generate certificates. Please try again.");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  // Add ad-hoc candidate locally
+  function handleAddCandidate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCand.recipientName.trim()) return;
+
+    const item = {
+      id: "",
+      user: null,
+      recipientName: newCand.recipientName,
+      uid: newCand.uid || "",
+      email: newCand.email || "",
+      program: newCand.program || "",
+      semester: newCand.semester ? parseInt(newCand.semester, 10) : null,
+      rank: newCand.rank,
+      certNumber: "",
+      isGenerated: false,
+      mode: "individual",
+      teamName: "",
+      isPresent: false
+    };
+
+    setCandidates(prev => [...prev, item]);
+    setShowAddModal(false);
+    setNewCand({
+      recipientName: "",
+      uid: "",
+      email: "",
+      program: "",
+      semester: "",
+      rank: "Participation"
+    });
+    setPanel(`Added manual candidate: ${item.recipientName}. Don't forget to click Save changes.`);
+  }
+
+  // Delete candidate
+  async function handleDeleteCandidate(index: number, id: string) {
+    if (id && /^[0-9a-fA-F]{24}$/.test(id)) {
+      setPanel("Deleting certificate record from database...");
+      try {
+        const res = await fetch(`/api/admin/certificates/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          setCandidates(prev => prev.filter((_, i) => i !== index));
+          setPanel("Deleted certificate record.");
+        } else {
+          setPanel("Failed to delete certificate record from database.");
+        }
+      } catch (e) {
+        console.error(e);
+        setPanel("Failed to delete certificate record.");
+      }
+    } else {
+      setCandidates(prev => prev.filter((_, i) => i !== index));
+      setPanel("Removed draft candidate.");
+    }
+  }
+
+  // Update candidate fields locally
+  function updateCandidateField(index: number, field: string, value: any) {
+    setCandidates(prev => prev.map((c, i) => i === index ? { ...c, [field]: value } : c));
+  }
+
+  // Bulk Rank Assign
+  function handleBulkAssign(rank: string) {
+    if (!selectedCands.length) {
+      setPanel("Select at least one candidate first.");
+      return;
+    }
+    setCandidates(prev => prev.map((c) => {
+      const candKey = c.user || `${c.recipientName}-${c.email}`;
+      if (selectedCands.includes(candKey)) {
+        return { ...c, rank };
+      }
+      return c;
+    }));
+    setPanel(`Assigned rank '${rank}' to ${selectedCands.length} selected candidates.`);
+    setSelectedCands([]);
+  }
+
+  // Filter & Search Candidates
+  const filteredCandidates = useMemo(() => {
+    return candidates.filter(c => {
+      const matchesSearch = c.recipientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            c.uid?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            c.certNumber?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesRank = rankFilter === "All" || c.rank === rankFilter;
+      return matchesSearch && matchesRank;
+    });
+  }, [candidates, searchQuery, rankFilter]);
+
+  const toggleSelectAll = () => {
+    if (selectedCands.length === filteredCandidates.length) {
+      setSelectedCands([]);
+    } else {
+      setSelectedCands(filteredCandidates.map(c => c.user || `${c.recipientName}-${c.email}`));
     }
   };
 
+  const toggleSelect = (candKey: string) => {
+    setSelectedCands(prev => 
+      prev.includes(candKey) ? prev.filter(k => k !== candKey) : [...prev, candKey]
+    );
+  };
+
+  // Summary counts
+  const totalCount = candidates.length;
+  const generatedCount = candidates.filter(c => c.isGenerated).length;
+  const winnerCounts = candidates.filter(c => ["1st Place", "2nd Place", "3rd Place"].includes(c.rank)).length;
+
   return (
     <div className="mt-7 grid gap-5 xl:grid-cols-[1fr_.42fr] animate-in fade-in duration-200">
+      {/* Left Panel: Configuration & Candidates */}
       <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.02] via-transparent to-fuchsia-500/[0.02]" />
         
+        {/* Header with event selector */}
         <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] pb-5 mb-6">
           <div>
-            <h3 className="text-base font-bold text-white tracking-tight">Certificate Generation</h3>
-            <p className="mt-1 text-xs text-white/38">Exports use your HTML certificate templates to generate high-fidelity PDFs.</p>
+            <h3 className="text-base font-bold text-white tracking-tight">Certificate Generator</h3>
+            <p className="mt-1 text-xs text-white/38">Configure settings, assign ranks, and generate PDF certificates.</p>
           </div>
           
           <select value={selected} onChange={(event) => setSelected(event.target.value)} className="rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-xs text-white outline-none focus:border-violet-400/40 transition">
@@ -2120,117 +2375,284 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
           </select>
         </div>
 
-        <div className="grid gap-3 grid-cols-3 mb-6 relative z-10">
-          <div className="rounded-2xl border border-white/[.06] bg-white/[.02] p-4 transition duration-200 hover:-translate-y-0.5">
-            <p className="text-[9px] uppercase tracking-[.18em] text-white/35">Registered</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-white">{participants.length}</p>
-          </div>
-          <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
-            <p className="text-[9px] uppercase tracking-[.18em] text-emerald-300/60">Present</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-emerald-300">{presentParticipants.length}</p>
-          </div>
-          <div className="rounded-2xl border border-violet-500/15 bg-violet-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
-            <p className="text-[9px] uppercase tracking-[.18em] text-violet-300/60">Winner Slots</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-violet-300">
-              {[selectedEvent?.winnerFirst, selectedEvent?.winnerSecond, selectedEvent?.winnerThird].filter(Boolean).length}/3
-            </p>
-          </div>
-        </div>
+        {selected ? (
+          <>
+            {/* Stats Summary cards */}
+            <div className="grid gap-3 grid-cols-3 mb-6 relative z-10">
+              <div className="rounded-2xl border border-white/[.06] bg-white/[.02] p-4 transition duration-200 hover:-translate-y-0.5">
+                <p className="text-[9px] uppercase tracking-[.18em] text-white/35">Total Candidates</p>
+                <p className="mt-2 text-2xl font-bold tracking-tight text-white">{totalCount}</p>
+              </div>
+              <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
+                <p className="text-[9px] uppercase tracking-[.18em] text-emerald-300/60">Generated</p>
+                <p className="mt-2 text-2xl font-bold tracking-tight text-emerald-300">{generatedCount} / {totalCount}</p>
+              </div>
+              <div className="rounded-2xl border border-violet-500/15 bg-violet-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
+                <p className="text-[9px] uppercase tracking-[.18em] text-violet-300/60">Winners</p>
+                <p className="mt-2 text-2xl font-bold tracking-tight text-violet-300">{winnerCounts}</p>
+              </div>
+            </div>
 
-        {presentParticipants.length ? (
-          <div className="relative overflow-hidden rounded-2xl border border-white/[.06]">
-            <div className="hidden grid-cols-[1.1fr_1fr_1.1fr_.7fr_auto] gap-3 bg-white/[.04] px-5 py-3.5 text-[10px] font-bold uppercase tracking-wider text-white/40 border-b border-white/[0.06] md:grid">
-              <span>Present Candidate</span>
-              <span>UID</span>
-              <span>Program</span>
-              <span>Mode</span>
-              <span className="text-right pr-4">Action</span>
-            </div>
-            
-            <div className="max-h-[380px] overflow-y-auto overscroll-contain divide-y divide-white/[0.04] mobile-tabs">
-              {presentParticipants.map((row: any) => (
-                <div className="grid gap-3 bg-black/10 px-5 py-4 text-xs hover:bg-white/[0.01] transition md:grid-cols-[1.1fr_1fr_1.1fr_.7fr_auto] md:items-center" key={`${row.registration}-${row.user}`}>
-                  <div>
-                    <p className="font-bold text-white/80 tracking-tight">{row.name || "Unnamed candidate"}</p>
-                    {row.teamName ? <p className="mt-1 text-[10px] text-violet-300/65 font-medium">Team: {row.teamName}</p> : null}
-                  </div>
-                  
-                  <span className="rounded-2xl border border-white/[.06] bg-white/[.02] px-3 py-2 text-white/48 md:border-0 md:bg-transparent md:px-0 md:py-0">{row.uid || "-"}</span>
-                  <span className="rounded-2xl border border-white/[.06] bg-white/[.02] px-3 py-2 text-white/48 md:border-0 md:bg-transparent md:px-0 md:py-0">{row.program || "-"}{row.semester ? ` / Sem ${row.semester}` : ""}</span>
-                  <span className="rounded-2xl border border-white/[.06] bg-white/[.02] px-3 py-2 capitalize text-white/48 md:border-0 md:bg-transparent md:px-0 md:py-0">{row.mode}</span>
-                  
-                  <div className="flex justify-end pr-4">
-                    <a download onClick={() => setPanel(`Downloading participation certificate for ${row.name || "candidate"}...`)} className="portal-command-button flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-center text-[10px] font-bold hover:scale-[1.02] active:scale-95 transition" href={`/api/certificates/export?event=${selected}&type=participation&format=pdf&candidate=${row.user}`}>
-                      <Download size={11} /> Participation PDF
-                    </a>
-                  </div>
+            {/* Template Overrides Form */}
+            <div className="rounded-2xl border border-white/[.06] bg-white/[0.015] p-5 mb-6 relative z-10">
+              <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-4">
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Certificate Template Options</h4>
+                <span className="text-[10px] text-white/30">Overrides default branding / details</span>
+              </div>
+              
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Event Name on Certificate</label>
+                  <input type="text" value={settings.certEventName} onChange={e => setSettings({...settings, certEventName: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/50" placeholder="e.g. Workshop on AI" />
                 </div>
-              ))}
+                <div>
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Event Date on Certificate</label>
+                  <input type="text" value={settings.certEventDate} onChange={e => setSettings({...settings, certEventDate: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/50" placeholder="e.g. 28th June 2026" />
+                </div>
+                <div>
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">HOD Name</label>
+                  <input type="text" value={settings.certHod} onChange={e => setSettings({...settings, certHod: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/50" />
+                </div>
+                <div>
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Faculty Advisor Name</label>
+                  <input type="text" value={settings.certFacultyAdvisor} onChange={e => setSettings({...settings, certFacultyAdvisor: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/50" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Co-Faculty Advisor Name</label>
+                  <input type="text" value={settings.certCoFacultyAdvisor} onChange={e => setSettings({...settings, certCoFacultyAdvisor: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/50" />
+                </div>
+              </div>
+              
+              <div className="flex justify-end mt-4">
+                <button type="button" onClick={() => saveSettingsAndRanks()} disabled={saving || loading} className="portal-mini-button flex items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-[10px] font-bold text-white hover:bg-white/[0.08] transition">
+                  {saving ? "Saving Settings..." : "Save Template Settings"}
+                </button>
+              </div>
             </div>
-          </div>
+
+            {/* Candidates Management Search, Filter & Bulk operations */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 relative z-10">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Search query box */}
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-white/30"><Search size={14} /></span>
+                  <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search candidate..." className="rounded-xl border border-white/[.07] bg-black/25 pl-9 pr-3 py-2 text-xs text-white outline-none focus:border-violet-400/40 w-44 sm:w-56" />
+                </div>
+
+                {/* Filter rank dropdown */}
+                <select value={rankFilter} onChange={e => setRankFilter(e.target.value)} className="rounded-xl border border-white/[.07] bg-black/25 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/40">
+                  <option value="All">All Ranks</option>
+                  <option value="1st Place">1st Place</option>
+                  <option value="2nd Place">2nd Place</option>
+                  <option value="3rd Place">3rd Place</option>
+                  <option value="Participation">Participation</option>
+                </select>
+              </div>
+
+              {/* Add Candidate trigger button */}
+              <button type="button" onClick={() => setShowAddModal(true)} className="portal-mini-button flex items-center justify-center gap-1 rounded-xl bg-violet-600/30 border border-violet-500/30 px-3 py-2 text-xs font-bold text-violet-200 hover:bg-violet-600/40 transition">
+                <Plus size={13} /> Add Candidate
+              </button>
+            </div>
+
+            {/* Candidates Table */}
+            {filteredCandidates.length ? (
+              <div className="relative overflow-hidden rounded-2xl border border-white/[.06] z-10 bg-black/10">
+                <div className="hidden grid-cols-[auto_1.5fr_1.2fr_1.3fr_1.3fr_auto] gap-3 bg-white/[.04] px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40 border-b border-white/[0.06] md:grid items-center">
+                  <input type="checkbox" checked={selectedCands.length > 0 && selectedCands.length === filteredCandidates.length} onChange={toggleSelectAll} className="rounded border-white/20 bg-black/40 text-violet-500 focus:ring-0 focus:ring-offset-0 h-3.5 w-3.5" />
+                  <span>Candidate Name</span>
+                  <span>UID / Email</span>
+                  <span>Rank / Position</span>
+                  <span>Cert. Number</span>
+                  <span className="text-right pr-3">Action</span>
+                </div>
+                
+                <div className="max-h-[420px] overflow-y-auto overscroll-contain divide-y divide-white/[0.04]">
+                  {filteredCandidates.map((row: any, idx: number) => {
+                    const candKey = row.user || `${row.recipientName}-${row.email}`;
+                    const isSel = selectedCands.includes(candKey);
+                    
+                    return (
+                      <div className={`grid gap-3 px-4 py-3 text-xs hover:bg-white/[0.01] transition items-center md:grid-cols-[auto_1.5fr_1.2fr_1.3fr_1.3fr_auto] ${isSel ? "bg-violet-500/[0.03]" : ""}`} key={`${row.id || "row"}-${idx}`}>
+                        {/* Checkbox */}
+                        <div className="flex items-center">
+                          <input type="checkbox" checked={isSel} onChange={() => toggleSelect(candKey)} className="rounded border-white/20 bg-black/40 text-violet-500 focus:ring-0 focus:ring-offset-0 h-3.5 w-3.5 cursor-pointer" />
+                        </div>
+
+                        {/* Name Input */}
+                        <div>
+                          <input type="text" value={row.recipientName} onChange={e => updateCandidateField(idx, "recipientName", e.target.value)} className="w-full bg-transparent border-0 p-0 text-white/90 font-bold focus:ring-0 tracking-tight outline-none" />
+                          {row.teamName ? <span className="text-[9px] text-violet-400 block mt-0.5">Team: {row.teamName}</span> : null}
+                          {row.isPresent ? <span className="inline-block mt-0.5 rounded px-1.5 py-0.5 text-[8px] bg-emerald-500/10 text-emerald-300 font-medium border border-emerald-500/10">Present</span> : null}
+                        </div>
+                        
+                        {/* UID & Email */}
+                        <div className="text-white/40 flex flex-col gap-0.5">
+                          <span className="font-semibold text-white/60">{row.uid || "-"}</span>
+                          <span className="text-[9px] truncate max-w-[140px]">{row.email || "-"}</span>
+                        </div>
+
+                        {/* Rank Selector */}
+                        <div>
+                          <select value={row.rank} onChange={e => updateCandidateField(idx, "rank", e.target.value)} className="rounded-lg border border-white/[.08] bg-black/45 px-2.5 py-1.5 text-xs text-white/80 outline-none focus:border-violet-400/40">
+                            <option value="Participation">Participation</option>
+                            <option value="1st Place">1st Place</option>
+                            <option value="2nd Place">2nd Place</option>
+                            <option value="3rd Place">3rd Place</option>
+                          </select>
+                        </div>
+
+                        {/* Cert Number Override */}
+                        <div>
+                          <input type="text" value={row.certNumber || ""} onChange={e => updateCandidateField(idx, "certNumber", e.target.value)} placeholder="Auto-generated" className="w-full rounded-lg border border-white/[.08] bg-black/45 px-2.5 py-1.5 text-xs text-white/80 outline-none focus:border-violet-400/40 font-mono text-[10px]" />
+                        </div>
+                        
+                        {/* Action buttons */}
+                        <div className="flex items-center justify-end gap-2 pr-2">
+                          {row.isGenerated && row.certNumber ? (
+                            <a download title="Download PDF certificate" className="portal-mini-button p-2 text-white/60 hover:text-white" href={`/api/certificates/export?event=${selected}&candidate=${row.user || ""}&certificateId=${row.id || ""}&format=pdf`}>
+                              <Download size={13} />
+                            </a>
+                          ) : null}
+                          <button type="button" title="Remove candidate" onClick={() => handleDeleteCandidate(idx, row.id)} className="portal-mini-button p-2 text-red-400/50 hover:bg-red-500/10 hover:text-red-300">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <p className="rounded-2xl border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium relative z-10">
+                No candidates found matching the query.
+              </p>
+            )}
+
+            <div className="flex justify-between items-center mt-4 relative z-10">
+              <span className="text-[10px] text-white/30">Total loaded: {filteredCandidates.length} candidate rows</span>
+              <button type="button" onClick={() => saveSettingsAndRanks()} disabled={saving || loading} className="portal-command-button flex items-center justify-center gap-1.5 rounded-2xl px-5 py-3 text-xs font-bold transition hover:-translate-y-0.5">
+                {saving ? "Saving Changes..." : "Save Candidate Ranks"}
+              </button>
+            </div>
+          </>
         ) : (
-          <p className="rounded-2xl border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium">
-            No present candidates yet. Mark attendance present before exporting participation certificates.
+          <p className="rounded-2xl border border-white/[.06] bg-white/[.02] p-12 text-sm text-white/35 text-center font-medium relative z-10">
+            Please select an event from the dropdown above to manage certificates.
           </p>
         )}
       </div>
 
+      {/* Right Panel: Side Controls */}
       <div className="grid gap-5 self-start">
-        <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-fuchsia-500/[0.04]" />
-          
-          <div className="relative">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Winner Selection</h3>
-            
-            <div className="grid gap-4 mt-4 mb-6">
-              {[
-                { label: "1st Place", key: "winnerFirst", color: "from-amber-400 to-yellow-300 text-amber-200" },
-                { label: "2nd Place", key: "winnerSecond", color: "from-slate-300 to-zinc-200 text-slate-200" },
-                { label: "3rd Place", key: "winnerThird", color: "from-amber-700 to-amber-600 text-amber-600/90" }
-              ].map(({ label, key, color }) => (
-                <div className="relative flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.015] p-3.5 transition hover:border-white/10" key={key}>
-                  <span className={`grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br ${color} text-black text-xs font-black shadow-lg`}>
-                    {label[0]}
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[.15em] text-white/30">{label}</p>
-                    <p className="mt-1 text-xs font-semibold text-white/85 truncate max-w-[200px]">
-                      {winnerDisplay(selectedEvent, key as any)}
-                    </p>
-                  </div>
+        {selected ? (
+          <>
+            {/* Bulk Assignment Panel */}
+            <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-fuchsia-500/[0.04]" />
+              
+              <div className="relative">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Bulk Actions</h3>
+                <p className="text-xs leading-relaxed text-white/40 mb-4">
+                  Select candidates on the left to batch assign ranks. Selected: <span className="font-bold text-violet-300">{selectedCands.length}</span>
+                </p>
+                
+                <div className="grid gap-3">
+                  <select value={bulkRank} onChange={e => setBulkRank(e.target.value)} className="w-full rounded-xl border border-white/[.07] bg-black/45 px-3 py-2.5 text-xs text-white outline-none focus:border-violet-400/40">
+                    <option value="Participation">Participation</option>
+                    <option value="1st Place">1st Place</option>
+                    <option value="2nd Place">2nd Place</option>
+                    <option value="3rd Place">3rd Place</option>
+                  </select>
+                  
+                  <button type="button" onClick={() => handleBulkAssign(bulkRank)} className="portal-mini-button w-full flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.06] px-4 py-3 text-center text-xs font-bold text-white/80 hover:bg-white/[0.1] hover:text-white transition">
+                    Apply to Selected ({selectedCands.length})
+                  </button>
                 </div>
-              ))}
+              </div>
             </div>
 
-            <button type="button" onClick={() => selectedEvent ? open({ resource: "events", title: `Select winners for ${selectedEvent.title}`, fields: config.Events.fields, item: selectedEvent }) : setPanel("Select an event before choosing winners.")} className="portal-command-button w-full flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-xs font-semibold hover:-translate-y-0.5 transition">
-              <Award size={14} /> Choose / Update Winners
-            </button>
-          </div>
-        </div>
-
-        <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/[0.03] via-transparent to-transparent" />
-          
-          <div className="relative">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Winner Certificate PDFs</h3>
-            <p className="text-xs leading-relaxed text-white/40 mb-5">
-              Generate and download winner certificates for the selected positions.
-            </p>
-            
-            <div className="grid gap-3 sm:grid-cols-3 relative z-10">
-              <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerFirst), "Select a 1st place winner first.")} className="portal-mini-button flex items-center justify-center gap-1.5 rounded-xl px-3 py-3 text-center text-[10px] font-bold text-white/70 hover:bg-white/[0.06] hover:-translate-y-0.5 hover:text-white transition" href={selected ? `/api/certificates/export?event=${selected}&type=winner&format=pdf&place=1` : "#"}>
-                <Download size={11} /> 1st Place
-              </a>
-              <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerSecond), "Select a 2nd place winner first.")} className="portal-mini-button flex items-center justify-center gap-1.5 rounded-xl px-3 py-3 text-center text-[10px] font-bold text-white/70 hover:bg-white/[0.06] hover:-translate-y-0.5 hover:text-white transition" href={selected ? `/api/certificates/export?event=${selected}&type=winner&format=pdf&place=2` : "#"}>
-                <Download size={11} /> 2nd Place
-              </a>
-              <a download onClick={guardedDownload(Boolean(selected && selectedEvent?.winnerThird), "Select a 3rd place winner first.")} className="portal-mini-button flex items-center justify-center gap-1.5 rounded-xl px-3 py-3 text-center text-[10px] font-bold text-white/70 hover:bg-white/[0.06] hover:-translate-y-0.5 hover:text-white transition" href={selected ? `/api/certificates/export?event=${selected}&type=winner&format=pdf&place=3` : "#"}>
-                <Download size={11} /> 3rd Place
-              </a>
+            {/* Main Certificate Generator Action */}
+            <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/[0.03] via-transparent to-transparent" />
+              
+              <div className="relative">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Generate ZIP Package</h3>
+                <p className="text-xs leading-relaxed text-white/40 mb-5">
+                  Generates and allocates cert numbers for all candidates, renders A4 landscape PDFs, and packages them in a downloadable ZIP.
+                </p>
+                
+                <button type="button" disabled={generating || loading || candidates.length === 0} onClick={generateAllCertificates} className="portal-command-button w-full flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-xs font-semibold hover:-translate-y-0.5 transition disabled:opacity-60">
+                  <Award size={14} /> {generating ? "Generating PDFs..." : "Generate & Download ZIP"}
+                </button>
+                
+                {generating ? (
+                  <div className="mt-4 flex flex-col items-center justify-center gap-2 border border-violet-500/10 rounded-2xl p-4 bg-violet-500/[0.02] animate-pulse">
+                    <RefreshCw className="animate-spin text-violet-400" size={16} />
+                    <span className="text-[10px] text-violet-300 font-bold uppercase tracking-wider">Processing PDF Chunks</span>
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        ) : null}
       </div>
+
+      {/* Manual Candidate Addition Modal Popup */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-[#111016] p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-4">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add Manual Candidate</h3>
+              <button type="button" onClick={() => setShowAddModal(false)} className="text-white/40 hover:text-white"><X size={16} /></button>
+            </div>
+            
+            <form onSubmit={handleAddCandidate} className="grid gap-4">
+              <div>
+                <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Candidate Full Name *</label>
+                <input type="text" required value={newCand.recipientName} onChange={e => setNewCand({...newCand, recipientName: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2.5 text-xs text-white outline-none focus:border-violet-400/50" placeholder="e.g. Jane Doe" />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">UID / Roll Number</label>
+                  <input type="text" value={newCand.uid} onChange={e => setNewCand({...newCand, uid: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2.5 text-xs text-white outline-none focus:border-violet-400/50" placeholder="e.g. 22BCS1000" />
+                </div>
+                <div>
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Email Address</label>
+                  <input type="email" value={newCand.email} onChange={e => setNewCand({...newCand, email: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2.5 text-xs text-white outline-none focus:border-violet-400/50" placeholder="e.g. jane@domain.com" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Program / Branch</label>
+                  <input type="text" value={newCand.program} onChange={e => setNewCand({...newCand, program: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2.5 text-xs text-white outline-none focus:border-violet-400/50" placeholder="e.g. BE-CSE" />
+                </div>
+                <div>
+                  <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Semester</label>
+                  <input type="number" min="1" max="10" value={newCand.semester} onChange={e => setNewCand({...newCand, semester: e.target.value})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2.5 text-xs text-white outline-none focus:border-violet-400/50" placeholder="e.g. 4" />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[9px] tracking-wider text-white/40 block mb-1 uppercase">Assign Rank</label>
+                <select value={newCand.rank} onChange={e => setNewCand({...newCand, rank: e.target.value as any})} className="w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-2.5 text-xs text-white outline-none focus:border-violet-400/50">
+                  <option value="Participation">Participation</option>
+                  <option value="1st Place">1st Place</option>
+                  <option value="2nd Place">2nd Place</option>
+                  <option value="3rd Place">3rd Place</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-2">
+                <button type="button" onClick={() => setShowAddModal(false)} className="rounded-xl border border-white/[.07] bg-white/[0.02] px-4 py-2.5 text-xs font-bold text-white hover:bg-white/[0.06] transition">Cancel</button>
+                <button type="submit" className="rounded-xl bg-violet-600 hover:bg-violet-700 px-4 py-2.5 text-xs font-bold text-white transition">Add to List</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

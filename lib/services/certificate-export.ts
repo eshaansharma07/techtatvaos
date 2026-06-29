@@ -23,9 +23,9 @@ export type CertificateConfig = {
   positionEmoji?: string;
   eventDate: string;
   certNumber: string;
-  facultyChampion: string;
-  clubChampion?: string;
-  secretary: string;
+  hod?: string;
+  facultyAdvisor?: string;
+  coFacultyAdvisor?: string;
 };
 
 type CertificatePdfJob = {
@@ -78,9 +78,9 @@ export function renderCertificateHtml(kind: CertificateKind, config: Certificate
   eventName       : ${jsString(config.eventName)},
   eventDate       : ${jsString(config.eventDate)},
   certNumber      : ${jsString(config.certNumber)},
-  facultyChampion : ${jsString(config.facultyChampion)},
-  clubChampion    : ${jsString(config.clubChampion || "")},
-  secretary       : ${jsString(config.secretary)},
+  hod             : ${jsString(config.hod || "")},
+  facultyAdvisor  : ${jsString(config.facultyAdvisor || "")},
+  coFacultyAdvisor: ${jsString(config.coFacultyAdvisor || "")},
   position        : ${jsString(position)},
   positionEmoji   : ${jsString(positionEmoji)},
 };`
@@ -89,9 +89,9 @@ export function renderCertificateHtml(kind: CertificateKind, config: Certificate
   eventName       : ${jsString(config.eventName)},
   eventDate       : ${jsString(config.eventDate)},
   certNumber      : ${jsString(config.certNumber)},
-  facultyChampion : ${jsString(config.facultyChampion)},
-  clubChampion    : ${jsString(config.clubChampion || "")},
-  secretary       : ${jsString(config.secretary)},
+  hod             : ${jsString(config.hod || "")},
+  facultyAdvisor  : ${jsString(config.facultyAdvisor || "")},
+  coFacultyAdvisor: ${jsString(config.coFacultyAdvisor || "")},
 };`;
 
   html = html.replace(/const CONFIG = \{[\s\S]*?\};/, configBlock);
@@ -99,8 +99,9 @@ export function renderCertificateHtml(kind: CertificateKind, config: Certificate
   html = replaceIdText(html, "cfg-event", config.eventName);
   html = replaceIdText(html, "cfg-date", config.eventDate);
   html = replaceIdText(html, "cfg-certno", `No. ${config.certNumber}`);
-  html = replaceIdText(html, "cfg-faculty", config.facultyChampion);
-  html = replaceIdText(html, "cfg-secretary", config.secretary);
+  html = replaceIdText(html, "cfg-hod", config.hod || "");
+  html = replaceIdText(html, "cfg-faculty", config.facultyAdvisor || "");
+  html = replaceIdText(html, "cfg-cofaculty", config.coFacultyAdvisor || "");
   if (kind === "winner") html = replaceIdText(html, "cfg-position", `${positionEmoji ? `${positionEmoji}  ` : ""}${position}`);
   return html;
 }
@@ -110,59 +111,11 @@ function slugFile(value: string) {
 }
 
 export async function renderCertificatePdf(kind: CertificateKind, config: CertificateConfig) {
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([841.89, 595.28]);
-  const backgroundPath = path.join(process.cwd(), "certificate-templates", "docx-backgrounds", kind === "winner" ? "winner.jpg" : "participation.jpg");
-  const background = await pdfDoc.embedJpg(readFileSync(backgroundPath));
-  page.drawImage(background, { x: 0, y: 0, width: 841.89, height: 595.28 });
-
-  const serif = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  const serifBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
-  const serifItalic = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic);
-  const sans = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const sansBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const ink = rgb(0.025, 0.03, 0.12);
-  const muted = rgb(0.39, 0.41, 0.5);
-  const plum = rgb(0.34, 0.12, 0.42);
-  const gold = rgb(0.57, 0.43, 0.08);
-  const fill = kind === "winner" ? rgb(0.985, 0.975, 0.935) : rgb(0.965, 0.975, 0.995);
-
-  const drawCentered = (text: string, y: number, font: PDFFont, size: number, color: RGB, maxWidth = 520) => {
-    const clean = String(text || "").trim();
-    if (!clean) return;
-    let fontSize = size;
-    while (font.widthOfTextAtSize(clean, fontSize) > maxWidth && fontSize > 8) fontSize -= 1;
-    page.drawText(clean, {
-      x: (841.89 - font.widthOfTextAtSize(clean, fontSize)) / 2,
-      y,
-      size: fontSize,
-      font,
-      color
-    });
-  };
-  const cover = (x: number, y: number, width: number, height: number) => {
-    page.drawRectangle({ x, y, width, height, color: fill, opacity: 0.96 });
-  };
-
-  cover(255, 246, 335, 42);
-  drawCentered(config.recipientName, 258, serifBold, 30, ink, 360);
-  cover(290, 196, 265, 22);
-  drawCentered(config.eventName, 204, sansBold, 8.5, kind === "winner" ? gold : plum, 280);
-  cover(306, 132, 120, 24);
-  drawCentered(config.facultyChampion, 142, serifItalic, 10.5, ink, 150);
-  cover(448, 132, 120, 24);
-  drawCentered(config.secretary, 142, serifItalic, 10.5, ink, 150);
-  cover(78, 13, 120, 11);
-  page.drawText(`NO. ${config.certNumber}`.toUpperCase(), { x: 84, y: 16, size: 6.5, font: sans, color: muted });
-  cover(714, 13, 95, 11);
-  page.drawText((config.eventDate || "").toUpperCase(), { x: 724, y: 16, size: 6.5, font: sans, color: muted });
-
-  if (kind === "winner") {
-    cover(375, 241, 94, 18);
-    drawCentered(config.position || "Winner", 247, sansBold, 8.5, gold, 115);
+  const pdfs = await renderCertificatePdfs([{ kind, config }]);
+  if (!pdfs.length) {
+    throw new Error("Failed to render PDF certificate");
   }
-
-  return Buffer.from(await pdfDoc.save());
+  return pdfs[0];
 }
 
 function printableCertificateHtml(kind: CertificateKind, config: CertificateConfig) {
@@ -187,23 +140,30 @@ export async function renderCertificatePdfs(jobs: CertificatePdfJob[]) {
     headless: true
   });
   try {
-    const pdfs: Buffer[] = [];
-    for (const job of jobs) {
-      const page = await browser.newPage();
-      try {
-        await page.setContent(printableCertificateHtml(job.kind, job.config), { waitUntil: "domcontentloaded", timeout: 30000 });
-        await page.emulateMediaType("print");
-        const pdf = await page.pdf({
-          format: "A4",
-          landscape: true,
-          printBackground: true,
-          margin: { top: 0, right: 0, bottom: 0, left: 0 },
-          preferCSSPageSize: true
-        });
-        pdfs.push(Buffer.from(pdf));
-      } finally {
-        await page.close().catch(() => undefined);
-      }
+    const pdfs: Buffer[] = new Array(jobs.length);
+    const batchSize = 8; // Render up to 8 pages concurrently to be efficient and save memory
+    for (let i = 0; i < jobs.length; i += batchSize) {
+      const batch = jobs.slice(i, i + batchSize);
+      await Promise.all(
+        batch.map(async (job, batchIndex) => {
+          const index = i + batchIndex;
+          const page = await browser.newPage();
+          try {
+            await page.setContent(printableCertificateHtml(job.kind, job.config), { waitUntil: "domcontentloaded", timeout: 30000 });
+            await page.emulateMediaType("print");
+            const pdf = await page.pdf({
+              format: "A4",
+              landscape: true,
+              printBackground: true,
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+              preferCSSPageSize: true
+            });
+            pdfs[index] = Buffer.from(pdf);
+          } finally {
+            await page.close().catch(() => undefined);
+          }
+        })
+      );
     }
     return pdfs;
   } finally {

@@ -25,9 +25,9 @@ const CONFIG = {
   eventName       : "Event / Workshop Name",
   eventDate       : "DD Month, YYYY",
   certNumber      : "TT-2025-0001",
-  facultyChampion : "Dr. Faculty Name",
-  secretary       : "Secretary Name",
-  
+  hod             : "HOD Name",
+  facultyAdvisor  : "Faculty Advisor Name",
+  coFacultyAdvisor: "Co-Faculty Advisor Name",
 };
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -36,9 +36,9 @@ window.addEventListener("DOMContentLoaded", () => {
   set("cfg-event",     CONFIG.eventName);
   set("cfg-date",      CONFIG.eventDate);
   set("cfg-certno",    "No. " + CONFIG.certNumber);
-  set("cfg-faculty",   CONFIG.facultyChampion);
-  set("cfg-secretary", CONFIG.secretary);
-  
+  set("cfg-hod",       CONFIG.hod);
+  set("cfg-faculty",   CONFIG.facultyAdvisor);
+  set("cfg-cofaculty", CONFIG.coFacultyAdvisor);
 });
 </script>
 
@@ -290,9 +290,9 @@ body {
 .sig-row {
   display: flex;
   justify-content: center;
-  gap: 60px;
+  gap: 40px;
   margin-top: 16px;
-  width: 80%;
+  width: 90%;
   position: relative; z-index: 1;
 }
 .sig {
@@ -401,14 +401,20 @@ body {
       <div class="sig">
         <div class="sig-space"></div>
         <div class="sig-line"></div>
-        <div class="sig-name" id="cfg-faculty">Dr. Faculty Name</div>
-        <div class="sig-role">Faculty Champion</div>
+        <div class="sig-name" id="cfg-hod">HOD Name</div>
+        <div class="sig-role">HOD</div>
       </div>
       <div class="sig">
         <div class="sig-space"></div>
         <div class="sig-line"></div>
-        <div class="sig-name" id="cfg-secretary">Secretary Name</div>
-        <div class="sig-role">Secretary</div>
+        <div class="sig-name" id="cfg-faculty">Faculty Advisor Name</div>
+        <div class="sig-role">Faculty Advisor</div>
+      </div>
+      <div class="sig">
+        <div class="sig-space"></div>
+        <div class="sig-line"></div>
+        <div class="sig-name" id="cfg-cofaculty">Co-Faculty Advisor Name</div>
+        <div class="sig-role">Co-Faculty Advisor</div>
       </div>
     </div>
   </div>
