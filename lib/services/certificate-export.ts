@@ -284,7 +284,7 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
 
   // Position badge (winner only)
   if (isWinner && config.position) {
-    const posText = `${config.positionEmoji ? config.positionEmoji + "  " : ""}${config.position}`.trim();
+    const posText = config.position.trim();
     const badgeWidth = helveticaBold.widthOfTextAtSize(posText, 9) + 36;
     const badgeX = (A4_WIDTH - badgeWidth) / 2;
     page.drawRectangle({

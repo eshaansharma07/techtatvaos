@@ -2458,8 +2458,7 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
             {/* Candidates Table */}
             {filteredCandidates.length ? (
               <div className="relative overflow-hidden rounded-2xl border border-white/[.06] z-10 bg-black/10">
-                <div className="hidden grid-cols-[auto_1.5fr_1.2fr_1.3fr_1.3fr_auto] gap-3 bg-white/[.04] px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40 border-b border-white/[0.06] md:grid items-center">
-                  <input type="checkbox" checked={selectedCands.length > 0 && selectedCands.length === filteredCandidates.length} onChange={toggleSelectAll} className="rounded border-white/20 bg-black/40 text-violet-500 focus:ring-0 focus:ring-offset-0 h-3.5 w-3.5" />
+                <div className="hidden grid-cols-[2fr_1.2fr_1.3fr_1.3fr_auto] gap-3 bg-white/[.04] px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white/40 border-b border-white/[0.06] md:grid items-center">
                   <span>Candidate Name</span>
                   <span>UID / Email</span>
                   <span>Rank / Position</span>
@@ -2469,16 +2468,8 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
                 
                 <div className="max-h-[420px] overflow-y-auto overscroll-contain divide-y divide-white/[0.04]">
                   {filteredCandidates.map((row: any, idx: number) => {
-                    const candKey = row.user || `${row.recipientName}-${row.email}`;
-                    const isSel = selectedCands.includes(candKey);
-                    
                     return (
-                      <div className={`grid gap-3 px-4 py-3 text-xs hover:bg-white/[0.01] transition items-center md:grid-cols-[auto_1.5fr_1.2fr_1.3fr_1.3fr_auto] ${isSel ? "bg-violet-500/[0.03]" : ""}`} key={`${row.id || "row"}-${idx}`}>
-                        {/* Checkbox */}
-                        <div className="flex items-center">
-                          <input type="checkbox" checked={isSel} onChange={() => toggleSelect(candKey)} className="rounded border-white/20 bg-black/40 text-violet-500 focus:ring-0 focus:ring-offset-0 h-3.5 w-3.5 cursor-pointer" />
-                        </div>
-
+                      <div className="grid gap-3 px-4 py-3 text-xs hover:bg-white/[0.01] transition items-center md:grid-cols-[2fr_1.2fr_1.3fr_1.3fr_auto]" key={`${row.id || "row"}-${idx}`}>
                         {/* Name Input */}
                         <div>
                           <input type="text" value={row.recipientName} onChange={e => updateCandidateField(idx, "recipientName", e.target.value)} className="w-full bg-transparent border-0 p-0 text-white/90 font-bold focus:ring-0 tracking-tight outline-none" />
@@ -2547,51 +2538,85 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
       <div className="grid gap-5 self-start">
         {selected ? (
           <>
-            {/* Bulk Assignment Panel */}
+            {/* Winners Category Download Card */}
             <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-fuchsia-500/[0.04]" />
               
               <div className="relative">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Bulk Actions</h3>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Winners Category</h3>
                 <p className="text-xs leading-relaxed text-white/40 mb-4">
-                  Select candidates on the left to batch assign ranks. Selected: <span className="font-bold text-violet-300">{selectedCands.length}</span>
+                  Download certificates individually for the top 3 winner categories.
                 </p>
                 
-                <div className="grid gap-3">
-                  <select value={bulkRank} onChange={e => setBulkRank(e.target.value)} className="w-full rounded-xl border border-white/[.07] bg-black/45 px-3 py-2.5 text-xs text-white outline-none focus:border-violet-400/40">
-                    <option value="Participation">Participation</option>
-                    <option value="1st Place">1st Place</option>
-                    <option value="2nd Place">2nd Place</option>
-                    <option value="3rd Place">3rd Place</option>
-                  </select>
-                  
-                  <button type="button" onClick={() => handleBulkAssign(bulkRank)} className="portal-mini-button w-full flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.06] px-4 py-3 text-center text-xs font-bold text-white/80 hover:bg-white/[0.1] hover:text-white transition">
-                    Apply to Selected ({selectedCands.length})
-                  </button>
+                <div className="grid gap-3.5">
+                  {/* 1st Place */}
+                  <div className="flex items-center justify-between rounded-xl border border-amber-500/10 bg-amber-500/[0.02] p-3">
+                    <div className="min-w-0 flex-1 pr-2">
+                      <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block">🥇 1st Place Winner</span>
+                      <span className="text-xs font-semibold text-white/80 truncate block mt-0.5">
+                        {candidates.find(c => c.rank === "1st Place")?.recipientName || "Not assigned"}
+                      </span>
+                    </div>
+                    {candidates.find(c => c.rank === "1st Place" && c.isGenerated && c.certNumber) ? (
+                      <a download className="portal-mini-button flex items-center gap-1 rounded-lg bg-amber-500/20 border border-amber-500/30 px-2.5 py-1.5 text-[10px] font-bold text-amber-200 hover:bg-amber-500/30 transition" href={`/api/certificates/export?event=${selected}&candidate=${candidates.find(c => c.rank === "1st Place")?.user || ""}&certificateId=${candidates.find(c => c.rank === "1st Place")?.id || ""}&format=pdf`}>
+                        <Download size={11} /> Download
+                      </a>
+                    ) : (
+                      <span className="text-[9px] text-white/20 uppercase tracking-wider">Pending</span>
+                    )}
+                  </div>
+
+                  {/* 2nd Place */}
+                  <div className="flex items-center justify-between rounded-xl border border-slate-400/10 bg-slate-400/[0.02] p-3">
+                    <div className="min-w-0 flex-1 pr-2">
+                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block">🥈 2nd Place Winner</span>
+                      <span className="text-xs font-semibold text-white/80 truncate block mt-0.5">
+                        {candidates.find(c => c.rank === "2nd Place")?.recipientName || "Not assigned"}
+                      </span>
+                    </div>
+                    {candidates.find(c => c.rank === "2nd Place" && c.isGenerated && c.certNumber) ? (
+                      <a download className="portal-mini-button flex items-center gap-1 rounded-lg bg-slate-400/20 border border-slate-400/30 px-2.5 py-1.5 text-[10px] font-bold text-slate-200 hover:bg-slate-400/30 transition" href={`/api/certificates/export?event=${selected}&candidate=${candidates.find(c => c.rank === "2nd Place")?.user || ""}&certificateId=${candidates.find(c => c.rank === "2nd Place")?.id || ""}&format=pdf`}>
+                        <Download size={11} /> Download
+                      </a>
+                    ) : (
+                      <span className="text-[9px] text-white/20 uppercase tracking-wider">Pending</span>
+                    )}
+                  </div>
+
+                  {/* 3rd Place */}
+                  <div className="flex items-center justify-between rounded-xl border border-amber-800/20 bg-amber-800/[0.02] p-3">
+                    <div className="min-w-0 flex-1 pr-2">
+                      <span className="text-[10px] font-bold text-amber-600/90 uppercase tracking-wider block">🥉 3rd Place Winner</span>
+                      <span className="text-xs font-semibold text-white/80 truncate block mt-0.5">
+                        {candidates.find(c => c.rank === "3rd Place")?.recipientName || "Not assigned"}
+                      </span>
+                    </div>
+                    {candidates.find(c => c.rank === "3rd Place" && c.isGenerated && c.certNumber) ? (
+                      <a download className="portal-mini-button flex items-center gap-1 rounded-lg bg-amber-800/20 border border-amber-800/30 px-2.5 py-1.5 text-[10px] font-bold text-amber-300 hover:bg-amber-800/30 transition" href={`/api/certificates/export?event=${selected}&candidate=${candidates.find(c => c.rank === "3rd Place")?.user || ""}&certificateId=${candidates.find(c => c.rank === "3rd Place")?.id || ""}&format=pdf`}>
+                        <Download size={11} /> Download
+                      </a>
+                    ) : (
+                      <span className="text-[9px] text-white/20 uppercase tracking-wider">Pending</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Main Certificate Generator Action */}
+            {/* Participation Category Card */}
             <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/[0.03] via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/[0.02] via-transparent to-transparent" />
               
               <div className="relative">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Generate ZIP Package</h3>
-                <p className="text-xs leading-relaxed text-white/40 mb-5">
-                  Generates and allocates cert numbers for all candidates, renders A4 landscape PDFs, and packages them in a downloadable ZIP.
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Participation Category</h3>
+                <p className="text-xs leading-relaxed text-white/40 mb-3">
+                  To download participation certificates one by one:
                 </p>
-                
-                <button type="button" disabled={generating || loading || candidates.length === 0} onClick={generateAllCertificates} className="portal-command-button w-full flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-xs font-semibold hover:-translate-y-0.5 transition disabled:opacity-60">
-                  <Award size={14} /> {generating ? "Generating PDFs..." : "Generate & Download ZIP"}
-                </button>
-                
-                {generating ? (
-                  <div className="mt-4 flex flex-col items-center justify-center gap-2 border border-violet-500/10 rounded-2xl p-4 bg-violet-500/[0.02] animate-pulse">
-                    <RefreshCw className="animate-spin text-violet-400" size={16} />
-                    <span className="text-[10px] text-violet-300 font-bold uppercase tracking-wider">Processing PDF Chunks</span>
-                  </div>
-                ) : null}
+                <ul className="text-[11px] leading-relaxed text-white/35 space-y-2 list-disc pl-4">
+                  <li>Select <strong>Participation</strong> in the Rank Filter dropdown on the left.</li>
+                  <li>Verify the candidate name and details.</li>
+                  <li>Click the <Download size={10} className="inline mx-0.5" /> download icon next to the candidate row.</li>
+                </ul>
               </div>
             </div>
           </>
