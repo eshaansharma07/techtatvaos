@@ -106,43 +106,43 @@ function drawFilledDiamond(p: PDFPage, cx: number, cy: number, s: number, color:
 
 /** Elaborate corner ornament with arcs, dots, and flourishes */
 function drawCornerOrnament(p: PDFPage, cx: number, cy: number, dx: number, dy: number, color: RGB) {
-  // Main L-bracket
-  const len = 70;
+  // Main L-bracket (shortened to avoid overlapping logos)
+  const len = 42;
   p.drawLine({ start: { x: cx, y: cy }, end: { x: cx + dx * len, y: cy }, thickness: 2, color, opacity: 0.7 });
   p.drawLine({ start: { x: cx, y: cy }, end: { x: cx, y: cy + dy * len }, thickness: 2, color, opacity: 0.7 });
 
   // Inner parallel lines
-  const inset = 6;
-  p.drawLine({ start: { x: cx + dx * inset, y: cy + dy * inset }, end: { x: cx + dx * (len - 10), y: cy + dy * inset }, thickness: 0.5, color, opacity: 0.45 });
-  p.drawLine({ start: { x: cx + dx * inset, y: cy + dy * inset }, end: { x: cx + dx * inset, y: cy + dy * (len - 10) }, thickness: 0.5, color, opacity: 0.45 });
+  const inset = 5;
+  p.drawLine({ start: { x: cx + dx * inset, y: cy + dy * inset }, end: { x: cx + dx * (len - 6), y: cy + dy * inset }, thickness: 0.5, color, opacity: 0.45 });
+  p.drawLine({ start: { x: cx + dx * inset, y: cy + dy * inset }, end: { x: cx + dx * inset, y: cy + dy * (len - 6) }, thickness: 0.5, color, opacity: 0.45 });
 
   // Corner dot cluster (flower pattern)
-  p.drawCircle({ x: cx + dx * 3, y: cy + dy * 3, size: 4, color, opacity: 0.8 });
+  p.drawCircle({ x: cx + dx * 3, y: cy + dy * 3, size: 3.5, color, opacity: 0.8 });
   // Petals
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI * 2) / 6;
-    p.drawCircle({ x: cx + dx * 3 + Math.cos(angle) * 9, y: cy + dy * 3 + Math.sin(angle) * 9, size: 2, color, opacity: 0.5 });
+    p.drawCircle({ x: cx + dx * 3 + Math.cos(angle) * 8, y: cy + dy * 3 + Math.sin(angle) * 8, size: 1.8, color, opacity: 0.5 });
   }
 
   // End decorations on the L
-  p.drawCircle({ x: cx + dx * len, y: cy, size: 2.5, color, opacity: 0.6 });
-  p.drawCircle({ x: cx, y: cy + dy * len, size: 2.5, color, opacity: 0.6 });
+  p.drawCircle({ x: cx + dx * len, y: cy, size: 2, color, opacity: 0.6 });
+  p.drawCircle({ x: cx, y: cy + dy * len, size: 2, color, opacity: 0.6 });
 
   // Diagonal flourish from corner
-  const diagLen = 35;
-  p.drawLine({ start: { x: cx + dx * 8, y: cy + dy * 8 }, end: { x: cx + dx * diagLen, y: cy + dy * diagLen }, thickness: 0.4, color, opacity: 0.3 });
+  const diagLen = 25;
+  p.drawLine({ start: { x: cx + dx * 7, y: cy + dy * 7 }, end: { x: cx + dx * diagLen, y: cy + dy * diagLen }, thickness: 0.4, color, opacity: 0.3 });
   // Dots along diagonal
-  for (let i = 1; i <= 4; i++) {
-    const t = i / 5;
-    p.drawCircle({ x: cx + dx * (8 + (diagLen - 8) * t), y: cy + dy * (8 + (diagLen - 8) * t), size: 1, color, opacity: 0.35 });
+  for (let i = 1; i <= 3; i++) {
+    const t = i / 4;
+    p.drawCircle({ x: cx + dx * (7 + (diagLen - 7) * t), y: cy + dy * (7 + (diagLen - 7) * t), size: 1, color, opacity: 0.35 });
   }
 
   // Scrollwork arcs (small crescents) using dot chains
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 6; i++) {
     const angle = (dy > 0 ? 0 : Math.PI) + (dx > 0 ? 0 : Math.PI) + (i * Math.PI / 16);
     p.drawCircle({
-      x: cx + dx * 3 + Math.cos(angle) * (16 + i * 1.5),
-      y: cy + dy * 3 + Math.sin(angle) * (16 + i * 1.5),
+      x: cx + dx * 3 + Math.cos(angle) * (14 + i * 1.3),
+      y: cy + dy * 3 + Math.sin(angle) * (14 + i * 1.3),
       size: 0.7, color, opacity: 0.3,
     });
   }
@@ -392,23 +392,23 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
   }
 
   // ╔═══════════════════════════════════════════════════════╗
-  // ║  HEADER SECTION                                       ║
+  // ║  HEADER SECTION (positioned to avoid corner ornaments)║
   // ╚═══════════════════════════════════════════════════════╝
-  const headY = H - 68;
+  const headY = H - 70;
 
-  // Tech Tatva Logo + name (top left)
-  if (ttLogo) page.drawImage(ttLogo, { x: 52, y: headY - 4, width: 40, height: 40 });
-  page.drawText("TechTatva", { x: 98, y: headY + 22, size: 13, font: helvB, color: C.ink });
-  page.drawText("CHANDIGARH UNIVERSITY", { x: 98, y: headY + 8, size: 7, font: helv, color: C.inkMuted });
+  // Tech Tatva Logo + name (top left, pushed inward to clear corner ornaments)
+  if (ttLogo) page.drawImage(ttLogo, { x: 90, y: headY + 2, width: 30, height: 30 });
+  page.drawText("TechTatva", { x: 126, y: headY + 20, size: 11, font: helvB, color: C.ink });
+  page.drawText("CHANDIGARH UNIVERSITY", { x: 126, y: headY + 8, size: 6.5, font: helv, color: C.inkMuted });
 
-  // CU Logo (top right)
-  if (cuLogo) page.drawImage(cuLogo, { x: W - 170, y: headY + 4, width: 100, height: 30 });
+  // CU Logo (top right, scaled down to avoid overlapping)
+  if (cuLogo) page.drawImage(cuLogo, { x: W - 150, y: headY + 6, width: 70, height: 22 });
 
-  // Event Logo (far right)
-  if (eventLogo) page.drawImage(eventLogo, { x: W - 60, y: headY - 2, width: 34, height: 34 });
+  // Event Logo (far right, smaller)
+  if (eventLogo) page.drawImage(eventLogo, { x: W - 72, y: headY + 2, width: 28, height: 28 });
 
   // Header divider
-  drawDivider(page, headY - 20, W - 130, C.gold, 0.5);
+  drawDivider(page, headY - 14, W - 180, C.gold, 0.5);
 
   // ╔═══════════════════════════════════════════════════════╗
   // ║  TITLE: "CERTIFICATE"  (large, spaced out)            ║
@@ -493,27 +493,30 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
   // ╔═══════════════════════════════════════════════════════╗
   // ║  SIGNATURES                                            ║
   // ╚═══════════════════════════════════════════════════════╝
-  const sigY = 58;
-  const sCol1 = W * 0.2;
-  const sCol3 = W * 0.8;
+  const sigY = 52;
+  const sCol1 = W * 0.22;
+  const sCol3 = W * 0.78;
 
-  const drawSig = (cx: number, name: string, role: string) => {
+  const drawSig = (cx: number, name: string, roleLines: string[]) => {
     const lw = 130;
-    const ly = sigY + 34;
+    const ly = sigY + 38;
     page.drawLine({ start: { x: cx - lw / 2, y: ly }, end: { x: cx + lw / 2, y: ly }, thickness: 0.6, color: C.inkMuted, opacity: 0.4 });
     page.drawCircle({ x: cx - lw / 2, y: ly, size: 1.5, color: C.gold, opacity: 0.5 });
     page.drawCircle({ x: cx + lw / 2, y: ly, size: 1.5, color: C.gold, opacity: 0.5 });
 
     if (name) {
-      const tw = timesI.widthOfTextAtSize(name, 12);
-      page.drawText(name, { x: cx - tw / 2, y: ly + 8, size: 12, font: timesI, color: C.ink });
+      const tw = timesI.widthOfTextAtSize(name, 11);
+      page.drawText(name, { x: cx - tw / 2, y: ly + 7, size: 11, font: timesI, color: C.ink });
     }
-    const rw = helvB.widthOfTextAtSize(role.toUpperCase(), 6.5);
-    page.drawText(role.toUpperCase(), { x: cx - rw / 2, y: sigY + 16, size: 6.5, font: helvB, color: C.inkMuted });
+    // Multi-line role labels
+    roleLines.forEach((line, idx) => {
+      const rw = helvB.widthOfTextAtSize(line.toUpperCase(), 5.5);
+      page.drawText(line.toUpperCase(), { x: cx - rw / 2, y: sigY + 24 - idx * 8, size: 5.5, font: helvB, color: C.inkMuted });
+    });
   };
 
-  drawSig(sCol1, config.hod || "", "Faculty Coordinator");
-  drawSig(sCol3, config.facultyAdvisor || "", "Core Team Lead");
+  drawSig(sCol1, config.hod || "", ["Faculty Coordinator"]);
+  drawSig(sCol3, config.facultyAdvisor || "", ["Head of Department", "AIT-CSE, Chandigarh University"]);
 
   // ╔═══════════════════════════════════════════════════════╗
   // ║  CENTER SEAL (elaborate multi-ring with scallops)      ║
@@ -532,11 +535,11 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
   const tagW = helv.widthOfTextAtSize(tag, 5);
   page.drawText(tag, { x: W - fw - 14 - tagW, y: bbY, size: 5, font: helv, color: C.goldLight, opacity: 0.6 });
 
-  // Certificate number (subtle, top right)
+  // Certificate number (subtle, moved below header to avoid logo overlap)
   if (config.certNumber) {
     const cn = `No. ${config.certNumber}`;
-    const cnW = helv.widthOfTextAtSize(cn, 6);
-    page.drawText(cn, { x: W - 42 - cnW, y: H - 46, size: 6, font: helv, color: C.inkMuted, opacity: 0.35 });
+    const cnW = helv.widthOfTextAtSize(cn, 5.5);
+    page.drawText(cn, { x: W - 50 - cnW, y: headY - 10, size: 5.5, font: helv, color: C.inkMuted, opacity: 0.3 });
   }
 
   return await doc.save();
