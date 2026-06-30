@@ -42,22 +42,18 @@ const CY = H / 2;
 //  PREMIUM COLOR PALETTE
 // ═══════════════════════════════════════════════════
 const C = {
-  // Outer frame layers
   navy:       rgb(15/255, 20/255, 35/255),
-  navyLight:  rgb(25/255, 32/255, 52/255),
-  // Gold spectrum
-  goldDark:   rgb(160/255, 120/255, 50/255),
+  navyMid:    rgb(22/255, 28/255, 48/255),
+  goldDark:   rgb(155/255, 115/255, 45/255),
   gold:       rgb(195/255, 158/255, 82/255),
   goldMid:    rgb(212/255, 175/255, 100/255),
   goldLight:  rgb(230/255, 205/255, 145/255),
   goldPale:   rgb(248/255, 238/255, 210/255),
-  // Canvas
-  cream:      rgb(252/255, 250/255, 245/255),
-  creamDark:  rgb(245/255, 240/255, 228/255),
-  // Text
+  cream:      rgb(253/255, 251/255, 247/255),
+  creamWarm:  rgb(248/255, 244/255, 235/255),
   ink:        rgb(20/255, 25/255, 40/255),
-  inkSoft:    rgb(60/255, 65/255, 80/255),
-  inkMuted:   rgb(110/255, 115/255, 130/255),
+  inkSoft:    rgb(55/255, 60/255, 78/255),
+  inkMuted:   rgb(105/255, 110/255, 128/255),
   white:      rgb(1, 1, 1),
 };
 
@@ -85,6 +81,7 @@ export function renderCertificateHtml(kind: CertificateKind, config: Certificate
   return "";
 }
 
+/** Draw centered text */
 function ctxt(page: PDFPage, text: string, y: number, font: PDFFont, size: number, color: RGB, opacity = 1) {
   const tw = font.widthOfTextAtSize(text, size);
   page.drawText(text, { x: Math.max((W - tw) / 2, 10), y, size, font, color, opacity });
@@ -94,152 +91,182 @@ function ctxt(page: PDFPage, text: string, y: number, font: PDFFont, size: numbe
 //  DECORATIVE DRAWING PRIMITIVES
 // ═══════════════════════════════════════════════════
 
-/** Draw a diamond shape at (cx, cy) with given half-size */
-function drawDiamond(page: PDFPage, cx: number, cy: number, halfSize: number, color: RGB, opacity = 1) {
-  // Approximate diamond with a rotated square using 4 thin lines
-  const s = halfSize;
-  const pts = [
-    { x: cx, y: cy + s },     // top
-    { x: cx + s, y: cy },     // right
-    { x: cx, y: cy - s },     // bottom
-    { x: cx - s, y: cy },     // left
-  ];
-  for (let i = 0; i < 4; i++) {
-    page.drawLine({
-      start: pts[i],
-      end: pts[(i + 1) % 4],
-      thickness: 0.6,
-      color,
-      opacity,
-    });
-  }
+/** Diamond shape */
+function drawDiamond(p: PDFPage, cx: number, cy: number, s: number, color: RGB, opacity = 1) {
+  const pts = [{ x: cx, y: cy + s }, { x: cx + s, y: cy }, { x: cx, y: cy - s }, { x: cx - s, y: cy }];
+  for (let i = 0; i < 4; i++) p.drawLine({ start: pts[i], end: pts[(i + 1) % 4], thickness: 0.6, color, opacity });
 }
 
-/** Draw a decorative dot cluster (rosette) at a corner */
-function drawCornerRosette(page: PDFPage, cx: number, cy: number, color: RGB) {
-  // Central dot
-  page.drawCircle({ x: cx, y: cy, size: 3.5, color, opacity: 0.9 });
-  // Ring of 8 dots
+/** Filled diamond */
+function drawFilledDiamond(p: PDFPage, cx: number, cy: number, s: number, color: RGB, opacity = 1) {
+  // Fill with a small rotated rectangle approximation
+  p.drawRectangle({ x: cx - s * 0.5, y: cy - s * 0.5, width: s, height: s, color, opacity, rotate: { type: 0, angle: 45 } as any });
+  drawDiamond(p, cx, cy, s, color, opacity);
+}
+
+/** Elaborate corner ornament with arcs, dots, and flourishes */
+function drawCornerOrnament(p: PDFPage, cx: number, cy: number, dx: number, dy: number, color: RGB) {
+  // Main L-bracket
+  const len = 70;
+  p.drawLine({ start: { x: cx, y: cy }, end: { x: cx + dx * len, y: cy }, thickness: 2, color, opacity: 0.7 });
+  p.drawLine({ start: { x: cx, y: cy }, end: { x: cx, y: cy + dy * len }, thickness: 2, color, opacity: 0.7 });
+
+  // Inner parallel lines
+  const inset = 6;
+  p.drawLine({ start: { x: cx + dx * inset, y: cy + dy * inset }, end: { x: cx + dx * (len - 10), y: cy + dy * inset }, thickness: 0.5, color, opacity: 0.45 });
+  p.drawLine({ start: { x: cx + dx * inset, y: cy + dy * inset }, end: { x: cx + dx * inset, y: cy + dy * (len - 10) }, thickness: 0.5, color, opacity: 0.45 });
+
+  // Corner dot cluster (flower pattern)
+  p.drawCircle({ x: cx + dx * 3, y: cy + dy * 3, size: 4, color, opacity: 0.8 });
+  // Petals
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * Math.PI * 2) / 6;
+    p.drawCircle({ x: cx + dx * 3 + Math.cos(angle) * 9, y: cy + dy * 3 + Math.sin(angle) * 9, size: 2, color, opacity: 0.5 });
+  }
+
+  // End decorations on the L
+  p.drawCircle({ x: cx + dx * len, y: cy, size: 2.5, color, opacity: 0.6 });
+  p.drawCircle({ x: cx, y: cy + dy * len, size: 2.5, color, opacity: 0.6 });
+
+  // Diagonal flourish from corner
+  const diagLen = 35;
+  p.drawLine({ start: { x: cx + dx * 8, y: cy + dy * 8 }, end: { x: cx + dx * diagLen, y: cy + dy * diagLen }, thickness: 0.4, color, opacity: 0.3 });
+  // Dots along diagonal
+  for (let i = 1; i <= 4; i++) {
+    const t = i / 5;
+    p.drawCircle({ x: cx + dx * (8 + (diagLen - 8) * t), y: cy + dy * (8 + (diagLen - 8) * t), size: 1, color, opacity: 0.35 });
+  }
+
+  // Scrollwork arcs (small crescents) using dot chains
   for (let i = 0; i < 8; i++) {
-    const angle = (i * Math.PI * 2) / 8;
-    page.drawCircle({
-      x: cx + Math.cos(angle) * 10,
-      y: cy + Math.sin(angle) * 10,
-      size: 1.8, color, opacity: 0.7,
-    });
-  }
-  // Outer ring of 12 tiny dots
-  for (let i = 0; i < 12; i++) {
-    const angle = (i * Math.PI * 2) / 12 + Math.PI / 12;
-    page.drawCircle({
-      x: cx + Math.cos(angle) * 18,
-      y: cy + Math.sin(angle) * 18,
-      size: 1, color, opacity: 0.45,
-    });
-  }
-  // Outermost ring of 16 micro dots
-  for (let i = 0; i < 16; i++) {
-    const angle = (i * Math.PI * 2) / 16;
-    page.drawCircle({
-      x: cx + Math.cos(angle) * 25,
-      y: cy + Math.sin(angle) * 25,
-      size: 0.6, color, opacity: 0.3,
+    const angle = (dy > 0 ? 0 : Math.PI) + (dx > 0 ? 0 : Math.PI) + (i * Math.PI / 16);
+    p.drawCircle({
+      x: cx + dx * 3 + Math.cos(angle) * (16 + i * 1.5),
+      y: cy + dy * 3 + Math.sin(angle) * (16 + i * 1.5),
+      size: 0.7, color, opacity: 0.3,
     });
   }
 }
 
-/** Draw ornamental divider line with center diamond */
-function drawOrnamentalDivider(page: PDFPage, y: number, width: number, color: RGB, opacity = 0.6) {
+/** Ornamental divider with diamond center and dot accents */
+function drawDivider(p: PDFPage, y: number, width: number, color: RGB, opacity = 0.6) {
   const left = CX - width / 2;
   const right = CX + width / 2;
 
-  // Main line
-  page.drawLine({ start: { x: left, y }, end: { x: CX - 8, y }, thickness: 0.5, color, opacity });
-  page.drawLine({ start: { x: CX + 8, y }, end: { x: right, y }, thickness: 0.5, color, opacity });
+  // Main lines
+  p.drawLine({ start: { x: left, y }, end: { x: CX - 12, y }, thickness: 0.7, color, opacity });
+  p.drawLine({ start: { x: CX + 12, y }, end: { x: right, y }, thickness: 0.7, color, opacity });
 
   // Center diamond
-  drawDiamond(page, CX, y, 4, color, opacity);
+  drawDiamond(p, CX, y, 5, color, opacity);
+  p.drawCircle({ x: CX, y, size: 1.5, color, opacity });
 
   // End diamonds
-  drawDiamond(page, left + 3, y, 2, color, opacity);
-  drawDiamond(page, right - 3, y, 2, color, opacity);
+  drawDiamond(p, left, y, 3, color, opacity * 0.7);
+  drawDiamond(p, right, y, 3, color, opacity * 0.7);
 
-  // Dots near center
-  page.drawCircle({ x: CX - 16, y, size: 1, color, opacity: opacity * 0.7 });
-  page.drawCircle({ x: CX + 16, y, size: 1, color, opacity: opacity * 0.7 });
+  // Intermediate dots
+  const dotPositions = [0.2, 0.4, 0.6, 0.8];
+  dotPositions.forEach(t => {
+    p.drawCircle({ x: left + (CX - 12 - left) * t, y, size: 0.8, color, opacity: opacity * 0.5 });
+    p.drawCircle({ x: CX + 12 + (right - CX - 12) * t, y, size: 0.8, color, opacity: opacity * 0.5 });
+  });
 }
 
-/** Sunburst radiating lines from a center point */
-function drawSunburst(page: PDFPage, cx: number, cy: number, innerR: number, outerR: number, count: number, color: RGB, opacity: number) {
+/** Sunburst rays from center */
+function drawSunburst(p: PDFPage, cx: number, cy: number, r1: number, r2: number, count: number, color: RGB, opacity: number) {
   for (let i = 0; i < count; i++) {
-    const angle = (i * Math.PI * 2) / count;
-    page.drawLine({
-      start: { x: cx + Math.cos(angle) * innerR, y: cy + Math.sin(angle) * innerR },
-      end: { x: cx + Math.cos(angle) * outerR, y: cy + Math.sin(angle) * outerR },
-      thickness: 0.3,
-      color,
-      opacity,
+    const a = (i * Math.PI * 2) / count;
+    p.drawLine({
+      start: { x: cx + Math.cos(a) * r1, y: cy + Math.sin(a) * r1 },
+      end: { x: cx + Math.cos(a) * r2, y: cy + Math.sin(a) * r2 },
+      thickness: 0.3, color, opacity,
     });
   }
 }
 
-/** Draw the elaborate multi-ring seal with scalloped edge effect */
-function drawElaborateSeal(page: PDFPage, cx: number, cy: number, color: RGB, darkColor: RGB, ttLogo: any) {
-  // Scalloped outer edge (bumpy circle made of overlapping circles)
-  const scallops = 24;
-  const sR = 38;
+/** Laurel leaf cluster (arc of small ellipses) */
+function drawLaurelArc(p: PDFPage, cx: number, cy: number, radius: number, startAngle: number, endAngle: number, count: number, color: RGB, opacity: number) {
+  for (let i = 0; i < count; i++) {
+    const t = i / (count - 1);
+    const angle = startAngle + t * (endAngle - startAngle);
+    const lx = cx + Math.cos(angle) * radius;
+    const ly = cy + Math.sin(angle) * radius;
+    // Small leaf shape using overlapping circles
+    p.drawCircle({ x: lx, y: ly, size: 3.5, color, opacity: opacity * 0.6 });
+    p.drawCircle({ x: lx + Math.cos(angle) * 2, y: ly + Math.sin(angle) * 2, size: 2, color, opacity: opacity * 0.4 });
+  }
+}
+
+/** Multi-ring elaborate seal */
+function drawSeal(p: PDFPage, cx: number, cy: number, color: RGB, dark: RGB, ttLogo: any) {
+  // Outer scalloped edge
+  const scallops = 32;
   for (let i = 0; i < scallops; i++) {
-    const angle = (i * Math.PI * 2) / scallops;
-    page.drawCircle({
-      x: cx + Math.cos(angle) * sR,
-      y: cy + Math.sin(angle) * sR,
-      size: 8,
-      color,
-      opacity: 0.85,
-    });
+    const a = (i * Math.PI * 2) / scallops;
+    p.drawCircle({ x: cx + Math.cos(a) * 44, y: cy + Math.sin(a) * 44, size: 9, color, opacity: 0.75 });
+  }
+  // Solid background
+  p.drawCircle({ x: cx, y: cy, size: 46, color, opacity: 0.9 });
+
+  // Ring decorations
+  drawSunburst(p, cx, cy, 32, 42, 48, dark, 0.12);
+
+  p.drawCircle({ x: cx, y: cy, size: 40, borderColor: dark, borderWidth: 1, opacity: 0, borderOpacity: 0.35 });
+  p.drawCircle({ x: cx, y: cy, size: 36, borderColor: C.goldLight, borderWidth: 1.5, opacity: 0, borderOpacity: 0.7 });
+
+  // Dark inner
+  p.drawCircle({ x: cx, y: cy, size: 32, color: dark });
+  p.drawCircle({ x: cx, y: cy, size: 29, borderColor: color, borderWidth: 1.2, opacity: 0, borderOpacity: 0.8 });
+
+  // Gold inner disc
+  p.drawCircle({ x: cx, y: cy, size: 25, color });
+
+  // Dot ring
+  for (let i = 0; i < 16; i++) {
+    const a = (i * Math.PI * 2) / 16;
+    p.drawCircle({ x: cx + Math.cos(a) * 21, y: cy + Math.sin(a) * 21, size: 1, color: dark, opacity: 0.4 });
   }
 
-  // Solid fill center
-  page.drawCircle({ x: cx, y: cy, size: 40, color });
-
-  // Sunburst rays inside seal
-  drawSunburst(page, cx, cy, 28, 37, 36, darkColor, 0.15);
-
-  // Inner ring 1
-  page.drawCircle({ x: cx, y: cy, size: 34, borderColor: darkColor, borderWidth: 0.8, opacity: 0, borderOpacity: 0.4 });
-
-  // Inner ring 2 (gold)
-  page.drawCircle({ x: cx, y: cy, size: 30, borderColor: C.goldLight, borderWidth: 1, opacity: 0, borderOpacity: 0.7 });
-
-  // Dark inner disc
-  page.drawCircle({ x: cx, y: cy, size: 27, color: darkColor });
-
-  // Gold ring on dark disc
-  page.drawCircle({ x: cx, y: cy, size: 24, borderColor: color, borderWidth: 1.2, opacity: 0, borderOpacity: 0.8 });
-
-  // Innermost gold disc
-  page.drawCircle({ x: cx, y: cy, size: 20, color });
-
-  // Dot ring inside seal
-  for (let i = 0; i < 12; i++) {
-    const angle = (i * Math.PI * 2) / 12;
-    page.drawCircle({
-      x: cx + Math.cos(angle) * 16,
-      y: cy + Math.sin(angle) * 16,
-      size: 1,
-      color: darkColor,
-      opacity: 0.5,
-    });
-  }
-
-  // Logo in the center of the seal
+  // Logo
   if (ttLogo) {
-    page.drawImage(ttLogo, {
-      x: cx - 14,
-      y: cy - 14,
-      width: 28,
-      height: 28,
-    });
+    p.drawImage(ttLogo, { x: cx - 16, y: cy - 16, width: 32, height: 32 });
+  }
+
+  // Text around seal
+  const sealText = "TECH TATVA";
+  const charSpread = Math.PI * 0.6;
+  const startA = Math.PI / 2 + charSpread / 2;
+  for (let i = 0; i < sealText.length; i++) {
+    const a = startA - (i / (sealText.length - 1)) * charSpread;
+    const tx = cx + Math.cos(a) * 38;
+    const ty = cy + Math.sin(a) * 38;
+    p.drawCircle({ x: tx, y: ty, size: 0.6, color: dark, opacity: 0.3 });
+  }
+}
+
+/** Decorative side accent (vertical line pattern) */
+function drawSideAccent(p: PDFPage, x: number, yStart: number, yEnd: number, color: RGB) {
+  p.drawLine({ start: { x, y: yStart }, end: { x, y: yEnd }, thickness: 0.3, color, opacity: 0.15 });
+  // Dots along the line
+  const count = Math.floor((yEnd - yStart) / 12);
+  for (let i = 0; i <= count; i++) {
+    const y = yStart + (i / count) * (yEnd - yStart);
+    p.drawCircle({ x, y, size: 1, color, opacity: 0.12 });
+  }
+}
+
+/** Background geometric lattice pattern */
+function drawLatticePattern(p: PDFPage, x1: number, y1: number, x2: number, y2: number, spacing: number, color: RGB, opacity: number) {
+  // Diagonal lines going one way
+  for (let x = x1; x <= x2 + (y2 - y1); x += spacing) {
+    const sx = Math.max(x, x1);
+    const sy = y1 + (sx - x);
+    const ey = Math.min(y2, y1 + (x2 - x + (y2 - y1)));
+    const ex = x - (ey - y1) + (sx - x1 ? sx - x1 : 0);
+    if (sy < y2 && ey > y1) {
+      p.drawLine({ start: { x: Math.max(x1, x), y: y1 }, end: { x: Math.max(x1, x - (y2 - y1)), y: y2 }, thickness: 0.15, color, opacity });
+    }
   }
 }
 
@@ -251,7 +278,6 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
   const doc = await PDFDocument.create();
   const page = doc.addPage([W, H]);
 
-  // Fonts
   const helv     = await doc.embedFont(StandardFonts.Helvetica);
   const helvB    = await doc.embedFont(StandardFonts.HelveticaBold);
   const times    = await doc.embedFont(StandardFonts.TimesRoman);
@@ -278,250 +304,239 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
     } catch {}
   }
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  LAYER 1: OUTER DARK NAVY BACKGROUND         ║
-  // ╚═══════════════════════════════════════════════╝
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  LAYER 1: DARK NAVY BACKGROUND                       ║
+  // ╚═══════════════════════════════════════════════════════╝
   page.drawRectangle({ x: 0, y: 0, width: W, height: H, color: C.navy });
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  LAYER 2: GOLD OUTER BORDER (thick)           ║
-  // ╚═══════════════════════════════════════════════╝
-  const ob = 10; // outer border offset
-  page.drawRectangle({ x: ob, y: ob, width: W - ob * 2, height: H - ob * 2, borderColor: C.gold, borderWidth: 2.5, opacity: 0, borderOpacity: 0.85 });
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  LAYER 2: THICK GOLD OUTER BORDER                     ║
+  // ╚═══════════════════════════════════════════════════════╝
+  page.drawRectangle({ x: 8, y: 8, width: W - 16, height: H - 16, borderColor: C.gold, borderWidth: 3, opacity: 0, borderOpacity: 0.9 });
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  LAYER 3: THIN GOLD PINSTRIPE                 ║
-  // ╚═══════════════════════════════════════════════╝
-  const ps = 16;
-  page.drawRectangle({ x: ps, y: ps, width: W - ps * 2, height: H - ps * 2, borderColor: C.goldMid, borderWidth: 0.5, opacity: 0, borderOpacity: 0.6 });
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  LAYER 3: THIN GOLD PINSTRIPE                         ║
+  // ╚═══════════════════════════════════════════════════════╝
+  page.drawRectangle({ x: 14, y: 14, width: W - 28, height: H - 28, borderColor: C.goldMid, borderWidth: 0.6, opacity: 0, borderOpacity: 0.7 });
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  LAYER 4: CREAM CANVAS FILL                   ║
-  // ╚═══════════════════════════════════════════════╝
-  const fw = 20;
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  LAYER 4: CREAM CANVAS                                ║
+  // ╚═══════════════════════════════════════════════════════╝
+  const fw = 18;
   page.drawRectangle({ x: fw, y: fw, width: W - fw * 2, height: H - fw * 2, color: C.cream });
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  LAYER 5: INNER DECORATIVE GOLD BORDER        ║
-  // ╚═══════════════════════════════════════════════╝
-  const ib = 30;
-  page.drawRectangle({ x: ib, y: ib, width: W - ib * 2, height: H - ib * 2, borderColor: C.gold, borderWidth: 1.2, opacity: 0, borderOpacity: 0.5 });
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  LAYER 5: INNER DOUBLE GOLD BORDER                    ║
+  // ╚═══════════════════════════════════════════════════════╝
+  const ib = 28;
+  page.drawRectangle({ x: ib, y: ib, width: W - ib * 2, height: H - ib * 2, borderColor: C.gold, borderWidth: 1.5, opacity: 0, borderOpacity: 0.55 });
+  page.drawRectangle({ x: ib + 5, y: ib + 5, width: W - (ib + 5) * 2, height: H - (ib + 5) * 2, borderColor: C.goldMid, borderWidth: 0.4, opacity: 0, borderOpacity: 0.35 });
 
-  // Thinner inner-inner border
-  const iib = 34;
-  page.drawRectangle({ x: iib, y: iib, width: W - iib * 2, height: H - iib * 2, borderColor: C.goldMid, borderWidth: 0.3, opacity: 0, borderOpacity: 0.35 });
-
-  // ╔═══════════════════════════════════════════════╗
-  // ║  DIAMOND CHAIN BORDER between layers 5 & 6    ║
-  // ╚═══════════════════════════════════════════════╝
-  const dbOffset = 32;
-  const diamondSpacing = 20;
-  // Top edge
-  for (let x = dbOffset + 20; x < W - dbOffset - 20; x += diamondSpacing) {
-    drawDiamond(page, x, H - dbOffset, 2.5, C.gold, 0.3);
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  DIAMOND CHAIN BORDERS (all 4 edges)                  ║
+  // ╚═══════════════════════════════════════════════════════╝
+  const dOff = 31;
+  const dSpacing = 16;
+  for (let x = dOff + 16; x < W - dOff - 16; x += dSpacing) {
+    drawDiamond(page, x, H - dOff, 2.8, C.gold, 0.4);
+    drawDiamond(page, x, dOff, 2.8, C.gold, 0.4);
   }
-  // Bottom edge
-  for (let x = dbOffset + 20; x < W - dbOffset - 20; x += diamondSpacing) {
-    drawDiamond(page, x, dbOffset, 2.5, C.gold, 0.3);
-  }
-  // Left edge
-  for (let y = dbOffset + 20; y < H - dbOffset - 20; y += diamondSpacing) {
-    drawDiamond(page, dbOffset, y, 2.5, C.gold, 0.3);
-  }
-  // Right edge
-  for (let y = dbOffset + 20; y < H - dbOffset - 20; y += diamondSpacing) {
-    drawDiamond(page, W - dbOffset, y, 2.5, C.gold, 0.3);
+  for (let y = dOff + 16; y < H - dOff - 16; y += dSpacing) {
+    drawDiamond(page, dOff, y, 2.8, C.gold, 0.4);
+    drawDiamond(page, W - dOff, y, 2.8, C.gold, 0.4);
   }
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  CORNER ROSETTES (ornate dot clusters)        ║
-  // ╚═══════════════════════════════════════════════╝
-  const cr = 56;
-  drawCornerRosette(page, cr, cr, C.gold);
-  drawCornerRosette(page, W - cr, cr, C.gold);
-  drawCornerRosette(page, cr, H - cr, C.gold);
-  drawCornerRosette(page, W - cr, H - cr, C.gold);
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  CORNER ORNAMENTS (elaborate flourishes)              ║
+  // ╚═══════════════════════════════════════════════════════╝
+  const co = 36;
+  drawCornerOrnament(page, co, co, 1, 1, C.gold);
+  drawCornerOrnament(page, W - co, co, -1, 1, C.gold);
+  drawCornerOrnament(page, co, H - co, 1, -1, C.gold);
+  drawCornerOrnament(page, W - co, H - co, -1, -1, C.gold);
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  CORNER BRACKET FLOURISHES (L-shaped)         ║
-  // ╚═══════════════════════════════════════════════╝
-  const drawCornerL = (x: number, y: number, dx: number, dy: number) => {
-    const len = 55;
-    const t = 1.5;
-    page.drawLine({ start: { x, y }, end: { x: x + dx * len, y }, thickness: t, color: C.gold, opacity: 0.55 });
-    page.drawLine({ start: { x, y }, end: { x, y: y + dy * len }, thickness: t, color: C.gold, opacity: 0.55 });
-    // Small perpendicular end caps
-    page.drawLine({ start: { x: x + dx * len, y: y - dy * 4 }, end: { x: x + dx * len, y: y + dy * 4 }, thickness: 0.6, color: C.gold, opacity: 0.4 });
-    page.drawLine({ start: { x: x - dx * 4, y: y + dy * len }, end: { x: x + dx * 4, y: y + dy * len }, thickness: 0.6, color: C.gold, opacity: 0.4 });
-  };
-  const clOff = 38;
-  drawCornerL(clOff, clOff, 1, 1);
-  drawCornerL(W - clOff, clOff, -1, 1);
-  drawCornerL(clOff, H - clOff, 1, -1);
-  drawCornerL(W - clOff, H - clOff, -1, -1);
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  SIDE ACCENT LINES                                    ║
+  // ╚═══════════════════════════════════════════════════════╝
+  drawSideAccent(page, 50, 120, H - 120, C.goldMid);
+  drawSideAccent(page, W - 50, 120, H - 120, C.goldMid);
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  BACKGROUND: RADIATING SUNBURST FROM CENTER   ║
-  // ╚═══════════════════════════════════════════════╝
-  drawSunburst(page, CX, CY, 80, 260, 72, C.goldPale, 0.06);
-  drawSunburst(page, CX, CY, 70, 160, 36, C.creamDark, 0.08);
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  BACKGROUND: SUNBURST RAYS (3 layers)                 ║
+  // ╚═══════════════════════════════════════════════════════╝
+  drawSunburst(page, CX, CY, 60, 280, 96, C.goldPale, 0.07);
+  drawSunburst(page, CX, CY, 50, 180, 48, C.creamWarm, 0.09);
+  drawSunburst(page, CX, CY, 40, 120, 24, C.goldLight, 0.05);
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  BACKGROUND: CONCENTRIC CIRCLES (watermark)   ║
-  // ╚═══════════════════════════════════════════════╝
-  for (let r = 40; r <= 240; r += 30) {
-    page.drawCircle({ x: CX, y: CY, size: r, borderColor: C.goldMid, borderWidth: 0.25, opacity: 0, borderOpacity: 0.035 });
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  BACKGROUND: CONCENTRIC WATERMARK RINGS               ║
+  // ╚═══════════════════════════════════════════════════════╝
+  for (let r = 35; r <= 260; r += 25) {
+    page.drawCircle({ x: CX, y: CY, size: r, borderColor: C.goldMid, borderWidth: 0.2, opacity: 0, borderOpacity: 0.04 });
   }
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  BACKGROUND: CENTER WATERMARK LOGO            ║
-  // ╚═══════════════════════════════════════════════╝
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  BACKGROUND: LATTICE PATTERN                          ║
+  // ╚═══════════════════════════════════════════════════════╝
+  // Subtle diagonal lattice across the entire canvas
+  for (let x = fw; x < W - fw; x += 40) {
+    page.drawLine({ start: { x, y: fw }, end: { x: x + H, y: H - fw }, thickness: 0.1, color: C.goldPale, opacity: 0.04 });
+    page.drawLine({ start: { x, y: H - fw }, end: { x: x + H, y: fw }, thickness: 0.1, color: C.goldPale, opacity: 0.04 });
+  }
+
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  BACKGROUND: WATERMARK LOGO                           ║
+  // ╚═══════════════════════════════════════════════════════╝
   if (ttLogo) {
-    page.drawImage(ttLogo, { x: CX - 100, y: CY - 100, width: 200, height: 200, opacity: 0.03 });
+    page.drawImage(ttLogo, { x: CX - 110, y: CY - 110, width: 220, height: 220, opacity: 0.035 });
   }
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  HEADER: LOGOS + BRANDING                     ║
-  // ╚═══════════════════════════════════════════════╝
-  const headY = H - 72;
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  HEADER SECTION                                       ║
+  // ╚═══════════════════════════════════════════════════════╝
+  const headY = H - 68;
 
-  // Left: Tech Tatva logo + text
-  if (ttLogo) {
-    page.drawImage(ttLogo, { x: 50, y: headY - 2, width: 36, height: 36 });
-  }
-  page.drawText("TechTatva", { x: 92, y: headY + 20, size: 12, font: helvB, color: C.ink });
-  page.drawText("CHANDIGARH UNIVERSITY", { x: 92, y: headY + 7, size: 6.5, font: helv, color: C.inkMuted });
+  // Tech Tatva Logo + name (top left)
+  if (ttLogo) page.drawImage(ttLogo, { x: 52, y: headY - 4, width: 40, height: 40 });
+  page.drawText("TechTatva", { x: 98, y: headY + 22, size: 13, font: helvB, color: C.ink });
+  page.drawText("CHANDIGARH UNIVERSITY", { x: 98, y: headY + 8, size: 7, font: helv, color: C.inkMuted });
 
-  // Right: CU logo + Event logo
-  if (cuLogo) {
-    page.drawImage(cuLogo, { x: W - 160, y: headY + 2, width: 90, height: 28 });
-  }
-  if (eventLogo) {
-    page.drawImage(eventLogo, { x: W - 62, y: headY, width: 32, height: 32 });
-  }
+  // CU Logo (top right)
+  if (cuLogo) page.drawImage(cuLogo, { x: W - 170, y: headY + 4, width: 100, height: 30 });
 
-  // Header divider with ornament
-  drawOrnamentalDivider(page, headY - 16, W - 120, C.gold, 0.45);
+  // Event Logo (far right)
+  if (eventLogo) page.drawImage(eventLogo, { x: W - 60, y: headY - 2, width: 34, height: 34 });
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  TITLE: "CERTIFICATE"                         ║
-  // ╚═══════════════════════════════════════════════╝
-  let ty = headY - 52;
+  // Header divider
+  drawDivider(page, headY - 20, W - 130, C.gold, 0.5);
 
-  ctxt(page, "CERTIFICATE", ty, timesB, 36, C.ink);
-  ty -= 22;
-
-  // Subtitle with spaced letters
-  const subText = isWinner ? "O F   A C H I E V E M E N T" : "O F   P A R T I C I P A T I O N";
-  ctxt(page, subText, ty, helvB, 9, C.gold);
-  ty -= 14;
-
-  // Ornamental divider under title
-  drawOrnamentalDivider(page, ty, 320, C.gold, 0.55);
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  TITLE: "CERTIFICATE"  (large, spaced out)            ║
+  // ╚═══════════════════════════════════════════════════════╝
+  let ty = headY - 62;
+  ctxt(page, "CERTIFICATE", ty, timesB, 42, C.ink);
   ty -= 26;
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  "PROUDLY PRESENTED TO"                       ║
-  // ╚═══════════════════════════════════════════════╝
-  ctxt(page, "PROUDLY PRESENTED TO", ty, helv, 8.5, C.inkMuted);
-  ty -= 38;
+  // Category subtitle
+  const subText = isWinner ? "O F    A C H I E V E M E N T" : "O F    P A R T I C I P A T I O N";
+  ctxt(page, subText, ty, helvB, 10, C.gold);
+  ty -= 16;
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  RECIPIENT NAME (large, elegant, gold)        ║
-  // ╚═══════════════════════════════════════════════╝
+  // Divider under title
+  drawDivider(page, ty, 350, C.gold, 0.5);
+  ty -= 36;
+
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  "THIS IS PROUDLY PRESENTED TO"                       ║
+  // ╚═══════════════════════════════════════════════════════╝
+  ctxt(page, "THIS IS PROUDLY PRESENTED TO", ty, helv, 9, C.inkMuted);
+  ty -= 48;
+
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  RECIPIENT NAME (large, elegant, gold italic)         ║
+  // ╚═══════════════════════════════════════════════════════╝
   const rName = config.recipientName || "Recipient Name";
-  ctxt(page, rName, ty, timesBi, 32, C.goldDark);
+  ctxt(page, rName, ty, timesBi, 38, C.goldDark);
 
-  // Decorative underline with end dots
-  const nw = timesBi.widthOfTextAtSize(rName, 32);
+  // Decorative underline with end ornaments
+  const nw = timesBi.widthOfTextAtSize(rName, 38);
   const nx = (W - nw) / 2;
-  ty -= 8;
-  page.drawLine({ start: { x: nx - 10, y: ty }, end: { x: nx + nw + 10, y: ty }, thickness: 1, color: C.gold, opacity: 0.5 });
-  // End dots
-  page.drawCircle({ x: nx - 14, y: ty, size: 2, color: C.gold, opacity: 0.5 });
-  page.drawCircle({ x: nx + nw + 14, y: ty, size: 2, color: C.gold, opacity: 0.5 });
+  ty -= 10;
+
+  // Main underline
+  page.drawLine({ start: { x: nx - 20, y: ty }, end: { x: nx + nw + 20, y: ty }, thickness: 1.2, color: C.gold, opacity: 0.55 });
+  // Thin parallel line
+  page.drawLine({ start: { x: nx - 10, y: ty - 4 }, end: { x: nx + nw + 10, y: ty - 4 }, thickness: 0.3, color: C.goldMid, opacity: 0.35 });
+
+  // End ornament dots
+  page.drawCircle({ x: nx - 24, y: ty, size: 3, color: C.gold, opacity: 0.55 });
+  page.drawCircle({ x: nx + nw + 24, y: ty, size: 3, color: C.gold, opacity: 0.55 });
+  page.drawCircle({ x: nx - 30, y: ty, size: 1.5, color: C.gold, opacity: 0.35 });
+  page.drawCircle({ x: nx + nw + 30, y: ty, size: 1.5, color: C.gold, opacity: 0.35 });
+
+  ty -= 32;
+
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  DESCRIPTION TEXT                                      ║
+  // ╚═══════════════════════════════════════════════════════╝
+  ctxt(page, "for exceptional dedication and outstanding performance in", ty, timesI, 11, C.inkSoft);
+  ty -= 28;
+
+  // Event name
+  const evName = (config.eventName || "Event").toUpperCase();
+  ctxt(page, evName, ty, helvB, 15, C.ink);
   ty -= 24;
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  DESCRIPTION TEXT                              ║
-  // ╚═══════════════════════════════════════════════╝
-  ctxt(page, "for exceptional dedication and outstanding performance in", ty, timesI, 10, C.inkSoft);
-  ty -= 22;
-
-  // Event name (bold, larger)
-  const evName = (config.eventName || "Event").toUpperCase();
-  ctxt(page, evName, ty, helvB, 13, C.ink);
-  ty -= 20;
-
-  // Position (for winners)
+  // Position for winners (FIXED: no duplicate "PLACE")
   if (isWinner && config.position) {
-    ctxt(page, `— ${config.position.toUpperCase()} PLACE —`, ty, helvB, 9.5, C.gold);
-    ty -= 18;
+    const posText = config.position.toUpperCase();
+    ctxt(page, `—  ${posText}  —`, ty, helvB, 10, C.gold);
+    ty -= 20;
   }
 
   // Affiliation
-  ctxt(page, `organized by TechTatva, Chandigarh University  ·  ${config.eventDate}`, ty, times, 9, C.inkMuted);
-  ty -= 14;
-  ctxt(page, "Your enthusiasm and commitment made this event a success.", ty, timesI, 8.5, C.inkMuted, 0.8);
+  ctxt(page, `Organized by TechTatva, Chandigarh University`, ty, times, 10, C.inkMuted);
+  ty -= 16;
+  ctxt(page, config.eventDate || "", ty, times, 9, C.inkMuted, 0.8);
+  ty -= 22;
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  ORNAMENTAL DIVIDER ABOVE SIGNATURES          ║
-  // ╚═══════════════════════════════════════════════╝
-  const sigDivY = 128;
-  drawOrnamentalDivider(page, sigDivY, W - 160, C.gold, 0.35);
+  // Divider before signatures
+  drawDivider(page, ty, W - 180, C.gold, 0.35);
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  SIGNATURES                                    ║
-  // ╚═══════════════════════════════════════════════╝
-  const sigBaseY = 60;
-  const sigCol1 = W * 0.22;
-  const sigCol3 = W * 0.78;
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  LAUREL ARCS (flanking the seal area)                 ║
+  // ╚═══════════════════════════════════════════════════════╝
+  const sealCY = 88;
+  drawLaurelArc(page, CX, sealCY, 65, Math.PI * 0.6, Math.PI * 0.9, 6, C.gold, 0.35);
+  drawLaurelArc(page, CX, sealCY, 65, Math.PI * 0.1, Math.PI * 0.4, 6, C.gold, 0.35);
 
-  // Left signature
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  SIGNATURES                                            ║
+  // ╚═══════════════════════════════════════════════════════╝
+  const sigY = 58;
+  const sCol1 = W * 0.2;
+  const sCol3 = W * 0.8;
+
   const drawSig = (cx: number, name: string, role: string) => {
-    const lw = 120;
-    const ly = sigBaseY + 30;
-    page.drawLine({ start: { x: cx - lw / 2, y: ly }, end: { x: cx + lw / 2, y: ly }, thickness: 0.5, color: C.inkMuted, opacity: 0.5 });
-    // End dots on signature line
-    page.drawCircle({ x: cx - lw / 2, y: ly, size: 1.2, color: C.gold, opacity: 0.6 });
-    page.drawCircle({ x: cx + lw / 2, y: ly, size: 1.2, color: C.gold, opacity: 0.6 });
+    const lw = 130;
+    const ly = sigY + 34;
+    page.drawLine({ start: { x: cx - lw / 2, y: ly }, end: { x: cx + lw / 2, y: ly }, thickness: 0.6, color: C.inkMuted, opacity: 0.4 });
+    page.drawCircle({ x: cx - lw / 2, y: ly, size: 1.5, color: C.gold, opacity: 0.5 });
+    page.drawCircle({ x: cx + lw / 2, y: ly, size: 1.5, color: C.gold, opacity: 0.5 });
 
     if (name) {
-      const tw = timesI.widthOfTextAtSize(name, 11);
-      page.drawText(name, { x: cx - tw / 2, y: ly + 6, size: 11, font: timesI, color: C.ink });
+      const tw = timesI.widthOfTextAtSize(name, 12);
+      page.drawText(name, { x: cx - tw / 2, y: ly + 8, size: 12, font: timesI, color: C.ink });
     }
-    const rw = helvB.widthOfTextAtSize(role.toUpperCase(), 6);
-    page.drawText(role.toUpperCase(), { x: cx - rw / 2, y: sigBaseY + 14, size: 6, font: helvB, color: C.inkMuted });
+    const rw = helvB.widthOfTextAtSize(role.toUpperCase(), 6.5);
+    page.drawText(role.toUpperCase(), { x: cx - rw / 2, y: sigY + 16, size: 6.5, font: helvB, color: C.inkMuted });
   };
 
-  drawSig(sigCol1, config.hod || "", "Faculty Coordinator");
-  drawSig(sigCol3, config.facultyAdvisor || "", "Core Team Lead");
+  drawSig(sCol1, config.hod || "", "Faculty Coordinator");
+  drawSig(sCol3, config.facultyAdvisor || "", "Core Team Lead");
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  CENTER SEAL (elaborate multi-ring rosette)   ║
-  // ╚═══════════════════════════════════════════════╝
-  drawElaborateSeal(page, CX, sigBaseY + 35, C.gold, C.navy, ttLogo);
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  CENTER SEAL (elaborate multi-ring with scallops)      ║
+  // ╚═══════════════════════════════════════════════════════╝
+  drawSeal(page, CX, sealCY, C.gold, C.navy, ttLogo);
 
-  // ╔═══════════════════════════════════════════════╗
-  // ║  BOTTOM DARK ACCENT BAR                       ║
-  // ╚═══════════════════════════════════════════════╝
-  const barH = 20;
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  BOTTOM DARK ACCENT BAR                               ║
+  // ╚═══════════════════════════════════════════════════════╝
+  const barH = 18;
   page.drawRectangle({ x: fw, y: fw, width: W - fw * 2, height: barH, color: C.navy });
 
-  // Bottom bar text
   const bbY = fw + barH / 2 - 3;
-  page.drawText("THANK YOU FOR BEING A PART OF THE JOURNEY.", { x: fw + 16, y: bbY, size: 6, font: helvB, color: C.gold, opacity: 0.85 });
+  page.drawText("THANK YOU FOR BEING A PART OF THE JOURNEY.", { x: fw + 14, y: bbY, size: 5.5, font: helvB, color: C.gold, opacity: 0.85 });
+  const tag = "POWERING IDEAS  ·  CELEBRATING EXCELLENCE";
+  const tagW = helv.widthOfTextAtSize(tag, 5);
+  page.drawText(tag, { x: W - fw - 14 - tagW, y: bbY, size: 5, font: helv, color: C.goldLight, opacity: 0.6 });
 
-  // Tagline right
-  const tag = "POWERING IDEAS. CELEBRATING EXCELLENCE.";
-  const tagW = helv.widthOfTextAtSize(tag, 5.5);
-  page.drawText(tag, { x: W - fw - 16 - tagW, y: bbY, size: 5.5, font: helv, color: C.goldLight, opacity: 0.6 });
-
-  // Certificate number (top-right corner, subtle)
+  // Certificate number (subtle, top right)
   if (config.certNumber) {
     const cn = `No. ${config.certNumber}`;
     const cnW = helv.widthOfTextAtSize(cn, 6);
-    page.drawText(cn, { x: W - 40 - cnW, y: H - 48, size: 6, font: helv, color: C.inkMuted, opacity: 0.4 });
+    page.drawText(cn, { x: W - 42 - cnW, y: H - 46, size: 6, font: helv, color: C.inkMuted, opacity: 0.35 });
   }
 
   return await doc.save();
