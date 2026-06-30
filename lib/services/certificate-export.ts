@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import path from "path";
-import { PDFDocument, rgb, StandardFonts, degrees, type PDFFont, type PDFPage, type RGB } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, type PDFFont, type PDFPage, type RGB } from "pdf-lib";
 
 export type CertificateKind = "participation" | "winner";
 
@@ -32,402 +32,504 @@ type CertificatePdfJob = {
   config: CertificateConfig;
 };
 
-// A4 landscape dimensions in points (72 points per inch)
-const A4_WIDTH = 841.89;
-const A4_HEIGHT = 595.28;
+// A4 landscape
+const W = 841.89;
+const H = 595.28;
+const CX = W / 2;
+const CY = H / 2;
 
-// Inspiration-matching Premium Color Palette
-const COLORS = {
-  darkFrame: rgb(12 / 255, 17 / 255, 27 / 255),       // Elegant deep dark charcoal/navy for frame
-  canvasBg: rgb(250 / 255, 249 / 255, 246 / 255),     // Off-white cream textured canvas background
-  slate900: rgb(15 / 255, 23 / 255, 42 / 255),         // Deep slate for primary text
-  slate600: rgb(71 / 255, 85 / 255, 105 / 255),        // Muted slate for descriptions
-  slate400: rgb(148 / 255, 163 / 255, 184 / 255),      // Light slate
-  indigo: rgb(29 / 255, 78 / 255, 216 / 255),          // Accent blue
-  gold: rgb(197 / 255, 160 / 255, 89 / 255),           // Bevel gold for details and seals
-  goldLight: rgb(253 / 255, 248 / 255, 226 / 255),    // Very light gold tint
+// ═══════════════════════════════════════════════════
+//  PREMIUM COLOR PALETTE
+// ═══════════════════════════════════════════════════
+const C = {
+  // Outer frame layers
+  navy:       rgb(15/255, 20/255, 35/255),
+  navyLight:  rgb(25/255, 32/255, 52/255),
+  // Gold spectrum
+  goldDark:   rgb(160/255, 120/255, 50/255),
+  gold:       rgb(195/255, 158/255, 82/255),
+  goldMid:    rgb(212/255, 175/255, 100/255),
+  goldLight:  rgb(230/255, 205/255, 145/255),
+  goldPale:   rgb(248/255, 238/255, 210/255),
+  // Canvas
+  cream:      rgb(252/255, 250/255, 245/255),
+  creamDark:  rgb(245/255, 240/255, 228/255),
+  // Text
+  ink:        rgb(20/255, 25/255, 40/255),
+  inkSoft:    rgb(60/255, 65/255, 80/255),
+  inkMuted:   rgb(110/255, 115/255, 130/255),
+  white:      rgb(1, 1, 1),
 };
 
-function slugFile(value: string) {
-  return (value || "certificate").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 80) || "certificate";
+// ═══════════════════════════════════════════════════
+//  UTILITY HELPERS
+// ═══════════════════════════════════════════════════
+
+function slugFile(v: string) {
+  return (v || "certificate").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 80) || "certificate";
 }
 
 export function certificateNumber(eventSlug: string, kind: CertificateKind, recipient: CertificateRecipient, index: number) {
-  const eventCode = (eventSlug || "event").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) || "EVENT";
-  const personCode = (recipient.uid || recipient.id || recipient.name || String(index + 1)).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(-8) || String(index + 1).padStart(4, "0");
-  const prefix = kind === "winner" ? `WIN${index + 1}` : "PAR";
-  return `TT-${eventCode}-${prefix}-${personCode}`;
+  const ec = (eventSlug || "event").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) || "EVENT";
+  const pc = (recipient.uid || recipient.id || recipient.name || String(index + 1)).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(-8) || String(index + 1).padStart(4, "0");
+  const pfx = kind === "winner" ? `WIN${index + 1}` : "PAR";
+  return `TT-${ec}-${pfx}-${pc}`;
 }
 
 export function certificateFilename(kind: CertificateKind, config: CertificateConfig) {
-  const prefix = kind === "winner" ? `winner-${slugFile(config.position || "place")}` : "participation";
-  return `${prefix}-${slugFile(config.recipientName)}-${slugFile(config.certNumber)}.pdf`;
+  const pfx = kind === "winner" ? `winner-${slugFile(config.position || "place")}` : "participation";
+  return `${pfx}-${slugFile(config.recipientName)}-${slugFile(config.certNumber)}.pdf`;
 }
 
 export function renderCertificateHtml(kind: CertificateKind, config: CertificateConfig) {
   return "";
 }
 
-// --- Helper drawing functions ---
-
-function drawCenteredText(page: PDFPage, text: string, y: number, font: PDFFont, size: number, color: RGB, maxWidth?: number) {
-  const textWidth = font.widthOfTextAtSize(text, size);
-  const pageWidth = page.getWidth();
-  const x = (pageWidth - textWidth) / 2;
-  page.drawText(text, { x: Math.max(x, 20), y, size, font, color, maxWidth });
+function ctxt(page: PDFPage, text: string, y: number, font: PDFFont, size: number, color: RGB, opacity = 1) {
+  const tw = font.widthOfTextAtSize(text, size);
+  page.drawText(text, { x: Math.max((W - tw) / 2, 10), y, size, font, color, opacity });
 }
 
-function drawSignatureBlock(page: PDFPage, centerX: number, baseY: number, name: string, role: string, fonts: { italic: PDFFont; sans: PDFFont; sansBold: PDFFont }) {
-  const lineWidth = 110;
-  const lineY = baseY + 24;
+// ═══════════════════════════════════════════════════
+//  DECORATIVE DRAWING PRIMITIVES
+// ═══════════════════════════════════════════════════
 
-  // Signature line
-  page.drawLine({
-    start: { x: centerX - lineWidth / 2, y: lineY },
-    end: { x: centerX + lineWidth / 2, y: lineY },
-    thickness: 0.5,
-    color: COLORS.slate400,
-    opacity: 0.7,
-  });
+/** Draw a diamond shape at (cx, cy) with given half-size */
+function drawDiamond(page: PDFPage, cx: number, cy: number, halfSize: number, color: RGB, opacity = 1) {
+  // Approximate diamond with a rotated square using 4 thin lines
+  const s = halfSize;
+  const pts = [
+    { x: cx, y: cy + s },     // top
+    { x: cx + s, y: cy },     // right
+    { x: cx, y: cy - s },     // bottom
+    { x: cx - s, y: cy },     // left
+  ];
+  for (let i = 0; i < 4; i++) {
+    page.drawLine({
+      start: pts[i],
+      end: pts[(i + 1) % 4],
+      thickness: 0.6,
+      color,
+      opacity,
+    });
+  }
+}
 
-  // Signature name (Times Italic)
-  if (name) {
-    const nameWidth = fonts.italic.widthOfTextAtSize(name, 10.5);
-    page.drawText(name, {
-      x: centerX - nameWidth / 2,
-      y: lineY + 5,
-      size: 10.5,
-      font: fonts.italic,
-      color: COLORS.slate900,
+/** Draw a decorative dot cluster (rosette) at a corner */
+function drawCornerRosette(page: PDFPage, cx: number, cy: number, color: RGB) {
+  // Central dot
+  page.drawCircle({ x: cx, y: cy, size: 3.5, color, opacity: 0.9 });
+  // Ring of 8 dots
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * Math.PI * 2) / 8;
+    page.drawCircle({
+      x: cx + Math.cos(angle) * 10,
+      y: cy + Math.sin(angle) * 10,
+      size: 1.8, color, opacity: 0.7,
+    });
+  }
+  // Outer ring of 12 tiny dots
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI * 2) / 12 + Math.PI / 12;
+    page.drawCircle({
+      x: cx + Math.cos(angle) * 18,
+      y: cy + Math.sin(angle) * 18,
+      size: 1, color, opacity: 0.45,
+    });
+  }
+  // Outermost ring of 16 micro dots
+  for (let i = 0; i < 16; i++) {
+    const angle = (i * Math.PI * 2) / 16;
+    page.drawCircle({
+      x: cx + Math.cos(angle) * 25,
+      y: cy + Math.sin(angle) * 25,
+      size: 0.6, color, opacity: 0.3,
+    });
+  }
+}
+
+/** Draw ornamental divider line with center diamond */
+function drawOrnamentalDivider(page: PDFPage, y: number, width: number, color: RGB, opacity = 0.6) {
+  const left = CX - width / 2;
+  const right = CX + width / 2;
+
+  // Main line
+  page.drawLine({ start: { x: left, y }, end: { x: CX - 8, y }, thickness: 0.5, color, opacity });
+  page.drawLine({ start: { x: CX + 8, y }, end: { x: right, y }, thickness: 0.5, color, opacity });
+
+  // Center diamond
+  drawDiamond(page, CX, y, 4, color, opacity);
+
+  // End diamonds
+  drawDiamond(page, left + 3, y, 2, color, opacity);
+  drawDiamond(page, right - 3, y, 2, color, opacity);
+
+  // Dots near center
+  page.drawCircle({ x: CX - 16, y, size: 1, color, opacity: opacity * 0.7 });
+  page.drawCircle({ x: CX + 16, y, size: 1, color, opacity: opacity * 0.7 });
+}
+
+/** Sunburst radiating lines from a center point */
+function drawSunburst(page: PDFPage, cx: number, cy: number, innerR: number, outerR: number, count: number, color: RGB, opacity: number) {
+  for (let i = 0; i < count; i++) {
+    const angle = (i * Math.PI * 2) / count;
+    page.drawLine({
+      start: { x: cx + Math.cos(angle) * innerR, y: cy + Math.sin(angle) * innerR },
+      end: { x: cx + Math.cos(angle) * outerR, y: cy + Math.sin(angle) * outerR },
+      thickness: 0.3,
+      color,
+      opacity,
+    });
+  }
+}
+
+/** Draw the elaborate multi-ring seal with scalloped edge effect */
+function drawElaborateSeal(page: PDFPage, cx: number, cy: number, color: RGB, darkColor: RGB, ttLogo: any) {
+  // Scalloped outer edge (bumpy circle made of overlapping circles)
+  const scallops = 24;
+  const sR = 38;
+  for (let i = 0; i < scallops; i++) {
+    const angle = (i * Math.PI * 2) / scallops;
+    page.drawCircle({
+      x: cx + Math.cos(angle) * sR,
+      y: cy + Math.sin(angle) * sR,
+      size: 8,
+      color,
+      opacity: 0.85,
     });
   }
 
-  // Role label (Uppercase Sans)
-  const roleWidth = fonts.sansBold.widthOfTextAtSize(role.toUpperCase(), 6.5);
-  page.drawText(role.toUpperCase(), {
-    x: centerX - roleWidth / 2,
-    y: baseY + 10,
-    size: 6.5,
-    font: fonts.sansBold,
-    color: COLORS.slate600,
-  });
+  // Solid fill center
+  page.drawCircle({ x: cx, y: cy, size: 40, color });
+
+  // Sunburst rays inside seal
+  drawSunburst(page, cx, cy, 28, 37, 36, darkColor, 0.15);
+
+  // Inner ring 1
+  page.drawCircle({ x: cx, y: cy, size: 34, borderColor: darkColor, borderWidth: 0.8, opacity: 0, borderOpacity: 0.4 });
+
+  // Inner ring 2 (gold)
+  page.drawCircle({ x: cx, y: cy, size: 30, borderColor: C.goldLight, borderWidth: 1, opacity: 0, borderOpacity: 0.7 });
+
+  // Dark inner disc
+  page.drawCircle({ x: cx, y: cy, size: 27, color: darkColor });
+
+  // Gold ring on dark disc
+  page.drawCircle({ x: cx, y: cy, size: 24, borderColor: color, borderWidth: 1.2, opacity: 0, borderOpacity: 0.8 });
+
+  // Innermost gold disc
+  page.drawCircle({ x: cx, y: cy, size: 20, color });
+
+  // Dot ring inside seal
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI * 2) / 12;
+    page.drawCircle({
+      x: cx + Math.cos(angle) * 16,
+      y: cy + Math.sin(angle) * 16,
+      size: 1,
+      color: darkColor,
+      opacity: 0.5,
+    });
+  }
+
+  // Logo in the center of the seal
+  if (ttLogo) {
+    page.drawImage(ttLogo, {
+      x: cx - 14,
+      y: cy - 14,
+      width: 28,
+      height: 28,
+    });
+  }
 }
 
-// --- Main PDF generation ---
+// ═══════════════════════════════════════════════════
+//  MAIN PDF BUILDER
+// ═══════════════════════════════════════════════════
 
 async function buildCertificatePdf(kind: CertificateKind, config: CertificateConfig): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
-  const page = doc.addPage([A4_WIDTH, A4_HEIGHT]);
+  const page = doc.addPage([W, H]);
 
-  // Embed standard fonts
-  const helvetica = await doc.embedFont(StandardFonts.Helvetica);
-  const helveticaBold = await doc.embedFont(StandardFonts.HelveticaBold);
-  const timesRoman = await doc.embedFont(StandardFonts.TimesRoman);
-  const timesItalic = await doc.embedFont(StandardFonts.TimesRomanItalic);
-  const timesBold = await doc.embedFont(StandardFonts.TimesRomanBold);
+  // Fonts
+  const helv     = await doc.embedFont(StandardFonts.Helvetica);
+  const helvB    = await doc.embedFont(StandardFonts.HelveticaBold);
+  const times    = await doc.embedFont(StandardFonts.TimesRoman);
+  const timesI   = await doc.embedFont(StandardFonts.TimesRomanItalic);
+  const timesB   = await doc.embedFont(StandardFonts.TimesRomanBold);
+  const timesBi  = await doc.embedFont(StandardFonts.TimesRomanBoldItalic);
 
   const isWinner = kind === "winner";
 
-  // Load and embed standard logos from the public folder dynamically
+  // ── Load logos ──
   let cuLogo: any = null;
   let ttLogo: any = null;
-  try {
-    const cuLogoBytes = readFileSync(path.join(process.cwd(), "public/chandigarh-university-logo.png"));
-    cuLogo = await doc.embedPng(cuLogoBytes);
-  } catch (e) {
-    console.error("Failed to load CU logo", e);
-  }
+  try { cuLogo = await doc.embedPng(readFileSync(path.join(process.cwd(), "public/chandigarh-university-logo.png"))); } catch {}
+  try { ttLogo = await doc.embedPng(readFileSync(path.join(process.cwd(), "public/logo-colour.png"))); } catch {}
 
-  try {
-    const ttLogoBytes = readFileSync(path.join(process.cwd(), "public/logo-colour.png"));
-    ttLogo = await doc.embedPng(ttLogoBytes);
-  } catch (e) {
-    console.error("Failed to load Tech Tatva logo", e);
-  }
-
-  // Load and embed custom Event Logo from remote URL if provided
-  let eventLogoImage: any = null;
+  let eventLogo: any = null;
   if (config.certEventLogo) {
     try {
       const res = await fetch(config.certEventLogo);
       if (res.ok) {
-        const arrayBuffer = await res.arrayBuffer();
-        const imageBuffer = Buffer.from(arrayBuffer);
-        if (config.certEventLogo.toLowerCase().includes(".png")) {
-          eventLogoImage = await doc.embedPng(imageBuffer);
-        } else {
-          eventLogoImage = await doc.embedJpg(imageBuffer);
-        }
+        const buf = Buffer.from(await res.arrayBuffer());
+        eventLogo = config.certEventLogo.toLowerCase().includes(".png") ? await doc.embedPng(buf) : await doc.embedJpg(buf);
       }
-    } catch (e) {
-      console.error("Failed to load custom event logo from URL", e);
-    }
+    } catch {}
   }
 
-  // 1. Draw solid dark background outer frame
-  page.drawRectangle({
-    x: 0, y: 0, width: A4_WIDTH, height: A4_HEIGHT,
-    color: COLORS.darkFrame,
-  });
+  // ╔═══════════════════════════════════════════════╗
+  // ║  LAYER 1: OUTER DARK NAVY BACKGROUND         ║
+  // ╚═══════════════════════════════════════════════╝
+  page.drawRectangle({ x: 0, y: 0, width: W, height: H, color: C.navy });
 
-  // 2. Draw inner cream canvas card
-  const frameWidth = 24;
-  page.drawRectangle({
-    x: frameWidth,
-    y: frameWidth,
-    width: A4_WIDTH - (frameWidth * 2),
-    height: A4_HEIGHT - (frameWidth * 2),
-    color: COLORS.canvasBg,
-  });
+  // ╔═══════════════════════════════════════════════╗
+  // ║  LAYER 2: GOLD OUTER BORDER (thick)           ║
+  // ╚═══════════════════════════════════════════════╝
+  const ob = 10; // outer border offset
+  page.drawRectangle({ x: ob, y: ob, width: W - ob * 2, height: H - ob * 2, borderColor: C.gold, borderWidth: 2.5, opacity: 0, borderOpacity: 0.85 });
 
-  // 3. Draw elegant gold corner brackets over the inner corners
-  const drawCornerBracket = (cx: number, cy: number, dx: number, dy: number) => {
-    const thickness = 1;
-    const len = 16;
-    page.drawLine({
-      start: { x: cx, y: cy },
-      end: { x: cx + dx * len, y: cy },
-      thickness,
-      color: COLORS.gold,
-    });
-    page.drawLine({
-      start: { x: cx, y: cy },
-      end: { x: cx, y: cy + dy * len },
-      thickness,
-      color: COLORS.gold,
-    });
+  // ╔═══════════════════════════════════════════════╗
+  // ║  LAYER 3: THIN GOLD PINSTRIPE                 ║
+  // ╚═══════════════════════════════════════════════╝
+  const ps = 16;
+  page.drawRectangle({ x: ps, y: ps, width: W - ps * 2, height: H - ps * 2, borderColor: C.goldMid, borderWidth: 0.5, opacity: 0, borderOpacity: 0.6 });
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  LAYER 4: CREAM CANVAS FILL                   ║
+  // ╚═══════════════════════════════════════════════╝
+  const fw = 20;
+  page.drawRectangle({ x: fw, y: fw, width: W - fw * 2, height: H - fw * 2, color: C.cream });
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  LAYER 5: INNER DECORATIVE GOLD BORDER        ║
+  // ╚═══════════════════════════════════════════════╝
+  const ib = 30;
+  page.drawRectangle({ x: ib, y: ib, width: W - ib * 2, height: H - ib * 2, borderColor: C.gold, borderWidth: 1.2, opacity: 0, borderOpacity: 0.5 });
+
+  // Thinner inner-inner border
+  const iib = 34;
+  page.drawRectangle({ x: iib, y: iib, width: W - iib * 2, height: H - iib * 2, borderColor: C.goldMid, borderWidth: 0.3, opacity: 0, borderOpacity: 0.35 });
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  DIAMOND CHAIN BORDER between layers 5 & 6    ║
+  // ╚═══════════════════════════════════════════════╝
+  const dbOffset = 32;
+  const diamondSpacing = 20;
+  // Top edge
+  for (let x = dbOffset + 20; x < W - dbOffset - 20; x += diamondSpacing) {
+    drawDiamond(page, x, H - dbOffset, 2.5, C.gold, 0.3);
+  }
+  // Bottom edge
+  for (let x = dbOffset + 20; x < W - dbOffset - 20; x += diamondSpacing) {
+    drawDiamond(page, x, dbOffset, 2.5, C.gold, 0.3);
+  }
+  // Left edge
+  for (let y = dbOffset + 20; y < H - dbOffset - 20; y += diamondSpacing) {
+    drawDiamond(page, dbOffset, y, 2.5, C.gold, 0.3);
+  }
+  // Right edge
+  for (let y = dbOffset + 20; y < H - dbOffset - 20; y += diamondSpacing) {
+    drawDiamond(page, W - dbOffset, y, 2.5, C.gold, 0.3);
+  }
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  CORNER ROSETTES (ornate dot clusters)        ║
+  // ╚═══════════════════════════════════════════════╝
+  const cr = 56;
+  drawCornerRosette(page, cr, cr, C.gold);
+  drawCornerRosette(page, W - cr, cr, C.gold);
+  drawCornerRosette(page, cr, H - cr, C.gold);
+  drawCornerRosette(page, W - cr, H - cr, C.gold);
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  CORNER BRACKET FLOURISHES (L-shaped)         ║
+  // ╚═══════════════════════════════════════════════╝
+  const drawCornerL = (x: number, y: number, dx: number, dy: number) => {
+    const len = 55;
+    const t = 1.5;
+    page.drawLine({ start: { x, y }, end: { x: x + dx * len, y }, thickness: t, color: C.gold, opacity: 0.55 });
+    page.drawLine({ start: { x, y }, end: { x, y: y + dy * len }, thickness: t, color: C.gold, opacity: 0.55 });
+    // Small perpendicular end caps
+    page.drawLine({ start: { x: x + dx * len, y: y - dy * 4 }, end: { x: x + dx * len, y: y + dy * 4 }, thickness: 0.6, color: C.gold, opacity: 0.4 });
+    page.drawLine({ start: { x: x - dx * 4, y: y + dy * len }, end: { x: x + dx * 4, y: y + dy * len }, thickness: 0.6, color: C.gold, opacity: 0.4 });
+  };
+  const clOff = 38;
+  drawCornerL(clOff, clOff, 1, 1);
+  drawCornerL(W - clOff, clOff, -1, 1);
+  drawCornerL(clOff, H - clOff, 1, -1);
+  drawCornerL(W - clOff, H - clOff, -1, -1);
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  BACKGROUND: RADIATING SUNBURST FROM CENTER   ║
+  // ╚═══════════════════════════════════════════════╝
+  drawSunburst(page, CX, CY, 80, 260, 72, C.goldPale, 0.06);
+  drawSunburst(page, CX, CY, 70, 160, 36, C.creamDark, 0.08);
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  BACKGROUND: CONCENTRIC CIRCLES (watermark)   ║
+  // ╚═══════════════════════════════════════════════╝
+  for (let r = 40; r <= 240; r += 30) {
+    page.drawCircle({ x: CX, y: CY, size: r, borderColor: C.goldMid, borderWidth: 0.25, opacity: 0, borderOpacity: 0.035 });
+  }
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  BACKGROUND: CENTER WATERMARK LOGO            ║
+  // ╚═══════════════════════════════════════════════╝
+  if (ttLogo) {
+    page.drawImage(ttLogo, { x: CX - 100, y: CY - 100, width: 200, height: 200, opacity: 0.03 });
+  }
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  HEADER: LOGOS + BRANDING                     ║
+  // ╚═══════════════════════════════════════════════╝
+  const headY = H - 72;
+
+  // Left: Tech Tatva logo + text
+  if (ttLogo) {
+    page.drawImage(ttLogo, { x: 50, y: headY - 2, width: 36, height: 36 });
+  }
+  page.drawText("TechTatva", { x: 92, y: headY + 20, size: 12, font: helvB, color: C.ink });
+  page.drawText("CHANDIGARH UNIVERSITY", { x: 92, y: headY + 7, size: 6.5, font: helv, color: C.inkMuted });
+
+  // Right: CU logo + Event logo
+  if (cuLogo) {
+    page.drawImage(cuLogo, { x: W - 160, y: headY + 2, width: 90, height: 28 });
+  }
+  if (eventLogo) {
+    page.drawImage(eventLogo, { x: W - 62, y: headY, width: 32, height: 32 });
+  }
+
+  // Header divider with ornament
+  drawOrnamentalDivider(page, headY - 16, W - 120, C.gold, 0.45);
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  TITLE: "CERTIFICATE"                         ║
+  // ╚═══════════════════════════════════════════════╝
+  let ty = headY - 52;
+
+  ctxt(page, "CERTIFICATE", ty, timesB, 36, C.ink);
+  ty -= 22;
+
+  // Subtitle with spaced letters
+  const subText = isWinner ? "O F   A C H I E V E M E N T" : "O F   P A R T I C I P A T I O N";
+  ctxt(page, subText, ty, helvB, 9, C.gold);
+  ty -= 14;
+
+  // Ornamental divider under title
+  drawOrnamentalDivider(page, ty, 320, C.gold, 0.55);
+  ty -= 26;
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  "PROUDLY PRESENTED TO"                       ║
+  // ╚═══════════════════════════════════════════════╝
+  ctxt(page, "PROUDLY PRESENTED TO", ty, helv, 8.5, C.inkMuted);
+  ty -= 38;
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  RECIPIENT NAME (large, elegant, gold)        ║
+  // ╚═══════════════════════════════════════════════╝
+  const rName = config.recipientName || "Recipient Name";
+  ctxt(page, rName, ty, timesBi, 32, C.goldDark);
+
+  // Decorative underline with end dots
+  const nw = timesBi.widthOfTextAtSize(rName, 32);
+  const nx = (W - nw) / 2;
+  ty -= 8;
+  page.drawLine({ start: { x: nx - 10, y: ty }, end: { x: nx + nw + 10, y: ty }, thickness: 1, color: C.gold, opacity: 0.5 });
+  // End dots
+  page.drawCircle({ x: nx - 14, y: ty, size: 2, color: C.gold, opacity: 0.5 });
+  page.drawCircle({ x: nx + nw + 14, y: ty, size: 2, color: C.gold, opacity: 0.5 });
+  ty -= 24;
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  DESCRIPTION TEXT                              ║
+  // ╚═══════════════════════════════════════════════╝
+  ctxt(page, "for exceptional dedication and outstanding performance in", ty, timesI, 10, C.inkSoft);
+  ty -= 22;
+
+  // Event name (bold, larger)
+  const evName = (config.eventName || "Event").toUpperCase();
+  ctxt(page, evName, ty, helvB, 13, C.ink);
+  ty -= 20;
+
+  // Position (for winners)
+  if (isWinner && config.position) {
+    ctxt(page, `— ${config.position.toUpperCase()} PLACE —`, ty, helvB, 9.5, C.gold);
+    ty -= 18;
+  }
+
+  // Affiliation
+  ctxt(page, `organized by TechTatva, Chandigarh University  ·  ${config.eventDate}`, ty, times, 9, C.inkMuted);
+  ty -= 14;
+  ctxt(page, "Your enthusiasm and commitment made this event a success.", ty, timesI, 8.5, C.inkMuted, 0.8);
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  ORNAMENTAL DIVIDER ABOVE SIGNATURES          ║
+  // ╚═══════════════════════════════════════════════╝
+  const sigDivY = 128;
+  drawOrnamentalDivider(page, sigDivY, W - 160, C.gold, 0.35);
+
+  // ╔═══════════════════════════════════════════════╗
+  // ║  SIGNATURES                                    ║
+  // ╚═══════════════════════════════════════════════╝
+  const sigBaseY = 60;
+  const sigCol1 = W * 0.22;
+  const sigCol3 = W * 0.78;
+
+  // Left signature
+  const drawSig = (cx: number, name: string, role: string) => {
+    const lw = 120;
+    const ly = sigBaseY + 30;
+    page.drawLine({ start: { x: cx - lw / 2, y: ly }, end: { x: cx + lw / 2, y: ly }, thickness: 0.5, color: C.inkMuted, opacity: 0.5 });
+    // End dots on signature line
+    page.drawCircle({ x: cx - lw / 2, y: ly, size: 1.2, color: C.gold, opacity: 0.6 });
+    page.drawCircle({ x: cx + lw / 2, y: ly, size: 1.2, color: C.gold, opacity: 0.6 });
+
+    if (name) {
+      const tw = timesI.widthOfTextAtSize(name, 11);
+      page.drawText(name, { x: cx - tw / 2, y: ly + 6, size: 11, font: timesI, color: C.ink });
+    }
+    const rw = helvB.widthOfTextAtSize(role.toUpperCase(), 6);
+    page.drawText(role.toUpperCase(), { x: cx - rw / 2, y: sigBaseY + 14, size: 6, font: helvB, color: C.inkMuted });
   };
 
-  const cOffset = frameWidth + 6;
-  drawCornerBracket(cOffset, cOffset, 1, 1); // Bottom-left
-  drawCornerBracket(A4_WIDTH - cOffset, cOffset, -1, 1); // Bottom-right
-  drawCornerBracket(cOffset, A4_HEIGHT - cOffset, 1, -1); // Top-left
-  drawCornerBracket(A4_WIDTH - cOffset, A4_HEIGHT - cOffset, -1, -1); // Top-right
+  drawSig(sigCol1, config.hod || "", "Faculty Coordinator");
+  drawSig(sigCol3, config.facultyAdvisor || "", "Core Team Lead");
 
-  // 4. Subtle background constellation decoration (very low opacity)
-  const drawConcentricCircles = (cx: number, cy: number, maxRadius: number) => {
-    for (let r = 40; r <= maxRadius; r += 40) {
-      page.drawCircle({
-        x: cx,
-        y: cy,
-        size: r,
-        borderColor: COLORS.gold,
-        borderWidth: 0.35,
-        opacity: 0,
-        borderOpacity: 0.03,
-      });
-    }
-  };
-  drawConcentricCircles(cOffset + 10, cOffset + 10, 200); // Bottom-left background details
-  drawConcentricCircles(A4_WIDTH - cOffset - 10, A4_HEIGHT - cOffset - 10, 200); // Top-right background details
+  // ╔═══════════════════════════════════════════════╗
+  // ║  CENTER SEAL (elaborate multi-ring rosette)   ║
+  // ╚═══════════════════════════════════════════════╝
+  drawElaborateSeal(page, CX, sigBaseY + 35, C.gold, C.navy, ttLogo);
 
-  // 5. Tech Tatva Center Watermark Logo
-  if (ttLogo) {
-    page.drawImage(ttLogo, {
-      x: (A4_WIDTH - 240) / 2,
-      y: (A4_HEIGHT - 240) / 2 - 5,
-      width: 240,
-      height: 240,
-      opacity: 0.035, // extremely faint background watermark
-    });
-  }
+  // ╔═══════════════════════════════════════════════╗
+  // ║  BOTTOM DARK ACCENT BAR                       ║
+  // ╚═══════════════════════════════════════════════╝
+  const barH = 20;
+  page.drawRectangle({ x: fw, y: fw, width: W - fw * 2, height: barH, color: C.navy });
 
-  // 6. Header branding
-  const headerY = A4_HEIGHT - 74;
-  // Tech Tatva Logo + text (Top Left)
-  if (ttLogo) {
-    page.drawImage(ttLogo, {
-      x: 48,
-      y: headerY,
-      width: 32,
-      height: 32,
-    });
-    page.drawText("TechTatva", {
-      x: 88,
-      y: headerY + 18,
-      size: 11,
-      font: helveticaBold,
-      color: COLORS.slate900,
-    });
-    page.drawText("CHANDIGARH UNIVERSITY", {
-      x: 88,
-      y: headerY + 6,
-      size: 6.5,
-      font: helvetica,
-      color: COLORS.slate600,
-    });
-  }
+  // Bottom bar text
+  const bbY = fw + barH / 2 - 3;
+  page.drawText("THANK YOU FOR BEING A PART OF THE JOURNEY.", { x: fw + 16, y: bbY, size: 6, font: helvB, color: C.gold, opacity: 0.85 });
 
-  // Dynamic Event/Custom Logo OR TM 3.0 Label (Top Right)
-  if (eventLogoImage) {
-    page.drawImage(eventLogoImage, {
-      x: A4_WIDTH - 80,
-      y: headerY,
-      width: 32,
-      height: 32,
-    });
-  } else {
-    page.drawText("TM 3.0", {
-      x: A4_WIDTH - 86,
-      y: headerY + 16,
-      size: 12,
-      font: helveticaBold,
-      color: COLORS.gold,
-    });
-    page.drawText("TECHNOMANIA", {
-      x: A4_WIDTH - 118,
-      y: headerY + 6,
-      size: 6,
-      font: helvetica,
-      color: COLORS.slate600,
-    });
-  }
+  // Tagline right
+  const tag = "POWERING IDEAS. CELEBRATING EXCELLENCE.";
+  const tagW = helv.widthOfTextAtSize(tag, 5.5);
+  page.drawText(tag, { x: W - fw - 16 - tagW, y: bbY, size: 5.5, font: helv, color: C.goldLight, opacity: 0.6 });
 
-  // Header Divider
-  page.drawLine({
-    start: { x: 48, y: headerY - 14 },
-    end: { x: A4_WIDTH - 48, y: headerY - 14 },
-    thickness: 0.5,
-    color: COLORS.slate400,
-    opacity: 0.25,
-  });
-
-  // ── Content Layout ──
-  let currentY = headerY - 52;
-
-  // Title: "CERTIFICATE"
-  drawCenteredText(page, "CERTIFICATE", currentY, helveticaBold, 24, COLORS.slate900);
-  currentY -= 18;
-
-  // Category: "— OF ACHIEVEMENT —" or "— OF PARTICIPATION —"
-  const catText = isWinner ? "—   O F   A C H I E V E M E N T   —" : "—   O F   P A R T I C I P A T I O N   —";
-  drawCenteredText(page, catText, currentY, helveticaBold, 7.5, COLORS.gold);
-  currentY -= 32;
-
-  // Presented label
-  drawCenteredText(page, "PROUDLY PRESENTED TO", currentY, helvetica, 7.5, COLORS.slate600);
-  currentY -= 36;
-
-  // Recipient Calligraphy Name (Times Italic for a beautiful handwritten/cursive script feel)
-  const recipientName = config.recipientName || "Recipient Name";
-  drawCenteredText(page, recipientName, currentY, timesItalic, 28, COLORS.gold);
-  
-  // Underline for name
-  const nameWidth = timesItalic.widthOfTextAtSize(recipientName, 28);
-  const nameX = (A4_WIDTH - nameWidth) / 2;
-  currentY -= 6;
-  page.drawLine({
-    start: { x: nameX, y: currentY },
-    end: { x: nameX + nameWidth, y: currentY },
-    thickness: 0.6,
-    color: COLORS.gold,
-    opacity: 0.5,
-  });
-  currentY -= 24;
-
-  // Details
-  const descLine1 = "for exceptional dedication and outstanding performance in";
-  drawCenteredText(page, descLine1, currentY, helvetica, 9, COLORS.slate600);
-  currentY -= 18;
-
-  // Event Name
-  const eventName = (config.eventName || "Event Name").toUpperCase();
-  drawCenteredText(page, eventName, currentY, helveticaBold, 11.5, COLORS.slate900);
-  currentY -= 18;
-
-  // Affiliation details
-  const descLine3 = `organized by TechTatva, Chandigarh University held on ${config.eventDate}.`;
-  drawCenteredText(page, descLine3, currentY, helvetica, 9, COLORS.slate600);
-  currentY -= 16;
-  
-  const descLine4 = "Your enthusiasm and commitment made this event a success.";
-  drawCenteredText(page, descLine4, currentY, helvetica, 9, COLORS.slate600);
-
-  // ── Bottom Signatures and Embossed Seal ──
-  const sigY = 62;
-  const sigSpacing = A4_WIDTH / 4;
-
-  // Left & Right Signatures (HOD, Faculty Advisor)
-  drawSignatureBlock(page, sigSpacing, sigY, config.hod || "", "Head of Department", {
-    italic: timesItalic,
-    sans: helvetica,
-    sansBold: helveticaBold,
-  });
-
-  drawSignatureBlock(page, sigSpacing * 3, sigY, config.facultyAdvisor || "", "Faculty Coordinator", {
-    italic: timesItalic,
-    sans: helvetica,
-    sansBold: helveticaBold,
-  });
-
-  // 7. Middle 3D Gold Seal Badge (embossed metal seal effect)
-  const sealX = A4_WIDTH / 2;
-  const sealY = sigY + 28;
-  
-  // Outer gold rim
-  page.drawCircle({
-    x: sealX,
-    y: sealY,
-    size: 26,
-    color: COLORS.gold,
-    borderColor: rgb(238 / 255, 207 / 255, 142 / 255),
-    borderWidth: 1.5,
-  });
-
-  // Inner dark center
-  page.drawCircle({
-    x: sealX,
-    y: sealY,
-    size: 22,
-    color: COLORS.darkFrame,
-  });
-
-  // Tech Tatva logo inside seal
-  if (ttLogo) {
-    page.drawImage(ttLogo, {
-      x: sealX - 13,
-      y: sealY - 13,
-      width: 26,
-      height: 26,
-    });
-  }
-
-  // 8. Dark bottom accent bar
-  const bottomBarHeight = 24;
-  page.drawRectangle({
-    x: frameWidth,
-    y: frameWidth,
-    width: A4_WIDTH - (frameWidth * 2),
-    height: bottomBarHeight,
-    color: COLORS.darkFrame,
-  });
-
-  // Bottom Accent text
-  const barTextY = frameWidth + (bottomBarHeight / 2) - 3.5;
-  
-  page.drawText("THANK YOU FOR BEING A PART OF THE JOURNEY.", {
-    x: frameWidth + 20,
-    y: barTextY,
-    size: 6.5,
-    font: helveticaBold,
-    color: COLORS.gold,
-    opacity: 0.9,
-  });
-
+  // Certificate number (top-right corner, subtle)
   if (config.certNumber) {
-    const certNoText = `No. ${config.certNumber}`;
-    const certNoWidth = helvetica.widthOfTextAtSize(certNoText, 6.5);
-    page.drawText(certNoText, {
-      x: A4_WIDTH - frameWidth - 20 - certNoWidth,
-      y: barTextY,
-      size: 6.5,
-      font: helvetica,
-      color: COLORS.slate400,
-    });
+    const cn = `No. ${config.certNumber}`;
+    const cnW = helv.widthOfTextAtSize(cn, 6);
+    page.drawText(cn, { x: W - 40 - cnW, y: H - 48, size: 6, font: helv, color: C.inkMuted, opacity: 0.4 });
   }
 
   return await doc.save();
 }
+
+// ═══════════════════════════════════════════════════
+//  PUBLIC API
+// ═══════════════════════════════════════════════════
 
 export async function renderCertificatePdf(kind: CertificateKind, config: CertificateConfig): Promise<Uint8Array> {
   return buildCertificatePdf(kind, config);
@@ -435,27 +537,23 @@ export async function renderCertificatePdf(kind: CertificateKind, config: Certif
 
 export async function renderCertificatePdfs(jobs: CertificatePdfJob[]): Promise<Buffer[]> {
   if (!jobs.length) return [];
-  
   const results: Buffer[] = [];
   const batchSize = 8;
   for (let i = 0; i < jobs.length; i += batchSize) {
     const batch = jobs.slice(i, i + batchSize);
-    const batchResults = await Promise.all(
-      batch.map(async (job) => {
-        const pdfBytes = await buildCertificatePdf(job.kind, job.config);
-        return Buffer.from(pdfBytes);
-      })
-    );
-    results.push(...batchResults);
+    const br = await Promise.all(batch.map(async (j) => Buffer.from(await buildCertificatePdf(j.kind, j.config))));
+    results.push(...br);
   }
   return results;
 }
 
-// ── ZIP utility ──
+// ═══════════════════════════════════════════════════
+//  ZIP UTILITY
+// ═══════════════════════════════════════════════════
 
 const crcTable = new Uint32Array(256).map((_, n) => {
   let c = n;
-  for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
   return c >>> 0;
 });
 
@@ -467,21 +565,12 @@ function crc32(buffer: Buffer) {
 
 function dosDateTime(date = new Date()) {
   const time = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
-  const dosDate = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
-  return { time, date: dosDate };
+  const d = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  return { time, date: d };
 }
 
-function u16(value: number) {
-  const buffer = Buffer.alloc(2);
-  buffer.writeUInt16LE(value);
-  return buffer;
-}
-
-function u32(value: number) {
-  const buffer = Buffer.alloc(4);
-  buffer.writeUInt32LE(value >>> 0);
-  return buffer;
-}
+const u16 = (v: number) => { const b = Buffer.alloc(2); b.writeUInt16LE(v); return b; };
+const u32 = (v: number) => { const b = Buffer.alloc(4); b.writeUInt32LE(v >>> 0); return b; };
 
 export function zipFiles(files: { name: string; content: string | Buffer }[]) {
   const locals: Buffer[] = [];
@@ -506,9 +595,9 @@ export function zipFiles(files: { name: string; content: string | Buffer }[]) {
     offset += local.length;
   });
 
-  const centralDirectory = Buffer.concat(centrals);
+  const cd = Buffer.concat(centrals);
   const end = Buffer.concat([
-    u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(centralDirectory.length), u32(offset), u16(0)
+    u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(cd.length), u32(offset), u16(0)
   ]);
-  return Buffer.concat([...locals, centralDirectory, end]);
+  return Buffer.concat([...locals, cd, end]);
 }
