@@ -5,8 +5,10 @@ import { MotionLogo, SiteLoader } from "@/components/brand-motion";
 import { MobilePublicMenu } from "@/components/mobile-public-menu";
 
 const publicLinks = [
+  ["HOME", "/"],
   ["ABOUT", "/about"],
   ["RECRUITMENT", "/recruitment"],
+  ["JOIN US", "/join"],
   ["EVENTS", "/events"],
   ["TEAMS", "/teams"],
   ["HALL OF FAME", "/hall-of-fame"],
@@ -60,7 +62,6 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
               />
             </div>
           </div>
-
         </div>
       </div>
     </footer>

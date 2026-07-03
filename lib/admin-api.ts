@@ -19,7 +19,9 @@ import {
   RecruitmentQuestion,
   RecruitmentRole,
   RecruitmentSettings,
-  RecruitmentTeam
+  RecruitmentTeam,
+  StudentMember,
+  MembershipDriveSettings
 } from "@/lib/models";
 
 export const adminResources = [
@@ -39,7 +41,9 @@ export const adminResources = [
   "recruitmentTeams",
   "recruitmentRoles",
   "recruitmentQuestions",
-  "recruitmentApplications"
+  "recruitmentApplications",
+  "studentMembers",
+  "membershipDriveSettings"
 ] as const;
 
 export type AdminResource = (typeof adminResources)[number];
@@ -94,6 +98,7 @@ const participationModes = new Set(["individual", "team", "both"]);
 const recruitmentStatuses = new Set(["opening_soon", "open", "closing_soon", "closed", "full"]);
 const applicationStatuses = new Set(["pending", "shortlisted", "accepted", "rejected", "on_hold"]);
 const questionTypes = new Set(["short_text", "long_text", "number", "multiple_choice", "checkbox", "dropdown", "rating", "url", "file_upload"]);
+const membershipStatuses = new Set(["opening_soon", "open", "closing_soon", "closed"]);
 
 function normalizeEventStatus(value: any, fallback = "published") {
   const status = String(value || fallback).toLowerCase().trim();
@@ -220,6 +225,18 @@ function normalizeRecruitmentSettings(input: Record<string, any>) {
   return normalized;
 }
 
+function normalizeMembershipDriveSettings(input: Record<string, any>) {
+  const body = clean(input);
+  const normalized: Record<string, any> = { ...body, key: "default" };
+  if (body.status !== undefined) normalized.status = membershipStatuses.has(String(body.status)) ? body.status : "closed";
+  if ("registrationEnabled" in input) normalized.registrationEnabled = input.registrationEnabled === true || input.registrationEnabled === "true";
+  if ("autoCloseAfterDeadline" in input) normalized.autoCloseAfterDeadline = input.autoCloseAfterDeadline === true || input.autoCloseAfterDeadline === "true";
+  if ("manualOverride" in input) normalized.manualOverride = input.manualOverride === true || input.manualOverride === "true";
+  if (body.openingDate) normalized.openingDate = new Date(body.openingDate);
+  if (body.closingDate) normalized.closingDate = new Date(body.closingDate);
+  return normalized;
+}
+
 function normalizeRecruitmentTeam(input: Record<string, any>, create = false) {
   const body = clean(input);
   const normalized: Record<string, any> = { ...body };
@@ -307,6 +324,8 @@ export async function createResource(resource: AdminResource, input: Record<stri
   if (resource === "recruitmentRoles") return RecruitmentRole.create(normalizeRecruitmentRole(body, true));
   if (resource === "recruitmentQuestions") return RecruitmentQuestion.create(normalizeRecruitmentQuestion(body, true));
   if (resource === "recruitmentApplications") return RecruitmentApplication.create(body);
+  if (resource === "studentMembers") return StudentMember.create(body);
+  if (resource === "membershipDriveSettings") return MembershipDriveSettings.findOneAndUpdate({ key: "default" }, normalizeMembershipDriveSettings(body), { upsert: true, new: true, setDefaultsOnInsert: true });
 }
 
 export async function updateResource(resource: AdminResource, id: string, input: Record<string, any>) {
@@ -335,6 +354,12 @@ export async function updateResource(resource: AdminResource, id: string, input:
   if (resource === "recruitmentTeams") return RecruitmentTeam.findByIdAndUpdate(id, normalizeRecruitmentTeam(input), { new: true, runValidators: true });
   if (resource === "recruitmentRoles") return RecruitmentRole.findByIdAndUpdate(id, normalizeRecruitmentRole(input), { new: true, runValidators: true });
   if (resource === "recruitmentQuestions") return RecruitmentQuestion.findByIdAndUpdate(id, normalizeRecruitmentQuestion(input), { new: true, runValidators: true });
+  if (resource === "studentMembers") {
+    const update: Record<string, any> = { ...body };
+    if (body.status === "approved") update.approvedAt = new Date();
+    return StudentMember.findByIdAndUpdate(id, update, { new: true, runValidators: true });
+  }
+  if (resource === "membershipDriveSettings") return MembershipDriveSettings.findByIdAndUpdate(id, normalizeMembershipDriveSettings(input), { new: true, runValidators: true });
   if (resource === "recruitmentApplications") {
     const status = applicationStatuses.has(String(body.status)) ? body.status : undefined;
     const update: Record<string, any> = {};
@@ -395,4 +420,5 @@ export async function deleteResource(resource: AdminResource, id: string) {
   if (resource === "recruitmentRoles") return RecruitmentRole.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "recruitmentQuestions") return RecruitmentQuestion.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "recruitmentApplications") return RecruitmentApplication.findByIdAndDelete(id);
+  if (resource === "studentMembers") return StudentMember.findByIdAndDelete(id);
 }

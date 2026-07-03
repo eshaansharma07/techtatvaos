@@ -18,16 +18,18 @@ import {
   Menu,
   X,
   ArrowUpRight,
-  Sparkles
+  Sparkles,
+  UserPlus
 } from "lucide-react";
 import { MotionLogo } from "./brand-motion";
 
 const links = [
   ["Home", "/", Home],
   ["About", "/about", Info],
+  ["Recruitment", "/recruitment", Briefcase],
+  ["Join Us", "/join", UserPlus],
   ["Events", "/events", Calendar],
   ["Teams", "/teams", Users],
-  ["Recruitment", "/recruitment", Briefcase],
   ["Hall of Fame", "/hall-of-fame", Award],
   ["Gallery", "/gallery", ImageIcon],
   ["Contact", "/contact", Mail],

@@ -2,7 +2,7 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 import { isPortalHost } from "@/lib/portal-host";
 
-const internalApiPrefixes = ["/api/admin", "/api/attendance", "/api/certificates", "/api/ai", "/api/search", "/api/recruitment/export", "/api/recruitment/bulk"];
+const internalApiPrefixes = ["/api/admin", "/api/attendance", "/api/certificates", "/api/ai", "/api/search", "/api/recruitment/export", "/api/recruitment/bulk", "/api/membership/export", "/api/membership/bulk"];
 const portalOnlyPrefixes = ["/portal", "/login", "/invite", "/api/auth", "/api/portal", ...internalApiPrefixes];
 
 export default async function middleware(req: NextRequest) {
@@ -47,5 +47,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|tech-tatva-hero.png).*)"]
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|tech-tatva-hero.png|icons/|manifest.*\\.json|sw\\.js).*)"]
 };

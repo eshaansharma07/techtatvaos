@@ -1,0 +1,32 @@
+{
+  "name": "Tech Tatva",
+  "short_name": "Tech Tatva",
+  "description": "The operating system for a new generation of builders.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#08040a",
+  "theme_color": "#08040a",
+  "orientation": "portrait-primary",
+  "categories": ["education", "social"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

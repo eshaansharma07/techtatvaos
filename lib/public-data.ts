@@ -22,7 +22,9 @@ import {
   Sponsor,
   Task,
   Team,
-  User
+  User,
+  StudentMember,
+  MembershipDriveSettings
 } from "@/lib/models";
 import { Types } from "mongoose";
 import { computeRecruitmentStatus } from "@/lib/recruitment";
@@ -344,10 +346,11 @@ export async function getPublicHomeData() {
     Sponsor.find({ active: true }).sort({ level: 1, name: 1 }).limit(8).select("name logo website level").lean(),
     Gallery.find({ published: true }).sort({ createdAt: -1 }).limit(4).select("title event").lean()
   ]);
-  const [members, eventCount, teamCount] = await Promise.all([
+  const [members, eventCount, teamCount, communityCount] = await Promise.all([
     User.countDocuments({ memberType: "club_member", status: "active" }),
     Event.countDocuments({ status: { $in: ["published", "active", "completed"] } }),
-    Team.countDocuments({ active: true })
+    Team.countDocuments({ active: true }),
+    StudentMember.countDocuments({ status: "approved" })
   ]);
   return serialize({
     clubInfo,
@@ -356,7 +359,7 @@ export async function getPublicHomeData() {
     achievements,
     sponsors,
     gallery,
-    stats: { members, events: eventCount, teams: teamCount }
+    stats: { members, events: eventCount, teams: teamCount, community: communityCount }
   });
 }
 
@@ -460,6 +463,19 @@ export async function getRecruitmentPublicData() {
   });
 }
 
+export async function getMembershipDriveStatus() {
+  await connectDB();
+  const settings = await MembershipDriveSettings.findOne({ key: "default" }).lean() as any;
+  return serialize(settings || { status: "closed", registrationEnabled: false }) as {
+    status: string;
+    registrationEnabled: boolean;
+    announcementBanner?: string;
+    openingDate?: string;
+    closingDate?: string;
+    whatsappGroupLink?: string;
+  };
+}
+
 export async function getAdminDashboardData() {
   await connectDB();
   const clubMemberQuery = {
@@ -492,7 +508,9 @@ export async function getAdminDashboardData() {
     recruitmentTeams,
     recruitmentRoles,
     recruitmentQuestions,
-    recruitmentApplications
+    recruitmentApplications,
+    studentMembers,
+    membershipDriveSettings
   ] = await Promise.all([
     User.find(clubMemberQuery).sort({ createdAt: -1 }).limit(300).populate("role", "name slug").populate("team", "name").populate("teams", "name").lean(),
     Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").populate("coLeads", "name").lean(),
@@ -515,7 +533,9 @@ export async function getAdminDashboardData() {
     RecruitmentTeam.find({}).sort({ order: 1, name: 1 }).lean(),
     RecruitmentRole.find({}).sort({ order: 1, name: 1 }).populate("team", "name").lean(),
     RecruitmentQuestion.find({}).sort({ order: 1, createdAt: 1 }).populate("team", "name").populate("role", "name").lean(),
-    RecruitmentApplication.find({}).sort({ submittedAt: -1 }).limit(1000).populate("team", "name").populate("role", "name").lean()
+    RecruitmentApplication.find({}).sort({ submittedAt: -1 }).limit(1000).populate("team", "name").populate("role", "name").lean(),
+    StudentMember.find({}).sort({ registeredAt: -1 }).limit(1000).lean(),
+    MembershipDriveSettings.find({}).sort({ createdAt: -1 }).lean()
   ]);
   return serialize({
     users,
@@ -539,6 +559,8 @@ export async function getAdminDashboardData() {
     recruitmentTeams,
     recruitmentRoles,
     recruitmentQuestions,
-    recruitmentApplications
+    recruitmentApplications,
+    studentMembers,
+    membershipDriveSettings
   });
 }

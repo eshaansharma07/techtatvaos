@@ -37,12 +37,14 @@ import {
   ClipboardList,
   Info,
   Filter,
-  HelpCircle
+  HelpCircle,
+  Home,
+  User
 } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
-type Module = "Overview" | "Members" | "Teams" | "Events" | "Recruitment" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Hall of Fame" | "Contact Messages" | "Settings";
-type Resource = "users" | "teams" | "events" | "meetings" | "tasks" | "announcements" | "sponsors" | "achievements" | "gallery" | "hallOfFame" | "contacts" | "settings" | "invites" | "recruitmentSettings" | "recruitmentTeams" | "recruitmentRoles" | "recruitmentQuestions" | "recruitmentApplications";
+type Module = "Overview" | "Members" | "Teams" | "Events" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Hall of Fame" | "Contact Messages" | "Settings";
+type Resource = "users" | "teams" | "events" | "meetings" | "tasks" | "announcements" | "sponsors" | "achievements" | "gallery" | "hallOfFame" | "contacts" | "settings" | "invites" | "recruitmentSettings" | "recruitmentTeams" | "recruitmentRoles" | "recruitmentQuestions" | "recruitmentApplications" | "studentMembers" | "membershipDriveSettings";
 type Data = Record<string, any>;
 type Field = [string, string, string?];
 
@@ -52,6 +54,7 @@ const nav = [
   [Workflow, "Teams"],
   [CalendarDays, "Events"],
   [BriefcaseBusiness, "Recruitment"],
+  [UserPlus, "Membership Drive"],
   [CheckCircle2, "Attendance"],
   [Award, "Certificates"],
   [FileText, "Meetings"],
@@ -64,7 +67,7 @@ const nav = [
   [Settings2, "Settings"]
 ] as const;
 
-const config: Record<Exclude<Module, "Overview" | "Recruitment" | "Attendance" | "Certificates" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
+const config: Record<Exclude<Module, "Overview" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
   Members: { key: "users", resource: "users", fields: [["name","Name"],["email","Email","email"],["teams","Teams","team-multi-select"],["image","Profile photo","upload:image"],["uid","UID"],["department","Department"],["program","Program"],["semester","Semester","number"],["phone","Phone"]] },
   Teams: { key: "teams", resource: "teams", fields: [["name","Team name"],["slug","Slug"],["description","Description"],["lead","Team lead","member-select"],["coLeads","Co-leads","member-multi-select"],["jointSecretaryLane","Reports under joint secretary","lane-select"],["order","Display order","number"],["active","Active: true/false"]] },
   Events: { key: "events", resource: "events", fields: [["title","Title"],["slug","Slug"],["description","Description"],["venue","Venue"],["capacity","Capacity","number"],["category","Category"],["team","Team","team-select"],["leads","Event leads","member-multi-select"],["participationMode","Participation type","participation-select"],["maxTeamSize","Maximum team size","number"],["winnerFirst","1st place winner","winner-select"],["winnerSecond","2nd place winner","winner-select"],["winnerThird","3rd place winner","winner-select"],["status","Public status","status-select"],["registrationOpen","Registration open","boolean-select"],["registrationStart","Registration start","datetime-local"],["registrationEnd","Registration end","datetime-local"],["startAt","Event start date/time","datetime-local"],["endAt","Event end date/time","datetime-local"],["banner","Event banner","upload:image"],["certEventLogo","Event logo","upload:image"]] },
@@ -94,7 +97,9 @@ const extraFields: Record<Resource, Field[]> = {
   recruitmentTeams: [["name","Team name"],["slug","Slug"],["description","Description"],["icon","Icon label"],["order","Display order","number"],["applicationLimit","Application limit","number"],["active","Active","boolean-select"]],
   recruitmentRoles: [["team","Recruitment team","recruitment-team-select"],["name","Role name"],["slug","Slug"],["description","Description"],["order","Display order","number"],["active","Active","boolean-select"]],
   recruitmentQuestions: [["team","Recruitment team","recruitment-team-select"],["role","Role-specific question","recruitment-role-select"],["label","Question"],["helpText","Help text"],["type","Question type","question-type-select"],["options","Options, one per line"],["required","Required","boolean-select"],["order","Display order","number"],["active","Active","boolean-select"]],
-  recruitmentApplications: [["status","Status","application-status-select"],["adminNotes","Admin notes"]]
+  recruitmentApplications: [["status","Status","application-status-select"],["adminNotes","Admin notes"]],
+  studentMembers: [["status","Status","membership-member-status-select"],["adminRemarks","Remarks"]],
+  membershipDriveSettings: [["status","Status","membership-status-select"],["registrationEnabled","Registration enabled","boolean-select"],["openingDate","Opening date","datetime-local"],["closingDate","Closing date","datetime-local"],["announcementBanner","Announcement banner"],["customSuccessMessage","Custom success message"],["whatsappGroupLink","WhatsApp group link"],["autoCloseAfterDeadline","Auto close after deadline","boolean-select"],["manualOverride","Manual override","boolean-select"]]
 };
 
 const settingsFields: Field[] = [
@@ -165,6 +170,8 @@ function normalizePortalData(input:Data):Data{
     recruitmentRoles:asArray(data.recruitmentRoles),
     recruitmentQuestions:asArray(data.recruitmentQuestions),
     recruitmentApplications:asArray(data.recruitmentApplications),
+    studentMembers:asArray(data.studentMembers),
+    membershipDriveSettings:asArray(data.membershipDriveSettings),
     clubInfo:data.clubInfo || {}
   };
 }
@@ -218,7 +225,8 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
     tasks:data.tasks?.filter((t:any)=>t.status!=="completed").length || 0,
     attendance:data.attendance?.length || 0,
     contacts:data.contactMessages?.filter((m:any)=>m.status!=="resolved").length || 0,
-    recruitment:data.recruitmentApplications?.length || 0
+    recruitment:data.recruitmentApplications?.length || 0,
+    membershipDrive:data.studentMembers?.length || 0
   }),[data]);
 
   const chart=useMemo(()=>[
@@ -226,6 +234,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
     {m:"Teams",v:counts.teams},
     {m:"Events",v:counts.events},
     {m:"Recruit",v:counts.recruitment},
+    {m:"Join Us",v:counts.membershipDrive},
     {m:"Tasks",v:counts.tasks},
     {m:"Contacts",v:counts.contacts}
   ],[counts]);
@@ -311,16 +320,19 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
       {nav.slice(0,5).map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[10px] font-semibold transition active:scale-[.97] ${active===label?"bg-violet-400/18 text-white shadow-[0_0_24px_rgba(168,85,247,.16)]":"text-white/42"}`}><Icon size={17}/><span>{label==="Attendance"?"Attend":label}</span></button>)}
     </nav>
     <section className="xl:pl-72"><header className="portal-topbar flex min-h-24 flex-wrap items-center justify-between gap-4 px-5 py-4 md:px-8"><div className="w-full xl:hidden"><PortalLogo/></div><div><p className="text-xs tracking-wide text-white/35">{new Date().toLocaleString("en-IN",{dateStyle:"full",timeStyle:"short"})}</p><h1 className="mt-1 text-xl font-semibold tracking-tight">Good day, {userName}.</h1></div><div className="flex flex-1 items-center justify-end gap-3"><label className="portal-search hidden min-w-80 items-center gap-3 rounded-2xl px-4 py-3 text-white/40 md:flex"><Search size={16}/><input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search live admin data..." className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/25"/></label><button onClick={refresh} className="portal-mini-button rounded-2xl p-3 text-white/55 transition hover:-translate-y-0.5 hover:text-white"><RefreshCw size={16} className={busy?"animate-spin":""}/></button><button onClick={()=>setNotifications(!notifications)} className="portal-mini-button relative rounded-2xl p-3 text-white/55 transition hover:-translate-y-0.5 hover:text-white"><Bell size={16}/>{counts.contacts?<i className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-pink-400 shadow-[0_0_14px_rgba(244,114,182,.75)]"/>:null}</button><div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 shadow-[0_0_30px_rgba(168,85,247,.28)]"/></div><label className="portal-search flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-white/40 md:hidden"><Search size={16}/><input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search admin data..." className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/25"/></label></header>
-    <div className="p-4 md:p-8"><div className="mb-4 flex gap-2 overflow-x-auto pb-1 xl:hidden mobile-tabs">{nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold ${active===label?"border-violet-200/35 bg-violet-500/18 text-white":"border-white/[.08] bg-white/[.035] text-white/50"}`}><Icon size={14}/>{label}</button>)}</div><Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>{active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}<div className="portal-action mt-4 rounded-2xl p-5"><p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p><p className="mt-3 text-sm leading-6 text-white/65">{panel}</p></div></div></section>
+    <div className="p-4 md:p-8"><div className="mb-4 flex gap-2 overflow-x-auto pb-1 xl:hidden mobile-tabs">{nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold ${active===label?"border-violet-200/35 bg-violet-500/18 text-white":"border-white/[.08] bg-white/[.035] text-white/50"}`}><Icon size={14}/>{label}</button>)}</div><Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>{active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}<div className="portal-action mt-4 rounded-2xl p-5"><p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p><p className="mt-3 text-sm leading-6 text-white/65">{panel}</p></div></div></section>
     {notifications?<div className="fixed right-5 top-24 z-50 w-[min(380px,calc(100vw-40px))] rounded-3xl border border-white/10 bg-[#111016]/95 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl"><p className="text-sm font-semibold">Open contact messages</p>{(data.contactMessages||[]).filter((m:any)=>m.status!=="resolved").slice(0,6).map((m:any)=><button onClick={()=>setPanel(`${m.name}: ${m.message}`)} className="portal-mini-button mt-3 block w-full rounded-2xl px-4 py-3 text-left text-xs text-white/60 transition hover:-translate-y-0.5 hover:text-white" key={idOf(m)}>{m.subject}</button>)}{!counts.contacts?<p className="mt-4 text-xs text-white/40">No unresolved messages.</p>:null}</div>:null}
-    {drawer?<div className="fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm"><div className="ml-auto h-full max-w-xl overflow-y-auto rounded-3xl border border-white/10 bg-[#111016] p-6 shadow-2xl shadow-violet-950/25"><div className="flex items-center justify-between"><h2 className="text-xl font-semibold tracking-tight">{drawer.title}</h2><button onClick={()=>setDrawer(null)} className="portal-mini-button rounded-full px-3 py-1.5 text-xs text-white/55">Close</button></div><form action={submit} className="mt-6 grid gap-4">{drawer.fields.map(([name,label,type])=>{const source={...(drawer.defaults||{}),...(drawer.item||{})};const selected=rawValue(source,name);const formValue=Array.isArray(selected)?selected:String(selected??"");const multiTeamValue=Array.isArray(selected)&&selected.length?selected:(rawValue(source,"team")?[String(rawValue(source,"team"))]:[]);return <label className="text-[10px] tracking-wider text-white/35" key={name}>{label.toUpperCase()}{type==="status-select"?<select name={name} defaultValue={formValue || "published"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{["draft","published","active","completed","archived"].map((status)=><option value={status} key={status}>{status}</option>)}</select>:type==="recruitment-status-select"?<select name={name} defaultValue={formValue || "open"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="opening_soon">Opening soon</option><option value="open">Applications open</option><option value="closing_soon">Closing soon</option><option value="closed">Closed</option><option value="full">Registration full</option></select>:type==="application-status-select"?<select name={name} defaultValue={formValue || "pending"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="pending">Pending</option><option value="shortlisted">Shortlisted</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="on_hold">On hold</option></select>:type==="question-type-select"?<select name={name} defaultValue={formValue || "long_text"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{["short_text","long_text","number","multiple_choice","checkbox","dropdown","rating","url","file_upload"].map((kind)=><option value={kind} key={kind}>{kind.replace(/_/g," ")}</option>)}</select>:type==="contact-status-select"?<select name={name} defaultValue={formValue || "new"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="new">New</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option></select>:type==="hall-category"?<select name={name} defaultValue={formValue || "top_contributor"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="top_contributor">Top Contributor</option><option value="alumni">Alumni</option></select>:type==="participation-select"?<select name={name} defaultValue={formValue || "individual"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="individual">Individual only</option><option value="team">Team only</option><option value="both">Individual or team</option></select>:type==="boolean-select"?<select name={name} defaultValue={String(selected === true || selected === "true")} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="true">Yes</option><option value="false">No</option></select>:type==="lane-select"?<select name={name} defaultValue={formValue || "technical"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="technical">Joint Secretary (Technical & Operations)</option><option value="creative">Joint Secretary (Media & Creative)</option></select>:type==="event-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No linked event</option>{(data.events||[]).map((event:any)=><option value={idOf(event)} key={idOf(event)}>{event.title}</option>)}</select>:type==="recruitment-team-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">Choose recruitment team</option>{(data.recruitmentTeams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="recruitment-role-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">All roles in selected team</option>{(data.recruitmentRoles||[]).filter((role:any)=>role.active!==false).map((role:any)=><option value={idOf(role)} key={idOf(role)}>{valueOf(role,"team") ? `${valueOf(role,"team")} / ` : ""}{role.name}</option>)}</select>:type==="team-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No team</option>{(data.teams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="team-multi-select"?<select name={name} multiple defaultValue={multiTeamValue} className="mt-2 min-h-36 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{(data.teams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="winner-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No winner selected</option>{winnerOptions(data,drawer.item).map((candidate:any)=><option value={candidate.id} key={candidate.id}>{candidate.label}</option>)}</select>:type==="member-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No member selected</option>{(data.users||[]).filter((user:any)=>user.status!=="inactive").map((user:any)=><option value={idOf(user)} key={idOf(user)}>{memberLabel(user)}</option>)}</select>:type==="member-multi-select"?<select name={name} multiple defaultValue={Array.isArray(formValue)?formValue:[]} className="mt-2 min-h-36 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{(data.users||[]).filter((user:any)=>user.status!=="inactive").map((user:any)=><option value={idOf(user)} key={idOf(user)}>{memberLabel(user)}</option>)}</select>:type==="gallery-assets"?<GalleryAssetsControl name={name} current={drawer.item?.assets || []} resource={drawer.resource} setPanel={setPanel}/>:type?.startsWith("upload")?<UploadControl name={name} current={Array.isArray(formValue)?"":formValue} upload={uploads[name]} uploading={Boolean(uploading[name])} onUpload={async(file)=>{setUploading((state)=>({...state,[name]:true}));setPanel(`Uploading ${file.name}...`);const form=new FormData();form.append("file",file);form.append("folder",`tech-tatva-os/${drawer.resource}`);const res=await fetch("/api/portal/upload",{method:"POST",body:form});const result=await res.json();setUploading((state)=>({...state,[name]:false}));if(!res.ok){setPanel(result.error || "Upload failed");return}setUploads((state)=>({...state,[name]:result}));setPanel(`Uploaded ${file.name}. Now save the form.`)}}/>:["description","body","message","aboutCopy","agenda","discussionPoints","decisionsTaken","actionItems","nextMeeting","announcementBanner","customSuccessMessage","adminNotes","helpText","options"].includes(name)?<textarea name={name} defaultValue={formValue} rows={5} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"/>:<input name={name} type={type||"text"} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"/>}</label>})}<p className="text-[10px] leading-4 text-white/35">Tip: hold Command/Ctrl to select multiple leads or co-leads.</p><button disabled={busy||Object.values(uploading).some(Boolean)} className="portal-command-button rounded-2xl py-3 text-sm font-semibold disabled:opacity-60">{busy?"Saving...":Object.values(uploading).some(Boolean)?"Uploading...":"Save changes"}</button></form></div></div>:null}
+    {drawer?<div className="fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm"><div className="ml-auto h-full max-w-xl overflow-y-auto rounded-3xl border border-white/10 bg-[#111016] p-6 shadow-2xl shadow-violet-950/25"><div className="flex items-center justify-between"><h2 className="text-xl font-semibold tracking-tight">{drawer.title}</h2><button onClick={()=>setDrawer(null)} className="portal-mini-button rounded-full px-3 py-1.5 text-xs text-white/55">Close</button></div><form action={submit} className="mt-6 grid gap-4">{drawer.fields.map(([name,label,type])=>{const source={...(drawer.defaults||{}),...(drawer.item||{})};const selected=rawValue(source,name);const formValue=Array.isArray(selected)?selected:String(selected??"");const multiTeamValue=Array.isArray(selected)&&selected.length?selected:(rawValue(source,"team")?[String(rawValue(source,"team"))]:[]);return <label className="text-[10px] tracking-wider text-white/35" key={name}>{label.toUpperCase()}{type==="status-select"?<select name={name} defaultValue={formValue || "published"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{["draft","published","active","completed","archived"].map((status)=><option value={status} key={status}>{status}</option>)}</select>:type==="recruitment-status-select"?<select name={name} defaultValue={formValue || "open"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="opening_soon">Opening soon</option><option value="open">Applications open</option><option value="closing_soon">Closing soon</option><option value="closed">Closed</option><option value="full">Registration full</option></select>:type==="application-status-select"?<select name={name} defaultValue={formValue || "pending"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="pending">Pending</option><option value="shortlisted">Shortlisted</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="on_hold">On hold</option></select>:type==="question-type-select"?<select name={name} defaultValue={formValue || "long_text"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{["short_text","long_text","number","multiple_choice","checkbox","dropdown","rating","url","file_upload"].map((kind)=><option value={kind} key={kind}>{kind.replace(/_/g," ")}</option>)}</select>:type==="contact-status-select"?<select name={name} defaultValue={formValue || "new"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="new">New</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option></select>:type==="membership-status-select"?<select name={name} defaultValue={formValue || "closed"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="opening_soon">Opening soon</option><option value="open">Applications open</option><option value="closing_soon">Closing soon</option><option value="closed">Closed</option></select>:type==="membership-member-status-select"?<select name={name} defaultValue={formValue || "pending"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>:type==="hall-category"?<select name={name} defaultValue={formValue || "top_contributor"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="top_contributor">Top Contributor</option><option value="alumni">Alumni</option></select>:type==="participation-select"?<select name={name} defaultValue={formValue || "individual"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="individual">Individual only</option><option value="team">Team only</option><option value="both">Individual or team</option></select>:type==="boolean-select"?<select name={name} defaultValue={String(selected === true || selected === "true")} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="true">Yes</option><option value="false">No</option></select>:type==="lane-select"?<select name={name} defaultValue={formValue || "technical"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="technical">Joint Secretary (Technical & Operations)</option><option value="creative">Joint Secretary (Media & Creative)</option></select>:type==="event-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No linked event</option>{(data.events||[]).map((event:any)=><option value={idOf(event)} key={idOf(event)}>{event.title}</option>)}</select>:type==="recruitment-team-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">Choose recruitment team</option>{(data.recruitmentTeams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="recruitment-role-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">All roles in selected team</option>{(data.recruitmentRoles||[]).filter((role:any)=>role.active!==false).map((role:any)=><option value={idOf(role)} key={idOf(role)}>{valueOf(role,"team") ? `${valueOf(role,"team")} / ` : ""}{role.name}</option>)}</select>:type==="team-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No team</option>{(data.teams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="team-multi-select"?<select name={name} multiple defaultValue={multiTeamValue} className="mt-2 min-h-36 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{(data.teams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="winner-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No winner selected</option>{winnerOptions(data,drawer.item).map((candidate:any)=><option value={candidate.id} key={candidate.id}>{candidate.label}</option>)}</select>:type==="member-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No member selected</option>{(data.users||[]).filter((user:any)=>user.status!=="inactive").map((user:any)=><option value={idOf(user)} key={idOf(user)}>{memberLabel(user)}</option>)}</select>:type==="member-multi-select"?<select name={name} multiple defaultValue={Array.isArray(formValue)?formValue:[]} className="mt-2 min-h-36 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{(data.users||[]).filter((user:any)=>user.status!=="inactive").map((user:any)=><option value={idOf(user)} key={idOf(user)}>{memberLabel(user)}</option>)}</select>:type==="gallery-assets"?<GalleryAssetsControl name={name} current={drawer.item?.assets || []} resource={drawer.resource} setPanel={setPanel}/>:type?.startsWith("upload")?<UploadControl name={name} current={Array.isArray(formValue)?"":formValue} upload={uploads[name]} uploading={Boolean(uploading[name])} onUpload={async(file)=>{setUploading((state)=>({...state,[name]:true}));setPanel(`Uploading ${file.name}...`);const form=new FormData();form.append("file",file);form.append("folder",`tech-tatva-os/${drawer.resource}`);const res=await fetch("/api/portal/upload",{method:"POST",body:form});const result=await res.json();setUploading((state)=>({...state,[name]:false}));if(!res.ok){setPanel(result.error || "Upload failed");return}setUploads((state)=>({...state,[name]:result}));setPanel(`Uploaded ${file.name}. Now save the form.`)}}/>:["description","body","message","aboutCopy","agenda","discussionPoints","decisionsTaken","actionItems","nextMeeting","announcementBanner","customSuccessMessage","adminNotes","helpText","options"].includes(name)?<textarea name={name} defaultValue={formValue} rows={5} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"/>:<input name={name} type={type||"text"} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"/>}</label>})}<p className="text-[10px] leading-4 text-white/35">Tip: hold Command/Ctrl to select multiple leads or co-leads.</p><button disabled={busy||Object.values(uploading).some(Boolean)} className="portal-command-button rounded-2xl py-3 text-sm font-semibold disabled:opacity-60">{busy?"Saving...":Object.values(uploading).some(Boolean)?"Uploading...":"Save changes"}</button></form></div></div>:null}
   </main>
 }
 
 function Header({active,data,open,setPanel}:{active:Module;data:Data;open:(drawer:any)=>void;setPanel:(text:string)=>void}){
-  const singular=active==="Hall of Fame"?"Hall entry":active.slice(0,-1);
-  const action=active==="Overview"?"Export summary":active==="Recruitment"?"Recruitment settings":active==="Attendance"?"Generate attendance":active==="Certificates"?"Certificate tools":active==="Settings"?"Update branding":active==="AI"?"Ask AI":active==="Contact Messages"?"Open messages":`Add ${singular}`;
-  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-5 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-[2.65rem] font-semibold leading-[.92] tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active==="AI"?"AI Desk":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">Live operational controls for members, teams, events, attendance, recruitment, media, documents, and public club content.</p></div><button type="button" onClick={()=>{if(active==="Overview"){exportDashboardSummary(data);setPanel("Dashboard summary CSV downloaded.");}else if(active==="Recruitment"){open({resource:"recruitmentSettings",title:"Recruitment settings",fields:extraFields.recruitmentSettings,item:data.recruitmentSettings?.[0],defaults:{status:"open",registrationEnabled:"true",autoCloseAfterDeadline:"true"}})}else if(active==="Attendance"){window.dispatchEvent(new Event("portal-download-attendance"));setPanel("Generating attendance sheet for the selected event...");}else if(active==="Certificates"){setPanel("Choose an event below, select winners from Events if needed, then export PDF certificates as ZIP files.");}else if(active==="AI"){setPanel("Use the AI Desk below to generate reports, MOMs, and secretary answers from real MongoDB data.");}else if(active==="Contact Messages"){setPanel("Open a message row to read all sender details and update its status.");}else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${singular}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:active==="Meetings"?{status:"completed"}:active==="Hall of Fame"?{category:"top_contributor",active:"true"}:{}})}}} className="portal-command-button flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-xs font-semibold transition hover:-translate-y-0.5 sm:w-auto sm:self-end">{active==="Overview"||active==="Attendance"?<Download size={14}/>:active==="Certificates"?<Award size={14}/>:active==="AI"?<Brain size={14}/>:active==="Contact Messages"?<MessageSquare size={14}/>:<Plus size={14}/>}<span>{action}</span></button></div>
+  const singular=active==="Hall of Fame"?"Hall entry":active==="Membership Drive"?"Student member":active.slice(0,-1);
+  const action=active==="Overview"?"Export summary":active==="Recruitment"?"Recruitment settings":active==="Membership Drive"?"Drive settings":active==="Attendance"?"Generate attendance":active==="Certificates"?"Certificate tools":active==="Settings"?"Update branding":active==="AI"?"Ask AI":active==="Contact Messages"?"Open messages":`Add ${singular}`;
+  const description=active==="Membership Drive"
+    ? "Manage student registrations, verify community members, analyze departmental signups, and update online drive configurations."
+    : "Live operational controls for members, teams, events, attendance, recruitment, media, documents, and public club content.";
+  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-5 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-[2.65rem] font-semibold leading-[.92] tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active==="AI"?"AI Desk":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">{description}</p></div><button type="button" onClick={()=>{if(active==="Overview"){exportDashboardSummary(data);setPanel("Dashboard summary CSV downloaded.");}else if(active==="Recruitment"){open({resource:"recruitmentSettings",title:"Recruitment settings",fields:extraFields.recruitmentSettings,item:data.recruitmentSettings?.[0],defaults:{status:"open",registrationEnabled:"true",autoCloseAfterDeadline:"true"}})}else if(active==="Membership Drive"){open({resource:"membershipDriveSettings",title:"Membership drive settings",fields:extraFields.membershipDriveSettings,item:data.membershipDriveSettings?.[0],defaults:{status:"closed",registrationEnabled:"false",autoCloseAfterDeadline:"true"}})}else if(active==="Attendance"){window.dispatchEvent(new Event("portal-download-attendance"));setPanel("Generating attendance sheet for the selected event...");}else if(active==="Certificates"){setPanel("Choose an event below, select winners from Events if needed, then export PDF certificates as ZIP files.");}else if(active==="AI"){setPanel("Use the AI Desk below to generate reports, MOMs, and secretary answers from real MongoDB data.");}else if(active==="Contact Messages"){setPanel("Open a message row to read all sender details and update its status.");}else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${singular}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:active==="Meetings"?{status:"completed"}:active==="Hall of Fame"?{category:"top_contributor",active:"true"}:{}})}}} className="portal-command-button flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-xs font-semibold transition hover:-translate-y-0.5 sm:w-auto sm:self-end">{active==="Overview"||active==="Attendance"?<Download size={14}/>:active==="Certificates"?<Award size={14}/>:active==="AI"?<Brain size={14}/>:active==="Contact Messages"?<MessageSquare size={14}/>:active==="Membership Drive"?<SlidersHorizontal size={14}/>:<Plus size={14}/>}<span>{action}</span></button></div>
 }
 
 
@@ -519,6 +531,13 @@ function Overview({counts,chart,setActive}:{counts:any;chart:any[];setActive:(m:
           <p className="text-lg font-semibold text-white">Quick access</p>
           <p className="mt-1 text-xs leading-5 text-white/38">Jump into the most used operating modules.</p>
           <div className="mt-5 grid gap-3">
+            <a href="/" target="_blank" rel="noopener noreferrer" className="portal-mini-button flex items-center justify-between rounded-2xl px-4 py-3 text-left text-sm text-white/70 transition hover:-translate-y-0.5 hover:text-white">
+              <span className="flex items-center gap-2">
+                <Home size={14} className="text-violet-200" />
+                <span>Go to Website Home</span>
+              </span>
+              <span className="text-[10px] tracking-[.16em] text-violet-200/55">VISIT</span>
+            </a>
             {(["Members","Events","Attendance","Hall of Fame","Settings"] as Module[]).map((module)=>(
               <button onClick={()=>setActive(module)} className="portal-mini-button flex items-center justify-between rounded-2xl px-4 py-3 text-left text-sm text-white/70 transition hover:-translate-y-0.5 hover:text-white" key={module}>
                 <span>{module}</span>
@@ -2709,74 +2728,259 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
   );
 }
 
-function Settings({ info, open }: { info: any; open: (drawer: any) => void }) {
-  const brandingKeys = ["logo", "website", "email", "location", "footerCopy", "aboutTitle", "aboutCopy", "vision", "mission"];
-  const advisorsKeys = ["facultyChampionName", "facultyChampionPhoto", "facultyChampionEmail", "facultyChampionPhone", "coFacultyChampionName", "coFacultyChampionPhoto", "coFacultyChampionEmail", "coFacultyChampionPhone"];
-  const bearersKeys = ["secretaryName", "secretaryEmail", "secretaryPhoto", "studentAdvisorOneName", "studentAdvisorOnePhoto", "studentAdvisorTwoName", "studentAdvisorTwoPhoto", "jointSecretaryOneName", "jointSecretaryTwoName"];
-  const docKeys = ["postActivityReportTemplate", "momTemplate"];
-
-  function formatKeyLabel(key: string) {
-    return key
-      .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (str) => str.toUpperCase())
-      .replace("Name", "")
-      .replace("Photo", " Photo")
-      .replace("Email", " Email")
-      .replace("Phone", " Phone")
-      .replace("Template", " Template")
-      .trim();
-  }
-
-  function renderSettingValue(key: string) {
-    const val = info[key];
-    if (!val) return <span className="text-white/25 italic">Not set</span>;
-
-    if (key.toLowerCase().includes("photo") || key === "logo") {
-      return (
-        <div className="flex items-center gap-3">
-          <img src={val} alt={key} className="h-12 w-12 rounded-xl object-cover border border-white/10 bg-black/20" />
-          <span className="text-xs text-white/50 truncate max-w-[200px] font-mono">{val.split("/").pop()}</span>
+function ProfileCard({ name, photo, role, email, phone, copiedKey, onCopy }: { name: string; photo?: string; role: string; email?: string; phone?: string; copiedKey: string | null; onCopy: (key: string, url: string) => void }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-white/[.06] bg-black/25 p-5 flex gap-4 items-start hover:border-white/[.1] transition">
+      <div className="relative h-16 w-16 rounded-full overflow-hidden border border-white/10 bg-black/40 flex-shrink-0 flex items-center justify-center">
+        {photo ? (
+          <img src={photo} alt={name || role} className="h-full w-full object-cover" />
+        ) : (
+          <User size={28} className="text-white/20" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <span className="inline-block rounded-full bg-violet-500/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-300">
+          {role}
+        </span>
+        <h4 className="mt-2 text-sm font-semibold text-white truncate">
+          {name || <span className="text-white/20 font-normal italic">Not set</span>}
+        </h4>
+        <div className="mt-3 space-y-1.5 text-xs text-white/45">
+          {email ? (
+            <a href={`mailto:${email}`} className="block hover:text-violet-300 transition truncate">
+              {email}
+            </a>
+          ) : (
+            <p className="italic text-white/25">No Email set</p>
+          )}
+          {phone && <p className="font-mono">{phone}</p>}
         </div>
-      );
-    }
+        {photo && (
+          <button
+            type="button"
+            onClick={() => onCopy(role + "-photo", photo)}
+            className="mt-3 text-[10px] font-semibold text-violet-300 hover:text-violet-200 transition underline decoration-dotted underline-offset-2 block"
+          >
+            {copiedKey === role + "-photo" ? "Copied Link!" : "Copy Photo URL"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
-    if (key.toLowerCase().includes("template")) {
-      return (
-        <a href={val} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/20 transition">
-          <FileText size={11} /> View Template PDF
-        </a>
-      );
-    }
+function Settings({ info, open }: { info: any; open: (drawer: any) => void }) {
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-    return <span className="text-white/80 break-all leading-relaxed font-sans">{val}</span>;
+  function handleCopy(key: string, val: string) {
+    navigator.clipboard.writeText(val);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
   }
 
   return (
-    <div className="mt-7 grid gap-5 lg:grid-cols-[1fr_.42fr] animate-in fade-in duration-200">
-      <div className="space-y-5">
-        {[
-          { title: "Club Branding & Vision", keys: brandingKeys, color: "text-violet-200" },
-          { title: "Faculty Champions", keys: advisorsKeys, color: "text-emerald-200" },
-          { title: "Office Bearers & Advisors", keys: bearersKeys, color: "text-fuchsia-200" },
-          { title: "AI Document Templates", keys: docKeys, color: "text-amber-200" }
-        ].map((section) => (
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7" key={section.title}>
-            <h3 className={`text-sm font-bold uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4 ${section.color}`}>{section.title}</h3>
-            
-            <div className="grid gap-3.5 max-h-[500px] overflow-y-auto pr-1">
-              {section.keys.map((key) => (
-                <div className="rounded-2xl border border-white/[0.04] bg-white/[0.01] p-4 text-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-white/[0.08] hover:bg-white/[0.02] transition" key={key}>
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-[.15em] text-white/35 sm:w-1/3 text-left">{formatKeyLabel(key)}</span>
-                  <div className="flex-1 text-left sm:text-right flex sm:justify-end">
-                    {renderSettingValue(key)}
-                  </div>
-                </div>
-              ))}
-            </div>
+    <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_.38fr] animate-in fade-in duration-200">
+      
+      {/* Left Column: Organized Settings Details */}
+      <div className="space-y-6">
+        
+        {/* Section 1: Club Branding & Identity */}
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
+          <div className="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-5">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-violet-200">Club Branding & Vision</h3>
           </div>
-        ))}
+          
+          <div className="grid gap-6 md:grid-cols-2">
+            
+            {/* Branding details & logo */}
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-white/[.05] bg-black/20 p-5 flex items-center gap-4">
+                <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-white/10 bg-black/40 flex items-center justify-center">
+                  {info.logo ? (
+                    <img src={info.logo} alt="Logo" className="h-full w-full object-contain p-1" />
+                  ) : (
+                    <span className="text-white/20 text-xs uppercase font-bold">LOGO</span>
+                  )}
+                </div>
+                <div>
+                  <span className="rounded bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-mono font-bold tracking-wider text-white/40 uppercase">
+                    {info.logo ? info.logo.split(".").pop()?.toUpperCase() : "SVG"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => info.logo && handleCopy("logo", info.logo)}
+                    className="mt-2 text-[10px] font-semibold text-violet-300 hover:text-violet-200 transition underline decoration-dotted underline-offset-2 block"
+                  >
+                    {copiedKey === "logo" ? "Copied!" : "Copy Logo URL"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/[.05] bg-black/20 p-4 space-y-3.5 text-xs">
+                <div className="flex justify-between items-center border-b border-white/[0.03] pb-2.5">
+                  <span className="font-semibold text-white/45 uppercase tracking-wider text-[10px]">Website</span>
+                  {info.website ? (
+                    <a href={info.website.startsWith("http") ? info.website : `https://${info.website}`} target="_blank" rel="noopener noreferrer" className="text-violet-300 hover:underline">
+                      {info.website}
+                    </a>
+                  ) : (
+                    <span className="text-white/20 italic">Not set</span>
+                  )}
+                </div>
+                <div className="flex justify-between items-center border-b border-white/[0.03] pb-2.5">
+                  <span className="font-semibold text-white/45 uppercase tracking-wider text-[10px]">Email</span>
+                  {info.email ? (
+                    <a href={`mailto:${info.email}`} className="text-violet-300 hover:underline">
+                      {info.email}
+                    </a>
+                  ) : (
+                    <span className="text-white/20 italic">Not set</span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="font-semibold text-white/45 uppercase tracking-wider text-[10px]">Location</span>
+                  <span className="text-white/80 leading-relaxed break-words">
+                    {info.location || <span className="text-white/20 italic">Not set</span>}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Vision & Mission */}
+            <div className="rounded-2xl border border-white/[.05] bg-black/20 p-5 space-y-4 text-xs">
+              <div>
+                <h4 className="font-bold text-white/50 uppercase tracking-wider text-[10px] mb-1.5">About Section</h4>
+                <p className="font-semibold text-white text-sm">{info.aboutTitle || "About Club"}</p>
+                <p className="mt-1 text-white/60 leading-relaxed break-words">{info.aboutCopy || <span className="text-white/20 italic font-normal">No copy set</span>}</p>
+              </div>
+              <div className="border-t border-white/[0.04] pt-3.5 grid gap-3 grid-cols-2">
+                <div>
+                  <h4 className="font-bold text-white/50 uppercase tracking-wider text-[10px] mb-1">Vision</h4>
+                  <p className="text-white/70 leading-relaxed italic">"{info.vision || "Not set"}"</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-white/50 uppercase tracking-wider text-[10px] mb-1">Mission</h4>
+                  <p className="text-white/70 leading-relaxed italic">"{info.mission || "Not set"}"</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Section 2: Faculty Champions */}
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-200 border-b border-white/[0.06] pb-4 mb-5">Faculty Champions</h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            <ProfileCard
+              name={info.facultyChampionName}
+              photo={info.facultyChampionPhoto}
+              role="Faculty Champion"
+              email={info.facultyChampionEmail}
+              phone={info.facultyChampionPhone}
+              copiedKey={copiedKey}
+              onCopy={handleCopy}
+            />
+            <ProfileCard
+              name={info.coFacultyChampionName}
+              photo={info.coFacultyChampionPhoto}
+              role="Co-Faculty Champion"
+              email={info.coFacultyChampionEmail}
+              phone={info.coFacultyChampionPhone}
+              copiedKey={copiedKey}
+              onCopy={handleCopy}
+            />
+          </div>
+        </div>
+
+        {/* Section 3: Office Bearers & Student Leadership */}
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-fuchsia-200 border-b border-white/[0.06] pb-4 mb-5">Office Bearers & Leadership</h3>
+          
+          <div className="space-y-4">
+            
+            {/* Secretary */}
+            <ProfileCard
+              name={info.secretaryName}
+              photo={info.secretaryPhoto}
+              role="Secretary"
+              email={info.secretaryEmail}
+              copiedKey={copiedKey}
+              onCopy={handleCopy}
+            />
+
+            {/* Student Advisors */}
+            <div className="grid gap-4 md:grid-cols-2">
+              <ProfileCard
+                name={info.studentAdvisorOneName}
+                photo={info.studentAdvisorOnePhoto}
+                role="Student Advisor One"
+                copiedKey={copiedKey}
+                onCopy={handleCopy}
+              />
+              <ProfileCard
+                name={info.studentAdvisorTwoName}
+                photo={info.studentAdvisorTwoPhoto}
+                role="Student Advisor Two"
+                copiedKey={copiedKey}
+                onCopy={handleCopy}
+              />
+            </div>
+
+            {/* Joint Secretaries */}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl border border-white/[.05] bg-black/20 p-4 text-xs">
+                <span className="text-[10px] uppercase font-bold text-white/35 tracking-wider block">Joint Secretary One</span>
+                <span className="text-sm font-semibold text-white mt-1 block">{info.jointSecretaryOneName || <span className="text-white/20 font-normal italic">Not set</span>}</span>
+              </div>
+              <div className="rounded-2xl border border-white/[.05] bg-black/20 p-4 text-xs">
+                <span className="text-[10px] uppercase font-bold text-white/35 tracking-wider block">Joint Secretary Two</span>
+                <span className="text-sm font-semibold text-white mt-1 block">{info.jointSecretaryTwoName || <span className="text-white/20 font-normal italic">Not set</span>}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Section 4: AI & Reporting Templates */}
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-amber-200 border-b border-white/[0.06] pb-4 mb-5">AI Document Templates</h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            
+            <div className="rounded-2xl border border-white/[.05] bg-black/20 p-5 flex items-center justify-between gap-3 text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-white/35 tracking-wider block">Post Activity Report Template</span>
+                <span className="font-semibold text-white mt-1.5 block">Activity Report Layout</span>
+              </div>
+              {info.postActivityReportTemplate ? (
+                <a href={info.postActivityReportTemplate} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/20 transition">
+                  <FileText size={12} /> View Template PDF
+                </a>
+              ) : (
+                <span className="text-white/20 italic">Not set</span>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-white/[.05] bg-black/20 p-5 flex items-center justify-between gap-3 text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-white/35 tracking-wider block">MOM Template</span>
+                <span className="font-semibold text-white mt-1.5 block">Minutes of Meeting Layout</span>
+              </div>
+              {info.momTemplate ? (
+                <a href={info.momTemplate} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/20 transition">
+                  <FileText size={12} /> View Template PDF
+                </a>
+              ) : (
+                <span className="text-white/20 italic">Not set</span>
+              )}
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
+      {/* Right Column: Settings control actions */}
       <div className="grid gap-5 self-start">
         <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.03] via-transparent to-transparent" />
@@ -2806,6 +3010,7 @@ function Settings({ info, open }: { info: any; open: (drawer: any) => void }) {
           </div>
         </div>
       </div>
+
     </div>
   );
 }
@@ -2937,3 +3142,492 @@ function UploadControl({
     </div>
   );
 }
+
+function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;open:(drawer:any)=>void;patch:(resource:Resource,item:any,body:Record<string, any>,message:string)=>void;remove:(resource:Resource,item:any)=>void;refresh:()=>Promise<void>;setPanel:(value:string)=>void}) {
+  const members = data.studentMembers || [];
+  const today = new Date().toISOString().slice(0, 10);
+
+  const [activeTab, setActiveTab] = useState<"dashboard" | "members">("dashboard");
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [deptFilter, setDeptFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
+  const [page, setPage] = useState(0);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [detailMember, setDetailMember] = useState<any>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const pageSize = 12;
+
+  const counts = {
+    total: members.length,
+    today: members.filter((item:any)=>String(item.registeredAt || item.createdAt || "").slice(0,10) === today).length,
+    pending: members.filter((item:any)=>item.status === "pending").length,
+    approved: members.filter((item:any)=>item.status === "approved").length,
+    rejected: members.filter((item:any)=>item.status === "rejected").length
+  };
+
+  const deptsMap = new Map<string, number>();
+  members.forEach((m: any) => {
+    const d = m.department || "Other";
+    deptsMap.set(d, (deptsMap.get(d) || 0) + 1);
+  });
+  const deptData = Array.from(deptsMap.entries())
+    .map(([name, count]) => ({ name: name.length > 15 ? name.slice(0, 12) + "..." : name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const yearsMap = new Map<string, number>();
+  members.forEach((m: any) => {
+    const y = m.year || "Unknown";
+    yearsMap.set(y, (yearsMap.get(y) || 0) + 1);
+  });
+  const yearData = Array.from(yearsMap.entries()).map(([name, count]) => ({ name, count }));
+
+  const interestsMap = new Map<string, number>();
+  members.forEach((m: any) => {
+    const ints = m.interests || [];
+    ints.forEach((i: string) => {
+      interestsMap.set(i, (interestsMap.get(i) || 0) + 1);
+    });
+  });
+  const interestData = Array.from(interestsMap.entries())
+    .map(([name, count]) => ({ name: name.length > 15 ? name.slice(0, 12) + "..." : name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const filtered = useMemo(() => {
+    return members.filter((m: any) => {
+      const hay = `${m.fullName} ${m.uid} ${m.email} ${m.phone} ${m.department}`.toLowerCase();
+      if (query && !hay.includes(query.toLowerCase())) return false;
+      if (statusFilter !== "all" && m.status !== statusFilter) return false;
+      if (deptFilter !== "all" && m.department !== deptFilter) return false;
+      if (yearFilter !== "all" && m.year !== yearFilter) return false;
+      return true;
+    });
+  }, [members, query, statusFilter, deptFilter, yearFilter]);
+
+  const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const visible = filtered.slice(page * pageSize, page * pageSize + pageSize);
+
+  const exportUrl = `/api/membership/export?${new URLSearchParams(
+    Object.entries({
+      status: statusFilter !== "all" ? statusFilter : "",
+      department: deptFilter !== "all" ? deptFilter : "",
+      year: yearFilter !== "all" ? yearFilter : "",
+      search: query
+    }).filter(([, v]) => v)
+  ).toString()}`;
+
+  function toggle(id: string) {
+    setSelected((state) => (state.includes(id) ? state.filter((x) => x !== id) : [...state, id]));
+  }
+  
+  function toggleAll() {
+    setSelected(selected.length === visible.length ? [] : visible.map((x: any) => idOf(x)));
+  }
+
+  async function bulkAction(action: "approve" | "reject") {
+    if (!selected.length) return;
+    setBulkBusy(true);
+    const res = await fetch("/api/membership/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ids: selected })
+    });
+    setBulkBusy(false);
+    if (!res.ok) {
+      setPanel("Bulk action failed.");
+      return;
+    }
+    setSelected([]);
+    await refresh();
+    setPanel(`Bulk ${action} successful.`);
+  }
+
+  const tabClass = (tab: typeof activeTab) =>
+    `flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-semibold transition ${
+      activeTab === tab
+        ? "border-violet-200/35 bg-violet-500/18 text-white shadow-[0_0_20px_rgba(139,92,246,0.15)]"
+        : "border-white/[.08] bg-white/[.035] text-white/50 hover:text-white hover:border-white/20"
+    }`;
+
+  const deptsList = Array.from(new Set(members.map((m: any) => m.department).filter(Boolean))) as string[];
+  const yearsList = ["1st", "2nd", "3rd", "4th", "5th"];
+
+  return (
+    <div className="mt-7 flex flex-col min-w-0 overflow-hidden">
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-white/[.06] pb-4">
+        <button onClick={() => { setActiveTab("dashboard"); }} className={tabClass("dashboard")}>
+          <BarChart3 size={14} />
+          <span>Dashboard</span>
+        </button>
+        <button onClick={() => { setActiveTab("members"); setPage(0); }} className={tabClass("members")}>
+          <ClipboardList size={14} />
+          <span>Members List ({filtered.length})</span>
+        </button>
+      </div>
+
+      {activeTab === "dashboard" && (
+        <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+            {[
+              ["Total Registered", counts.total, "border-violet-500/20 text-violet-200 bg-violet-500/[0.02]"],
+              ["Today's Sign-ups", counts.today, "border-fuchsia-500/20 text-fuchsia-200 bg-fuchsia-500/[0.02]"],
+              ["Pending Approval", counts.pending, "border-white/10 text-white/60 bg-white/[0.01]"],
+              ["Approved Members", counts.approved, "border-emerald-500/20 text-emerald-200 bg-emerald-500/[0.02]"],
+              ["Rejected Entries", counts.rejected, "border-rose-500/20 text-rose-200 bg-rose-500/[0.02]"]
+            ].map(([label, value, styles]: any) => (
+              <div className={`portal-card rounded-2xl p-4 border ${styles}`} key={label}>
+                <p className="text-[10px] uppercase tracking-[.12em] text-white/35 font-medium">{label}</p>
+                <p className="mt-3 text-3xl font-semibold tracking-tight">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="portal-chart-card rounded-2xl border border-white/[.08] bg-white/[0.02] p-5">
+              <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">Department-wise Distribution</h3>
+              {deptData.length ? (
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={deptData}>
+                      <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} />
+                      <Tooltip contentStyle={{ background: "#111016", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12 }} />
+                      <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-xs text-white/40 text-center py-10">No data available.</p>
+              )}
+            </div>
+
+            <div className="portal-chart-card rounded-2xl border border-white/[.08] bg-white/[0.02] p-5">
+              <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">Top Technical/Creative Interests</h3>
+              {interestData.length ? (
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={interestData} layout="vertical">
+                      <XAxis type="number" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} />
+                      <Tooltip contentStyle={{ background: "#111016", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12 }} />
+                      <Bar dataKey="count" fill="#ec4899" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-xs text-white/40 text-center py-10">No data available.</p>
+              )}
+            </div>
+          </div>
+          
+          <div className="portal-card rounded-2xl border border-white/[.08] bg-white/[0.02] p-5">
+            <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">Academic Year Breakdowns</h3>
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-5">
+              {yearsList.map((y) => {
+                const val = yearData.find((x) => x.name === y)?.count || 0;
+                return (
+                  <div key={y} className="border border-white/[0.05] rounded-xl p-4 bg-white/[0.01]">
+                    <p className="text-[10px] text-white/40 uppercase font-semibold">{y} Year</p>
+                    <p className="mt-2 text-2xl font-semibold">{val}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "members" && (
+        <div className="flex flex-col gap-4 animate-in fade-in duration-200">
+          
+          <div className="glass rounded-xl p-5 border border-white/[.06] bg-black/10">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+              <div>
+                <p className="text-sm font-semibold">Active Community Roster</p>
+                <p className="mt-1 text-xs text-white/38">Apply queries, filter by verification status, target specific academic years or departments, and export reports.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <a href={exportUrl} className="portal-command-button rounded-2xl px-4 py-2.5 text-xs font-semibold hover:scale-[1.02] transition active:scale-95">
+                  Export Excel
+                </a>
+              </div>
+            </div>
+
+            {/* Filter Inputs Grid */}
+            <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+              <label className="portal-search flex items-center gap-3 rounded-2xl px-4 py-3 text-white/40 border border-white/[.07] bg-black/30">
+                <Search size={14}/>
+                <input
+                  value={query}
+                  onChange={(e) => { setQuery(e.target.value); setPage(0); }}
+                  placeholder="Search name, UID, email, phone..."
+                  className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/25"
+                />
+              </label>
+
+              <select
+                value={statusFilter}
+                onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
+                className="rounded-2xl border border-white/[.08] bg-black/35 px-4 py-3 text-xs text-white/70 outline-none cursor-pointer"
+              >
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+
+              <select
+                value={deptFilter}
+                onChange={(e) => { setDeptFilter(e.target.value); setPage(0); }}
+                className="rounded-2xl border border-white/[.08] bg-black/35 px-4 py-3 text-xs text-white/70 outline-none cursor-pointer"
+              >
+                <option value="all">All Departments</option>
+                {deptsList.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+
+              <select
+                value={yearFilter}
+                onChange={(e) => { setYearFilter(e.target.value); setPage(0); }}
+                className="rounded-2xl border border-white/[.08] bg-black/35 px-4 py-3 text-xs text-white/70 outline-none cursor-pointer"
+              >
+                <option value="all">All Years</option>
+                {yearsList.map((y) => (
+                  <option key={y} value={y}>{y} Year</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {selected.length > 0 && (
+            <div className="flex items-center gap-3 rounded-2xl border border-violet-500/20 bg-violet-500/5 px-5 py-3 text-sm">
+              <span className="font-medium text-violet-200">{selected.length} selected</span>
+              <div className="h-4 w-px bg-white/10" />
+              <button
+                type="button"
+                onClick={() => bulkAction("approve")}
+                disabled={bulkBusy}
+                className="text-xs font-semibold text-emerald-400 hover:underline disabled:opacity-50"
+              >
+                Approve Selected
+              </button>
+              <button
+                type="button"
+                onClick={() => bulkAction("reject")}
+                disabled={bulkBusy}
+                className="text-xs font-semibold text-rose-400 hover:underline disabled:opacity-50"
+              >
+                Reject Selected
+              </button>
+            </div>
+          )}
+
+          <div className="overflow-x-auto rounded-2xl border border-white/[.08]">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-white/[.08] bg-white/[.015] font-semibold text-white/50">
+                  <th className="p-4 w-10">
+                    <input
+                      type="checkbox"
+                      checked={selected.length === visible.length && visible.length > 0}
+                      onChange={toggleAll}
+                      className="rounded bg-black border-white/20 text-violet-500 focus:ring-violet-500"
+                    />
+                  </th>
+                  <th className="p-4">Name</th>
+                  <th className="p-4">UID</th>
+                  <th className="p-4">Department / Year</th>
+                  <th className="p-4">Email / Phone</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.length ? (
+                  visible.map((m: any) => (
+                    <tr key={idOf(m)} className="border-b border-white/[.05] hover:bg-white/[0.015] transition">
+                      <td className="p-4">
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(idOf(m))}
+                          onChange={() => toggle(idOf(m))}
+                          className="rounded bg-black border-white/20 text-violet-500 focus:ring-violet-500"
+                        />
+                      </td>
+                      <td className="p-4 font-semibold text-white">{m.fullName}</td>
+                      <td className="p-4 font-mono text-white/70">{m.uid}</td>
+                      <td className="p-4">
+                        <div className="text-white/80">{m.department}</div>
+                        <div className="text-[10px] text-white/40 mt-0.5">{m.year} Year {m.section ? `/ Sec ${m.section}` : ""}</div>
+                      </td>
+                      <td className="p-4">
+                        <div className="text-white/80">{m.email}</div>
+                        <div className="text-[10px] text-white/40 mt-0.5">{m.phone}</div>
+                      </td>
+                      <td className="p-4">
+                        <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider ${
+                          m.status === "approved"
+                            ? "bg-emerald-400/10 text-emerald-400"
+                            : m.status === "rejected"
+                            ? "bg-rose-400/10 text-rose-400"
+                            : "bg-white/10 text-white/60"
+                        }`}>
+                          {m.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right space-x-2 text-white">
+                        <button
+                          type="button"
+                          onClick={() => setDetailMember(m)}
+                          className="text-[10px] font-bold text-violet-300 hover:text-violet-100 uppercase"
+                        >
+                          View
+                        </button>
+                        {m.status === "pending" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => patch("studentMembers", m, { status: "approved" }, "Student approved")}
+                              className="text-[10px] font-bold text-emerald-400 hover:text-emerald-200 uppercase"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => patch("studentMembers", m, { status: "rejected" }, "Student rejected")}
+                              className="text-[10px] font-bold text-rose-400 hover:text-rose-200 uppercase"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => remove("studentMembers", m)}
+                          className="text-[10px] font-bold text-white/30 hover:text-rose-400 uppercase"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-white/40">
+                      No matching student members found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {pages > 1 && (
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-[10px] text-white/40 font-semibold uppercase">Page {page + 1} of {pages}</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={page === 0}
+                  onClick={() => setPage(page - 1)}
+                  className="portal-mini-button rounded-xl p-2.5 text-white/55 transition hover:text-white disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <button
+                  type="button"
+                  disabled={page === pages - 1}
+                  onClick={() => setPage(page + 1)}
+                  className="portal-mini-button rounded-xl p-2.5 text-white/55 transition hover:text-white disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {detailMember && (
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="max-w-lg w-full rounded-3xl border border-white/10 bg-[#111016] p-6 shadow-2xl">
+            <div className="flex justify-between items-center border-b border-white/[0.06] pb-4 mb-6">
+              <h3 className="text-lg font-bold text-white uppercase tracking-wider">Member Details</h3>
+              <button
+                type="button"
+                onClick={() => setDetailMember(null)}
+                className="text-xs text-white/40 hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+            
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">Full Name</p>
+                  <p className="mt-1 text-sm font-semibold text-white">{detailMember.fullName}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">University UID</p>
+                  <p className="mt-1 text-sm font-semibold text-white font-mono">{detailMember.uid}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">Email</p>
+                  <p className="mt-1 text-white">{detailMember.email}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">Phone</p>
+                  <p className="mt-1 text-white">{detailMember.phone}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">Department</p>
+                  <p className="mt-1 text-white">{detailMember.department}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">Year / Section</p>
+                  <p className="mt-1 text-white">{detailMember.year} Year {detailMember.section ? `/ Section ${detailMember.section}` : ""}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">Gender</p>
+                  <p className="mt-1 text-white uppercase">{detailMember.gender || "Not specified"}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">Registration Source</p>
+                  <p className="mt-1 text-white uppercase tracking-wider">{detailMember.source || "online"}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider mb-2">Interests</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(detailMember.interests || []).map((interest: string) => (
+                    <span key={interest} className="rounded-full border border-violet-500/20 bg-violet-500/5 px-2.5 py-1 text-[9px] font-semibold text-violet-200">
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-white/[0.06] pt-4 mt-6">
+                <label className="block text-[10px] text-white/40 font-semibold uppercase tracking-wider mb-2">Internal Remarks</label>
+                <textarea
+                  defaultValue={detailMember.adminRemarks || ""}
+                  placeholder="Add internal notes about this student member..."
+                  onBlur={(e) => {
+                    void patch("studentMembers", detailMember, { adminRemarks: e.target.value }, "Remarks updated");
+                  }}
+                  className="w-full rounded-xl border border-white/[0.08] bg-black/20 p-3 text-white text-xs outline-none focus:border-violet-500/50"
+                  rows={4}
+                />
+                <p className="text-[9px] text-white/30 mt-1">Changes are saved automatically when you click outside the text area.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
