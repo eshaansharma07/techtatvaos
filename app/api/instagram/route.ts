@@ -22,23 +22,21 @@ export async function GET(req: NextRequest) {
     }
 
     const rawData = await res.json();
-    let posts: any[] = [];
+    let postsArray: any[] = [];
 
     if (Array.isArray(rawData)) {
-      // Behold API returns a flat array of posts
-      posts = rawData.slice(0, 6).map((post: any) => ({
-        id: post.id || String(Math.random()),
-        image: post.sizes?.medium?.mediaUrl || post.sizes?.small?.mediaUrl || post.sizes?.full?.mediaUrl || post.thumbnail_url || post.media_url || post.thumbnailUrl || post.mediaUrl,
-        url: post.permalink || "https://instagram.com"
-      }));
+      postsArray = rawData;
+    } else if (rawData && Array.isArray(rawData.posts)) {
+      postsArray = rawData.posts;
     } else if (rawData && Array.isArray(rawData.data)) {
-      // Standard Instagram Graph API or proxy response
-      posts = rawData.data.slice(0, 6).map((post: any) => ({
-        id: post.id || String(Math.random()),
-        image: post.sizes?.medium?.mediaUrl || post.sizes?.small?.mediaUrl || post.sizes?.full?.mediaUrl || post.thumbnail_url || post.media_url || post.thumbnailUrl || post.mediaUrl,
-        url: post.permalink || "https://instagram.com"
-      }));
+      postsArray = rawData.data;
     }
+
+    const posts = postsArray.slice(0, 6).map((post: any) => ({
+      id: post.id || String(Math.random()),
+      image: post.sizes?.medium?.mediaUrl || post.sizes?.small?.mediaUrl || post.sizes?.full?.mediaUrl || post.thumbnailUrl || post.mediaUrl || post.thumbnail_url || post.media_url,
+      url: post.permalink || `https://instagram.com/p/${post.id}`
+    }));
 
     // Filter out posts that don't have valid images
     const validPosts = posts.filter(p => p.image);
