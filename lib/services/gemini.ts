@@ -9,7 +9,10 @@ const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 
 export async function generateWithGemini({ system, prompt, contents, fallback }: GeminiRequest) {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || "";
-  if (!apiKey) return fallback;
+  if (!apiKey) {
+    console.error("Gemini API Error: Neither GEMINI_API_KEY nor GOOGLE_GEMINI_API_KEY is configured in the environment variables.");
+    return fallback;
+  }
 
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
@@ -25,10 +28,17 @@ export async function generateWithGemini({ system, prompt, contents, fallback }:
         }
       })
     });
-    if (!res.ok) return fallback;
+    
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`Gemini API Error: Google endpoint returned HTTP ${res.status}:`, errText);
+      return fallback;
+    }
+    
     const json = await res.json();
     return json?.candidates?.[0]?.content?.parts?.map((part: any) => part.text).filter(Boolean).join("\n").trim() || fallback;
-  } catch {
+  } catch (err) {
+    console.error("Gemini API Error: Network/parsing exception thrown:", err);
     return fallback;
   }
 }
