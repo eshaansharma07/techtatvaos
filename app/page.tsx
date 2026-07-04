@@ -61,7 +61,7 @@ export default async function Home() {
             </p>
 
             {/* Interactive Developer CLI Terminal Widget */}
-            <div className="mt-8 mb-4">
+            <div className="mt-8 mb-4 hidden lg:block">
               <InteractiveTerminal 
                 stats={stats}
                 instagram={{
@@ -148,6 +148,23 @@ export default async function Home() {
               </div>
             </div>
           </div>
+        </Reveal>
+
+        <Reveal delay={.12} className="block lg:hidden mt-8 w-full">
+          <InteractiveTerminal 
+            stats={stats}
+            instagram={{
+              handle: clubInfo?.instagramHandle,
+              post1_image: clubInfo?.instagramPost1_image,
+              post1_url: clubInfo?.instagramPost1_url,
+            }}
+            event={nextEvent ? {
+              title: nextEvent.title,
+              description: nextEvent.description,
+              slug: nextEvent.slug,
+              venue: nextEvent.venue,
+            } : undefined}
+          />
         </Reveal>
       </div>
 
