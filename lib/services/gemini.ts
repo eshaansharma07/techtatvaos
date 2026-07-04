@@ -5,7 +5,7 @@ type GeminiRequest = {
   fallback: string;
 };
 
-const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 export async function generateWithGemini({ system, prompt, contents, fallback }: GeminiRequest) {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || "";
