@@ -175,11 +175,11 @@ export function InstagramFeed({
                 {post.caption ? (
                   <div className="mt-4 flex flex-col justify-between flex-grow">
                     <div>
-                      <div className="flex items-center gap-1.5 text-[8px] font-mono tracking-[0.2em] text-violet-300/80 uppercase">
-                        <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse" />
-                        {post.isReel ? "SIGNAL // REEL" : "SIGNAL // POST"}
+                      <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-wider text-violet-300/80 uppercase">
+                        <Instagram size={10} className="text-pink-400/90" />
+                        <span>{post.isReel ? "Reel" : "Post"}</span>
                       </div>
-                      <p className="mt-2 text-[11px] leading-relaxed text-white/45 group-hover:text-white/75 transition-colors duration-300 line-clamp-2 min-h-[44px] px-0.5">
+                      <p className="mt-2.5 pl-3 border-l border-white/10 group-hover:border-pink-500/30 text-[12.5px] leading-relaxed text-white/60 group-hover:text-white/90 transition-all duration-300 line-clamp-2 min-h-[44px] px-0.5">
                         {formatCaption(post.caption)}
                       </p>
                     </div>
@@ -191,11 +191,11 @@ export function InstagramFeed({
                 ) : post.image ? (
                   <div className="mt-4 flex flex-col justify-between flex-grow">
                     <div>
-                      <div className="flex items-center gap-1.5 text-[8px] font-mono tracking-[0.2em] text-violet-300/80 uppercase">
-                        <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
-                        SIGNAL // FALLBACK
+                      <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-wider text-violet-300/80 uppercase">
+                        <Instagram size={10} className="text-pink-400/90" />
+                        <span>Featured</span>
                       </div>
-                      <p className="mt-2 text-[11px] leading-relaxed text-white/25 line-clamp-2 min-h-[44px] px-0.5 italic">
+                      <p className="mt-2.5 pl-3 border-l border-white/10 group-hover:border-pink-500/30 text-[12.5px] leading-relaxed text-white/35 line-clamp-2 min-h-[44px] px-0.5 italic">
                         Manual fallback display.
                       </p>
                     </div>
