@@ -56,15 +56,32 @@ export async function POST(req: NextRequest) {
     if (!user?.id || !allowedRoles.has(user.role || "")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     if (!rateLimit(`ai:${user.id}`, 12, 60_000)) return NextResponse.json({ error: "Too many AI requests. Try again in a minute." }, { status: 429 });
 
-    const prompt = String((await req.json()).prompt || "").trim();
+    const bodyJson = await req.json();
+    const prompt = String(bodyJson.prompt || "").trim();
     if (prompt.length < 3) return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
-
+    const history = Array.isArray(bodyJson.history) ? bodyJson.history : [];
+ 
     await connectDB();
     const rag = await context();
+
+    const contents: any[] = [];
+    for (const turn of history) {
+      if (turn.role === "user" || turn.role === "model") {
+        contents.push({
+          role: turn.role,
+          parts: [{ text: turn.text }]
+        });
+      }
+    }
+    contents.push({
+      role: "user",
+      parts: [{ text: `User prompt:\n${prompt}\n\nRetrieved live MongoDB context:\n${compactJson(rag)}` }]
+    });
+
     const fallback = `I checked the current club database. Active members: ${rag.stats.activeMembers}. Active teams: ${rag.stats.activeTeams}. Total events: ${rag.stats.totalEvents}. Confirmed registrations: ${rag.stats.confirmedRegistrations}. Pending tasks: ${rag.stats.pendingTasks}. Ask me for a specific event, team, task, meeting, or trend and I will summarize only the stored records.`;
     const response = await generateWithGemini({
       system: "You are the internal Tech Tatva Secretary Assistant. Always answer using only the retrieved MongoDB context. If the data is not present, say it is not available in the system. Never invent names, counts, events, or decisions.",
-      prompt: `User prompt:\n${prompt}\n\nRetrieved live MongoDB context:\n${compactJson(rag)}`,
+      contents,
       fallback
     });
     await AIConversation.create({ user: user.id, prompt, response, context: rag.stats, kind: "secretary_assistant" });

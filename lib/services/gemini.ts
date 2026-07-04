@@ -1,12 +1,13 @@
 type GeminiRequest = {
   system: string;
-  prompt: string;
+  prompt?: string;
+  contents?: any[];
   fallback: string;
 };
 
 const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 
-export async function generateWithGemini({ system, prompt, fallback }: GeminiRequest) {
+export async function generateWithGemini({ system, prompt, contents, fallback }: GeminiRequest) {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || "";
   if (!apiKey) return fallback;
 
@@ -16,7 +17,7 @@ export async function generateWithGemini({ system, prompt, fallback }: GeminiReq
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        contents: contents || [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.35,
           topP: 0.9,

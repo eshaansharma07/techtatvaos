@@ -1,6 +1,6 @@
 "use client";
 
-import { type MouseEvent, useEffect, useMemo, useState } from "react";
+import { type MouseEvent, useEffect, useMemo, useState, useRef } from "react";
 import { signOut } from "next-auth/react";
 import {
   Activity,
@@ -39,7 +39,8 @@ import {
   Filter,
   HelpCircle,
   Home,
-  User
+  User,
+  Send
 } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
@@ -1647,16 +1648,36 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
   );
 }
 
+interface ChatMessage {
+  role: "user" | "model";
+  text: string;
+  timestamp: Date;
+}
+
 function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => void }) {
   const events = data.events || [];
   const meetings = data.meetings || [];
   const [eventId, setEventId] = useState(events[0] ? idOf(events[0]) : "");
   const [meetingId, setMeetingId] = useState(meetings[0] ? idOf(meetings[0]) : "");
   const [prompt, setPrompt] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: "model",
+      text: "Hello! I am your Tech Tatva Secretary Assistant. I have loaded the live MongoDB records including members, teams, events, registrations, tasks, meetings, and reports. Ask me anything about current club stats or operations!",
+      timestamp: new Date()
+    }
+  ]);
   const [asking, setAsking] = useState(false);
   const selectedEvent = events.find((event: any) => idOf(event) === eventId);
   const selectedMeeting = meetings.find((meeting: any) => idOf(meeting) === meetingId);
+  
+  const chatScrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [messages, asking]);
 
   async function askSecretary() {
     const text = prompt.trim();
@@ -1664,32 +1685,51 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
       setPanel("Write a question for the Secretary Assistant first.");
       return;
     }
+    setPrompt("");
+    
+    // Add user message
+    const userMsg: ChatMessage = { role: "user", text, timestamp: new Date() };
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
+    
     setAsking(true);
-    setPanel("Secretary Assistant is reading live MongoDB context...");
-    const res = await fetch("/api/ai/secretary", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: text })
-    });
-    const raw = await res.text();
-    let result: any = {};
+    setPanel("Secretary Assistant is thinking...");
+    
     try {
-      result = raw ? JSON.parse(raw) : {};
-    } catch {
-      result = { error: raw.slice(0, 220) };
+      const res = await fetch("/api/ai/secretary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: text,
+          history: updatedMessages.map(m => ({ role: m.role, text: m.text })).slice(0, -1)
+        })
+      });
+      const raw = await res.text();
+      let result: any = {};
+      try {
+        result = raw ? JSON.parse(raw) : {};
+      } catch {
+        result = { error: raw.slice(0, 220) };
+      }
+      setAsking(false);
+      if (!res.ok) {
+        setPanel(result.error || "Secretary Assistant failed.");
+        setMessages(prev => [...prev, { role: "model", text: `Error: ${result.error || "Request failed."}`, timestamp: new Date() }]);
+        return;
+      }
+      const response = String(result.response || "").trim();
+      if (!response) {
+        setPanel("AI returned an empty response.");
+        setMessages(prev => [...prev, { role: "model", text: "Sorry, I couldn't generate a response based on the database. Please try another query.", timestamp: new Date() }]);
+        return;
+      }
+      setMessages(prev => [...prev, { role: "model", text: response, timestamp: new Date() }]);
+      setPanel("Secretary Assistant response generated.");
+    } catch (err: any) {
+      setAsking(false);
+      setPanel("Network error connecting to assistant.");
+      setMessages(prev => [...prev, { role: "model", text: `Network error: ${err.message || "Failed to fetch response."}`, timestamp: new Date() }]);
     }
-    setAsking(false);
-    if (!res.ok) {
-      setPanel(result.error || "Secretary Assistant failed.");
-      return;
-    }
-    const response = String(result.response || "").trim();
-    if (!response) {
-      setPanel(result.error || "AI returned an empty response. Try again.");
-      return;
-    }
-    setAnswer(response);
-    setPanel("Secretary Assistant response generated and logged.");
   }
 
   const docs = (data.generatedDocuments || []).slice(0, 8);
@@ -1708,7 +1748,7 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
               </span>
               <div>
                 <p className="text-base font-bold text-white tracking-tight">Post Event Report Generator</p>
-                <p className="mt-1 text-xs text-white/38">Uses your official PDF template with real event, registration, attendance \u0026 gallery data.</p>
+                <p className="mt-1 text-xs text-white/38">Uses your official PDF template with real event, registration, attendance & gallery data.</p>
               </div>
             </div>
             <select value={eventId} onChange={(event) => setEventId(event.target.value)} className="mt-5 w-full rounded-2xl border border-white/[.07] bg-black/35 px-4 py-3.5 text-sm text-white outline-none focus:border-fuchsia-400/40 transition">
@@ -1723,7 +1763,7 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
               <p className="mt-3 text-xs text-white/30">Create an event first if this list is empty.</p>
             )}
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <a download aria-disabled={!eventId} onClick={(event) => { if (!eventId) { event.preventDefault(); setPanel("Select an event before downloading a report."); } }} href={eventId ? `/api/ai/event-report?event=${eventId}&format=pdf` : "#"} className="portal-command-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-center text-xs font-semibold transition hover:-translate-y-0.5">
+              <a download aria-disabled={!eventId} onClick={(event) => { if (!eventId) { event.preventDefault(); setPanel("Select an event before downloading a report."); } }} href={eventId ? `/api/ai/event-report?event=${eventId}&format=pdf` : "#"} className="portal-command-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-center text-xs font-semibold transition hover:-translate-y-0.5 text-black">
                 <Download size={13} /> Download PDF
               </a>
               <a download aria-disabled={!eventId} onClick={(event) => { if (!eventId) { event.preventDefault(); setPanel("Select an event before downloading a report."); } }} href={eventId ? `/api/ai/event-report?event=${eventId}&format=docx` : "#"} className="flex items-center justify-center gap-2 rounded-2xl border border-white/[.08] bg-white/[.035] px-4 py-3.5 text-center text-xs font-semibold text-white/70 transition hover:-translate-y-0.5 hover:bg-white/[.06] hover:text-white">
@@ -1758,7 +1798,7 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
               <p className="mt-3 text-xs text-white/30">Create a meeting from the Meetings tab first.</p>
             )}
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <a download aria-disabled={!meetingId} onClick={(event) => { if (!meetingId) { event.preventDefault(); setPanel("Select a meeting before downloading MOM."); } }} href={meetingId ? `/api/ai/mom?meeting=${meetingId}&format=pdf` : "#"} className="portal-command-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-center text-xs font-semibold transition hover:-translate-y-0.5">
+              <a download aria-disabled={!meetingId} onClick={(event) => { if (!meetingId) { event.preventDefault(); setPanel("Select a meeting before downloading MOM."); } }} href={meetingId ? `/api/ai/mom?meeting=${meetingId}&format=pdf` : "#"} className="portal-command-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-center text-xs font-semibold transition hover:-translate-y-0.5 text-black">
                 <Download size={13} /> Download MOM PDF
               </a>
               <a download aria-disabled={!meetingId} onClick={(event) => { if (!meetingId) { event.preventDefault(); setPanel("Select a meeting before downloading MOM."); } }} href={meetingId ? `/api/ai/mom?meeting=${meetingId}&format=docx` : "#"} className="flex items-center justify-center gap-2 rounded-2xl border border-white/[.08] bg-white/[.035] px-4 py-3.5 text-center text-xs font-semibold text-white/70 transition hover:-translate-y-0.5 hover:bg-white/[.06] hover:text-white">
@@ -1771,30 +1811,68 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
 
       {/* Right Column - Secretary Assistant & Document Timeline */}
       <div className="grid gap-5 self-start">
-        {/* Secretary Assistant Console */}
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
+        {/* Secretary Assistant Chat Console */}
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-5 md:p-6 flex flex-col h-[500px]">
           <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-fuchsia-500/[0.04]" />
-          <div className="relative">
-            <div className="flex items-center gap-4">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-violet-400 to-fuchsia-300 text-black shadow-[0_0_30px_rgba(139,92,246,.24)]">
-                <Brain size={18} />
+          <div className="relative flex flex-col h-full justify-between">
+            {/* Header */}
+            <div className="flex items-center gap-4 border-b border-white/[0.06] pb-3 shrink-0">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-400 to-fuchsia-300 text-black shadow-[0_0_20px_rgba(139,92,246,.18)]">
+                <Brain size={16} />
               </span>
               <div>
-                <p className="text-base font-bold text-white tracking-tight">Secretary Assistant</p>
-                <p className="mt-1 text-xs text-white/38">Answers from live database context only.</p>
+                <p className="text-sm font-bold text-white tracking-tight">Secretary Assistant</p>
+                <p className="text-[10px] text-white/35">Interactive chat powered by live MongoDB context</p>
               </div>
             </div>
-            <textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={5} placeholder="Ask about pending tasks, registration status, attendance gaps, upcoming meetings..." className="mt-5 w-full rounded-2xl border border-white/[.07] bg-black/35 px-4 py-3.5 text-sm leading-6 text-white outline-none placeholder:text-white/25 focus:border-violet-400/40 transition" />
-            <button disabled={asking} onClick={askSecretary} className="portal-command-button mt-3 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-xs font-semibold disabled:opacity-60 transition hover:-translate-y-0.5">
-              <Brain size={13} className={asking ? "animate-spin" : ""} />
-              {asking ? "Thinking..." : "Ask Secretary Assistant"}
-            </button>
-            {answer ? (
-              <div className="mt-4 rounded-2xl border border-violet-500/15 bg-violet-500/[0.03] p-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-200/45 mb-2">AI RESPONSE</p>
-                <div className="text-sm leading-7 text-white/70 whitespace-pre-wrap font-mono">{answer}</div>
-              </div>
-            ) : null}
+
+            {/* Conversation Log (ChatGPT bubble format) */}
+            <div ref={chatScrollRef} className="flex-grow overflow-y-auto my-3 pr-1 flex flex-col gap-3 overscroll-contain mobile-tabs">
+              {messages.map((m, idx) => (
+                <div key={idx} className={`flex flex-col gap-1 ${m.role === "user" ? "items-end" : "items-start"}`}>
+                  <div className={`px-3.5 py-2 rounded-2xl text-[12px] leading-relaxed max-w-[88%] break-words ${
+                    m.role === "user" 
+                      ? "bg-violet-500/10 border border-violet-500/20 text-white rounded-tr-none" 
+                      : "bg-white/[0.025] border border-white/[0.06] text-white/80 rounded-tl-none font-mono whitespace-pre-wrap"
+                  }`}>
+                    {m.text}
+                  </div>
+                  <span className="text-[8px] text-white/20 px-1 font-mono">
+                    {m.timestamp.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+              ))}
+              {asking && (
+                <div className="flex flex-col items-start gap-1">
+                  <div className="px-3.5 py-2.5 rounded-2xl rounded-tl-none bg-white/[0.025] border border-white/[0.06] text-[11px] text-white/40 font-mono italic animate-pulse">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-ping" />
+                      Assistant is querying club database...
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Chat Input Box */}
+            <div className="relative shrink-0 mt-1">
+              <input 
+                type="text" 
+                value={prompt} 
+                onChange={(event) => setPrompt(event.target.value)} 
+                onKeyDown={(event) => { if (event.key === "Enter") askSecretary(); }}
+                disabled={asking}
+                placeholder={asking ? "Assistant is compiling records..." : "Ask about registrations, tasks, meetings..."} 
+                className="w-full rounded-2xl border border-white/[.07] bg-black/45 py-3.5 pl-4 pr-12 text-[12px] text-white outline-none placeholder:text-white/22 focus:border-violet-400/40 disabled:opacity-60 transition"
+              />
+              <button 
+                onClick={askSecretary} 
+                disabled={asking || !prompt.trim()} 
+                className="absolute right-2 top-2 h-8 w-8 rounded-xl bg-violet-500/20 hover:bg-violet-500/40 text-violet-200 hover:text-white flex items-center justify-center transition active:scale-95 disabled:opacity-40"
+              >
+                <Send size={12} />
+              </button>
+            </div>
           </div>
         </div>
 
