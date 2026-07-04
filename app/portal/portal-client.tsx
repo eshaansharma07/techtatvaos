@@ -142,6 +142,7 @@ const settingsFields: Field[] = [
   ["linkedinUrl","LinkedIn URL"],
   ["instagramHandle","Instagram handle (e.g. techtatva)"],
   ["instagramUrl","Instagram profile URL"],
+  ["instagramFeedUrl","Instagram Auto-Feed JSON URL (e.g. Behold.so API URL)"],
   ["rotatingWords","Rotating Hero Words (comma-separated)"],
   ["instagramPost1_image","Instagram Post 1 Image","upload:image"],
   ["instagramPost1_url","Instagram Post 1 Link"],

@@ -1,14 +1,15 @@
 "use client";
-
+ 
+import { useEffect, useState } from "react";
 import { Instagram, ArrowUpRight, Sparkles } from "lucide-react";
 import { Reveal } from "./reveal";
-
+ 
 interface InstagramPost {
   id: string;
   image?: string;
   url: string;
 }
-
+ 
 interface InstagramFeedProps {
   handle?: string;
   profileUrl?: string;
@@ -19,7 +20,7 @@ interface InstagramFeedProps {
   post3_image?: string;
   post3_url?: string;
 }
-
+ 
 export function InstagramFeed({
   handle = "techtatva",
   profileUrl = "https://instagram.com",
@@ -31,27 +32,51 @@ export function InstagramFeed({
   post3_url = "https://instagram.com"
 }: InstagramFeedProps) {
   
+  // State for posts, initially loaded from settings fallback values
+  const [posts, setPosts] = useState<InstagramPost[]>([]);
+
+  useEffect(() => {
+    async function fetchLiveFeed() {
+      try {
+        const res = await fetch("/api/instagram");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.posts && data.posts.length > 0) {
+            // Use the top 3 live posts
+            setPosts(data.posts.slice(0, 3));
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Live Instagram feed fetch failed, using manual fallback:", err);
+      }
+      
+      // Fallback state
+      setPosts([
+        {
+          id: "ig-1",
+          image: post1_image || undefined,
+          url: post1_url
+        },
+        {
+          id: "ig-2",
+          image: post2_image || undefined,
+          url: post2_url
+        },
+        {
+          id: "ig-3",
+          image: post3_image || undefined,
+          url: post3_url
+        }
+      ]);
+    }
+
+    fetchLiveFeed();
+  }, [post1_image, post1_url, post2_image, post2_url, post3_image, post3_url]);
+ 
   // Format handle with @
   const displayHandle = handle.startsWith("@") ? handle : `@${handle}`;
 
-  // Fallback cards if no custom posts are uploaded in settings
-  const posts: InstagramPost[] = [
-    {
-      id: "ig-1",
-      image: post1_image || undefined,
-      url: post1_url
-    },
-    {
-      id: "ig-2",
-      image: post2_image || undefined,
-      url: post2_url
-    },
-    {
-      id: "ig-3",
-      image: post3_image || undefined,
-      url: post3_url
-    }
-  ];
 
   return (
     <section className="border-t border-white/[.06] bg-white/[0.002] py-20 md:py-28">

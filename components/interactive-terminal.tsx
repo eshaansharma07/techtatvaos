@@ -85,12 +85,59 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
     switch (primary) {
       case "instagram":
         const handle = instagram?.handle || "techtatva";
+        
+        // Use functional setHistory updates as this is inside an async loop
+        setHistory(prev => [
+          ...prev,
+          { text: `Fetching latest media signal from @${handle}...`, type: "system" }
+        ]);
+
+        try {
+          const res = await fetch("/api/instagram");
+          if (res.ok) {
+            const data = await res.json();
+            if (data.posts && data.posts.length > 0) {
+              const livePost = data.posts[0];
+              setHistory(prev => [
+                ...prev,
+                {
+                  text: `@${handle} uploaded a new post:`,
+                  type: "success",
+                  node: (
+                    <div className="mt-2 flex gap-3 items-center rounded-xl border border-white/10 bg-white/5 p-2 max-w-sm">
+                      <img 
+                        src={livePost.image} 
+                        alt="Instagram Latest Preview" 
+                        className="w-12 h-12 object-cover rounded-md border border-white/10 bg-black/40"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-white/50 truncate">Live Reels/Post Preview</p>
+                        <a 
+                          href={livePost.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-pink-300 hover:text-white transition"
+                        >
+                          Open on Instagram <ArrowUpRight size={10} />
+                        </a>
+                      </div>
+                    </div>
+                  )
+                }
+              ]);
+              break;
+            }
+          }
+        } catch (err) {
+          console.error("Live Instagram terminal fetch failed:", err);
+        }
+
+        // Fallback to manual posts if fetch fails or no auto-feed configured
         const postImg = instagram?.post1_image;
         const postUrl = instagram?.post1_url || "https://instagram.com";
 
-        setHistory([
-          ...newHistory,
-          { text: `Fetching latest media signal from @${handle}...`, type: "system" },
+        setHistory(prev => [
+          ...prev,
           {
             text: `@${handle} uploaded a new post:`,
             type: "success",
