@@ -58,10 +58,14 @@ export default async function About() {
     "Build team ownership across design, operations, media, and technology.",
     "Turn student energy into documented, repeatable club systems."
   ]);
-  const timeline = history.length ? history.slice(0, 4) : [
+  const rawTimeline = history.length ? history.slice(0, 4) : [
     { year: "01", text: "Admin-published milestones will appear here when the club is ready to make them public." },
     { year: "02", text: "Until then, the page stays intentional instead of inventing legacy claims." }
   ];
+  const timeline = rawTimeline.map((item: any) => ({
+    year: String(item.year || ""),
+    text: String(item.text || "")
+  }));
 
   return (
     <PublicShell>
