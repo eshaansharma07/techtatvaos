@@ -36,7 +36,9 @@ export async function GET(req: NextRequest) {
       id: post.id || String(Math.random()),
       image: post.sizes?.medium?.mediaUrl || post.sizes?.small?.mediaUrl || post.sizes?.full?.mediaUrl || post.thumbnailUrl || post.mediaUrl || post.thumbnail_url || post.media_url,
       url: post.permalink || `https://instagram.com/p/${post.id}`,
-      caption: post.prunedCaption || post.caption || ""
+      caption: post.prunedCaption || post.caption || "",
+      timestamp: post.timestamp,
+      isReel: post.isReel === true || post.isReel === "true" || (post.permalink && String(post.permalink).includes("/reel/"))
     }));
 
     // Filter out posts that don't have valid images

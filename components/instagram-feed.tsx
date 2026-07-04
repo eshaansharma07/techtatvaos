@@ -9,6 +9,8 @@ interface InstagramPost {
   image?: string;
   url: string;
   caption?: string;
+  timestamp?: string;
+  isReel?: boolean;
 }
  
 interface InstagramFeedProps {
@@ -20,6 +22,31 @@ interface InstagramFeedProps {
   post2_url?: string;
   post3_image?: string;
   post3_url?: string;
+}
+
+function formatCaption(text?: string) {
+  if (!text) return "";
+  const words = text.split(/(\s+)/);
+  return words.map((word, i) => {
+    if (word.startsWith("#")) {
+      return (
+        <span key={i} className="text-pink-400 font-mono text-[10px] tracking-wide hover:underline">
+          {word}
+        </span>
+      );
+    }
+    return word;
+  });
+}
+
+function formatDate(timestamp?: string) {
+  if (!timestamp) return "";
+  try {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString("en-US", { day: "2-digit", month: "short" }).toUpperCase();
+  } catch {
+    return "";
+  }
 }
  
 export function InstagramFeed({
@@ -78,7 +105,6 @@ export function InstagramFeed({
   // Format handle with @
   const displayHandle = handle.startsWith("@") ? handle : `@${handle}`;
  
- 
   return (
     <section className="border-t border-white/[.06] bg-white/[0.002] py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-5 md:px-6">
@@ -106,12 +132,12 @@ export function InstagramFeed({
  
         <div className="grid gap-6 sm:grid-cols-3">
           {posts.map((post, i) => (
-            <Reveal key={post.id} delay={i * 0.08}>
+            <Reveal key={post.id} delay={i * 0.08} className="h-full">
               <a 
                 href={post.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="premium-card group block rounded-[2rem] border border-white/[0.06] bg-white/[0.015] p-3 hover:-translate-y-1 hover:border-pink-500/20 transition-all duration-300"
+                className="premium-card group flex flex-col justify-between h-full rounded-[2rem] border border-white/[0.06] bg-white/[0.015] p-3 hover:-translate-y-1 hover:border-pink-500/20 transition-all duration-300"
               >
                 <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-black/40 border border-white/[0.04] flex items-center justify-center">
                   {post.image ? (
@@ -147,11 +173,37 @@ export function InstagramFeed({
                   )}
                 </div>
                 {post.caption ? (
-                  <p className="mt-3 px-1.5 text-[11px] leading-5 text-white/42 line-clamp-2 min-h-[40px] transition-colors duration-300 group-hover:text-white/70">
-                    {post.caption}
-                  </p>
+                  <div className="mt-4 flex flex-col justify-between flex-grow">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-[8px] font-mono tracking-[0.2em] text-violet-300/80 uppercase">
+                        <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse" />
+                        {post.isReel ? "SIGNAL // REEL" : "SIGNAL // POST"}
+                      </div>
+                      <p className="mt-2 text-[11px] leading-relaxed text-white/45 group-hover:text-white/75 transition-colors duration-300 line-clamp-2 min-h-[44px] px-0.5">
+                        {formatCaption(post.caption)}
+                      </p>
+                    </div>
+                    <div className="mt-4 pt-2.5 border-t border-white/[.04] flex items-center justify-between text-[8px] font-mono tracking-[0.15em] text-white/25">
+                      <span>{displayHandle.toUpperCase()}</span>
+                      <span>{formatDate(post.timestamp)}</span>
+                    </div>
+                  </div>
                 ) : post.image ? (
-                  <div className="mt-3 min-h-[40px]" />
+                  <div className="mt-4 flex flex-col justify-between flex-grow">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-[8px] font-mono tracking-[0.2em] text-violet-300/80 uppercase">
+                        <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
+                        SIGNAL // FALLBACK
+                      </div>
+                      <p className="mt-2 text-[11px] leading-relaxed text-white/25 line-clamp-2 min-h-[44px] px-0.5 italic">
+                        Manual fallback display.
+                      </p>
+                    </div>
+                    <div className="mt-4 pt-2.5 border-t border-white/[.04] flex items-center justify-between text-[8px] font-mono tracking-[0.15em] text-white/25">
+                      <span>{displayHandle.toUpperCase()}</span>
+                      <span>ACTIVE</span>
+                    </div>
+                  </div>
                 ) : null}
               </a>
             </Reveal>
