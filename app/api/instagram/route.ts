@@ -13,9 +13,8 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch the live Instagram feed from the configured URL (e.g. Behold.so or public JSON proxy)
-    // Cache the response for 1 hour to prevent hitting rate limits
     const res = await fetch(instagramFeedUrl, {
-      next: { revalidate: 3600 }
+      cache: "no-store"
     });
 
     if (!res.ok) {
