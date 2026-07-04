@@ -179,7 +179,7 @@ export function InstagramFeed({
                         <Instagram size={10} className="text-pink-400/90" />
                         <span>{post.isReel ? "Reel" : "Post"}</span>
                       </div>
-                      <p className="mt-2.5 pl-3 border-l border-white/10 group-hover:border-pink-500/30 text-[12.5px] leading-relaxed text-white/60 group-hover:text-white/90 transition-all duration-300 line-clamp-2 min-h-[44px] px-0.5">
+                      <p className="mt-2.5 pl-3 border-l border-white/10 group-hover:border-pink-500/30 text-[12.5px] font-medium leading-relaxed text-white/70 group-hover:text-white transition-all duration-300 line-clamp-2 min-h-[44px] px-0.5">
                         {formatCaption(post.caption)}
                       </p>
                     </div>
@@ -195,7 +195,7 @@ export function InstagramFeed({
                         <Instagram size={10} className="text-pink-400/90" />
                         <span>Featured</span>
                       </div>
-                      <p className="mt-2.5 pl-3 border-l border-white/10 group-hover:border-pink-500/30 text-[12.5px] leading-relaxed text-white/35 line-clamp-2 min-h-[44px] px-0.5 italic">
+                      <p className="mt-2.5 pl-3 border-l border-white/10 group-hover:border-pink-500/30 text-[12.5px] font-medium leading-relaxed text-white/40 line-clamp-2 min-h-[44px] px-0.5 italic">
                         Manual fallback display.
                       </p>
                     </div>
