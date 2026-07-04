@@ -2,7 +2,7 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 import { isPortalHost } from "@/lib/portal-host";
 
-const internalApiPrefixes = ["/api/admin", "/api/attendance", "/api/certificates", "/api/ai", "/api/search", "/api/recruitment/export", "/api/recruitment/bulk", "/api/membership/export", "/api/membership/bulk"];
+const internalApiPrefixes = ["/api/admin", "/api/attendance", "/api/certificates", "/api/ai/event-report", "/api/ai/mom", "/api/ai/secretary", "/api/search", "/api/recruitment/export", "/api/recruitment/bulk", "/api/membership/export", "/api/membership/bulk"];
 const portalOnlyPrefixes = ["/portal", "/login", "/invite", "/api/auth", "/api/portal", ...internalApiPrefixes];
 
 export default async function middleware(req: NextRequest) {

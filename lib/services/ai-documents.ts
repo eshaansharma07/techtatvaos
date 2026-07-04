@@ -13,7 +13,7 @@ export type GeneratedContent = {
 };
 
 function templatePath(kind: "event_report" | "mom") {
-  return path.join(process.cwd(), "document-templates", kind === "mom" ? "mom-template.pdf" : "post-activity-report-template.pdf");
+  return path.join(process.cwd(), "templates", "documents", kind === "mom" ? "mom-template.pdf" : "post-activity-report-template.pdf");
 }
 
 async function templateSource(kind: "event_report" | "mom", templateUrl?: string) {
