@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { ServiceWorkerRegister } from "@/components/sw-register";
+import { FloatingAIChat } from "@/components/floating-ai-chat";
 
 /* ── Portal host detection (mirrors lib/portal-host.ts logic) ── */
 const portalHosts = (
@@ -54,11 +55,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") || headersList.get("host") || "";
+  const showChat = !isPortal(host);
+
   return (
     <html lang="en">
       <body>
         {children}
+        {showChat && <FloatingAIChat />}
         <ServiceWorkerRegister />
       </body>
     </html>

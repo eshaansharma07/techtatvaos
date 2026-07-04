@@ -73,6 +73,13 @@ export async function POST(req: NextRequest) {
         });
       }
     }
+    
+    // Gemini requires conversation turns to strictly start with a 'user' turn.
+    // Filter out leading 'model' turns (like local system greetings) to avoid HTTP 400.
+    while (contents.length > 0 && contents[0].role === "model") {
+      contents.shift();
+    }
+
     contents.push({
       role: "user",
       parts: [{ text: `User prompt:\n${prompt}\n\nRetrieved live MongoDB context:\n${compactJson(rag)}` }]
