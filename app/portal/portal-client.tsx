@@ -3136,14 +3136,41 @@ function UploadControl({
   uploading: boolean;
   onUpload: (file: File) => Promise<void>;
 }) {
-  const value = upload?.url || current;
+  const [cleared, setCleared] = useState(false);
+
+  // If a new upload completes, make sure we show it
+  useEffect(() => {
+    if (upload?.url) {
+      setCleared(false);
+    }
+  }, [upload?.url]);
+
+  const value = cleared ? "" : (upload?.url || current);
   const preview = value && /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(value);
+
   return (
     <div className="mt-2 rounded-xl border border-white/[.07] bg-black/25 p-3">
       <input type="hidden" name={name} value={value} />
       {upload?.publicId ? <input type="hidden" name={name === "url" ? "publicId" : `${name}PublicId`} value={upload.publicId} /> : null}
       {name === "url" ? <input type="hidden" name="kind" value={upload?.resourceType || "image"} /> : null}
-      {preview ? <img src={value} alt="" className="mb-3 h-28 w-full rounded-lg object-cover" /> : value ? <p className="mb-3 break-all text-xs text-white/45">{value}</p> : null}
+      
+      {value ? (
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-white/[.06] pb-3">
+          {preview ? (
+            <img src={value} alt="" className="h-16 w-24 rounded-lg object-cover border border-white/10" />
+          ) : (
+            <p className="break-all text-xs text-white/45 flex-1">{value}</p>
+          )}
+          <button 
+            type="button" 
+            onClick={() => setCleared(true)} 
+            className="rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-200 border border-rose-500/25 px-2.5 py-1.5 text-[10px] font-semibold transition"
+          >
+            Delete Asset
+          </button>
+        </div>
+      ) : null}
+
       <input
         type="file"
         accept="image/*,video/mp4,video/webm,application/pdf"

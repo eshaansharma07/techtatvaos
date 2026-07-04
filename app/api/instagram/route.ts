@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       // Behold API returns a flat array of posts
       posts = rawData.slice(0, 6).map((post: any) => ({
         id: post.id || String(Math.random()),
-        image: post.thumbnailUrl || post.mediaUrl,
+        image: post.thumbnail_url || post.media_url || post.thumbnailUrl || post.mediaUrl,
         url: post.permalink || "https://instagram.com"
       }));
     } else if (rawData && Array.isArray(rawData.data)) {
