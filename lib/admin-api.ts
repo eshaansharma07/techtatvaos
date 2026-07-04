@@ -271,12 +271,12 @@ function normalizeRecruitmentQuestion(input: Record<string, any>, create = false
 }
 
 export async function createResource(resource: AdminResource, input: Record<string, any>, actorId?: string) {
-  const body = clean(input);
   if (resource === "settings") {
-    const entries = Object.entries(body);
-    await Promise.all(entries.map(([key, value]) => ClubInfo.findOneAndUpdate({ key }, { key, value }, { upsert: true })));
+    const entries = Object.entries(input);
+    await Promise.all(entries.map(([key, value]) => ClubInfo.findOneAndUpdate({ key }, { key, value: value ?? "" }, { upsert: true })));
     return { updated: entries.length };
   }
+  const body = clean(input);
   if (resource === "teams") {
     const team = await Team.create(normalizeTeamBody(body, true));
     await syncTeamLeadership(team._id, team.lead, team.coLeads);

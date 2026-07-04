@@ -267,8 +267,13 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
     for (const [name,,type] of drawer.fields) {
       if (type === "member-multi-select" || type === "team-multi-select") body[name] = formData.getAll(name).filter(Boolean);
     }
-    const url=drawer.resource==="invites"?"/api/portal/invites":drawer.item?`/api/admin/${drawer.resource}/${idOf(drawer.item)}`:`/api/admin/${drawer.resource}`;
-    const res=await fetch(url,{method:drawer.item?"PATCH":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const isSettings = drawer.resource === "settings";
+    const url = drawer.resource === "invites" ? "/api/portal/invites" : (drawer.item && !isSettings) ? `/api/admin/${drawer.resource}/${idOf(drawer.item)}` : `/api/admin/${drawer.resource}`;
+    const res = await fetch(url, {
+      method: (drawer.item && !isSettings) ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
     setBusy(false);
     if(!res.ok){setPanel(`Action failed: ${(await res.json()).error || res.statusText}`);return}
     const data=await res.json();
