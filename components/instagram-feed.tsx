@@ -8,6 +8,7 @@ interface InstagramPost {
   id: string;
   image?: string;
   url: string;
+  caption?: string;
 }
  
 interface InstagramFeedProps {
@@ -34,7 +35,7 @@ export function InstagramFeed({
   
   // State for posts, initially loaded from settings fallback values
   const [posts, setPosts] = useState<InstagramPost[]>([]);
-
+ 
   useEffect(() => {
     async function fetchLiveFeed() {
       try {
@@ -70,14 +71,14 @@ export function InstagramFeed({
         }
       ]);
     }
-
+ 
     fetchLiveFeed();
   }, [post1_image, post1_url, post2_image, post2_url, post3_image, post3_url]);
- 
+  
   // Format handle with @
   const displayHandle = handle.startsWith("@") ? handle : `@${handle}`;
-
-
+ 
+ 
   return (
     <section className="border-t border-white/[.06] bg-white/[0.002] py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-5 md:px-6">
@@ -102,7 +103,7 @@ export function InstagramFeed({
             </a>
           </div>
         </Reveal>
-
+ 
         <div className="grid gap-6 sm:grid-cols-3">
           {posts.map((post, i) => (
             <Reveal key={post.id} delay={i * 0.08}>
@@ -110,9 +111,9 @@ export function InstagramFeed({
                 href={post.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="premium-card group block rounded-[2rem] border border-white/[0.06] bg-white/[0.015] p-3 aspect-square overflow-hidden hover:-translate-y-1 hover:border-pink-500/20 transition-all duration-300"
+                className="premium-card group block rounded-[2rem] border border-white/[0.06] bg-white/[0.015] p-3 hover:-translate-y-1 hover:border-pink-500/20 transition-all duration-300"
               >
-                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-black/40 border border-white/[0.04] flex items-center justify-center">
+                <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-black/40 border border-white/[0.04] flex items-center justify-center">
                   {post.image ? (
                     <>
                       <img 
@@ -145,6 +146,13 @@ export function InstagramFeed({
                     </div>
                   )}
                 </div>
+                {post.caption ? (
+                  <p className="mt-3 px-1.5 text-[11px] leading-5 text-white/42 line-clamp-2 min-h-[40px] transition-colors duration-300 group-hover:text-white/70">
+                    {post.caption}
+                  </p>
+                ) : post.image ? (
+                  <div className="mt-3 min-h-[40px]" />
+                ) : null}
               </a>
             </Reveal>
           ))}

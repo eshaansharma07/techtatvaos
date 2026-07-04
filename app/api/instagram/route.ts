@@ -35,7 +35,8 @@ export async function GET(req: NextRequest) {
     const posts = postsArray.slice(0, 6).map((post: any) => ({
       id: post.id || String(Math.random()),
       image: post.sizes?.medium?.mediaUrl || post.sizes?.small?.mediaUrl || post.sizes?.full?.mediaUrl || post.thumbnailUrl || post.mediaUrl || post.thumbnail_url || post.media_url,
-      url: post.permalink || `https://instagram.com/p/${post.id}`
+      url: post.permalink || `https://instagram.com/p/${post.id}`,
+      caption: post.prunedCaption || post.caption || ""
     }));
 
     // Filter out posts that don't have valid images
