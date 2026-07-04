@@ -9,14 +9,18 @@ export default async function Gallery() {
   return (
     <PublicShell>
       <section className="mx-auto max-w-7xl px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
+        {/* Header Block */}
         <div className="aurora-shell rounded-[2rem] px-6 py-10 md:rounded-[2.6rem] md:px-14 md:py-14">
-          <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200">THE ARCHIVE</p>
-          <h1 className="mt-5 max-w-4xl text-3xl xs:text-5xl font-semibold leading-[.86] tracking-[-.08em] md:text-8xl">Proof of work.</h1>
+          <p className="text-[10px] font-bold tracking-[.34em] text-violet-200 uppercase">THE ARCHIVE</p>
+          <h1 className="mt-5 max-w-4xl text-3xl xs:text-5xl font-bold leading-[.86] tracking-[-.08em] text-white md:text-8xl">
+            The Visual Archive.
+          </h1>
           <p className="mt-6 max-w-2xl text-[15px] leading-8 text-white/56 md:text-base">
             Event albums published by the club. Open an album to view every photo, video, and caption attached to that moment.
           </p>
         </div>
 
+        {/* Albums Grid */}
         {albums.length ? (
           <div className="mt-8 grid auto-rows-[420px] gap-5 md:mt-10 md:auto-rows-[340px] md:grid-cols-3">
             {albums.map((album: any, index: number) => {
@@ -25,24 +29,47 @@ export default async function Gallery() {
                 <Link
                   href={`/gallery/${album.id}`}
                   key={album.id}
-                  className={`premium-card group relative overflow-hidden rounded-[2rem] bg-gradient-to-br ${["from-violet-800 to-fuchsia-700", "from-zinc-800 to-purple-800", "from-rose-800 to-orange-700"][index % 3]} ${index === 0 || index === 4 ? "md:row-span-2" : ""}`}
+                  className={`premium-card group relative overflow-hidden rounded-[2.2rem] border border-white/[0.08] bg-[#0c0a12] transition-all duration-500 hover:border-violet-500/30 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(139,92,246,0.12)] ${
+                    index === 0 || index === 4 ? "md:row-span-2" : ""
+                  }`}
                 >
+                  {/* Full-bleed media backing */}
                   {asset?.url ? asset.kind === "video" ? (
-                    <video src={asset.url} muted playsInline className="absolute inset-x-0 top-0 h-[68%] w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
+                    <video src={asset.url} muted playsInline autoPlay loop className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:opacity-75 group-hover:scale-105 transition-all duration-[800ms] ease-out" />
                   ) : (
-                    <img src={asset.url} alt="" loading="lazy" className="absolute inset-x-0 top-0 h-[68%] w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
+                    <img src={asset.url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:opacity-75 group-hover:scale-105 transition-all duration-[800ms] ease-out" />
                   ) : null}
-                  <div className="absolute inset-0 grid-bg opacity-25" />
-                  <div className="absolute inset-x-0 bottom-0 min-h-[36%] border-t border-white/10 bg-black/82 p-5 backdrop-blur-2xl md:p-6">
-                    <p className="text-[10px] font-semibold uppercase tracking-[.24em] text-violet-100/60">Album title</p>
-                    <p className="mt-2 text-2xl font-semibold leading-tight tracking-[-.04em] text-white">{album.title}</p>
-                    <p className="mt-2 text-xs text-violet-100/75">{album.event || "Club gallery"}</p>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                      <p className="text-[10px] uppercase tracking-[.22em] text-white/42">{album.assetCount || album.assets?.length || 0} media items / Album {String(index + 1).padStart(2, "0")}</p>
-                      <span className="rounded-full border border-violet-200/20 bg-violet-500/12 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.18em] text-violet-100">Tap for more details</span>
+
+                  {/* Dark Vignette Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent z-10" />
+
+                  {/* Watermark grid network pattern */}
+                  <div className="absolute inset-0 grid-bg opacity-15 pointer-events-none" />
+
+                  {/* Content Overlays */}
+                  <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 z-20 flex flex-col justify-end min-h-[45%]">
+                    <p className="text-[10px] font-bold uppercase tracking-[.25em] text-fuchsia-300">
+                      ALBUM {String(index + 1).padStart(2, "0")}
+                    </p>
+                    <h2 className="mt-2 text-2xl font-bold leading-tight tracking-[-.04em] text-white group-hover:text-violet-200 transition duration-300">
+                      {album.title}
+                    </h2>
+                    <p className="mt-1 text-xs text-violet-100/60 font-mono">
+                      {album.event || "Club Gallery Album"}
+                    </p>
+                    
+                    {/* Hover slider info bar */}
+                    <div className="overflow-hidden">
+                      <div className="mt-4 flex items-center justify-between gap-3 transform translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
+                        <span className="text-[9px] uppercase tracking-[.2em] text-white/35 font-mono">
+                          {album.assetCount || album.assets?.length || 0} media items
+                        </span>
+                        <span className="rounded-full border border-violet-400/30 bg-violet-500/15 px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-[.2em] text-violet-200 backdrop-blur">
+                          OPEN ALBUM
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <span className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[10px] tracking-wider text-white/70 backdrop-blur">OPEN ALBUM</span>
                 </Link>
               );
             })}
