@@ -106,10 +106,10 @@ export default async function About() {
       <section className="mx-auto max-w-7xl px-6 py-10">
         <div className="grid gap-5 lg:grid-cols-2">
           <Reveal>
-            <AboutSignalCard icon={Compass} label="VISION" title="Direction before decoration." copy={vision} />
+            <AboutSignalCard iconName="compass" label="VISION" title="Direction before decoration." copy={vision} />
           </Reveal>
           <Reveal delay={0.08}>
-            <AboutSignalCard icon={Target} label="MISSION" title="Operate with clarity." copy={mission} />
+            <AboutSignalCard iconName="target" label="MISSION" title="Operate with clarity." copy={mission} />
           </Reveal>
         </div>
       </section>

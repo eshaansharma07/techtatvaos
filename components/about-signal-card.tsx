@@ -1,11 +1,19 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import { Compass, Target, LucideIcon } from "lucide-react";
 
-export function AboutSignalCard({ icon: Icon, label, title, copy }: { icon: any; label: string; title: string; copy: string }) {
+const iconsMap: Record<string, LucideIcon> = {
+  compass: Compass,
+  target: Target
+};
+
+export function AboutSignalCard({ iconName, label, title, copy }: { iconName: "compass" | "target"; label: string; title: string; copy: string }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
+
+  const Icon = iconsMap[iconName] || Compass;
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (!cardRef.current) return;
