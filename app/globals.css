@@ -967,3 +967,101 @@ body:before {
     display: none;
   }
 }
+
+/* --- PREMIUM INTERACTIVE VISUAL EXTENSIONS --- */
+
+/* Click ripples keyframe */
+@keyframes cursorRipple {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(15);
+    opacity: 0;
+  }
+}
+
+/* Card hover scaling, translate lifting, shadow depth, and backdrop-blur styling */
+.premium-card,
+.glass,
+.event-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              backdrop-filter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) {
+  .premium-card:hover,
+  .glass:hover,
+  .event-card:hover {
+    transform: translateY(-4px) scale(1.015);
+    border-color: rgba(255, 250, 241, 0.22) !important;
+    box-shadow: 0 32px 85px rgba(20, 8, 22, 0.46), 
+                inset 0 1px rgba(255, 250, 241, 0.16) !important;
+    backdrop-filter: blur(32px);
+  }
+
+  /* Shimmer sweep reflection on hover */
+  .premium-card::before,
+  .glass::before,
+  .event-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.05),
+      transparent
+    );
+    transform: skewX(-22deg);
+    transition: left 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .premium-card:hover::before,
+  .glass:hover::before,
+  .event-card:hover::before {
+    left: 150%;
+  }
+}
+
+/* Subtle page vignette overlay */
+.premium-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: radial-gradient(circle, transparent 40%, rgba(5, 3, 8, 0.48) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .premium-card,
+  .glass,
+  .event-card {
+    transition: none !important;
+    transform: none !important;
+  }
+  .premium-card:hover,
+  .glass:hover,
+  .event-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  .premium-card::before,
+  .glass::before,
+  .event-card::before {
+    display: none !important;
+  }
+}
+

@@ -344,7 +344,7 @@ export async function getPublicHomeData() {
     getPublicTeams(),
     Achievement.find({ featured: true }).sort({ awardedAt: -1 }).limit(3).select("kind title description awardedAt").lean(),
     Sponsor.find({ active: true }).sort({ level: 1, name: 1 }).limit(8).select("name logo website level").lean(),
-    Gallery.find({ published: true }).sort({ createdAt: -1 }).limit(4).select("title event").lean()
+    Gallery.find({ published: true }).sort({ createdAt: -1 }).limit(4).select("title event assets").lean()
   ]);
   const [members, eventCount, teamCount, communityCount] = await Promise.all([
     User.countDocuments({ memberType: "club_member", status: "active" }),

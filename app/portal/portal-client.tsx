@@ -136,7 +136,19 @@ const settingsFields: Field[] = [
   ["jointSecretaryTwoEmail","Joint secretary 2 email","email"],
   ["jointSecretaryTwoPhoto","Joint secretary 2 photo","upload:image"],
   ["postActivityReportTemplate","Post activity report PDF template","upload:pdf"],
-  ["momTemplate","MOM PDF template","upload:pdf"]
+  ["momTemplate","MOM PDF template","upload:pdf"],
+  ["githubUrl","GitHub URL"],
+  ["discordUrl","Discord URL"],
+  ["linkedinUrl","LinkedIn URL"],
+  ["instagramHandle","Instagram handle (e.g. techtatva)"],
+  ["instagramUrl","Instagram profile URL"],
+  ["rotatingWords","Rotating Hero Words (comma-separated)"],
+  ["instagramPost1_image","Instagram Post 1 Image","upload:image"],
+  ["instagramPost1_url","Instagram Post 1 Link"],
+  ["instagramPost2_image","Instagram Post 2 Image","upload:image"],
+  ["instagramPost2_url","Instagram Post 2 Link"],
+  ["instagramPost3_image","Instagram Post 3 Image","upload:image"],
+  ["instagramPost3_url","Instagram Post 3 Link"]
 ];
 
 function idOf(item:any){return typeof item==="string"?item:String(item?._id || item?.id || item || "")}
