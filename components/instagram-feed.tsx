@@ -63,6 +63,7 @@ export function InstagramFeed({
   const [posts, setPosts] = useState<InstagramPost[]>([]);
   const [stats, setStats] = useState<{ followers: string; following: string; postsCount: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
  
   useEffect(() => {
     async function fetchLiveFeed() {
@@ -78,6 +79,7 @@ export function InstagramFeed({
           if (data.posts && data.posts.length > 0) {
             setPosts(data.posts.slice(0, 3));
             setLoading(false);
+            setMounted(true);
             return;
           }
         }
@@ -109,6 +111,7 @@ export function InstagramFeed({
         setStats({ followers: "109", following: "34", postsCount: "40" });
       }
       setLoading(false);
+      setMounted(true);
     }
  
     fetchLiveFeed();
@@ -117,24 +120,23 @@ export function InstagramFeed({
   const displayHandle = handle.startsWith("@") ? handle : `@${handle}`;
  
   return (
-    <section className="border-t border-white/[.06] bg-[#07050d] py-20 md:py-28 relative overflow-hidden">
-      {/* Visual background ambient blooms */}
-      <div className="absolute top-1/4 -left-1/4 w-[500px] h-[500px] rounded-full bg-purple-900/10 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] rounded-full bg-pink-900/10 blur-[130px] pointer-events-none" />
+    <section className="border-t border-white/[0.06] bg-[#050308] py-20 md:py-28 relative overflow-hidden">
+      {/* Interactive holographic ambient glows */}
+      <div className="absolute top-1/3 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#f9ce34]/5 via-[#ee2a7b]/10 to-[#6228d7]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/3 -right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#6228d7]/5 via-[#ee2a7b]/10 to-[#f9ce34]/5 blur-[120px] pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-5 md:px-6 relative">
         <Reveal>
           <div className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div className="max-w-2xl">
-              <p className="mb-4 text-[10px] font-semibold tracking-[.35em] text-pink-400 uppercase">SOCIAL CONNECT</p>
-              <h2 className="text-4xl font-bold tracking-tight md:text-6xl text-white">Captured on Instagram.</h2>
+              <p className="mb-4 text-[10px] font-semibold tracking-[0.4em] text-pink-400 uppercase">SOCIAL CONNECT</p>
+              <h2 className="text-4xl font-extrabold tracking-tight md:text-6xl text-white">Captured on Instagram.</h2>
               <p className="mt-4 text-sm leading-8 text-white/50">
                 Join our active student community of builders. We post live updates, technology news, event announcements, and design highlights.
               </p>
             </div>
             
             <div className="flex flex-wrap items-center gap-4 shrink-0">
-              {/* Sleek Instagram Pill */}
               <div className="inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 backdrop-blur-xl">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
@@ -160,77 +162,142 @@ export function InstagramFeed({
           </div>
         </Reveal>
 
-        {/* Glassmorphic Instagram Profile Stats HUD */}
+        {/* Glassmorphic Cyber-Gauge Instagram Stats HUD */}
         <Reveal delay={0.04}>
-          <div className="mb-12 rounded-[2.5rem] border border-white/[0.08] bg-gradient-to-br from-white/[0.02] to-white/[0.005] p-8 md:p-10 backdrop-blur-3xl shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10">
-            {/* Ambient background glows using Instagram brand colors */}
-            <div className="absolute -left-10 -top-10 w-60 h-60 rounded-full bg-gradient-to-tr from-yellow-500/10 via-pink-500/10 to-purple-600/10 blur-[80px] pointer-events-none animate-pulse" />
-            <div className="absolute -right-10 -bottom-10 w-60 h-60 rounded-full bg-purple-600/10 blur-[80px] pointer-events-none" />
+          <div className="mb-14 grid gap-6 lg:grid-cols-[1.1fr_2fr] items-stretch">
+            {/* Left Box: Futuristic Profile Core */}
+            <div className="relative rounded-[2.5rem] border border-white/[0.08] bg-[#0c0814]/80 p-8 backdrop-blur-3xl shadow-2xl flex flex-col items-center justify-center overflow-hidden group">
+              {/* Corner crosshairs for technical drafting aesthetic */}
+              <div className="absolute top-3 left-3 text-white/10 font-mono text-[9px] select-none">+</div>
+              <div className="absolute top-3 right-3 text-white/10 font-mono text-[9px] select-none">+</div>
+              <div className="absolute bottom-3 left-3 text-white/10 font-mono text-[9px] select-none">+</div>
+              <div className="absolute bottom-3 right-3 text-white/10 font-mono text-[9px] select-none">+</div>
+              
+              {/* Tech grid pattern */}
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.005)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.005)_50%,rgba(255,255,255,0.005)_75%,transparent_75%,transparent)] bg-[length:12px_12px] opacity-40 pointer-events-none" />
 
-            {/* Left: Creator Profile Info */}
-            <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left select-none">
-              <div className="relative shrink-0">
-                {/* Glowing Instagram brand-color ring */}
-                <div className="absolute inset-[-4px] rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] animate-pulse" />
-                <div className="relative grid h-24 w-24 place-items-center rounded-full bg-[#07050d] text-white">
-                  <Instagram size={40} className="text-pink-300 drop-shadow-[0_0_15px_rgba(238,42,123,0.5)] animate-pulse" />
+              <div className="flex flex-col sm:flex-row items-center gap-6 z-10 w-full justify-center">
+                {/* Glowing reactor core avatar frame */}
+                <div className="relative shrink-0 select-none">
+                  {/* Rotating dashed outer circle */}
+                  <div className="absolute inset-[-8px] rounded-full border border-dashed border-pink-500/30 animate-[spin_25s_linear_infinite]" />
+                  {/* Glowing color gradient background */}
+                  <div className="absolute inset-[-4px] rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] animate-pulse" />
+                  <div className="relative grid h-20 w-20 place-items-center rounded-full bg-[#0c0814] text-white">
+                    <Instagram size={36} className="text-pink-300 drop-shadow-[0_0_15px_rgba(238,42,123,0.55)] animate-pulse" />
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 justify-center sm:justify-start">
-                  <h3 className="text-2xl font-extrabold tracking-tight text-white">{displayHandle}</h3>
-                  {/* Verified checkmark badge */}
-                  <span className="grid h-5 w-5 place-items-center rounded-full bg-pink-500 text-white shadow-lg shadow-pink-500/20">
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
-                      <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-                    </svg>
-                  </span>
+                <div className="text-center sm:text-left flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2.5 justify-center sm:justify-start">
+                    <h3 className="text-2xl font-black tracking-tight text-white">
+                      {displayHandle}
+                    </h3>
+                    <span className="grid h-5 w-5 place-items-center rounded-full bg-pink-500 text-white shadow-lg shadow-pink-500/30">
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                        <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                  </div>
+                  <p className="text-[9px] font-black tracking-[0.25em] text-pink-400 uppercase">OFFICIAL INSTAGRAM</p>
+                  <p className="text-xs text-white/45 max-w-[200px] leading-relaxed">Workspace feed integration for Tech Tatva Club.</p>
                 </div>
-                <p className="text-[10px] font-bold tracking-[0.25em] text-pink-400 uppercase">OFFICIAL COMMUNITY PROFILE</p>
-                <p className="text-xs text-white/45 max-w-[280px]">Official Instagram page for Chandigarh University's premier technical hub.</p>
               </div>
             </div>
 
-            {/* Right: Three Interactive Stat Counters */}
-            <div className="grid grid-cols-3 gap-6 sm:gap-12 w-full lg:w-auto font-sans">
-              {/* Stat 1: Posts */}
-              <div className="flex flex-col items-center lg:items-end text-center lg:text-right group">
-                <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform duration-300">
-                  {stats?.postsCount || "40"}
-                </span>
-                <span className="mt-2 text-[9px] font-black tracking-[0.2em] text-white/40 uppercase group-hover:text-pink-400 transition-colors">
+            {/* Right Box: 3 Circular Cyber-Gauges */}
+            <div className="grid gap-4 sm:grid-cols-3">
+              {/* Gauge 1: Posts */}
+              <div className="relative rounded-[2.5rem] border border-white/[0.06] bg-[#0c0814]/40 p-6 backdrop-blur-2xl transition duration-500 hover:border-pink-500/20 hover:bg-[#0c0814]/70 hover:-translate-y-1.5 group flex flex-col items-center justify-between overflow-hidden">
+                <div className="absolute top-2 left-2 text-white/5 font-mono text-[8px] select-none">+</div>
+                <div className="absolute top-2 right-2 text-white/5 font-mono text-[8px] select-none">+</div>
+                
+                {/* SVG Radial Gauge */}
+                <div className="relative my-4 flex items-center justify-center">
+                  <svg className="w-32 h-32 transform -rotate-90">
+                    {/* Background track circle */}
+                    <circle cx="64" cy="64" r="45" className="stroke-white/[0.03] stroke-[4] fill-none" />
+                    {/* Animated gradient progress ring */}
+                    <circle 
+                      cx="64" 
+                      cy="64" 
+                      r="45" 
+                      className="stroke-[#ee2a7b] stroke-[5] fill-none transition-all duration-[1200ms] ease-out drop-shadow-[0_0_8px_rgba(238,42,123,0.3)]" 
+                      strokeDasharray="283" 
+                      strokeDashoffset={mounted ? 283 - (283 * 0.4) : 283} 
+                    />
+                  </svg>
+                  {/* Number inside circle */}
+                  <div className="absolute inset-0 flex items-center justify-center flex-col">
+                    <span className="text-3xl font-black text-white tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                      {stats?.postsCount || "40"}
+                    </span>
+                  </div>
+                </div>
+                
+                <span className="text-[10px] font-black tracking-[0.25em] text-white/35 group-hover:text-pink-400 transition-colors uppercase mt-2">
                   POSTS
                 </span>
-                <div className="mt-2.5 h-1 w-8 rounded-full bg-white/[0.06] overflow-hidden">
-                  <div className="h-full w-0 bg-pink-500 group-hover:w-full transition-all duration-500" />
-                </div>
               </div>
 
-              {/* Stat 2: Followers */}
-              <div className="flex flex-col items-center lg:items-end text-center lg:text-right border-l border-white/[0.08] pl-6 sm:pl-12 group">
-                <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform duration-300">
-                  {stats?.followers || "109"}
-                </span>
-                <span className="mt-2 text-[9px] font-black tracking-[0.2em] text-white/40 uppercase group-hover:text-pink-400 transition-colors">
+              {/* Gauge 2: Followers */}
+              <div className="relative rounded-[2.5rem] border border-white/[0.06] bg-[#0c0814]/40 p-6 backdrop-blur-2xl transition duration-500 hover:border-violet-500/20 hover:bg-[#0c0814]/70 hover:-translate-y-1.5 group flex flex-col items-center justify-between overflow-hidden">
+                <div className="absolute top-2 left-2 text-white/5 font-mono text-[8px] select-none">+</div>
+                <div className="absolute top-2 right-2 text-white/5 font-mono text-[8px] select-none">+</div>
+                
+                {/* SVG Radial Gauge */}
+                <div className="relative my-4 flex items-center justify-center">
+                  <svg className="w-32 h-32 transform -rotate-90">
+                    <circle cx="64" cy="64" r="45" className="stroke-white/[0.03] stroke-[4] fill-none" />
+                    <circle 
+                      cx="64" 
+                      cy="64" 
+                      r="45" 
+                      className="stroke-[#6228d7] stroke-[5] fill-none transition-all duration-[1200ms] ease-out drop-shadow-[0_0_8px_rgba(98,40,215,0.3)]" 
+                      strokeDasharray="283" 
+                      strokeDashoffset={mounted ? 283 - (283 * 0.75) : 283} 
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center flex-col">
+                    <span className="text-3xl font-black text-white tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                      {stats?.followers || "109"}
+                    </span>
+                  </div>
+                </div>
+                
+                <span className="text-[10px] font-black tracking-[0.25em] text-white/35 group-hover:text-pink-400 transition-colors uppercase mt-2">
                   FOLLOWERS
                 </span>
-                <div className="mt-2.5 h-1 w-8 rounded-full bg-white/[0.06] overflow-hidden">
-                  <div className="h-full w-0 bg-pink-500 group-hover:w-full transition-all duration-500" />
-                </div>
               </div>
 
-              {/* Stat 3: Following */}
-              <div className="flex flex-col items-center lg:items-end text-center lg:text-right border-l border-white/[0.08] pl-6 sm:pl-12 group">
-                <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform duration-300">
-                  {stats?.following || "34"}
-                </span>
-                <span className="mt-2 text-[9px] font-black tracking-[0.2em] text-white/40 uppercase group-hover:text-pink-400 transition-colors">
+              {/* Gauge 3: Following */}
+              <div className="relative rounded-[2.5rem] border border-white/[0.06] bg-[#0c0814]/40 p-6 backdrop-blur-2xl transition duration-500 hover:border-[#f9ce34]/20 hover:bg-[#0c0814]/70 hover:-translate-y-1.5 group flex flex-col items-center justify-between overflow-hidden">
+                <div className="absolute top-2 left-2 text-white/5 font-mono text-[8px] select-none">+</div>
+                <div className="absolute top-2 right-2 text-white/5 font-mono text-[8px] select-none">+</div>
+                
+                {/* SVG Radial Gauge */}
+                <div className="relative my-4 flex items-center justify-center">
+                  <svg className="w-32 h-32 transform -rotate-90">
+                    <circle cx="64" cy="64" r="45" className="stroke-white/[0.03] stroke-[4] fill-none" />
+                    <circle 
+                      cx="64" 
+                      cy="64" 
+                      r="45" 
+                      className="stroke-[#f9ce34] stroke-[5] fill-none transition-all duration-[1200ms] ease-out drop-shadow-[0_0_8px_rgba(249,206,52,0.3)]" 
+                      strokeDasharray="283" 
+                      strokeDashoffset={mounted ? 283 - (283 * 0.35) : 283} 
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center flex-col">
+                    <span className="text-3xl font-black text-white tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                      {stats?.following || "34"}
+                    </span>
+                  </div>
+                </div>
+                
+                <span className="text-[10px] font-black tracking-[0.25em] text-white/35 group-hover:text-pink-400 transition-colors uppercase mt-2">
                   FOLLOWING
                 </span>
-                <div className="mt-2.5 h-1 w-8 rounded-full bg-white/[0.06] overflow-hidden">
-                  <div className="h-full w-0 bg-pink-500 group-hover:w-full transition-all duration-500" />
-                </div>
               </div>
             </div>
           </div>
