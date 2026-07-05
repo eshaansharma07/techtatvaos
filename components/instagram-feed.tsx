@@ -65,11 +65,13 @@ export function InstagramFeed({
  
   useEffect(() => {
     async function fetchLiveFeed() {
+      let fetchedStats = null;
       try {
         const res = await fetch("/api/instagram");
         if (res.ok) {
           const data = await res.json();
           if (data.stats) {
+            fetchedStats = data.stats;
             setStats(data.stats);
           }
           if (data.posts && data.posts.length > 0) {
@@ -81,8 +83,7 @@ export function InstagramFeed({
         console.error("Live Instagram feed fetch failed, using manual fallback:", err);
       }
       
-      // Fallback state
-      setStats({ followers: "1.2k", following: "29", postsCount: "3" });
+      // Fallback state for posts
       setPosts([
         {
           id: "ig-1",
@@ -100,6 +101,11 @@ export function InstagramFeed({
           url: post3_url
         }
       ]);
+      
+      // Only set baseline fallback stats if API call returned no statistics
+      if (!fetchedStats) {
+        setStats({ followers: "109", following: "34", postsCount: "40" });
+      }
     }
  
     fetchLiveFeed();
@@ -158,15 +164,15 @@ export function InstagramFeed({
               {/* Stats Counters */}
               <div className="flex justify-center md:justify-start gap-8 font-mono">
                 <div>
-                  <span className="text-lg font-bold text-white tracking-tight">{stats?.postsCount || "3"}</span>
+                  <span className="text-lg font-bold text-white tracking-tight">{stats?.postsCount || "40"}</span>
                   <span className="text-[10px] text-white/35 uppercase tracking-wider block mt-0.5">Posts</span>
                 </div>
                 <div className="border-l border-white/[0.06] pl-8">
-                  <span className="text-lg font-bold text-white tracking-tight">{stats?.followers || "1.2k"}</span>
+                  <span className="text-lg font-bold text-white tracking-tight">{stats?.followers || "109"}</span>
                   <span className="text-[10px] text-white/35 uppercase tracking-wider block mt-0.5">Followers</span>
                 </div>
                 <div className="border-l border-white/[0.06] pl-8">
-                  <span className="text-lg font-bold text-white tracking-tight">{stats?.following || "29"}</span>
+                  <span className="text-lg font-bold text-white tracking-tight">{stats?.following || "34"}</span>
                   <span className="text-[10px] text-white/35 uppercase tracking-wider block mt-0.5">Following</span>
                 </div>
               </div>
