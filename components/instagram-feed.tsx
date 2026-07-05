@@ -162,115 +162,75 @@ export function InstagramFeed({
 
         {/* Glassmorphic Instagram Profile Stats HUD */}
         <Reveal delay={0.04}>
-          <div className="mb-12 grid gap-6 lg:grid-cols-[1fr_2fr] items-stretch">
-            {/* Left Column: Avatar & Profile Metadata HUD */}
-            <div className="relative rounded-[2.2rem] border border-white/[0.08] bg-[#0c0814]/75 p-6 md:p-8 backdrop-blur-3xl shadow-2xl flex flex-col items-center md:items-start justify-center gap-6 overflow-hidden group">
-              {/* Animated background laser line */}
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-pink-500 to-transparent animate-pulse" />
-              <div className="absolute -right-20 -bottom-20 w-52 h-52 rounded-full bg-violet-600/10 blur-[60px] pointer-events-none" />
+          <div className="mb-12 rounded-[2.5rem] border border-white/[0.08] bg-gradient-to-br from-white/[0.02] to-white/[0.005] p-8 md:p-10 backdrop-blur-3xl shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10">
+            {/* Ambient background glows using Instagram brand colors */}
+            <div className="absolute -left-10 -top-10 w-60 h-60 rounded-full bg-gradient-to-tr from-yellow-500/10 via-pink-500/10 to-purple-600/10 blur-[80px] pointer-events-none animate-pulse" />
+            <div className="absolute -right-10 -bottom-10 w-60 h-60 rounded-full bg-purple-600/10 blur-[80px] pointer-events-none" />
 
-              <div className="flex flex-col md:flex-row items-center gap-6 w-full">
-                {/* Fusion Reactor Core Avatar Ring */}
-                <div className="relative shrink-0 select-none">
-                  {/* Outer spinning dash border */}
-                  <div className="absolute inset-[-6px] rounded-full border border-dashed border-pink-500/40 animate-[spin_20s_linear_infinite]" />
-                  {/* Middle gradient ring */}
-                  <div className="absolute inset-[-4px] rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 animate-pulse opacity-85" />
-                  {/* Inner dark circle containing the Instagram logo */}
-                  <div className="relative grid h-20 w-20 place-items-center rounded-full bg-[#0c0814] text-white animate-pulse">
-                    <Instagram size={36} className="text-pink-300 drop-shadow-[0_0_15px_rgba(244,114,182,0.6)]" />
-                  </div>
+            {/* Left: Creator Profile Info */}
+            <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left select-none">
+              <div className="relative shrink-0">
+                {/* Glowing Instagram brand-color ring */}
+                <div className="absolute inset-[-4px] rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] animate-pulse" />
+                <div className="relative grid h-24 w-24 place-items-center rounded-full bg-[#07050d] text-white">
+                  <Instagram size={40} className="text-pink-300 drop-shadow-[0_0_15px_rgba(238,42,123,0.5)] animate-pulse" />
                 </div>
+              </div>
 
-                <div className="text-center md:text-left flex-grow flex flex-col gap-2">
-                  <div className="flex flex-col sm:flex-row items-center gap-2.5 justify-center md:justify-start">
-                    <h3 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-pink-200">
-                      {displayHandle}
-                    </h3>
-                  </div>
-                  <span className="self-center md:self-start inline-flex items-center gap-1 rounded-md border border-pink-500/20 bg-pink-500/10 px-2 py-0.5 text-[8px] font-black tracking-[0.2em] text-pink-300 uppercase">
-                    SYS.VERIFIED.BUILDER
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
+                  <h3 className="text-2xl font-extrabold tracking-tight text-white">{displayHandle}</h3>
+                  {/* Verified checkmark badge */}
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-pink-500 text-white shadow-lg shadow-pink-500/20">
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                      <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                    </svg>
                   </span>
-                  
-                  {/* Tech Coordinates details */}
-                  <div className="mt-1 font-mono text-[9px] text-white/30 flex items-center justify-center md:justify-start gap-3">
-                    <span>LOC: [30.76, 76.62]</span>
-                    <span className="h-1 w-1 rounded-full bg-white/20" />
-                    <span>STATUS: ACTIVE</span>
-                  </div>
                 </div>
+                <p className="text-[10px] font-bold tracking-[0.25em] text-pink-400 uppercase">OFFICIAL COMMUNITY PROFILE</p>
+                <p className="text-xs text-white/45 max-w-[280px]">Official Instagram page for Chandigarh University's premier technical hub.</p>
               </div>
             </div>
 
-            {/* Right Column: 3 Cybernetic Stats Panels */}
-            <div className="grid gap-4 sm:grid-cols-3">
-              {/* Panel 1: Posts */}
-              <div className="relative rounded-[2.2rem] border border-white/[0.06] bg-[#0c0814]/40 p-6 backdrop-blur-2xl transition duration-500 hover:border-pink-500/30 hover:bg-[#0c0814]/70 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-pink-500/[0.02] blur-[25px] pointer-events-none group-hover:bg-pink-500/[0.05] transition-all" />
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-mono tracking-widest text-white/30 uppercase">Posts</span>
-                  <div className="h-6 w-6 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center">
-                    <span className="text-[9px] text-pink-400 font-mono">01</span>
-                  </div>
-                </div>
-                <div className="my-6">
-                  <h4 className="text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:text-pink-100 transition-colors">
-                    {stats?.postsCount || "40"}
-                  </h4>
-                  {/* Simulated LED progress line */}
-                  <div className="mt-3 h-1 w-full bg-white/[0.04] rounded-full overflow-hidden">
-                    <div className="h-full w-4/12 bg-gradient-to-r from-pink-500 to-violet-500 rounded-full transition-all group-hover:w-full duration-700" />
-                  </div>
-                </div>
-                <span className="text-[8px] font-mono tracking-widest text-pink-400/60 uppercase">
-                  ASSETS.SYNCHRONIZED
+            {/* Right: Three Interactive Stat Counters */}
+            <div className="grid grid-cols-3 gap-6 sm:gap-12 w-full lg:w-auto font-sans">
+              {/* Stat 1: Posts */}
+              <div className="flex flex-col items-center lg:items-end text-center lg:text-right group">
+                <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform duration-300">
+                  {stats?.postsCount || "40"}
                 </span>
+                <span className="mt-2 text-[9px] font-black tracking-[0.2em] text-white/40 uppercase group-hover:text-pink-400 transition-colors">
+                  POSTS
+                </span>
+                <div className="mt-2.5 h-1 w-8 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div className="h-full w-0 bg-pink-500 group-hover:w-full transition-all duration-500" />
+                </div>
               </div>
 
-              {/* Panel 2: Followers */}
-              <div className="relative rounded-[2.2rem] border border-white/[0.06] bg-[#0c0814]/40 p-6 backdrop-blur-2xl transition duration-500 hover:border-violet-500/30 hover:bg-[#0c0814]/70 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-violet-500/[0.02] blur-[25px] pointer-events-none group-hover:bg-violet-500/[0.05] transition-all" />
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-mono tracking-widest text-white/30 uppercase">Followers</span>
-                  <div className="h-6 w-6 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
-                    <span className="text-[9px] text-violet-400 font-mono">02</span>
-                  </div>
-                </div>
-                <div className="my-6">
-                  <h4 className="text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:text-violet-100 transition-colors">
-                    {stats?.followers || "109"}
-                  </h4>
-                  {/* Simulated LED progress line */}
-                  <div className="mt-3 h-1 w-full bg-white/[0.04] rounded-full overflow-hidden">
-                    <div className="h-full w-6/12 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all group-hover:w-full duration-700" />
-                  </div>
-                </div>
-                <span className="text-[8px] font-mono tracking-widest text-violet-400/60 uppercase">
-                  NETWORK.CONNECTIONS
+              {/* Stat 2: Followers */}
+              <div className="flex flex-col items-center lg:items-end text-center lg:text-right border-l border-white/[0.08] pl-6 sm:pl-12 group">
+                <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform duration-300">
+                  {stats?.followers || "109"}
                 </span>
+                <span className="mt-2 text-[9px] font-black tracking-[0.2em] text-white/40 uppercase group-hover:text-pink-400 transition-colors">
+                  FOLLOWERS
+                </span>
+                <div className="mt-2.5 h-1 w-8 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div className="h-full w-0 bg-pink-500 group-hover:w-full transition-all duration-500" />
+                </div>
               </div>
 
-              {/* Panel 3: Following */}
-              <div className="relative rounded-[2.2rem] border border-white/[0.06] bg-[#0c0814]/40 p-6 backdrop-blur-2xl transition duration-500 hover:border-purple-500/30 hover:bg-[#0c0814]/70 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-purple-500/[0.02] blur-[25px] pointer-events-none group-hover:bg-purple-500/[0.05] transition-all" />
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-mono tracking-widest text-white/30 uppercase">Following</span>
-                  <div className="h-6 w-6 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                    <span className="text-[9px] text-purple-400 font-mono">03</span>
-                  </div>
-                </div>
-                <div className="my-6">
-                  <h4 className="text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:text-purple-100 transition-colors">
-                    {stats?.following || "34"}
-                  </h4>
-                  {/* Simulated LED progress line */}
-                  <div className="mt-3 h-1 w-full bg-white/[0.04] rounded-full overflow-hidden">
-                    <div className="h-full w-2/12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all group-hover:w-full duration-700" />
-                  </div>
-                </div>
-                <span className="text-[8px] font-mono tracking-widest text-purple-400/60 uppercase">
-                  OUTBOUND.GATEWAYS
+              {/* Stat 3: Following */}
+              <div className="flex flex-col items-center lg:items-end text-center lg:text-right border-l border-white/[0.08] pl-6 sm:pl-12 group">
+                <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform duration-300">
+                  {stats?.following || "34"}
                 </span>
+                <span className="mt-2 text-[9px] font-black tracking-[0.2em] text-white/40 uppercase group-hover:text-pink-400 transition-colors">
+                  FOLLOWING
+                </span>
+                <div className="mt-2.5 h-1 w-8 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div className="h-full w-0 bg-pink-500 group-hover:w-full transition-all duration-500" />
+                </div>
               </div>
             </div>
           </div>
