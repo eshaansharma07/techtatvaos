@@ -50,7 +50,7 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
     const measurePing = async () => {
       const startTime = Date.now();
       try {
-        const res = await fetch("/api/health");
+        const res = await fetch("/ping.txt");
         const latency = Date.now() - startTime;
         if (res.ok) {
           setLatencyText(`PING: ${latency}ms (STABLE)`);
