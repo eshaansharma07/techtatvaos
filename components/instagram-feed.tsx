@@ -67,7 +67,7 @@ export function InstagramFeed({
     async function fetchLiveFeed() {
       let fetchedStats = null;
       try {
-        const res = await fetch("/api/instagram");
+        const res = await fetch(`/api/instagram?t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           if (data.stats) {
