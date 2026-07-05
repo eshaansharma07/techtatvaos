@@ -14,10 +14,6 @@ export async function GET(req: NextRequest) {
     // Scraping Instagram follower counts
     try {
       const profileRes = await fetch(`https://www.instagram.com/${instagramHandle}/`, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Accept-Language": "en-US,en;q=0.9"
-        },
         next: { revalidate: 3600 } // Cache results for 1 hour
       });
 
