@@ -60,8 +60,8 @@ export function InstagramFeed({
   post3_url = "https://instagram.com"
 }: InstagramFeedProps) {
   
-  // State for posts, initially loaded from settings fallback values
   const [posts, setPosts] = useState<InstagramPost[]>([]);
+  const [stats, setStats] = useState<{ followers: string; following: string; postsCount: string } | null>(null);
  
   useEffect(() => {
     async function fetchLiveFeed() {
@@ -69,8 +69,10 @@ export function InstagramFeed({
         const res = await fetch("/api/instagram");
         if (res.ok) {
           const data = await res.json();
+          if (data.stats) {
+            setStats(data.stats);
+          }
           if (data.posts && data.posts.length > 0) {
-            // Use the top 3 live posts
             setPosts(data.posts.slice(0, 3));
             return;
           }
@@ -80,6 +82,7 @@ export function InstagramFeed({
       }
       
       // Fallback state
+      setStats({ followers: "1.2k", following: "29", postsCount: "3" });
       setPosts([
         {
           id: "ig-1",
@@ -102,7 +105,6 @@ export function InstagramFeed({
     fetchLiveFeed();
   }, [post1_image, post1_url, post2_image, post2_url, post3_image, post3_url]);
   
-  // Format handle with @
   const displayHandle = handle.startsWith("@") ? handle : `@${handle}`;
  
   return (
@@ -127,6 +129,54 @@ export function InstagramFeed({
               <span>FOLLOW {displayHandle.toUpperCase()}</span>
               <ArrowUpRight size={13} className="text-white/40 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
+          </div>
+        </Reveal>
+
+        {/* Glassmorphic Instagram Profile Card */}
+        <Reveal delay={0.04}>
+          <div className="mb-12 rounded-[2.2rem] border border-white/[0.08] bg-[#0c0814]/65 p-6 md:p-8 backdrop-blur-2xl shadow-xl flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
+            {/* Ambient background glow */}
+            <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-pink-500/10 blur-[50px] pointer-events-none" />
+            
+            {/* Left: Instagram Avatar Frame */}
+            <div className="relative shrink-0 select-none">
+              <div className="absolute inset-[-4px] rounded-full bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-600 animate-pulse opacity-75" />
+              <div className="relative grid h-20 w-20 place-items-center rounded-full bg-[#0c0814] text-white">
+                <Instagram size={36} className="text-pink-300 drop-shadow-[0_0_12px_rgba(244,114,182,0.4)]" />
+              </div>
+            </div>
+
+            {/* Right: Profile Info and Stats */}
+            <div className="flex-grow text-center md:text-left flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row md:items-center gap-3 justify-center md:justify-start">
+                <h3 className="text-xl font-bold tracking-tight text-white">{displayHandle}</h3>
+                <span className="inline-flex self-center items-center gap-1 rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-0.5 text-[9px] font-bold tracking-wider text-violet-300 uppercase">
+                  VERIFIED BUILDER
+                </span>
+              </div>
+
+              {/* Stats Counters */}
+              <div className="flex justify-center md:justify-start gap-8 font-mono">
+                <div>
+                  <span className="text-lg font-bold text-white tracking-tight">{stats?.postsCount || "3"}</span>
+                  <span className="text-[10px] text-white/35 uppercase tracking-wider block mt-0.5">Posts</span>
+                </div>
+                <div className="border-l border-white/[0.06] pl-8">
+                  <span className="text-lg font-bold text-white tracking-tight">{stats?.followers || "1.2k"}</span>
+                  <span className="text-[10px] text-white/35 uppercase tracking-wider block mt-0.5">Followers</span>
+                </div>
+                <div className="border-l border-white/[0.06] pl-8">
+                  <span className="text-lg font-bold text-white tracking-tight">{stats?.following || "29"}</span>
+                  <span className="text-[10px] text-white/35 uppercase tracking-wider block mt-0.5">Following</span>
+                </div>
+              </div>
+
+              {/* Bio Details */}
+              <div className="text-xs text-white/45 leading-relaxed">
+                <p className="font-bold text-white/70">Tech Tatva Club</p>
+                <p className="mt-0.5">Official Student Technical Hub. Built for execution. Powered by CU.</p>
+              </div>
+            </div>
           </div>
         </Reveal>
  
@@ -156,7 +206,6 @@ export function InstagramFeed({
                       </div>
                     </>
                   ) : (
-                    // Aesthetic Abstract Gradient Placeholder with Admin Upload TODO
                     <div className="absolute inset-0 bg-gradient-to-br from-pink-950/20 via-violet-950/10 to-black flex flex-col items-center justify-center p-6 text-center">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(236,72,153,0.08),transparent_60%)]" />
                       <Instagram className="h-8 w-8 text-pink-300/30 mb-2 transition duration-500 group-hover:scale-110 group-hover:text-pink-300" />

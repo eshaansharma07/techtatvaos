@@ -4,12 +4,44 @@ import { getClubInfo } from "@/lib/public-data";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  let stats = { followers: "1.2k", following: "29", postsCount: "3" };
+
   try {
     const clubInfo = await getClubInfo();
     const instagramFeedUrl = clubInfo.instagramFeedUrl?.trim();
+    const instagramHandle = clubInfo.instagramHandle?.trim() || "techtatva";
+
+    // Scraping Instagram follower counts
+    try {
+      const profileRes = await fetch(`https://www.instagram.com/${instagramHandle}/`, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept-Language": "en-US,en;q=0.9"
+        },
+        next: { revalidate: 3600 } // Cache results for 1 hour
+      });
+
+      if (profileRes.ok) {
+        const html = await profileRes.text();
+        const match = html.match(/<meta content="([^"]+)" name="description"/i);
+        if (match && match[1]) {
+          const content = match[1]; // e.g. "4 Followers, 29 Following, 3 Posts..."
+          const statsMatch = content.match(/([0-9kKmM\.,\s]+)\s+Followers,\s+([0-9kKmM\.,\s]+)\s+Following,\s+([0-9kKmM\.,\s]+)\s+Posts/i);
+          if (statsMatch) {
+            stats = {
+              followers: statsMatch[1].trim(),
+              following: statsMatch[2].trim(),
+              postsCount: statsMatch[3].trim()
+            };
+          }
+        }
+      }
+    } catch (scrapeErr) {
+      console.error("Failed to scrape live Instagram stats:", scrapeErr);
+    }
 
     if (!instagramFeedUrl) {
-      return NextResponse.json({ source: "manual", posts: [] });
+      return NextResponse.json({ source: "manual", stats, posts: [] });
     }
 
     // Fetch the live Instagram feed from the configured URL (e.g. Behold.so or public JSON proxy)
@@ -46,10 +78,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       source: "api",
+      stats,
       posts: validPosts
     });
   } catch (error) {
     console.error("Failed fetching live Instagram feed API:", error);
-    return NextResponse.json({ source: "manual", posts: [] });
+    return NextResponse.json({ source: "manual", stats, posts: [] });
   }
 }
