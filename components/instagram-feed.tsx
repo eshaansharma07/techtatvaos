@@ -213,10 +213,6 @@ export function InstagramFeed({
                     <div className="w-1.5 h-2.5 rounded-sm bg-pink-500 shadow-[0_0_8px_rgba(238,42,123,0.85)]" />
                   </div>
                 </div>
-                <div className="mt-6 flex items-center justify-between text-[8px] font-mono tracking-wider text-white/20">
-                  <span>UNIT // 01</span>
-                  <span>[SYS // LIVE]</span>
-                </div>
               </div>
 
               {/* Stat Card 2: Followers */}
@@ -239,10 +235,6 @@ export function InstagramFeed({
                     <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)]" />
                   </div>
                 </div>
-                <div className="mt-6 flex items-center justify-between text-[8px] font-mono tracking-wider text-white/20">
-                  <span>UNIT // 02</span>
-                  <span>[SYS // LIVE]</span>
-                </div>
               </div>
 
               {/* Stat Card 3: Following */}
@@ -264,10 +256,6 @@ export function InstagramFeed({
                     <div className="w-1.5 h-2.5 rounded-sm bg-[#f9ce34] shadow-[0_0_8px_rgba(249,206,52,0.85)] animate-pulse" />
                     <div className="w-1.5 h-2.5 rounded-sm bg-[#f9ce34] shadow-[0_0_8px_rgba(249,206,52,0.85)]" />
                   </div>
-                </div>
-                <div className="mt-6 flex items-center justify-between text-[8px] font-mono tracking-wider text-white/20">
-                  <span>UNIT // 03</span>
-                  <span>[SYS // LIVE]</span>
                 </div>
               </div>
             </div>
