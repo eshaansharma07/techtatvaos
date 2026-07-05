@@ -122,8 +122,8 @@ export function InstagramFeed({
   return (
     <section className="border-t border-white/[0.06] bg-[#050308] py-20 md:py-28 relative overflow-hidden">
       {/* Interactive holographic ambient glows */}
-      <div className="absolute top-1/3 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#f9ce34]/5 via-[#ee2a7b]/10 to-[#6228d7]/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/3 -right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#6228d7]/5 via-[#ee2a7b]/10 to-[#f9ce34]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#f9ce34]/5 via-[#ee2a7b]/10 to-[#6228d7]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#6228d7]/5 via-[#ee2a7b]/10 to-[#f9ce34]/5 blur-[120px] pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-5 md:px-6 relative">
         <Reveal>
@@ -162,141 +162,169 @@ export function InstagramFeed({
           </div>
         </Reveal>
 
-        {/* Glassmorphic Cyber-Gauge Instagram Stats HUD */}
+        {/* Glassmorphic Instagram Profile Stats HUD */}
         <Reveal delay={0.04}>
-          <div className="mb-14 grid gap-6 lg:grid-cols-[1.1fr_2fr] items-stretch">
-            {/* Left Box: Futuristic Profile Core */}
-            <div className="relative rounded-[2.5rem] border border-white/[0.08] bg-[#0c0814]/80 p-8 backdrop-blur-3xl shadow-2xl flex flex-col items-center justify-center overflow-hidden group">
-              {/* Corner crosshairs for technical drafting aesthetic */}
-              <div className="absolute top-3 left-3 text-white/10 font-mono text-[9px] select-none">+</div>
-              <div className="absolute top-3 right-3 text-white/10 font-mono text-[9px] select-none">+</div>
-              <div className="absolute bottom-3 left-3 text-white/10 font-mono text-[9px] select-none">+</div>
-              <div className="absolute bottom-3 right-3 text-white/10 font-mono text-[9px] select-none">+</div>
-              
-              {/* Tech grid pattern */}
-              <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.005)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.005)_50%,rgba(255,255,255,0.005)_75%,transparent_75%,transparent)] bg-[length:12px_12px] opacity-40 pointer-events-none" />
+          <div className="mb-14 relative rounded-[2.5rem] border border-white/[0.08] bg-[#0c0814]/75 p-8 md:p-12 backdrop-blur-3xl shadow-[0_0_50px_rgba(238,42,123,0.05)] overflow-hidden flex flex-col gap-10">
+            {/* Glowing neon borders/accents */}
+            <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
+            <div className="absolute bottom-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-purple-600 to-transparent" />
 
-              <div className="flex flex-col sm:flex-row items-center gap-6 z-10 w-full justify-center">
-                {/* Glowing reactor core avatar frame */}
+            {/* Glowing colored spheres floating in background */}
+            <div className="absolute -left-20 -top-20 w-80 h-80 rounded-full bg-pink-500/10 blur-[90px] pointer-events-none animate-pulse" />
+            <div className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-purple-600/10 blur-[90px] pointer-events-none" />
+
+            {/* Top Row: Profile Core Integration */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-8 border-b border-white/[0.06] relative z-10">
+              <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left w-full md:w-auto">
+                {/* Glowing reactor avatar */}
                 <div className="relative shrink-0 select-none">
-                  {/* Rotating dashed outer circle */}
-                  <div className="absolute inset-[-8px] rounded-full border border-dashed border-pink-500/30 animate-[spin_25s_linear_infinite]" />
-                  {/* Glowing color gradient background */}
-                  <div className="absolute inset-[-4px] rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] animate-pulse" />
+                  {/* Glowing halo */}
+                  <div className="absolute inset-[-6px] rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] opacity-75 blur-md animate-pulse" />
+                  <div className="absolute inset-[-4px] rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]" />
                   <div className="relative grid h-20 w-20 place-items-center rounded-full bg-[#0c0814] text-white">
-                    <Instagram size={36} className="text-pink-300 drop-shadow-[0_0_15px_rgba(238,42,123,0.55)] animate-pulse" />
+                    <Instagram size={36} className="text-pink-300 drop-shadow-[0_0_12px_rgba(238,42,123,0.6)] animate-pulse" />
                   </div>
                 </div>
 
-                <div className="text-center sm:text-left flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2.5 justify-center sm:justify-start">
-                    <h3 className="text-2xl font-black tracking-tight text-white">
+                    <h3 className="text-3xl font-black tracking-tight text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
                       {displayHandle}
                     </h3>
-                    <span className="grid h-5 w-5 place-items-center rounded-full bg-pink-500 text-white shadow-lg shadow-pink-500/30">
-                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                    <span className="grid h-6 w-6 place-items-center rounded-full bg-pink-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.4)]">
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
                         <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
                       </svg>
                     </span>
                   </div>
-                  <p className="text-[10px] font-black tracking-[0.25em] text-pink-400 uppercase">OFFICIAL CLUB HANDLE</p>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-pink-500/20 bg-pink-500/10 px-3 py-0.5 text-[9px] font-black tracking-wider text-pink-300 uppercase">
+                      OFFICIAL CLUB HANDLE
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-0.5 text-[9px] font-black tracking-wider text-violet-300 uppercase">
+                      LIVE HUB
+                    </span>
+                  </div>
                 </div>
               </div>
+
+              {/* Visit Profile Action */}
+              <a 
+                href={profileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="action-pill relative overflow-hidden group shrink-0 flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-4 text-xs tracking-wider transition duration-300 hover:scale-105 text-white font-extrabold shadow-[0_0_25px_rgba(236,72,153,0.25)] hover:shadow-[0_0_35px_rgba(236,72,153,0.4)]"
+              >
+                <span>LAUNCH ON INSTAGRAM</span>
+                <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </a>
             </div>
 
-            {/* Right Box: 3 Circular Cyber-Gauges */}
-            <div className="grid gap-4 sm:grid-cols-3">
-              {/* Gauge 1: Posts */}
-              <div className="relative rounded-[2.5rem] border border-white/[0.06] bg-[#0c0814]/40 p-6 backdrop-blur-2xl transition duration-500 hover:border-pink-500/20 hover:bg-[#0c0814]/70 hover:-translate-y-1.5 group flex flex-col items-center justify-between overflow-hidden">
-                <div className="absolute top-2 left-2 text-white/5 font-mono text-[8px] select-none">+</div>
-                <div className="absolute top-2 right-2 text-white/5 font-mono text-[8px] select-none">+</div>
+            {/* Bottom Row: 3 Premium Cybernetic Reactor Rings */}
+            <div className="grid gap-6 sm:grid-cols-3 relative z-10">
+              {/* Reactor 1: Posts */}
+              <div className="relative rounded-[2rem] border border-white/[0.04] bg-white/[0.01] p-8 transition duration-500 hover:border-pink-500/20 hover:bg-white/[0.03] group flex flex-col items-center justify-center overflow-hidden">
+                {/* Dash Ring Background Spinner */}
+                <div className="absolute inset-[-10px] rounded-full border border-dashed border-white/5 animate-[spin_40s_linear_infinite] group-hover:border-pink-500/25 pointer-events-none" />
                 
-                {/* SVG Radial Gauge */}
-                <div className="relative my-4 flex items-center justify-center">
-                  <svg className="w-32 h-32 transform -rotate-90">
-                    {/* Background track circle */}
-                    <circle cx="64" cy="64" r="45" className="stroke-white/[0.03] stroke-[4] fill-none" />
-                    {/* Animated gradient progress ring */}
+                {/* SVG Ring Gauge */}
+                <div className="relative flex items-center justify-center">
+                  <svg className="w-36 h-36 transform -rotate-90">
+                    <circle cx="72" cy="72" r="52" className="stroke-white/[0.03] stroke-[4] fill-none" />
                     <circle 
-                      cx="64" 
-                      cy="64" 
-                      r="45" 
-                      className="stroke-[#ee2a7b] stroke-[5] fill-none transition-all duration-[1200ms] ease-out drop-shadow-[0_0_8px_rgba(238,42,123,0.3)]" 
-                      strokeDasharray="283" 
-                      strokeDashoffset={mounted ? 283 - (283 * 0.4) : 283} 
+                      cx="72" 
+                      cy="72" 
+                      r="52" 
+                      className="stroke-[#ee2a7b] stroke-[5] fill-none transition-all duration-[1500ms] ease-out drop-shadow-[0_0_12px_rgba(238,42,123,0.45)]" 
+                      strokeDasharray="327" 
+                      strokeDashoffset={mounted ? 327 - (327 * 0.45) : 327} 
                     />
                   </svg>
-                  {/* Number inside circle */}
-                  <div className="absolute inset-0 flex items-center justify-center flex-col">
-                    <span className="text-3xl font-black text-white tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                  {/* Number Inside circle */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-pink-200 tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                       {stats?.postsCount || "40"}
                     </span>
                   </div>
                 </div>
-                
-                <span className="text-[10px] font-black tracking-[0.25em] text-white/35 group-hover:text-pink-400 transition-colors uppercase mt-2">
-                  POSTS
-                </span>
+
+                <div className="mt-6 flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+                  </span>
+                  <span className="text-[11px] font-black tracking-[0.25em] text-white/40 group-hover:text-pink-400 transition-colors uppercase">
+                    POSTS
+                  </span>
+                </div>
               </div>
 
-              {/* Gauge 2: Followers */}
-              <div className="relative rounded-[2.5rem] border border-white/[0.06] bg-[#0c0814]/40 p-6 backdrop-blur-2xl transition duration-500 hover:border-violet-500/20 hover:bg-[#0c0814]/70 hover:-translate-y-1.5 group flex flex-col items-center justify-between overflow-hidden">
-                <div className="absolute top-2 left-2 text-white/5 font-mono text-[8px] select-none">+</div>
-                <div className="absolute top-2 right-2 text-white/5 font-mono text-[8px] select-none">+</div>
+              {/* Reactor 2: Followers */}
+              <div className="relative rounded-[2rem] border border-white/[0.04] bg-white/[0.01] p-8 transition duration-500 hover:border-violet-500/20 hover:bg-white/[0.03] group flex flex-col items-center justify-center overflow-hidden">
+                <div className="absolute inset-[-10px] rounded-full border border-dashed border-white/5 animate-[spin_40s_linear_infinite] group-hover:border-violet-500/25 pointer-events-none" />
                 
-                {/* SVG Radial Gauge */}
-                <div className="relative my-4 flex items-center justify-center">
-                  <svg className="w-32 h-32 transform -rotate-90">
-                    <circle cx="64" cy="64" r="45" className="stroke-white/[0.03] stroke-[4] fill-none" />
+                <div className="relative flex items-center justify-center">
+                  <svg className="w-36 h-36 transform -rotate-90">
+                    <circle cx="72" cy="72" r="52" className="stroke-white/[0.03] stroke-[4] fill-none" />
                     <circle 
-                      cx="64" 
-                      cy="64" 
-                      r="45" 
-                      className="stroke-[#6228d7] stroke-[5] fill-none transition-all duration-[1200ms] ease-out drop-shadow-[0_0_8px_rgba(98,40,215,0.3)]" 
-                      strokeDasharray="283" 
-                      strokeDashoffset={mounted ? 283 - (283 * 0.75) : 283} 
+                      cx="72" 
+                      cy="72" 
+                      r="52" 
+                      className="stroke-[#6228d7] stroke-[5] fill-none transition-all duration-[1500ms] ease-out drop-shadow-[0_0_12px_rgba(98,40,215,0.45)]" 
+                      strokeDasharray="327" 
+                      strokeDashoffset={mounted ? 327 - (327 * 0.75) : 327} 
                     />
                   </svg>
-                  <div className="absolute inset-0 flex items-center justify-center flex-col">
-                    <span className="text-3xl font-black text-white tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-violet-200 tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                       {stats?.followers || "109"}
                     </span>
                   </div>
                 </div>
-                
-                <span className="text-[10px] font-black tracking-[0.25em] text-white/35 group-hover:text-pink-400 transition-colors uppercase mt-2">
-                  FOLLOWERS
-                </span>
+
+                <div className="mt-6 flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+                  </span>
+                  <span className="text-[11px] font-black tracking-[0.25em] text-white/40 group-hover:text-violet-400 transition-colors uppercase">
+                    FOLLOWERS
+                  </span>
+                </div>
               </div>
 
-              {/* Gauge 3: Following */}
-              <div className="relative rounded-[2.5rem] border border-white/[0.06] bg-[#0c0814]/40 p-6 backdrop-blur-2xl transition duration-500 hover:border-[#f9ce34]/20 hover:bg-[#0c0814]/70 hover:-translate-y-1.5 group flex flex-col items-center justify-between overflow-hidden">
-                <div className="absolute top-2 left-2 text-white/5 font-mono text-[8px] select-none">+</div>
-                <div className="absolute top-2 right-2 text-white/5 font-mono text-[8px] select-none">+</div>
+              {/* Reactor 3: Following */}
+              <div className="relative rounded-[2rem] border border-white/[0.04] bg-white/[0.01] p-8 transition duration-500 hover:border-[#f9ce34]/20 hover:bg-white/[0.03] group flex flex-col items-center justify-center overflow-hidden">
+                <div className="absolute inset-[-10px] rounded-full border border-dashed border-white/5 animate-[spin_40s_linear_infinite] group-hover:border-[#f9ce34]/25 pointer-events-none" />
                 
-                {/* SVG Radial Gauge */}
-                <div className="relative my-4 flex items-center justify-center">
-                  <svg className="w-32 h-32 transform -rotate-90">
-                    <circle cx="64" cy="64" r="45" className="stroke-white/[0.03] stroke-[4] fill-none" />
+                <div className="relative flex items-center justify-center">
+                  <svg className="w-36 h-36 transform -rotate-90">
+                    <circle cx="72" cy="72" r="52" className="stroke-white/[0.03] stroke-[4] fill-none" />
                     <circle 
-                      cx="64" 
-                      cy="64" 
-                      r="45" 
-                      className="stroke-[#f9ce34] stroke-[5] fill-none transition-all duration-[1200ms] ease-out drop-shadow-[0_0_8px_rgba(249,206,52,0.3)]" 
-                      strokeDasharray="283" 
-                      strokeDashoffset={mounted ? 283 - (283 * 0.35) : 283} 
+                      cx="72" 
+                      cy="72" 
+                      r="52" 
+                      className="stroke-[#f9ce34] stroke-[5] fill-none transition-all duration-[1500ms] ease-out drop-shadow-[0_0_12px_rgba(249,206,52,0.45)]" 
+                      strokeDasharray="327" 
+                      strokeDashoffset={mounted ? 327 - (327 * 0.35) : 327} 
                     />
                   </svg>
-                  <div className="absolute inset-0 flex items-center justify-center flex-col">
-                    <span className="text-3xl font-black text-white tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-yellow-200 tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                       {stats?.following || "34"}
                     </span>
                   </div>
                 </div>
-                
-                <span className="text-[10px] font-black tracking-[0.25em] text-white/35 group-hover:text-pink-400 transition-colors uppercase mt-2">
-                  FOLLOWING
-                </span>
+
+                <div className="mt-6 flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                  </span>
+                  <span className="text-[11px] font-black tracking-[0.25em] text-white/40 group-hover:text-yellow-400 transition-colors uppercase">
+                    FOLLOWING
+                  </span>
+                </div>
               </div>
             </div>
           </div>
