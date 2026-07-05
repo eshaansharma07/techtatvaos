@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getClubInfo } from "@/lib/public-data";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   let stats = { followers: "109", following: "34", postsCount: "40" };
@@ -89,9 +89,17 @@ export async function GET(req: NextRequest) {
       source: "api",
       stats,
       posts: validPosts
+    }, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30"
+      }
     });
   } catch (error) {
     console.error("Failed fetching live Instagram feed API:", error);
-    return NextResponse.json({ source: "manual", stats, posts: [] });
+    return NextResponse.json({ source: "manual", stats, posts: [] }, {
+      headers: {
+        "Cache-Control": "public, s-maxage=10, stale-while-revalidate=10"
+      }
+    });
   }
 }
