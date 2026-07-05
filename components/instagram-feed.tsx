@@ -159,103 +159,107 @@ export function InstagramFeed({
           </div>
         </Reveal>
 
-        {/* Glassmorphic Instagram Profile Stats HUD */}
+        {/* Glassmorphic Cyber-Deck Stats HUD */}
         <Reveal delay={0.04}>
-          <div className="mb-14 grid gap-6 lg:grid-cols-[1fr_2fr] items-stretch">
-            {/* Left: Minimal Profile Card */}
-            <div className="relative rounded-[2rem] border border-white/[0.08] bg-[#0c0814]/75 p-6 md:p-8 backdrop-blur-2xl shadow-xl flex items-center gap-5 overflow-hidden group">
-              <div className="absolute -left-10 -top-10 w-32 h-32 rounded-full bg-pink-500/5 blur-[40px] pointer-events-none" />
-              {/* Subtle top laser border */}
-              <div className="absolute top-0 left-0 w-full h-[1.5px] bg-gradient-to-r from-transparent via-pink-500/55 to-transparent" />
-              
-              <div className="relative shrink-0 select-none">
+          <div className="mb-14 relative rounded-[2.5rem] border border-white/[0.08] bg-[#0c0814]/75 p-8 md:p-10 backdrop-blur-3xl shadow-[0_0_50px_rgba(238,42,123,0.08)] overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10">
+            {/* Animated Laser Scanning Line */}
+            <style>{`
+              @keyframes scan {
+                0% { transform: translateY(-150px); opacity: 0; }
+                10% { opacity: 0.5; }
+                90% { opacity: 0.5; }
+                100% { transform: translateY(400px); opacity: 0; }
+              }
+            `}</style>
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-pink-500 to-transparent pointer-events-none" style={{ animation: 'scan 4s linear infinite' }} />
+
+            {/* Glowing background matrix lights */}
+            <div className="absolute -left-20 -top-20 w-72 h-72 rounded-full bg-pink-500/10 blur-[80px] pointer-events-none animate-pulse" />
+            <div className="absolute -right-20 -bottom-20 w-72 h-72 rounded-full bg-purple-500/10 blur-[80px] pointer-events-none" />
+
+            {/* Left Section: Sleek Club Profile Core */}
+            <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left z-10 select-none">
+              <div className="relative shrink-0">
+                {/* Spinner dash outer border */}
+                <div className="absolute inset-[-6px] rounded-full border border-dashed border-pink-500/30 animate-[spin_20s_linear_infinite]" />
+                {/* Glowing reactor avatar circle */}
                 <div className="absolute inset-[-3px] rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]" />
-                <div className="relative grid h-16 w-16 place-items-center rounded-full bg-[#07050d] text-white">
-                  <Instagram size={28} className="text-pink-300" />
+                <div className="relative grid h-16 w-16 place-items-center rounded-full bg-[#0c0814] text-white">
+                  <Instagram size={28} className="text-pink-300 drop-shadow-[0_0_10px_rgba(238,42,123,0.5)] animate-pulse" />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold tracking-tight text-white">{displayHandle}</h3>
-                  <span className="grid h-4.5 w-4.5 place-items-center rounded-full bg-pink-500 text-white">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
+                  <h3 className="text-2xl font-black tracking-tight text-white">{displayHandle}</h3>
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-pink-500 text-white shadow-[0_0_10px_rgba(236,72,153,0.3)]">
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
                       <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
                     </svg>
                   </span>
                 </div>
-                <span className="self-start inline-flex rounded-full border border-pink-500/20 bg-pink-500/5 px-2.5 py-0.5 text-[8px] font-extrabold tracking-wider text-pink-300 uppercase">
+                <span className="self-center sm:self-start inline-flex rounded-full border border-pink-500/20 bg-pink-500/10 px-3 py-0.5 text-[8px] font-black tracking-[0.2em] text-pink-400 uppercase">
                   OFFICIAL CLUB HANDLE
                 </span>
               </div>
             </div>
 
-            {/* Right: Grid of 3 Cybernetic Stat Cards */}
-            <div className="grid gap-4 sm:grid-cols-3">
-              {/* Stat Card 1: Posts */}
-              <div className="relative rounded-[2rem] border border-white/[0.08] bg-[#0c0814]/75 bg-[radial-gradient(rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:10px_10px] p-6 backdrop-blur-2xl transition duration-500 hover:border-pink-500/30 hover:bg-[#0c0814]/90 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden shadow-lg hover:shadow-pink-500/5">
-                {/* Neon Top Edge Accent */}
-                <div className="absolute top-0 left-0 w-full h-[1.5px] bg-transparent group-hover:bg-gradient-to-r group-hover:from-transparent group-hover:via-pink-500 group-hover:to-transparent transition-all duration-500" />
-                
-                <div className="flex items-start justify-between w-full">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-black tracking-[0.2em] font-mono text-white/30 group-hover:text-pink-400 transition-colors uppercase">POSTS</span>
-                    <span className="text-4xl font-extrabold text-white tracking-tight font-mono mt-3">
-                      {stats?.postsCount || "40"}
-                    </span>
-                  </div>
-                  {/* Neon Status LED Column Indicator */}
-                  <div className="flex flex-col gap-[3px] py-1 shrink-0">
-                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-pink-500 shadow-[0_0_8px_rgba(238,42,123,0.85)] animate-pulse" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-pink-500 shadow-[0_0_8px_rgba(238,42,123,0.85)]" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-pink-500 shadow-[0_0_8px_rgba(238,42,123,0.85)]" />
-                  </div>
+            {/* Glowing Vertical Neon Divider (Hidden on Mobile) */}
+            <div className="hidden lg:block h-16 w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent z-10" />
+
+            {/* Right Section: Three Holographic Stats Dials */}
+            <div className="grid grid-cols-3 gap-6 sm:gap-12 w-full lg:w-auto z-10">
+              {/* Stat 1: Posts */}
+              <div className="flex flex-col items-center lg:items-end text-center lg:text-right group relative">
+                <span className="text-[10px] font-black tracking-[0.2em] font-mono text-white/35 group-hover:text-pink-400 transition-colors uppercase">
+                  POSTS
+                </span>
+                <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tight font-mono mt-2 drop-shadow-[0_0_12px_rgba(238,42,123,0.55)] group-hover:scale-105 transition-transform duration-300">
+                  {stats?.postsCount || "40"}
+                </span>
+                {/* Horizontal Level Indicator Bar */}
+                <div className="mt-3 flex gap-0.5 justify-center lg:justify-end">
+                  <div className="w-1.5 h-1.5 rounded-sm bg-pink-500 shadow-[0_0_6px_#ee2a7b]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-pink-500 shadow-[0_0_6px_#ee2a7b]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-pink-500 shadow-[0_0_6px_#ee2a7b]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
                 </div>
               </div>
 
-              {/* Stat Card 2: Followers */}
-              <div className="relative rounded-[2rem] border border-white/[0.08] bg-[#0c0814]/75 bg-[radial-gradient(rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:10px_10px] p-6 backdrop-blur-2xl transition duration-500 hover:border-violet-500/30 hover:bg-[#0c0814]/90 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden shadow-lg hover:shadow-violet-500/5">
-                <div className="absolute top-0 left-0 w-full h-[1.5px] bg-transparent group-hover:bg-gradient-to-r group-hover:from-transparent group-hover:via-violet-500 group-hover:to-transparent transition-all duration-500" />
-                
-                <div className="flex items-start justify-between w-full">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-black tracking-[0.2em] font-mono text-white/30 group-hover:text-violet-400 transition-colors uppercase">FOLLOWERS</span>
-                    <span className="text-4xl font-extrabold text-white tracking-tight font-mono mt-3">
-                      {stats?.followers || "109"}
-                    </span>
-                  </div>
-                  {/* Neon Status LED Column Indicator */}
-                  <div className="flex flex-col gap-[3px] py-1 shrink-0">
-                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)]" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)] animate-pulse" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)]" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)]" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)]" />
-                  </div>
+              {/* Stat 2: Followers */}
+              <div className="flex flex-col items-center lg:items-end text-center lg:text-right border-l border-white/[0.08] pl-6 sm:pl-12 group relative">
+                <span className="text-[10px] font-black tracking-[0.2em] font-mono text-white/35 group-hover:text-violet-400 transition-colors uppercase">
+                  FOLLOWERS
+                </span>
+                <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tight font-mono mt-2 drop-shadow-[0_0_12px_rgba(98,40,215,0.55)] group-hover:scale-105 transition-transform duration-300">
+                  {stats?.followers || "109"}
+                </span>
+                {/* Horizontal Level Indicator Bar */}
+                <div className="mt-3 flex gap-0.5 justify-center lg:justify-end">
+                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
                 </div>
               </div>
 
-              {/* Stat Card 3: Following */}
-              <div className="relative rounded-[2rem] border border-white/[0.08] bg-[#0c0814]/75 bg-[radial-gradient(rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:10px_10px] p-6 backdrop-blur-2xl transition duration-500 hover:border-[#f9ce34]/30 hover:bg-[#0c0814]/90 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden shadow-lg hover:shadow-yellow-500/5">
-                <div className="absolute top-0 left-0 w-full h-[1.5px] bg-transparent group-hover:bg-gradient-to-r group-hover:from-transparent group-hover:via-yellow-500 group-hover:to-transparent transition-all duration-500" />
-                
-                <div className="flex items-start justify-between w-full">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-black tracking-[0.2em] font-mono text-white/30 group-hover:text-yellow-400 transition-colors uppercase">FOLLOWING</span>
-                    <span className="text-4xl font-extrabold text-white tracking-tight font-mono mt-3">
-                      {stats?.following || "34"}
-                    </span>
-                  </div>
-                  {/* Neon Status LED Column Indicator */}
-                  <div className="flex flex-col gap-[3px] py-1 shrink-0">
-                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-[#f9ce34] shadow-[0_0_8px_rgba(249,206,52,0.85)] animate-pulse" />
-                    <div className="w-1.5 h-2.5 rounded-sm bg-[#f9ce34] shadow-[0_0_8px_rgba(249,206,52,0.85)]" />
-                  </div>
+              {/* Stat 3: Following */}
+              <div className="flex flex-col items-center lg:items-end text-center lg:text-right border-l border-white/[0.08] pl-6 sm:pl-12 group relative">
+                <span className="text-[10px] font-black tracking-[0.2em] font-mono text-white/35 group-hover:text-yellow-400 transition-colors uppercase">
+                  FOLLOWING
+                </span>
+                <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tight font-mono mt-2 drop-shadow-[0_0_12px_rgba(249,206,52,0.55)] group-hover:scale-105 transition-transform duration-300">
+                  {stats?.following || "34"}
+                </span>
+                {/* Horizontal Level Indicator Bar */}
+                <div className="mt-3 flex gap-0.5 justify-center lg:justify-end">
+                  <div className="w-1.5 h-1.5 rounded-sm bg-[#f9ce34] shadow-[0_0_6px_#f9ce34]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-[#f9ce34] shadow-[0_0_6px_#f9ce34]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
+                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
                 </div>
               </div>
             </div>
