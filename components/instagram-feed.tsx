@@ -161,17 +161,13 @@ export function InstagramFeed({
 
         {/* Glassmorphic Cyber-Deck Stats HUD */}
         <Reveal delay={0.04}>
-          <div className="mb-14 relative rounded-[2.5rem] border border-white/[0.08] bg-[#0c0814]/75 p-8 md:p-10 backdrop-blur-3xl shadow-[0_0_50px_rgba(238,42,123,0.08)] overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10">
-            {/* Animated Laser Scanning Line */}
-            <style>{`
-              @keyframes scan {
-                0% { transform: translateY(-150px); opacity: 0; }
-                10% { opacity: 0.5; }
-                90% { opacity: 0.5; }
-                100% { transform: translateY(400px); opacity: 0; }
-              }
-            `}</style>
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-pink-500 to-transparent pointer-events-none" style={{ animation: 'scan 4s linear infinite' }} />
+          <div className="mb-14 relative rounded-[2.2rem] border border-white/[0.08] bg-[#0c0814]/75 p-8 md:p-10 backdrop-blur-3xl shadow-[0_0_50px_rgba(238,42,123,0.08)] overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10">
+            
+            {/* Technical HUD Crosshairs / Corner Brackets */}
+            <div className="absolute top-4 left-4 w-3.5 h-3.5 border-t border-l border-pink-500/40 pointer-events-none" />
+            <div className="absolute top-4 right-4 w-3.5 h-3.5 border-t border-r border-pink-500/40 pointer-events-none" />
+            <div className="absolute bottom-4 left-4 w-3.5 h-3.5 border-b border-l border-pink-500/40 pointer-events-none" />
+            <div className="absolute bottom-4 right-4 w-3.5 h-3.5 border-b border-r border-pink-500/40 pointer-events-none" />
 
             {/* Glowing background matrix lights */}
             <div className="absolute -left-20 -top-20 w-72 h-72 rounded-full bg-pink-500/10 blur-[80px] pointer-events-none animate-pulse" />
@@ -207,7 +203,7 @@ export function InstagramFeed({
             {/* Glowing Vertical Neon Divider (Hidden on Mobile) */}
             <div className="hidden lg:block h-16 w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent z-10" />
 
-            {/* Right Section: Three Holographic Stats Dials */}
+            {/* Right Section: Three Holographic Stats Array */}
             <div className="grid grid-cols-3 gap-6 sm:gap-12 w-full lg:w-auto z-10">
               {/* Stat 1: Posts */}
               <div className="flex flex-col items-center lg:items-end text-center lg:text-right group relative">
@@ -218,12 +214,17 @@ export function InstagramFeed({
                   {stats?.postsCount || "40"}
                 </span>
                 {/* Horizontal Level Indicator Bar */}
-                <div className="mt-3 flex gap-0.5 justify-center lg:justify-end">
-                  <div className="w-1.5 h-1.5 rounded-sm bg-pink-500 shadow-[0_0_6px_#ee2a7b]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-pink-500 shadow-[0_0_6px_#ee2a7b]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-pink-500 shadow-[0_0_6px_#ee2a7b]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
+                <div className="mt-3.5 flex gap-1 justify-center lg:justify-end">
+                  {Array.from({ length: 8 }).map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`h-1.5 w-2.5 rounded-sm transition-all duration-500 ${
+                        idx < 3 
+                          ? "bg-pink-500 shadow-[0_0_6px_#ee2a7b]" 
+                          : "bg-white/[0.04]"
+                      }`} 
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -236,12 +237,17 @@ export function InstagramFeed({
                   {stats?.followers || "109"}
                 </span>
                 {/* Horizontal Level Indicator Bar */}
-                <div className="mt-3 flex gap-0.5 justify-center lg:justify-end">
-                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-violet-500 shadow-[0_0_6px_#6228d7]" />
+                <div className="mt-3.5 flex gap-1 justify-center lg:justify-end">
+                  {Array.from({ length: 8 }).map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`h-1.5 w-2.5 rounded-sm transition-all duration-500 ${
+                        idx < 7 
+                          ? "bg-violet-500 shadow-[0_0_6px_#6228d7]" 
+                          : "bg-white/[0.04]"
+                      }`} 
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -254,12 +260,17 @@ export function InstagramFeed({
                   {stats?.following || "34"}
                 </span>
                 {/* Horizontal Level Indicator Bar */}
-                <div className="mt-3 flex gap-0.5 justify-center lg:justify-end">
-                  <div className="w-1.5 h-1.5 rounded-sm bg-[#f9ce34] shadow-[0_0_6px_#f9ce34]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-[#f9ce34] shadow-[0_0_6px_#f9ce34]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
-                  <div className="w-1.5 h-1.5 rounded-sm bg-white/[0.04]" />
+                <div className="mt-3.5 flex gap-1 justify-center lg:justify-end">
+                  {Array.from({ length: 8 }).map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`h-1.5 w-2.5 rounded-sm transition-all duration-500 ${
+                        idx < 2 
+                          ? "bg-[#f9ce34] shadow-[0_0_6px_#f9ce34]" 
+                          : "bg-white/[0.04]"
+                      }`} 
+                    />
+                  ))}
                 </div>
               </div>
             </div>
