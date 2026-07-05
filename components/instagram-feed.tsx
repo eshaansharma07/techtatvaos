@@ -50,7 +50,7 @@ function formatDate(timestamp?: string) {
 }
  
 export function InstagramFeed({
-  handle = "techtatva",
+  handle = "techtatvaclub",
   profileUrl = "https://instagram.com",
   post1_image,
   post1_url = "https://instagram.com",

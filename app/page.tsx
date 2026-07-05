@@ -224,9 +224,6 @@ export default async function Home() {
 
     {achievements.length || sponsors.length || gallery.length ? <section className="mx-auto max-w-7xl px-6 py-20"><div className="grid gap-4 md:grid-cols-3">{achievements.slice(0,3).map((item:any)=><div className="glass rounded-2xl p-6" key={item._id}><p className="text-[10px] tracking-[.2em] text-violet-300">{item.kind || "ACHIEVEMENT"}</p><p className="mt-4 text-lg text-white">{item.title}</p><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p></div>)}</div></section> : null}
     
-    {/* Real Human Presence: Community Showcase Grid */}
-    <CommunityShowcase galleryData={gallery} />
-
     {/* Dedicated Instagram posts feed */}
     <InstagramFeed
       handle={clubInfo?.instagramHandle}
@@ -238,6 +235,9 @@ export default async function Home() {
       post3_image={clubInfo?.instagramPost3_image}
       post3_url={clubInfo?.instagramPost3_url}
     />
+
+    {/* Real Human Presence: Community Showcase Grid */}
+    <CommunityShowcase galleryData={gallery} />
 
     <section className="mx-auto max-w-7xl px-5 py-20 md:px-6 md:py-28"><div className="aurora-shell rounded-3xl px-6 py-12 md:px-16 md:py-16"><Zap className="absolute -right-6 -top-8 h-52 w-52 text-white/[.035]"/><p className="text-[10px] tracking-[.3em] text-violet-200">ACCESS THE NETWORK</p><h2 className="mt-6 max-w-2xl text-4xl font-medium tracking-tight md:text-6xl text-white">The future needs people who show up early.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-white/50">Find your team, enter the room, and start making something that matters.</p><Link href="/contact" className="action-pill mt-8 inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-black">Connect with us <ArrowUpRight size={15}/></Link></div></section>
   </PublicShell>;

@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   try {
     const clubInfo = await getClubInfo();
     const instagramFeedUrl = clubInfo.instagramFeedUrl?.trim();
-    const instagramHandle = clubInfo.instagramHandle?.trim() || "techtatva";
+    const instagramHandle = clubInfo.instagramHandle?.trim() || "techtatvaclub";
 
     // Scraping Instagram follower counts
     try {
@@ -23,9 +23,12 @@ export async function GET(req: NextRequest) {
 
       if (profileRes.ok) {
         const html = await profileRes.text();
-        const match = html.match(/<meta content="([^"]+)" name="description"/i);
+        const match = html.match(/<meta\s+(?:name|property)="og:description"\s+content="([^"]+)"/i) || 
+                      html.match(/<meta\s+content="([^"]+)"\s+(?:name|property)="og:description"/i) ||
+                      html.match(/<meta\s+(?:name|property)="description"\s+content="([^"]+)"/i) ||
+                      html.match(/<meta\s+content="([^"]+)"\s+(?:name|property)="description"/i);
         if (match && match[1]) {
-          const content = match[1]; // e.g. "4 Followers, 29 Following, 3 Posts..."
+          const content = match[1]; // e.g. "109 Followers, 36 Following, 40 Posts..."
           const statsMatch = content.match(/([0-9kKmM\.,\s]+)\s+Followers,\s+([0-9kKmM\.,\s]+)\s+Following,\s+([0-9kKmM\.,\s]+)\s+Posts/i);
           if (statsMatch) {
             stats = {
