@@ -199,8 +199,7 @@ export function InstagramFeed({
                       </svg>
                     </span>
                   </div>
-                  <p className="text-[9px] font-black tracking-[0.25em] text-pink-400 uppercase">OFFICIAL INSTAGRAM</p>
-                  <p className="text-xs text-white/45 max-w-[200px] leading-relaxed">Workspace feed integration for Tech Tatva Club.</p>
+                  <p className="text-[10px] font-black tracking-[0.25em] text-pink-400 uppercase">OFFICIAL COMMUNITY HANDLE</p>
                 </div>
               </div>
             </div>
