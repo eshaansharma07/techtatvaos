@@ -163,8 +163,10 @@ export function InstagramFeed({
         <Reveal delay={0.04}>
           <div className="mb-14 grid gap-6 lg:grid-cols-[1fr_2fr] items-stretch">
             {/* Left: Minimal Profile Card */}
-            <div className="relative rounded-[2rem] border border-white/[0.06] bg-white/[0.015] p-6 md:p-8 backdrop-blur-2xl shadow-xl flex items-center gap-5 overflow-hidden">
+            <div className="relative rounded-[2rem] border border-white/[0.08] bg-[#0c0814]/75 p-6 md:p-8 backdrop-blur-2xl shadow-xl flex items-center gap-5 overflow-hidden group">
               <div className="absolute -left-10 -top-10 w-32 h-32 rounded-full bg-pink-500/5 blur-[40px] pointer-events-none" />
+              {/* Subtle top laser border */}
+              <div className="absolute top-0 left-0 w-full h-[1.5px] bg-gradient-to-r from-transparent via-pink-500/55 to-transparent" />
               
               <div className="relative shrink-0 select-none">
                 <div className="absolute inset-[-3px] rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]" />
@@ -188,44 +190,84 @@ export function InstagramFeed({
               </div>
             </div>
 
-            {/* Right: Grid of 3 Clean Rectangular Stat Cards */}
+            {/* Right: Grid of 3 Cybernetic Stat Cards */}
             <div className="grid gap-4 sm:grid-cols-3">
               {/* Stat Card 1: Posts */}
-              <div className="relative rounded-[2rem] border border-white/[0.06] bg-white/[0.015] p-6 backdrop-blur-2xl transition duration-300 hover:border-pink-500/20 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-wider text-white/35 group-hover:text-pink-400 transition-colors">POSTS</span>
-                  <div className="h-2 w-2 rounded-full bg-pink-500 group-hover:animate-ping" />
+              <div className="relative rounded-[2rem] border border-white/[0.08] bg-[#0c0814]/75 bg-[radial-gradient(rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:10px_10px] p-6 backdrop-blur-2xl transition duration-500 hover:border-pink-500/30 hover:bg-[#0c0814]/90 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden shadow-lg hover:shadow-pink-500/5">
+                {/* Neon Top Edge Accent */}
+                <div className="absolute top-0 left-0 w-full h-[1.5px] bg-transparent group-hover:bg-gradient-to-r group-hover:from-transparent group-hover:via-pink-500 group-hover:to-transparent transition-all duration-500" />
+                
+                <div className="flex items-start justify-between w-full">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-black tracking-[0.2em] font-mono text-white/30 group-hover:text-pink-400 transition-colors uppercase">POSTS</span>
+                    <span className="text-4xl font-extrabold text-white tracking-tight font-mono mt-3">
+                      {stats?.postsCount || "40"}
+                    </span>
+                  </div>
+                  {/* Neon Status LED Column Indicator */}
+                  <div className="flex flex-col gap-[3px] py-1 shrink-0">
+                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-pink-500 shadow-[0_0_8px_rgba(238,42,123,0.85)] animate-pulse" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-pink-500 shadow-[0_0_8px_rgba(238,42,123,0.85)]" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-pink-500 shadow-[0_0_8px_rgba(238,42,123,0.85)]" />
+                  </div>
                 </div>
-                <div className="mt-5">
-                  <span className="text-4xl font-extrabold text-white tracking-tight">
-                    {stats?.postsCount || "40"}
-                  </span>
+                <div className="mt-6 flex items-center justify-between text-[8px] font-mono tracking-wider text-white/20">
+                  <span>UNIT // 01</span>
+                  <span>[SYS // LIVE]</span>
                 </div>
               </div>
 
               {/* Stat Card 2: Followers */}
-              <div className="relative rounded-[2rem] border border-white/[0.06] bg-white/[0.015] p-6 backdrop-blur-2xl transition duration-300 hover:border-pink-500/20 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-wider text-white/35 group-hover:text-pink-400 transition-colors">FOLLOWERS</span>
-                  <div className="h-2 w-2 rounded-full bg-pink-500 group-hover:animate-ping" />
+              <div className="relative rounded-[2rem] border border-white/[0.08] bg-[#0c0814]/75 bg-[radial-gradient(rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:10px_10px] p-6 backdrop-blur-2xl transition duration-500 hover:border-violet-500/30 hover:bg-[#0c0814]/90 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden shadow-lg hover:shadow-violet-500/5">
+                <div className="absolute top-0 left-0 w-full h-[1.5px] bg-transparent group-hover:bg-gradient-to-r group-hover:from-transparent group-hover:via-violet-500 group-hover:to-transparent transition-all duration-500" />
+                
+                <div className="flex items-start justify-between w-full">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-black tracking-[0.2em] font-mono text-white/30 group-hover:text-violet-400 transition-colors uppercase">FOLLOWERS</span>
+                    <span className="text-4xl font-extrabold text-white tracking-tight font-mono mt-3">
+                      {stats?.followers || "109"}
+                    </span>
+                  </div>
+                  {/* Neon Status LED Column Indicator */}
+                  <div className="flex flex-col gap-[3px] py-1 shrink-0">
+                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)]" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)] animate-pulse" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)]" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)]" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-violet-500 shadow-[0_0_8px_rgba(98,40,215,0.85)]" />
+                  </div>
                 </div>
-                <div className="mt-5">
-                  <span className="text-4xl font-extrabold text-white tracking-tight">
-                    {stats?.followers || "109"}
-                  </span>
+                <div className="mt-6 flex items-center justify-between text-[8px] font-mono tracking-wider text-white/20">
+                  <span>UNIT // 02</span>
+                  <span>[SYS // LIVE]</span>
                 </div>
               </div>
 
               {/* Stat Card 3: Following */}
-              <div className="relative rounded-[2rem] border border-white/[0.06] bg-white/[0.015] p-6 backdrop-blur-2xl transition duration-300 hover:border-pink-500/20 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-wider text-white/35 group-hover:text-pink-400 transition-colors">FOLLOWING</span>
-                  <div className="h-2 w-2 rounded-full bg-pink-500 group-hover:animate-ping" />
+              <div className="relative rounded-[2rem] border border-white/[0.08] bg-[#0c0814]/75 bg-[radial-gradient(rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:10px_10px] p-6 backdrop-blur-2xl transition duration-500 hover:border-[#f9ce34]/30 hover:bg-[#0c0814]/90 hover:-translate-y-1 group flex flex-col justify-between overflow-hidden shadow-lg hover:shadow-yellow-500/5">
+                <div className="absolute top-0 left-0 w-full h-[1.5px] bg-transparent group-hover:bg-gradient-to-r group-hover:from-transparent group-hover:via-yellow-500 group-hover:to-transparent transition-all duration-500" />
+                
+                <div className="flex items-start justify-between w-full">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-black tracking-[0.2em] font-mono text-white/30 group-hover:text-yellow-400 transition-colors uppercase">FOLLOWING</span>
+                    <span className="text-4xl font-extrabold text-white tracking-tight font-mono mt-3">
+                      {stats?.following || "34"}
+                    </span>
+                  </div>
+                  {/* Neon Status LED Column Indicator */}
+                  <div className="flex flex-col gap-[3px] py-1 shrink-0">
+                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-white/[0.03]" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-[#f9ce34] shadow-[0_0_8px_rgba(249,206,52,0.85)] animate-pulse" />
+                    <div className="w-1.5 h-2.5 rounded-sm bg-[#f9ce34] shadow-[0_0_8px_rgba(249,206,52,0.85)]" />
+                  </div>
                 </div>
-                <div className="mt-5">
-                  <span className="text-4xl font-extrabold text-white tracking-tight">
-                    {stats?.following || "34"}
-                  </span>
+                <div className="mt-6 flex items-center justify-between text-[8px] font-mono tracking-wider text-white/20">
+                  <span>UNIT // 03</span>
+                  <span>[SYS // LIVE]</span>
                 </div>
               </div>
             </div>
