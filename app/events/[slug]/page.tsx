@@ -4,7 +4,7 @@ import { PublicShell } from "@/components/public-shell";
 import { getPublicEvent } from "@/lib/public-data";
 import { RegisterForm } from "@/components/register-form";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const dateText = (value?: string) =>
   value ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(new Date(value)) : "Date TBA";

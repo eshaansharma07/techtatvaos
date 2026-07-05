@@ -4,7 +4,7 @@ import { PublicShell } from "@/components/public-shell";
 import { Reveal } from "@/components/reveal";
 import { getClubInfo } from "@/lib/public-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 function sentences(value?: string) {
   return String(value || "")

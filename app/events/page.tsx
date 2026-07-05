@@ -3,7 +3,7 @@ import { EventCard } from "@/components/event-card";
 import { PublicShell } from "@/components/public-shell";
 import { getPublicEvents, getPublicTeams } from "@/lib/public-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function EventsPage() {
   const [events, teams] = await Promise.all([getPublicEvents(), getPublicTeams()]);

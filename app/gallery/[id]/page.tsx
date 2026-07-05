@@ -5,7 +5,7 @@ import { PublicShell } from "@/components/public-shell";
 import { getPublicGalleryAlbum } from "@/lib/public-data";
 import { GalleryLightbox } from "@/components/gallery-lightbox";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function GalleryAlbum({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

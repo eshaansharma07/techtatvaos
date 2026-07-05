@@ -3,7 +3,7 @@ import { PublicShell } from "@/components/public-shell";
 import { MobileTeamAccordion } from "@/components/mobile-team-accordion";
 import { getClubInfo, getPublicTeams, type PublicTeam } from "@/lib/public-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const creativeWords = ["design", "media", "creative", "content", "marketing", "social", "outreach", "sponsor", "photography", "video"];
 const technicalColors = ["from-amber-500/22 to-emerald-400/10", "from-yellow-400/22 to-amber-500/10", "from-rose-500/22 to-red-500/10"];

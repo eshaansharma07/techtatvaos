@@ -2,7 +2,7 @@ import { Award, Crown, Medal, Sparkles, Star, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
 import { getHallOfFameData, type HallMember } from "@/lib/public-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const tones = {
   violet: "border-violet-300/24 from-violet-500/20 via-purple-500/10 to-fuchsia-500/10 shadow-violet-950/24",

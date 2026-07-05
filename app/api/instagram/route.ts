@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getClubInfo } from "@/lib/public-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function GET(req: NextRequest) {
   let stats = { followers: "109", following: "34", postsCount: "40" };
@@ -53,6 +53,16 @@ export async function GET(req: NextRequest) {
     }
 
     const rawData = await res.json();
+    
+    if (rawData && typeof rawData === "object") {
+      if (typeof rawData.followersCount === "number" || typeof rawData.followersCount === "string") {
+        stats.followers = String(rawData.followersCount);
+      }
+      if (typeof rawData.followsCount === "number" || typeof rawData.followsCount === "string") {
+        stats.following = String(rawData.followsCount);
+      }
+    }
+
     let postsArray: any[] = [];
 
     if (Array.isArray(rawData)) {
