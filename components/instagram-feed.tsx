@@ -132,7 +132,7 @@ export function InstagramFeed({
               <p className="mb-4 text-[10px] font-semibold tracking-[0.4em] text-pink-400 uppercase">SOCIAL CONNECT</p>
               <h2 className="text-4xl font-extrabold tracking-tight md:text-6xl text-white">Captured on Instagram.</h2>
               <p className="mt-4 text-sm leading-8 text-white/50">
-                Join our active student community of builders. We post live updates, technology news, event announcements, and design highlights.
+                Join our active student club of builders. We post live updates, technology news, event announcements, and design highlights.
               </p>
             </div>
             
@@ -199,7 +199,7 @@ export function InstagramFeed({
                       </svg>
                     </span>
                   </div>
-                  <p className="text-[10px] font-black tracking-[0.25em] text-pink-400 uppercase">OFFICIAL COMMUNITY HANDLE</p>
+                  <p className="text-[10px] font-black tracking-[0.25em] text-pink-400 uppercase">OFFICIAL CLUB HANDLE</p>
                 </div>
               </div>
             </div>
