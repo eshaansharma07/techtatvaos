@@ -4,7 +4,7 @@ import { getClubInfo } from "@/lib/public-data";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  let stats = { followers: "1.2k", following: "29", postsCount: "3" };
+  let stats = { followers: "109", following: "34", postsCount: "40" };
 
   try {
     const clubInfo = await getClubInfo();
