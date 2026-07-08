@@ -50,11 +50,11 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
         return {
           id: item.id || `live-${index}`,
           title: item.title,
-          category: item.event || "COMMUNITY EVENT",
+          category: item.event || "CLUB EVENT",
           image: firstAsset?.url || undefined,
           icon: Camera,
           date: "Recently Published",
-          description: firstAsset?.caption || "Tech Tatva community activity captured live.",
+          description: firstAsset?.caption || "Tech Tatva club activity captured live.",
         };
       })
     : FALLBACK_ITEMS;
@@ -64,7 +64,7 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
       <div className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 md:px-6">
         <Reveal>
           <div className="mb-14 max-w-2xl">
-            <p className="mb-4 text-[10px] font-semibold tracking-[.3em] text-violet-300">COMMUNITY LIFE</p>
+            <p className="mb-4 text-[10px] font-semibold tracking-[.3em] text-violet-300">CLUB LIFE</p>
             <h2 className="text-3xl font-medium tracking-tight md:text-5xl text-white">Tech Tatva in action.</h2>
             <p className="mt-4 text-sm leading-7 text-white/45">
               Glimpses of active collaboration, late-night coding sessions, practical workshops, and mentorship inside the university.

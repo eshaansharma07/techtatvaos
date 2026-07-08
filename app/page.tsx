@@ -35,7 +35,7 @@ export default async function Home() {
   const nextEvent = events[0];
   const statRows = [
     [String(stats.members), "Active members"],
-    [String(stats.community || 0), "Community members"],
+    [String(stats.community || 0), "Student members"],
     [String(stats.events), "Published events"],
     [String(stats.teams), "Active teams"],
     [String(achievements.length), "Featured achievements"]
@@ -77,7 +77,7 @@ export default async function Home() {
         <div className="mt-8 flex w-full max-w-[280px] flex-col gap-3">
           {driveStatus && driveStatus.registrationEnabled ? (
             <Link href="/join" className="action-pill group flex h-[52px] items-center justify-center gap-2.5 rounded-full text-[15px] font-bold text-black shadow-[0_4px_24px_rgba(236,72,153,0.3)]">
-              Join the community <ArrowRight size={16} className="transition group-active:translate-x-1"/>
+              Join the club <ArrowRight size={16} className="transition group-active:translate-x-1"/>
             </Link>
           ) : (
             <Link href="/events" className="action-pill group flex h-[52px] items-center justify-center gap-2.5 rounded-full text-[15px] font-bold text-black shadow-[0_4px_24px_rgba(236,72,153,0.3)]">
@@ -188,9 +188,9 @@ export default async function Home() {
                 </Link>
               </div>
               <div className="mt-4 grid grid-cols-3 gap-3">
-                <div className="rounded-2xl border border-white/[.07] bg-white/[.03] p-4"><Users size={16} className="text-violet-200"/><p className="mt-5 text-xl font-semibold text-white"><AnimatedCounter value={stats.members} /></p><p className="mt-1 text-[9px] tracking-[.12em] text-white/32">MEMBERS</p></div>
+                <div className="rounded-2xl border border-white/[.07] bg-white/[.03] p-4"><Users size={16} className="text-violet-200"/><p className="mt-5 text-xl font-semibold text-white"><AnimatedCounter value={stats.members} /></p><p className="mt-1 text-[9px] tracking-[.12em] text-white/32">CORE MEMBERS</p></div>
                 <div className="rounded-2xl border border-white/[.07] bg-white/[.03] p-4"><Sparkles size={16} className="text-fuchsia-200"/><p className="mt-5 text-xl font-semibold text-white"><AnimatedCounter value={stats.events} /></p><p className="mt-1 text-[9px] tracking-[.12em] text-white/32">EVENTS</p></div>
-                <div className="rounded-2xl border border-white/[.07] bg-white/[.03] p-4"><Users size={16} className="text-pink-200"/><p className="mt-5 text-xl font-semibold text-white"><AnimatedCounter value={stats.community || 0} /></p><p className="mt-1 text-[9px] tracking-[.12em] text-white/32">COMMUNITY</p></div>
+                <div className="rounded-2xl border border-white/[.07] bg-white/[.03] p-4"><Users size={16} className="text-pink-200"/><p className="mt-5 text-xl font-semibold text-white"><AnimatedCounter value={stats.community || 0} /></p><p className="mt-1 text-[9px] tracking-[.12em] text-white/32">STUDENT MEMBERS</p></div>
               </div>
             </div>
           </div>
@@ -233,7 +233,7 @@ export default async function Home() {
           <Reveal>
             <div className="mb-12 max-w-3xl">
               <p className="mb-4 text-[10px] font-semibold tracking-[.3em] text-violet-300">MEMBERSHIP DRIVE</p>
-              <h2 className="text-3xl font-medium tracking-tight md:text-5xl text-white">Join the Tech Tatva Community.</h2>
+              <h2 className="text-3xl font-medium tracking-tight md:text-5xl text-white">Join the Tech Tatva Club.</h2>
               <p className="mt-4 text-sm leading-7 text-white/45">
                 Take your technical and creative skills to the next level. Connect with peers, participate in exclusive bootcamps, and build project portfolios that matter.
               </p>
@@ -268,7 +268,7 @@ export default async function Home() {
                 <p className="mt-2 text-xs text-white/50">Submit your registration details online and get verified instantly.</p>
               </div>
               <Link href="/join" className="action-pill flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5 text-black">
-                Join Community <ArrowRight size={14} />
+                Join Club <ArrowRight size={14} />
               </Link>
             </Reveal>
           )}

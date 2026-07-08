@@ -143,10 +143,10 @@ export function JoinClient({ initialStatus }: { initialStatus: StatusData }) {
             <div className="text-center mb-12">
               <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-1.5 text-xs font-medium text-violet-200">
                 <UserPlus size={14} />
-                <span>Tech Tatva Community</span>
+                <span>Tech Tatva Membership</span>
               </span>
               <h1 className="mt-6 text-4xl sm:text-6xl font-bold tracking-tight text-white leading-tight">
-                Enter the <span className="gradient-text">Community.</span>
+                Enter the <span className="gradient-text">Club.</span>
               </h1>
               <p className="mt-4 text-sm sm:text-base text-white/50 max-w-xl mx-auto leading-relaxed">
                 Connect with like-minded students, get priority access to club events, build projects, and collaborate with technical and creative teams.
@@ -207,9 +207,9 @@ export function JoinClient({ initialStatus }: { initialStatus: StatusData }) {
                         {whatsappLink && (
                           <div className="mt-8 p-6 rounded-2xl border border-violet-500/20 bg-violet-500/5 max-w-md mx-auto">
                             <p className="text-xs font-medium text-violet-200 uppercase tracking-widest">Next Step</p>
-                            <h3 className="mt-2 text-base font-semibold text-white">Join the Community Hub</h3>
+                            <h3 className="mt-2 text-base font-semibold text-white">Join the Club Hub</h3>
                             <p className="mt-2 text-xs text-white/50 leading-relaxed">
-                              Join our community WhatsApp group to stay updated with event announcements, project opportunities, and peer networking.
+                              Join our official student WhatsApp group to stay updated with event announcements, project opportunities, and peer networking.
                             </p>
                             <a
                               href={whatsappLink}

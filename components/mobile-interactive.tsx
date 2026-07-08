@@ -190,9 +190,9 @@ export function MobileInteractiveSections({
       {/* ─── Animated Stats Bar ─── */}
       <section className="py-10 border-b border-white/[0.04]">
         <div className="flex justify-center gap-8">
-          <ScrollCounter value={stats.members} label="Members" icon={<Users size={16} />} />
+          <ScrollCounter value={stats.members} label="Core Members" icon={<Users size={16} />} />
           <ScrollCounter value={stats.events} label="Events" icon={<Sparkles size={16} />} />
-          <ScrollCounter value={stats.community} label="Community" icon={<Zap size={16} />} />
+          <ScrollCounter value={stats.community} label="Student Members" icon={<Zap size={16} />} />
         </div>
       </section>
 
@@ -271,7 +271,7 @@ export function MobileInteractiveSections({
         <section className="py-10 border-t border-white/[0.04]">
           <div className="px-5 mb-6">
             <p className="text-[9px] font-bold tracking-[.3em] text-violet-300/80 uppercase mb-3">Membership Drive</p>
-            <h2 className="text-[22px] font-bold tracking-tight text-white leading-[1.2]">Join the community.</h2>
+            <h2 className="text-[22px] font-bold tracking-tight text-white leading-[1.2]">Join the club.</h2>
           </div>
           <SwipeCarousel>
             {perks.map((p) => (

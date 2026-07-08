@@ -60,7 +60,7 @@ export default async function About() {
   );
   const vision = precise(
     info.vision,
-    "A focused student community where ideas move from curiosity to working outcomes."
+    "A focused student club where ideas move from curiosity to working outcomes."
   );
   const mission = precise(
     info.mission,

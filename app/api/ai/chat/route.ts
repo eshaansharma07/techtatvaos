@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       parts: [{ text: `User question:\n${prompt}\n\nLive Tech Tatva Club public information:\n${JSON.stringify(publicContext, null, 2).slice(0, 10000)}` }]
     });
 
-    const fallback = "Tech Tatva is a premier student-led tech community. We host hackathons, workshops, and recruitment drives. Ask me about our teams, events, or how to register!";
+    const fallback = "Tech Tatva is a premier student-led tech club. We host hackathons, workshops, and recruitment drives. Ask me about our teams, events, or how to register!";
     const response = await generateWithGemini({
       system: "You are the public Tech Tatva Chat Assistant. Help candidates and visitors learn about the club, upcoming events, recruitment, and teams. Always answer politely using only the provided public club details. If info is not present, guide them to our links (e.g. /recruitment for joining, /events for registering). Never make up details or give private member information.",
       contents,

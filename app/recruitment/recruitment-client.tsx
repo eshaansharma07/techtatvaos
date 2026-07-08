@@ -342,7 +342,7 @@ function ClosedRecruitmentView({ data }: { data: RecruitmentData }) {
         {data.settings.announcementBanner ? <p className="mx-auto mt-6 max-w-xl rounded-2xl border border-amber-200/20 bg-amber-300/[.06] p-4 text-xs leading-6 text-amber-50/75">{data.settings.announcementBanner}</p> : null}
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           <Link href="/" className="ghost-pill inline-flex min-h-12 items-center rounded-full px-6 text-sm">Return home</Link>
-          <Link href="/join" className="action-pill inline-flex min-h-12 items-center rounded-full px-6 text-sm font-semibold text-black">Join Community</Link>
+          <Link href="/join" className="action-pill inline-flex min-h-12 items-center rounded-full px-6 text-sm font-semibold text-black">Join the Club</Link>
           <Link href="/teams" className="ghost-pill inline-flex min-h-12 items-center rounded-full px-6 text-sm">Explore teams</Link>
         </div>
       </motion.div>
