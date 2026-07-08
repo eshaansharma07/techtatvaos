@@ -41,7 +41,7 @@ export default async function Home() {
   ];
   return <PublicShell>
     <section className="relative min-h-[820px] overflow-hidden pt-24 md:min-h-[980px] md:pt-24">
-      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-center opacity-55 md:opacity-60"/>
+      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_30%] md:object-center opacity-45 md:opacity-60"/>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(217,70,239,.28),transparent_34%),radial-gradient(circle_at_18%_35%,rgba(124,58,237,.28),transparent_32%),radial-gradient(circle_at_52%_46%,rgba(253,186,116,.12),transparent_36%),linear-gradient(180deg,rgba(5,4,10,.24),#060509_88%)]"/>
       <div className="absolute inset-0 grid-bg opacity-[.16]"/>
       <div className="absolute left-1/2 top-28 h-72 w-72 -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-[100px]"/>
@@ -69,7 +69,7 @@ export default async function Home() {
             </div>
 
             <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200/80">TECH TATVA</p>
-            <h1 className="mt-4 max-w-5xl text-4xl xs:text-5xl sm:text-6xl font-extrabold leading-[1.05] tracking-[-0.04em] md:mt-6 md:text-7xl lg:text-[104px] lg:leading-[1.05] text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-fuchsia-400 to-violet-400 drop-shadow-[0_0_20px_rgba(236,72,153,0.35)]">
+            <h1 className="mt-4 max-w-5xl text-4xl xs:text-5xl sm:text-6xl font-semibold leading-[1.1] tracking-[-0.04em] text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.12)] md:mt-6 md:text-7xl lg:text-[104px] lg:leading-[1.05]">
               Enter the next room.
             </h1>
             <p className="mt-6 max-w-2xl text-[15px] leading-8 text-white/66 md:mt-8 md:text-lg md:leading-9 md:text-white/62">
