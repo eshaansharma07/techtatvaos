@@ -10,6 +10,7 @@ import { InteractiveHero3D } from "@/components/interactive-hero-3d";
 import { CommunityShowcase } from "@/components/community-showcase";
 import { InstagramFeed } from "@/components/instagram-feed";
 import { InteractiveTerminal } from "@/components/interactive-terminal";
+import { MobileInteractiveSections } from "@/components/mobile-interactive";
 
 export const revalidate = 60;
 
@@ -215,11 +216,19 @@ export default async function Home() {
 
       <div className="relative mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] grid-cols-3 gap-3 px-6 md:grid-cols-5">{statRows.map(([n,l])=><div key={l} className="premium-card rounded-[1.75rem] px-7 py-7 transition duration-300 hover:-translate-y-1 hover:border-violet-200/25"><p className="text-4xl font-semibold tracking-[-.055em] text-white"><AnimatedCounter value={n} /></p><p className="mt-2 text-[10px] tracking-[.18em] text-white/38">{l.toUpperCase()}</p></div>)}</div>
     </section>
-    <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 py-20 md:px-6 md:py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="ghost-pill mt-7 inline-flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
-    <section className="border-y border-white/[.06] bg-white/[.018]"><div className="mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] gap-10 px-5 py-20 md:px-6 md:py-28 lg:grid-cols-[.9fr_1.1fr] lg:gap-14"><Reveal><SectionTitle eyebrow="ONE SYSTEM / MANY DISCIPLINES" title="Teams building the future." copy="Explore the public team structure and the disciplines behind club work."/><Link className="ghost-pill inline-flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm" href="/teams">Explore the network <ArrowRight size={15}/></Link></Reveal><div className="grid gap-4 sm:grid-cols-2">{teams.length?teams.slice(0,6).map((team,i)=><Reveal key={team.id} delay={i*.04}><div className="premium-card group rounded-2xl p-5 transition duration-300 hover:-translate-y-1 hover:border-violet-300/25"><div className="flex justify-between"><Orbit size={18} className="text-violet-300"/><span className="rounded-full bg-white/[.045] px-3 py-1 text-xs text-white/35">{team.members}</span></div><h3 className="mt-7 text-base font-semibold text-white">{team.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{team.description || "Team details coming soon."}</p></div></Reveal>):<EmptyState title="Team information is coming soon." copy="The public team structure has not been published yet."/>}</div></div></section>
+    {/* Mobile interactive sections — swipeable carousels, touch cards */}
+    <MobileInteractiveSections
+      teams={teams.slice(0, 6).map(t => ({ id: t.id, name: t.name, description: t.description || "", members: t.members }))}
+      events={events.map(e => ({ slug: e.slug, title: e.title, description: e.description || "", registrationOpen: !!e.registrationOpen, venue: e.venue }))}
+      stats={{ members: stats.members, events: stats.events, community: stats.community || 0 }}
+      driveStatus={driveStatus}
+      achievements={achievements as any}
+    />
+    <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 py-20 md:px-6 md:py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="ghost-pill mt-7 inline-flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
+    <section className="hidden md:block border-y border-white/[.06] bg-white/[.018]"><div className="mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] gap-10 px-5 py-20 md:px-6 md:py-28 lg:grid-cols-[.9fr_1.1fr] lg:gap-14"><Reveal><SectionTitle eyebrow="ONE SYSTEM / MANY DISCIPLINES" title="Teams building the future." copy="Explore the public team structure and the disciplines behind club work."/><Link className="ghost-pill inline-flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm" href="/teams">Explore the network <ArrowRight size={15}/></Link></Reveal><div className="grid gap-4 sm:grid-cols-2">{teams.length?teams.slice(0,6).map((team,i)=><Reveal key={team.id} delay={i*.04}><div className="premium-card group rounded-2xl p-5 transition duration-300 hover:-translate-y-1 hover:border-violet-300/25"><div className="flex justify-between"><Orbit size={18} className="text-violet-300"/><span className="rounded-full bg-white/[.045] px-3 py-1 text-xs text-white/35">{team.members}</span></div><h3 className="mt-7 text-base font-semibold text-white">{team.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{team.description || "Team details coming soon."}</p></div></Reveal>):<EmptyState title="Team information is coming soon." copy="The public team structure has not been published yet."/>}</div></div></section>
     
     {driveStatus && driveStatus.status !== "closed" && (
-      <section className="border-b border-white/[.06] bg-gradient-to-b from-[#0c0512] to-[#040206] py-20 md:py-28">
+      <section className="hidden md:block border-b border-white/[.06] bg-gradient-to-b from-[#0c0512] to-[#040206] py-20 md:py-28">
         <div className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 md:px-6">
           <Reveal>
             <div className="mb-12 max-w-3xl">
@@ -267,7 +276,7 @@ export default async function Home() {
       </section>
     )}
 
-    {achievements.length ? <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-20"><div className="grid gap-4 md:grid-cols-3">{achievements.slice(0,3).map((item:any)=><div className="glass rounded-2xl p-6" key={item._id}><p className="text-[10px] tracking-[.2em] text-violet-300">{item.kind || "ACHIEVEMENT"}</p><p className="mt-4 text-lg text-white">{item.title}</p><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p></div>)}</div></section> : null}
+    {achievements.length ? <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-20"><div className="grid gap-4 md:grid-cols-3">{achievements.slice(0,3).map((item:any)=><div className="glass rounded-2xl p-6" key={item._id}><p className="text-[10px] tracking-[.2em] text-violet-300">{item.kind || "ACHIEVEMENT"}</p><p className="mt-4 text-lg text-white">{item.title}</p><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p></div>)}</div></section> : null}
     
     {/* Dedicated Instagram posts feed */}
     <InstagramFeed

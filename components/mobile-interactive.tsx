@@ -1,0 +1,313 @@
+"use client";
+import { useRef, useState, useEffect } from "react";
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, Orbit, Sparkles, Users, Zap } from "lucide-react";
+
+/* ─── Horizontal Swipe Carousel ─── */
+function SwipeCarousel({ children, label }: { children: React.ReactNode[]; label?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const total = children.length;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const handler = () => {
+      const scrollLeft = el.scrollLeft;
+      const cardWidth = el.offsetWidth * 0.78;
+      setActive(Math.round(scrollLeft / cardWidth));
+    };
+    el.addEventListener("scroll", handler, { passive: true });
+    return () => el.removeEventListener("scroll", handler);
+  }, []);
+
+  const scrollTo = (i: number) => {
+    const el = ref.current;
+    if (!el) return;
+    const cardWidth = el.offsetWidth * 0.78;
+    el.scrollTo({ left: cardWidth * i, behavior: "smooth" });
+  };
+
+  return (
+    <div className="relative">
+      {label && (
+        <div className="flex items-center justify-between px-5 mb-4">
+          <span className="text-[9px] font-bold tracking-[.3em] text-violet-300/80 uppercase">{label}</span>
+          <div className="flex gap-1.5">
+            {Array.from({ length: total }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => scrollTo(i)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === active ? "w-5 bg-violet-400" : "w-1.5 bg-white/15"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+      <div
+        ref={ref}
+        className="flex gap-4 overflow-x-auto px-5 pb-2 snap-x snap-mandatory scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+      >
+        {children.map((child, i) => (
+          <div key={i} className="w-[78%] flex-shrink-0 snap-start">
+            {child}
+          </div>
+        ))}
+        {/* End spacer for last card visibility */}
+        <div className="w-[22%] flex-shrink-0" />
+      </div>
+    </div>
+  );
+}
+
+/* ─── Touch-Responsive Team Card ─── */
+function TeamCard({ name, description, members, color }: { name: string; description: string; members: number; color: string }) {
+  const [pressed, setPressed] = useState(false);
+
+  return (
+    <div
+      className={`relative rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-5 backdrop-blur-md transition-all duration-200 overflow-hidden ${
+        pressed ? "scale-[0.97] border-violet-500/30" : ""
+      }`}
+      onTouchStart={() => setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      onTouchCancel={() => setPressed(false)}
+    >
+      {/* Glow accent */}
+      <div
+        className="absolute -top-8 -right-8 h-20 w-20 rounded-full blur-[40px] opacity-30 transition-opacity duration-300"
+        style={{ backgroundColor: color, opacity: pressed ? 0.5 : 0.2 }}
+      />
+      <div className="relative z-10">
+        <div className="flex items-center justify-between">
+          <Orbit size={16} className="text-violet-300" />
+          <span className="flex items-center gap-1 rounded-full bg-white/[.05] px-2.5 py-1 text-[10px] font-semibold text-white/40">
+            <Users size={10} /> {members}
+          </span>
+        </div>
+        <h3 className="mt-4 text-[15px] font-bold text-white">{name}</h3>
+        <p className="mt-2 text-[11px] leading-[1.6] text-white/35">{description || "Team details coming soon."}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Animated Stats Counter with Intersection Observer ─── */
+function ScrollCounter({ value, label, icon }: { value: number; label: string; icon: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [count, setCount] = useState(0);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.5 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible || value === 0) return;
+    const duration = 1200;
+    const steps = 30;
+    const stepTime = duration / steps;
+    let current = 0;
+    const increment = value / steps;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= value) {
+        setCount(value);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, stepTime);
+    return () => clearInterval(timer);
+  }, [visible, value]);
+
+  if (value === 0) return null;
+
+  return (
+    <div ref={ref} className="flex flex-col items-center gap-2 py-4">
+      <div className="grid h-10 w-10 place-items-center rounded-xl bg-violet-500/10 text-violet-300">
+        {icon}
+      </div>
+      <p className="text-2xl font-extrabold tracking-tight text-white">{visible ? count : 0}</p>
+      <p className="text-[8px] font-bold tracking-[.2em] text-white/30 uppercase">{label}</p>
+    </div>
+  );
+}
+
+/* ─── Membership Perks Swipeable ─── */
+const perks = [
+  { emoji: "🤝", title: "Connect & Collaborate", desc: "Work with top minds in programming, design, marketing, and engineering." },
+  { emoji: "🛠️", title: "Practical Learning", desc: "Access workshops, hackathons, and real projects for your resume." },
+  { emoji: "🎯", title: "Exclusive Perks", desc: "Early event registration, speaker sessions, and contribution certificates." },
+];
+
+function PerkCard({ emoji, title, desc }: { emoji: string; title: string; desc: string }) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <div
+      className={`rounded-2xl border border-white/[0.07] bg-gradient-to-b from-violet-500/[0.06] to-transparent p-6 transition-all duration-200 ${
+        pressed ? "scale-[0.97] border-violet-400/30 bg-violet-500/[0.1]" : ""
+      }`}
+      onTouchStart={() => setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      onTouchCancel={() => setPressed(false)}
+    >
+      <span className="text-2xl">{emoji}</span>
+      <h3 className="mt-3 text-[15px] font-bold text-white">{title}</h3>
+      <p className="mt-2 text-[11px] leading-[1.7] text-white/40">{desc}</p>
+    </div>
+  );
+}
+
+/* ─── Main Export: Mobile Interactive Sections ─── */
+export function MobileInteractiveSections({
+  teams,
+  events,
+  stats,
+  driveStatus,
+  achievements,
+}: {
+  teams: { id: string; name: string; description: string; members: number }[];
+  events: { slug: string; title: string; description: string; registrationOpen: boolean; venue?: string }[];
+  stats: { members: number; events: number; community: number };
+  driveStatus: { status: string; registrationEnabled: boolean } | null;
+  achievements: { _id: string; kind?: string; title: string; description: string }[];
+}) {
+  const teamColors = ["#8b5cf6", "#ec4899", "#f59e0b", "#06b6d4", "#10b981", "#6366f1"];
+
+  return (
+    <div className="md:hidden">
+      {/* ─── Animated Stats Bar ─── */}
+      <section className="py-10 border-b border-white/[0.04]">
+        <div className="flex justify-center gap-8">
+          <ScrollCounter value={stats.members} label="Members" icon={<Users size={16} />} />
+          <ScrollCounter value={stats.events} label="Events" icon={<Sparkles size={16} />} />
+          <ScrollCounter value={stats.community} label="Community" icon={<Zap size={16} />} />
+        </div>
+      </section>
+
+      {/* ─── Events — Horizontal Swipe Carousel ─── */}
+      <section className="py-10">
+        {events.length > 0 ? (
+          <SwipeCarousel label="Upcoming Events">
+            {events.map((e) => (
+              <Link
+                href={`/events/${e.slug}`}
+                key={e.slug}
+                className="block rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-5 backdrop-blur-md active:scale-[0.97] transition-transform"
+              >
+                <div className="flex items-center justify-between">
+                  <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold tracking-wider uppercase ${
+                    e.registrationOpen
+                      ? "bg-emerald-500/15 text-emerald-300"
+                      : "bg-white/[0.06] text-white/40"
+                  }`}>
+                    {e.registrationOpen ? "Open" : "Live"}
+                  </span>
+                  <ArrowUpRight size={14} className="text-white/20" />
+                </div>
+                <h3 className="mt-4 text-[16px] font-bold text-white leading-tight">{e.title}</h3>
+                <p className="mt-2 text-[11px] leading-[1.6] text-white/35 line-clamp-2">{e.description}</p>
+                {e.venue && (
+                  <p className="mt-3 text-[10px] font-semibold text-violet-300/60 uppercase tracking-wider">📍 {e.venue}</p>
+                )}
+              </Link>
+            ))}
+          </SwipeCarousel>
+        ) : (
+          <div className="px-5">
+            <p className="text-[9px] font-bold tracking-[.3em] text-violet-300/80 uppercase mb-4">Events</p>
+            <div className="relative rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.02] p-8 text-center overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent" />
+              <div className="relative z-10">
+                <div className="mx-auto h-12 w-12 rounded-full bg-violet-500/10 grid place-items-center mb-4">
+                  <Sparkles size={20} className="text-violet-300 animate-pulse" />
+                </div>
+                <p className="text-sm font-semibold text-white/60">Events launching soon</p>
+                <p className="mt-2 text-[11px] text-white/30">Stay tuned for workshops, hackathons & more</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ─── Teams — Horizontal Swipe Carousel ─── */}
+      {teams.length > 0 && (
+        <section className="py-10 border-t border-white/[0.04]">
+          <SwipeCarousel label="Our Teams">
+            {teams.slice(0, 6).map((team, i) => (
+              <TeamCard
+                key={team.id}
+                name={team.name}
+                description={team.description}
+                members={team.members}
+                color={teamColors[i % teamColors.length]}
+              />
+            ))}
+          </SwipeCarousel>
+          <div className="px-5 mt-5">
+            <Link
+              href="/teams"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] text-[12px] font-semibold text-white/50 transition active:scale-[0.97] active:bg-white/[0.06] active:text-white"
+            >
+              View all teams <ArrowRight size={13} />
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* ─── Membership Drive — Swipeable Perks ─── */}
+      {driveStatus && driveStatus.status !== "closed" && (
+        <section className="py-10 border-t border-white/[0.04]">
+          <div className="px-5 mb-6">
+            <p className="text-[9px] font-bold tracking-[.3em] text-violet-300/80 uppercase mb-3">Membership Drive</p>
+            <h2 className="text-[22px] font-bold tracking-tight text-white leading-[1.2]">Join the community.</h2>
+          </div>
+          <SwipeCarousel>
+            {perks.map((p) => (
+              <PerkCard key={p.title} {...p} />
+            ))}
+          </SwipeCarousel>
+          {driveStatus.registrationEnabled && (
+            <div className="px-5 mt-6">
+              <Link
+                href="/join"
+                className="action-pill flex h-[50px] items-center justify-center gap-2 rounded-full text-[14px] font-bold text-black shadow-[0_4px_20px_rgba(236,72,153,0.25)]"
+              >
+                Register now <ArrowRight size={15} />
+              </Link>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ─── Achievements — Horizontal Swipe ─── */}
+      {achievements.length > 0 && (
+        <section className="py-10 border-t border-white/[0.04]">
+          <SwipeCarousel label="Achievements">
+            {achievements.slice(0, 5).map((item: any) => (
+              <div
+                key={item._id}
+                className="rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-transparent p-5"
+              >
+                <p className="text-[9px] font-bold tracking-[.2em] text-violet-300 uppercase">{item.kind || "Achievement"}</p>
+                <h3 className="mt-3 text-[15px] font-bold text-white">{item.title}</h3>
+                <p className="mt-2 text-[11px] leading-[1.6] text-white/35">{item.description}</p>
+              </div>
+            ))}
+          </SwipeCarousel>
+        </section>
+      )}
+    </div>
+  );
+}
