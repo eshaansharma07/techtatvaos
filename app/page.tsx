@@ -40,8 +40,106 @@ export default async function Home() {
     [String(achievements.length), "Featured achievements"]
   ];
   return <PublicShell>
-    <section className="relative min-h-[680px] overflow-hidden pt-16 md:min-h-[980px] md:pt-24">
-      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_30%] md:object-center opacity-45 md:opacity-60"/>
+    {/* ═══════════════════════════════════════════════════════════════════
+        MOBILE HERO — Full-viewport immersive experience (md:hidden)
+        Desktop hero follows below and is completely untouched.
+    ═══════════════════════════════════════════════════════════════════ */}
+    <section className="relative flex min-h-[100dvh] flex-col overflow-hidden md:hidden">
+      {/* Background layers */}
+      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_20%] opacity-30"/>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(139,92,246,.22),transparent),radial-gradient(ellipse_60%_40%_at_80%_70%,rgba(236,72,153,.15),transparent),linear-gradient(180deg,transparent_20%,#060509_92%)]"/>
+      <div className="absolute inset-0 grid-bg opacity-[.08]"/>
+      {/* Animated glow orbs */}
+      <div className="absolute left-1/2 top-[18%] h-40 w-40 -translate-x-1/2 rounded-full bg-violet-500/20 blur-[80px] animate-pulse"/>
+      <div className="absolute right-[10%] top-[60%] h-28 w-28 rounded-full bg-fuchsia-500/15 blur-[60px] animate-pulse [animation-delay:1.2s]"/>
+
+      {/* Content — vertically centered */}
+      <div className="relative z-10 flex flex-1 flex-col justify-center px-6 pb-6 pt-20">
+        {/* Eyebrow */}
+        <p className="text-[9px] font-bold tracking-[.4em] text-violet-300/90 uppercase">Tech Tatva OS</p>
+        
+        {/* Animated accent line */}
+        <div className="mt-3 h-[2px] w-12 rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500" style={{animation: "titleShimmer 3s ease-in-out infinite"}}/>
+        
+        {/* Title */}
+        <h1 className="mt-4 text-[11vw] font-bold leading-[1.05] tracking-[-0.04em] text-white" style={{textShadow: "0 0 60px rgba(139,92,246,.2), 0 0 120px rgba(236,72,153,.08)"}}>
+          Enter the<br/>next room.
+        </h1>
+        
+        {/* Subtitle */}
+        <p className="mt-4 max-w-[85%] text-[13px] leading-[1.7] text-white/50">
+          Discover events, explore teams, and follow the work Tech Tatva publishes for students.
+        </p>
+
+        {/* CTA Buttons */}
+        <div className="mt-6 flex flex-col gap-2.5">
+          {driveStatus && driveStatus.registrationEnabled ? (
+            <Link href="/join" className="action-pill group flex h-12 items-center justify-center gap-2 rounded-full text-sm font-semibold text-black shadow-[0_0_24px_rgba(236,72,153,0.25)]">
+              Join Tech Tatva <ArrowRight size={15} className="transition group-active:translate-x-1"/>
+            </Link>
+          ) : null}
+          <Link href="/events" className="ghost-pill flex h-12 items-center justify-center gap-2 rounded-full text-sm font-medium transition active:scale-[0.98]">
+            Browse events <ChevronRight size={15}/>
+          </Link>
+        </div>
+
+        {/* Inline Stats Row */}
+        <div className="mt-6 flex items-center gap-4 border-t border-white/[0.06] pt-5">
+          {[
+            [stats.members, "Members"],
+            [stats.events, "Events"],
+            [stats.community || 0, "Community"],
+          ].map(([val, label]) => (
+            <div key={String(label)} className="flex-1 text-center">
+              <p className="text-lg font-bold tracking-tight text-white"><AnimatedCounter value={val} /></p>
+              <p className="mt-0.5 text-[8px] font-semibold tracking-[.15em] text-white/30 uppercase">{String(label)}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Next Event Spotlight Card */}
+        {nextEvent && (
+          <Link href={`/events/${nextEvent.slug}`} className="group mt-5 flex items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 backdrop-blur-md transition active:scale-[0.98] active:bg-white/[0.06]">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-500/15 text-violet-200">
+              <Ticket size={16}/>
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[8px] font-bold tracking-[.2em] text-violet-300/70 uppercase">{nextEvent.registrationOpen ? "REGISTRATION OPEN" : "NEXT EVENT"}</p>
+              <p className="mt-0.5 text-sm font-semibold text-white truncate">{nextEvent.title}</p>
+            </div>
+            <ArrowUpRight size={14} className="shrink-0 text-white/25 transition group-active:translate-x-0.5 group-active:-translate-y-0.5 group-active:text-violet-300"/>
+          </Link>
+        )}
+
+        {/* Quick Navigation Pills */}
+        <div className="mt-5 flex flex-wrap gap-2">
+          {mobileQuickLinks.map(([label, href]) => (
+            <Link
+              href={href}
+              key={href}
+              className="flex items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] px-3.5 py-1.5 text-[11px] font-medium text-white/60 backdrop-blur-sm transition-all active:scale-[0.95] active:bg-white/[0.08] active:text-white"
+            >
+              {label}
+              <ArrowUpRight size={10} className="text-white/20"/>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Scroll hint */}
+      <div className="relative z-10 flex justify-center pb-5">
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="h-6 w-[1px] bg-gradient-to-b from-transparent via-white/20 to-white/5 animate-pulse"/>
+          <span className="text-[8px] tracking-[.2em] text-white/20 uppercase">Scroll</span>
+        </div>
+      </div>
+    </section>
+
+    {/* ═══════════════════════════════════════════════════════════════════
+        DESKTOP HERO — hidden on mobile, shown on md+ (UNTOUCHED)
+    ═══════════════════════════════════════════════════════════════════ */}
+    <section className="relative hidden min-h-[980px] overflow-hidden pt-24 md:block">
+      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-center opacity-60"/>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(217,70,239,.28),transparent_34%),radial-gradient(circle_at_18%_35%,rgba(124,58,237,.28),transparent_32%),radial-gradient(circle_at_52%_46%,rgba(253,186,116,.12),transparent_36%),linear-gradient(180deg,rgba(5,4,10,.24),#060509_88%)]"/>
       <div className="absolute inset-0 grid-bg opacity-[.16]"/>
       <div className="absolute left-1/2 top-28 h-72 w-72 -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-[100px]"/>
@@ -49,16 +147,14 @@ export default async function Home() {
       {/* Interactive Hologram 3D Core */}
       <InteractiveHero3D />
 
-      <div className="relative mx-auto grid min-h-[560px] max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] items-center gap-8 px-5 py-6 md:min-h-[790px] md:px-6 md:py-16 lg:grid-cols-[1.05fr_.75fr]">
+      <div className="relative mx-auto grid min-h-[790px] max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] items-center gap-8 px-6 py-16 lg:grid-cols-[1.05fr_.75fr]">
         <Reveal>
           <div>
-
-
             <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200/80">TECH TATVA</p>
-            <h1 className="mt-4 max-w-5xl text-4xl xs:text-5xl sm:text-6xl font-semibold leading-[1.1] tracking-[-0.04em] text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.12)] md:mt-6 md:text-7xl lg:text-[104px] lg:leading-[1.05]">
+            <h1 className="mt-6 max-w-5xl text-7xl font-semibold leading-[1.1] tracking-[-0.04em] text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.12)] lg:text-[104px] lg:leading-[1.05]">
               Enter the next room.
             </h1>
-            <p className="mt-6 max-w-2xl text-[15px] leading-8 text-white/66 md:mt-8 md:text-lg md:leading-9 md:text-white/62">
+            <p className="mt-8 max-w-2xl text-lg leading-9 text-white/62">
               Discover real club events, register as a candidate, explore teams, and follow the work Tech Tatva publishes for students.
             </p>
  
@@ -80,7 +176,7 @@ export default async function Home() {
               />
             </div>
  
-            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap md:mt-10">
+            <div className="mt-10 flex flex-wrap gap-3">
               {driveStatus && driveStatus.registrationEnabled ? (
                 <>
                   <Link href="/join" className="action-pill group flex min-h-14 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5 text-black shadow-[0_0_20px_rgba(236,72,153,0.22)] hover:shadow-[0_0_30px_rgba(236,72,153,0.35)]">
@@ -101,25 +197,11 @@ export default async function Home() {
                 Explore teams <ChevronRight size={16}/>
               </Link>
             </div>
-            
-            {/* Mobile Quick Links — sleek frosted glass pills */}
-            <div className="mt-6 flex flex-wrap gap-2.5 md:hidden">
-              {mobileQuickLinks.map(([label, href]) => (
-                <Link
-                  href={href}
-                  key={href}
-                  className="group flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-[13px] font-medium text-white/80 backdrop-blur-md transition-all active:scale-[0.97] active:bg-white/[0.08] hover:border-violet-400/30 hover:text-white"
-                >
-                  {label}
-                  <ArrowUpRight size={12} className="text-white/30 transition-transform group-active:translate-x-0.5 group-active:-translate-y-0.5 group-active:text-violet-300" />
-                </Link>
-              ))}
-            </div>
           </div>
         </Reveal>
 
         <Reveal delay={.12}>
-          <div className="relative mt-10 lg:mt-0 block lg:block">
+          <div className="relative mt-0 block">
             <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-violet-500/18 via-fuchsia-500/10 to-transparent blur-2xl"/>
             <div className="aurora-shell relative rounded-[2rem] p-5">
               <div className="rounded-[1.5rem] border border-white/[.08] bg-white/[.035] p-5">
@@ -173,7 +255,7 @@ export default async function Home() {
         </Reveal>
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] grid-cols-2 gap-3 px-5 sm:grid-cols-3 md:grid-cols-5 md:px-6">{statRows.map(([n,l])=><div key={l} className="premium-card rounded-[1.35rem] px-5 py-5 transition duration-300 hover:-translate-y-1 hover:border-violet-200/25 md:rounded-[1.75rem] md:px-7 md:py-7"><p className="text-3xl font-semibold tracking-[-.055em] md:text-4xl text-white"><AnimatedCounter value={n} /></p><p className="mt-2 text-[9px] tracking-[.16em] text-white/38 md:text-[10px] md:tracking-[.18em]">{l.toUpperCase()}</p></div>)}</div>
+      <div className="relative mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] grid-cols-3 gap-3 px-6 md:grid-cols-5">{statRows.map(([n,l])=><div key={l} className="premium-card rounded-[1.75rem] px-7 py-7 transition duration-300 hover:-translate-y-1 hover:border-violet-200/25"><p className="text-4xl font-semibold tracking-[-.055em] text-white"><AnimatedCounter value={n} /></p><p className="mt-2 text-[10px] tracking-[.18em] text-white/38">{l.toUpperCase()}</p></div>)}</div>
     </section>
     <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 py-20 md:px-6 md:py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="ghost-pill mt-7 inline-flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
     <section className="border-y border-white/[.06] bg-white/[.018]"><div className="mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] gap-10 px-5 py-20 md:px-6 md:py-28 lg:grid-cols-[.9fr_1.1fr] lg:gap-14"><Reveal><SectionTitle eyebrow="ONE SYSTEM / MANY DISCIPLINES" title="Teams building the future." copy="Explore the public team structure and the disciplines behind club work."/><Link className="ghost-pill inline-flex min-h-12 items-center gap-2 rounded-full px-5 py-3 text-sm" href="/teams">Explore the network <ArrowRight size={15}/></Link></Reveal><div className="grid gap-4 sm:grid-cols-2">{teams.length?teams.slice(0,6).map((team,i)=><Reveal key={team.id} delay={i*.04}><div className="premium-card group rounded-2xl p-5 transition duration-300 hover:-translate-y-1 hover:border-violet-300/25"><div className="flex justify-between"><Orbit size={18} className="text-violet-300"/><span className="rounded-full bg-white/[.045] px-3 py-1 text-xs text-white/35">{team.members}</span></div><h3 className="mt-7 text-base font-semibold text-white">{team.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{team.description || "Team details coming soon."}</p></div></Reveal>):<EmptyState title="Team information is coming soon." copy="The public team structure has not been published yet."/>}</div></div></section>
