@@ -41,98 +41,56 @@ export default async function Home() {
   ];
   return <PublicShell>
     {/* ═══════════════════════════════════════════════════════════════════
-        MOBILE HERO — Full-viewport immersive experience (md:hidden)
+        MOBILE HERO — Center-aligned, dramatic, minimal (md:hidden)
         Desktop hero follows below and is completely untouched.
+        Height accounts for the h-20 (5rem) spacer in public-shell.
     ═══════════════════════════════════════════════════════════════════ */}
-    <section className="relative flex min-h-[100dvh] flex-col overflow-hidden md:hidden">
-      {/* Background layers */}
-      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_20%] opacity-30"/>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(139,92,246,.22),transparent),radial-gradient(ellipse_60%_40%_at_80%_70%,rgba(236,72,153,.15),transparent),linear-gradient(180deg,transparent_20%,#060509_92%)]"/>
-      <div className="absolute inset-0 grid-bg opacity-[.08]"/>
-      {/* Animated glow orbs */}
-      <div className="absolute left-1/2 top-[18%] h-40 w-40 -translate-x-1/2 rounded-full bg-violet-500/20 blur-[80px] animate-pulse"/>
-      <div className="absolute right-[10%] top-[60%] h-28 w-28 rounded-full bg-fuchsia-500/15 blur-[60px] animate-pulse [animation-delay:1.2s]"/>
+    <section className="relative flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center overflow-hidden md:hidden">
+      {/* Cinematic background */}
+      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_25%] opacity-25"/>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_20%,rgba(139,92,246,.18),transparent_70%),radial-gradient(ellipse_50%_40%_at_50%_100%,rgba(236,72,153,.12),transparent_70%),linear-gradient(180deg,rgba(6,5,9,.4)_0%,rgba(6,5,9,.95)_100%)]"/>
 
-      {/* Content — vertically centered */}
-      <div className="relative z-10 flex flex-1 flex-col justify-center px-6 pb-6 pt-20">
-        {/* Eyebrow */}
-        <p className="text-[9px] font-bold tracking-[.4em] text-violet-300/90 uppercase">Tech Tatva OS</p>
-        
-        {/* Animated accent line */}
-        <div className="mt-3 h-[2px] w-12 rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500" style={{animation: "titleShimmer 3s ease-in-out infinite"}}/>
-        
-        {/* Title */}
-        <h1 className="mt-4 text-[11vw] font-bold leading-[1.05] tracking-[-0.04em] text-white" style={{textShadow: "0 0 60px rgba(139,92,246,.2), 0 0 120px rgba(236,72,153,.08)"}}>
+      {/* Floating ambient glow */}
+      <div className="absolute left-1/2 top-1/3 h-52 w-52 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-600/12 blur-[100px]"/>
+      <div className="absolute bottom-1/4 right-0 h-36 w-36 rounded-full bg-fuchsia-500/10 blur-[80px]"/>
+
+      {/* Center-aligned content */}
+      <div className="relative z-10 flex flex-col items-center px-7 text-center">
+        {/* Eyebrow badge */}
+        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/8 px-4 py-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse"/>
+          <span className="text-[10px] font-semibold tracking-[.25em] text-violet-200/90 uppercase">Tech Tatva</span>
+        </div>
+
+        {/* Main headline */}
+        <h1 className="mt-7 text-[13vw] font-extrabold leading-[1] tracking-[-0.05em] text-white" style={{textShadow: "0 4px 40px rgba(139,92,246,.25), 0 0 80px rgba(236,72,153,.1)"}}>
           Enter the<br/>next room.
         </h1>
-        
+
         {/* Subtitle */}
-        <p className="mt-4 max-w-[85%] text-[13px] leading-[1.7] text-white/50">
-          Discover events, explore teams, and follow the work Tech Tatva publishes for students.
+        <p className="mt-5 max-w-[280px] text-[14px] leading-[1.65] text-white/45">
+          Where students build, compete, and create what comes next.
         </p>
 
-        {/* CTA Buttons */}
-        <div className="mt-6 flex flex-col gap-2.5">
+        {/* Primary CTA */}
+        <div className="mt-8 flex w-full max-w-[280px] flex-col gap-3">
           {driveStatus && driveStatus.registrationEnabled ? (
-            <Link href="/join" className="action-pill group flex h-12 items-center justify-center gap-2 rounded-full text-sm font-semibold text-black shadow-[0_0_24px_rgba(236,72,153,0.25)]">
-              Join Tech Tatva <ArrowRight size={15} className="transition group-active:translate-x-1"/>
+            <Link href="/join" className="action-pill group flex h-[52px] items-center justify-center gap-2.5 rounded-full text-[15px] font-bold text-black shadow-[0_4px_24px_rgba(236,72,153,0.3)]">
+              Join the community <ArrowRight size={16} className="transition group-active:translate-x-1"/>
             </Link>
-          ) : null}
-          <Link href="/events" className="ghost-pill flex h-12 items-center justify-center gap-2 rounded-full text-sm font-medium transition active:scale-[0.98]">
-            Browse events <ChevronRight size={15}/>
-          </Link>
-        </div>
-
-        {/* Inline Stats Row */}
-        <div className="mt-6 flex items-center gap-4 border-t border-white/[0.06] pt-5">
-          {[
-            [stats.members, "Members"],
-            [stats.events, "Events"],
-            [stats.community || 0, "Community"],
-          ].map(([val, label]) => (
-            <div key={String(label)} className="flex-1 text-center">
-              <p className="text-lg font-bold tracking-tight text-white"><AnimatedCounter value={val} /></p>
-              <p className="mt-0.5 text-[8px] font-semibold tracking-[.15em] text-white/30 uppercase">{String(label)}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Next Event Spotlight Card */}
-        {nextEvent && (
-          <Link href={`/events/${nextEvent.slug}`} className="group mt-5 flex items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 backdrop-blur-md transition active:scale-[0.98] active:bg-white/[0.06]">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-500/15 text-violet-200">
-              <Ticket size={16}/>
-            </span>
-            <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-bold tracking-[.2em] text-violet-300/70 uppercase">{nextEvent.registrationOpen ? "REGISTRATION OPEN" : "NEXT EVENT"}</p>
-              <p className="mt-0.5 text-sm font-semibold text-white truncate">{nextEvent.title}</p>
-            </div>
-            <ArrowUpRight size={14} className="shrink-0 text-white/25 transition group-active:translate-x-0.5 group-active:-translate-y-0.5 group-active:text-violet-300"/>
-          </Link>
-        )}
-
-        {/* Quick Navigation Pills */}
-        <div className="mt-5 flex flex-wrap gap-2">
-          {mobileQuickLinks.map(([label, href]) => (
-            <Link
-              href={href}
-              key={href}
-              className="flex items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] px-3.5 py-1.5 text-[11px] font-medium text-white/60 backdrop-blur-sm transition-all active:scale-[0.95] active:bg-white/[0.08] active:text-white"
-            >
-              {label}
-              <ArrowUpRight size={10} className="text-white/20"/>
+          ) : (
+            <Link href="/events" className="action-pill group flex h-[52px] items-center justify-center gap-2.5 rounded-full text-[15px] font-bold text-black shadow-[0_4px_24px_rgba(236,72,153,0.3)]">
+              Explore events <ArrowRight size={16} className="transition group-active:translate-x-1"/>
             </Link>
-          ))}
+          )}
+          <Link href="/teams" className="flex h-[44px] items-center justify-center gap-2 rounded-full text-[13px] font-medium text-white/50 transition active:text-white/80">
+            Meet the teams <ChevronRight size={14}/>
+          </Link>
         </div>
       </div>
 
-      {/* Scroll hint */}
-      <div className="relative z-10 flex justify-center pb-5">
-        <div className="flex flex-col items-center gap-1.5">
-          <div className="h-6 w-[1px] bg-gradient-to-b from-transparent via-white/20 to-white/5 animate-pulse"/>
-          <span className="text-[8px] tracking-[.2em] text-white/20 uppercase">Scroll</span>
-        </div>
-      </div>
+      {/* Bottom edge fade-out line */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent"/>
     </section>
 
     {/* ═══════════════════════════════════════════════════════════════════
