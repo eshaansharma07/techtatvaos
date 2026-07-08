@@ -61,7 +61,7 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
 
   return (
     <section className="border-t border-white/[.06] bg-white/[0.005] py-20 md:py-28">
-      <div className="mx-auto max-w-7xl px-5 md:px-6">
+      <div className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 md:px-6">
         <Reveal>
           <div className="mb-14 max-w-2xl">
             <p className="mb-4 text-[10px] font-semibold tracking-[.3em] text-violet-300">COMMUNITY LIFE</p>

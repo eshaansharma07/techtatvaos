@@ -83,7 +83,7 @@ export default async function About() {
         <div className="about-orb about-orb-one" />
         <div className="about-orb about-orb-two" />
 
-        <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_.78fr] lg:items-center">
+        <div className="relative mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] gap-12 lg:grid-cols-[1fr_.78fr] lg:items-center">
           <Reveal>
             <div>
               <p className="inline-flex rounded-full border border-violet-200/15 bg-white/[.035] px-4 py-2 text-[10px] font-semibold tracking-[.28em] text-violet-100/80">
@@ -126,7 +126,7 @@ export default async function About() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-10">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-10">
         <div className="grid gap-5 lg:grid-cols-2">
           <Reveal>
             <SignalCard icon={Compass} label="VISION" title="Direction before decoration." copy={vision} />
@@ -137,7 +137,7 @@ export default async function About() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-24">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-24">
         <Reveal>
           <div className="about-band rounded-[2.2rem] p-7 md:p-10">
             <div className="grid gap-10 lg:grid-cols-[.75fr_1fr] lg:items-end">
@@ -160,7 +160,7 @@ export default async function About() {
         </Reveal>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-32">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 pb-32">
         <div className="grid gap-10 lg:grid-cols-[.55fr_1fr]">
           <Reveal>
             <div className="lg:sticky lg:top-32">
@@ -191,7 +191,7 @@ export default async function About() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-28">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 pb-28">
         <Reveal>
           <div className="aurora-shell rounded-[2.2rem] px-7 py-12 md:px-12">
             <Sparkles className="absolute right-8 top-8 h-20 w-20 text-white/[.04]" />

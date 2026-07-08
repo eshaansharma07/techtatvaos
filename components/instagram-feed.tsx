@@ -122,7 +122,7 @@ export function InstagramFeed({
       <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#f9ce34]/5 via-[#ee2a7b]/10 to-[#6228d7]/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#6228d7]/5 via-[#ee2a7b]/10 to-[#f9ce34]/5 blur-[120px] pointer-events-none" />
 
-      <div className="mx-auto max-w-7xl px-5 md:px-6 relative">
+      <div className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 md:px-6 relative">
         <Reveal>
           <div className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div className="max-w-2xl">

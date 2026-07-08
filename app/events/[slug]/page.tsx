@@ -41,7 +41,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
 
   return (
     <PublicShell>
-      <section className="mx-auto max-w-7xl px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
         <Link href="/events" className="ghost-pill inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[.18em] text-white/52 transition hover:text-white">
           <ArrowLeft size={14} /> BACK TO EVENTS
         </Link>

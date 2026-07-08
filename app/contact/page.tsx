@@ -10,7 +10,7 @@ export default async function Contact() {
 
   return (
     <PublicShell>
-      <section className="relative mx-auto grid max-w-7xl gap-8 px-5 pb-20 pt-32 md:gap-12 md:px-6 md:pb-28 md:pt-44 lg:grid-cols-[0.9fr_1.1fr]">
+      <section className="relative mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] gap-8 px-5 pb-20 pt-32 md:gap-12 md:px-6 md:pb-28 md:pt-44 lg:grid-cols-[0.9fr_1.1fr]">
         {/* Ambient atmospheric glowing lights behind the contact panel */}
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_30%_40%,rgba(168,85,247,0.15),transparent_45%),radial-gradient(circle_at_80%_60%,rgba(236,72,153,0.08),transparent_45%)]" />
         

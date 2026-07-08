@@ -8,7 +8,7 @@ export default async function Gallery() {
   const albums = await getPublicGallery();
   return (
     <PublicShell>
-      <section className="mx-auto max-w-7xl px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
         {/* Header Block */}
         <div className="aurora-shell rounded-[2rem] px-6 py-10 md:rounded-[2.6rem] md:px-14 md:py-14">
           <p className="text-[10px] font-bold tracking-[.34em] text-violet-200 uppercase">THE ARCHIVE</p>

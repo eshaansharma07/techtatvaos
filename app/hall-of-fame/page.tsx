@@ -85,7 +85,7 @@ export default async function HallOfFamePage() {
 
   return (
     <PublicShell>
-      <section className="relative mx-auto max-w-7xl px-5 pb-20 pt-28 md:px-6 md:pb-28 md:pt-44">
+      <section className="relative mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-28 md:px-6 md:pb-28 md:pt-44">
         <div className="pointer-events-none absolute left-0 top-32 h-80 w-80 rounded-full bg-violet-500/10 blur-[140px]" />
         <div className="pointer-events-none absolute right-0 top-80 h-96 w-96 rounded-full bg-fuchsia-500/10 blur-[150px]" />
 

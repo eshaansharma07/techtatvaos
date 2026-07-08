@@ -11,7 +11,7 @@ export default async function EventsPage() {
 
   return (
     <PublicShell>
-      <section className="mx-auto max-w-7xl px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
         <div className="aurora-shell rounded-[2rem] p-6 md:rounded-[2.6rem] md:p-14">
           <div className="grid gap-10 lg:grid-cols-[1fr_.7fr] lg:items-end">
             <div>

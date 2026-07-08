@@ -50,7 +50,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     <div className="premium-vignette" aria-hidden="true" />
 
     <header className="public-header fixed inset-x-0 top-0 z-50">
-      <div className="public-header-inner mx-auto flex max-w-7xl flex-row items-center justify-between px-5 py-4 md:mt-4 md:h-[4.75rem] md:px-5 md:py-0">
+      <div className="public-header-inner mx-auto flex max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] flex-row items-center justify-between px-5 py-4 md:mt-4 md:h-[4.75rem] md:px-5 md:py-0">
         <MotionLogo logo={info.logo}/>
         <nav className="public-nav hidden w-auto items-center gap-1 text-xs font-medium tracking-[.15em] text-white/50 md:flex">
           {publicLinks.map(([label,href])=><Link className="rounded-full px-4 py-3 transition hover:bg-white/[.07] hover:text-white" key={href} href={href}>{label}</Link>)}
@@ -65,7 +65,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     {children}
     
     <footer className="public-footer px-5 py-10 md:px-6 md:py-16">
-      <div className="public-footer-card mx-auto max-w-7xl rounded-[2rem] p-6 md:p-8">
+      <div className="public-footer-card mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] rounded-[2rem] p-6 md:p-8">
         
         {/* RICH FOOTER INFORMATION CARDS */}
         <div className="grid gap-4 sm:grid-cols-3 pb-8 mb-8 border-b border-white/[.06]">

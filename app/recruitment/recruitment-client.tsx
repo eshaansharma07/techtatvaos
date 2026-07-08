@@ -172,7 +172,7 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
   }
 
   return (
-    <section className="relative mx-auto max-w-7xl px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
+    <section className="relative mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44">
       <div className="absolute inset-x-0 top-24 h-80 bg-[radial-gradient(circle_at_50%_0%,rgba(253,186,116,.18),transparent_36%),radial-gradient(circle_at_70%_20%,rgba(232,121,166,.16),transparent_30%)]" aria-hidden />
       <div className="relative grid gap-8 lg:grid-cols-[.72fr_1fr] lg:items-start">
         <aside className="lg:sticky lg:top-28">
