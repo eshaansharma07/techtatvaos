@@ -40,7 +40,7 @@ export default async function Home() {
     [String(achievements.length), "Featured achievements"]
   ];
   return <PublicShell>
-    <section className="relative min-h-[820px] overflow-hidden pt-24 md:min-h-[980px] md:pt-24">
+    <section className="relative min-h-[680px] overflow-hidden pt-16 md:min-h-[980px] md:pt-24">
       <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_30%] md:object-center opacity-45 md:opacity-60"/>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(217,70,239,.28),transparent_34%),radial-gradient(circle_at_18%_35%,rgba(124,58,237,.28),transparent_32%),radial-gradient(circle_at_52%_46%,rgba(253,186,116,.12),transparent_36%),linear-gradient(180deg,rgba(5,4,10,.24),#060509_88%)]"/>
       <div className="absolute inset-0 grid-bg opacity-[.16]"/>
@@ -49,24 +49,10 @@ export default async function Home() {
       {/* Interactive Hologram 3D Core */}
       <InteractiveHero3D />
 
-      <div className="relative mx-auto grid min-h-[700px] max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] items-center gap-8 px-5 py-10 md:min-h-[790px] md:px-6 md:py-16 lg:grid-cols-[1.05fr_.75fr]">
+      <div className="relative mx-auto grid min-h-[560px] max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] items-center gap-8 px-5 py-6 md:min-h-[790px] md:px-6 md:py-16 lg:grid-cols-[1.05fr_.75fr]">
         <Reveal>
           <div>
-            {/* Cybernetic Telemetry Status Indicators (Mobile Only) */}
-            <div className="flex flex-wrap items-center gap-2 mb-5 select-none lg:hidden animate-[pulse_2.5s_ease-in-out_infinite]">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-0.5 text-[8px] font-mono tracking-wider text-emerald-300 uppercase">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-                SYS: ONLINE
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-pink-500/20 bg-pink-500/5 px-2.5 py-0.5 text-[8px] font-mono tracking-wider text-pink-300 uppercase">
-                <span className="h-1.5 w-1.5 rounded-full bg-pink-400" />
-                OS: VER 2.0
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/20 bg-violet-500/5 px-2.5 py-0.5 text-[8px] font-mono tracking-wider text-violet-300 uppercase">
-                <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
-                SIGNAL: SECURE
-              </span>
-            </div>
+
 
             <p className="text-[10px] font-semibold tracking-[.34em] text-violet-200/80">TECH TATVA</p>
             <h1 className="mt-4 max-w-5xl text-4xl xs:text-5xl sm:text-6xl font-semibold leading-[1.1] tracking-[-0.04em] text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.12)] md:mt-6 md:text-7xl lg:text-[104px] lg:leading-[1.05]">
@@ -116,50 +102,18 @@ export default async function Home() {
               </Link>
             </div>
             
-            {/* Cybernetic Deck Quick Links Panel (Mobile Only) */}
-            <div className="mt-7 grid grid-cols-2 gap-3 md:hidden">
-              {mobileQuickLinks.map(([label, href, eyebrow], idx) => {
-                const colors = ["#ec4899", "#8b5cf6", "#f59e0b", "#ec4899", "#3b82f6", "#06b6d4"];
-                const color = colors[idx % colors.length];
-                const activeSegments = (idx % 3) + 2; // 2 to 4 segments
-                return (
-                  <Link 
-                    href={href} 
-                    key={href} 
-                    className="group relative rounded-2xl border border-white/[0.06] bg-[#0c0814]/75 p-4 shadow-[inset_0_1px_rgba(255,255,255,0.03)] backdrop-blur-xl transition active:scale-[0.98] overflow-hidden"
-                  >
-                    {/* Corner HUD Brackets */}
-                    <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-violet-500/30 pointer-events-none group-active:border-pink-500" />
-                    <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-violet-500/30 pointer-events-none group-active:border-pink-500" />
-
-                    <div className="flex flex-col justify-between h-full">
-                      <div>
-                        <span className="text-[8px] font-black tracking-[0.18em] text-white/30 uppercase block">
-                          {eyebrow}
-                        </span>
-                        <span className="mt-1 flex items-center justify-between gap-1.5 text-base font-extrabold tracking-tight text-white group-active:text-pink-400 transition-colors">
-                          {label}
-                          <ArrowUpRight size={13} className="text-white/30 group-active:text-pink-400 group-active:translate-x-0.5 group-active:-translate-y-0.5 transition-transform" />
-                        </span>
-                      </div>
-                      
-                      {/* Technical Level Grid */}
-                      <div className="mt-3.5 flex gap-0.5">
-                        {Array.from({ length: 4 }).map((_, segmentIdx) => (
-                          <div 
-                            key={segmentIdx} 
-                            className="h-1 w-2 rounded-[1px] transition-all duration-300"
-                            style={{ 
-                              backgroundColor: segmentIdx < activeSegments ? color : "rgba(255, 255, 255, 0.04)",
-                              boxShadow: segmentIdx < activeSegments ? `0 0 6px ${color}` : "none"
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+            {/* Mobile Quick Links — sleek frosted glass pills */}
+            <div className="mt-6 flex flex-wrap gap-2.5 md:hidden">
+              {mobileQuickLinks.map(([label, href]) => (
+                <Link
+                  href={href}
+                  key={href}
+                  className="group flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-[13px] font-medium text-white/80 backdrop-blur-md transition-all active:scale-[0.97] active:bg-white/[0.08] hover:border-violet-400/30 hover:text-white"
+                >
+                  {label}
+                  <ArrowUpRight size={12} className="text-white/30 transition-transform group-active:translate-x-0.5 group-active:-translate-y-0.5 group-active:text-violet-300" />
+                </Link>
+              ))}
             </div>
           </div>
         </Reveal>
