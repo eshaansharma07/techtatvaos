@@ -44,13 +44,22 @@ const typeConfig: Record<AnnouncementType, { icon: typeof Info; gradient: string
   },
 };
 
+const getDismissalKey = (text: string) => {
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    hash = (hash << 5) - hash + text.charCodeAt(i);
+    hash |= 0;
+  }
+  return `announcement-dismissed-${hash}`;
+};
+
 export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
   const [dismissed, setDismissed] = useState(false);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     // Check if user already dismissed this specific announcement
-    const key = `announcement-dismissed-${btoa(data.announcementText || "").slice(0, 20)}`;
+    const key = getDismissalKey(data.announcementText || "");
     if (sessionStorage.getItem(key)) {
       setDismissed(true);
       return;
@@ -68,7 +77,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
 
   const handleDismiss = () => {
     setVisible(false);
-    const key = `announcement-dismissed-${btoa(data.announcementText || "").slice(0, 20)}`;
+    const key = getDismissalKey(data.announcementText || "");
     sessionStorage.setItem(key, "1");
     setTimeout(() => setDismissed(true), 300);
   };
