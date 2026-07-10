@@ -67,6 +67,7 @@ export function InstagramFeed({
   useEffect(() => {
     async function fetchLiveFeed() {
       let fetchedStats = null;
+      let apiPosts: InstagramPost[] = [];
       try {
         const res = await fetch(`/api/instagram?t=${Date.now()}`);
         if (res.ok) {
@@ -76,41 +77,37 @@ export function InstagramFeed({
             setStats(data.stats);
           }
           if (data.posts && data.posts.length > 0) {
-            setPosts(data.posts.slice(0, 3));
-            setLoading(false);
-            return;
+            apiPosts = data.posts;
           }
         }
       } catch (err) {
         console.error("Live Instagram feed fetch failed, using manual fallback:", err);
       }
-      
-      // Fallback state
-      setPosts([
-        {
-          id: "ig-1",
-          image: post1_image || undefined,
-          url: post1_url
-        },
-        {
-          id: "ig-2",
-          image: post2_image || undefined,
-          url: post2_url
-        },
-        {
-          id: "ig-3",
-          image: post3_image || undefined,
-          url: post3_url
-        }
-      ]);
-      
-      // Fallback stats to correct baseline if API fetch didn't return them
+
+      // Merge manual posts with API posts
+      const manualPosts: InstagramPost[] = [];
+      if (post1_image) manualPosts.push({ id: "manual-1", image: post1_image, url: post1_url || "https://instagram.com/techtatvaclub", caption: "Latest update from Tech Tatva Club." });
+      if (post2_image) manualPosts.push({ id: "manual-2", image: post2_image, url: post2_url || "https://instagram.com/techtatvaclub", caption: "Featured update." });
+      if (post3_image) manualPosts.push({ id: "manual-3", image: post3_image, url: post3_url || "https://instagram.com/techtatvaclub", caption: "Tech Tatva news." });
+
+      const combined = [...manualPosts, ...apiPosts.filter(p => !manualPosts.some(m => m.url === p.url))].slice(0, 3);
+
+      if (combined.length === 0) {
+        setPosts([
+          { id: "ig-1", image: "/chandigarh-university-logo.png", url: "https://instagram.com/techtatvaclub", caption: "Welcome to Tech Tatva" },
+          { id: "ig-2", image: "/chandigarh-university-logo.png", url: "https://instagram.com/techtatvaclub", caption: "Innovation & Excellence" },
+          { id: "ig-3", image: "/chandigarh-university-logo.png", url: "https://instagram.com/techtatvaclub", caption: "Connect with us" }
+        ]);
+      } else {
+        setPosts(combined);
+      }
+
       if (!fetchedStats) {
-        setStats({ followers: "109", following: "34", postsCount: "40" });
+        setStats({ followers: "109", following: "35", postsCount: "40" });
       }
       setLoading(false);
     }
- 
+
     fetchLiveFeed();
   }, [post1_image, post1_url, post2_image, post2_url, post3_image, post3_url]);
   
