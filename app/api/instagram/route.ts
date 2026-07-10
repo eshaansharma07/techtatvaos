@@ -16,7 +16,10 @@ export async function GET(req: NextRequest) {
     // 1. Try to scrape Instagram follower counts
     try {
       const profileRes = await fetch(`https://www.instagram.com/${instagramHandle}/`, {
-        cache: "no-store"
+        cache: "no-store",
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+        }
       });
 
       if (profileRes.ok) {
