@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { X, Megaphone, ArrowRight, Sparkles, AlertTriangle, Info } from "lucide-react";
+import { X, Megaphone, ArrowRight, Sparkles, AlertTriangle, Info, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type AnnouncementType = "info" | "event" | "alert" | "promo";
 
@@ -11,6 +12,7 @@ interface AnnouncementData {
   announcementLink?: string;
   announcementLinkText?: string;
   announcementType?: AnnouncementType;
+  announcementDetails?: string;
 }
 
 const typeConfig: Record<AnnouncementType, { icon: typeof Info; gradient: string; glow: string; border: string; dot: string }> = {
@@ -56,6 +58,7 @@ const getDismissalKey = (text: string) => {
 export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
   const [dismissed, setDismissed] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     // Check if user already dismissed this specific announcement
@@ -74,6 +77,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
   const type = (data.announcementType as AnnouncementType) || "info";
   const cfg = typeConfig[type] || typeConfig.info;
   const Icon = cfg.icon;
+  const hasDetails = !!data.announcementDetails?.trim();
 
   const handleDismiss = () => {
     setVisible(false);
@@ -99,39 +103,94 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
         {/* Gradient accent */}
         <div className={`absolute inset-0 bg-gradient-to-r ${cfg.gradient} pointer-events-none`} />
 
-        <div className="relative flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5">
-          {/* Pulsing dot + icon */}
-          <div className="flex shrink-0 items-center gap-2">
-            <span className={`h-2 w-2 rounded-full ${cfg.dot} animate-pulse`} />
-            <Icon size={15} className="text-white/60" />
+        {/* Content Container (Clickable if details are present) */}
+        <div
+          onClick={hasDetails ? () => setExpanded(!expanded) : undefined}
+          className={`relative flex flex-col transition-colors ${
+            hasDetails ? "cursor-pointer select-none hover:bg-white/[0.02]" : ""
+          }`}
+        >
+          <div className="relative flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5">
+            {/* Pulsing dot + icon */}
+            <div className="flex shrink-0 items-center gap-2">
+              <span className={`h-2 w-2 rounded-full ${cfg.dot} animate-pulse`} />
+              <Icon size={15} className="text-white/60" />
+            </div>
+
+            {/* Text content */}
+            <div className="min-w-0 flex-1">
+              <p className="text-[12px] sm:text-[13px] font-medium text-white/80 leading-snug truncate">
+                {data.announcementText}
+              </p>
+            </div>
+
+            {/* Action link */}
+            {data.announcementLink && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <Link
+                  href={data.announcementLink}
+                  className="group flex shrink-0 items-center gap-1 rounded-full bg-white/[0.08] px-3 py-1.5 text-[10px] sm:text-[11px] font-semibold text-white/70 transition hover:bg-white/[0.14] hover:text-white"
+                >
+                  {data.announcementLinkText || "View"}
+                  <ArrowRight size={11} className="transition group-hover:translate-x-0.5" />
+                </Link>
+              </div>
+            )}
+
+            {/* Chevron toggle indicator if details present */}
+            {hasDetails && (
+              <ChevronDown
+                size={16}
+                className={`text-white/40 transition-transform duration-300 shrink-0 ${
+                  expanded ? "rotate-180 text-white/70" : ""
+                }`}
+              />
+            )}
+
+            {/* Dismiss */}
+            <div onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={handleDismiss}
+                className="flex shrink-0 items-center justify-center rounded-full p-1.5 text-white/25 transition hover:bg-white/[0.08] hover:text-white/60"
+                aria-label="Dismiss announcement"
+              >
+                <X size={14} />
+              </button>
+            </div>
           </div>
 
-          {/* Text content */}
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] sm:text-[13px] font-medium text-white/80 leading-snug truncate">
-              {data.announcementText}
-            </p>
-          </div>
-
-          {/* Action link */}
-          {data.announcementLink && (
-            <Link
-              href={data.announcementLink}
-              className="group flex shrink-0 items-center gap-1 rounded-full bg-white/[0.08] px-3 py-1.5 text-[10px] sm:text-[11px] font-semibold text-white/70 transition hover:bg-white/[0.14] hover:text-white"
-            >
-              {data.announcementLinkText || "View"}
-              <ArrowRight size={11} className="transition group-hover:translate-x-0.5" />
-            </Link>
-          )}
-
-          {/* Dismiss */}
-          <button
-            onClick={handleDismiss}
-            className="flex shrink-0 items-center justify-center rounded-full p-1.5 text-white/25 transition hover:bg-white/[0.08] hover:text-white/60"
-            aria-label="Dismiss announcement"
-          >
-            <X size={14} />
-          </button>
+          {/* Expanded details panel */}
+          <AnimatePresence initial={false}>
+            {expanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{
+                  height: "auto",
+                  opacity: 1,
+                  transition: {
+                    height: { duration: 0.3, ease: "easeOut" },
+                    opacity: { duration: 0.2, delay: 0.05 }
+                  }
+                }}
+                exit={{
+                  height: 0,
+                  opacity: 0,
+                  transition: {
+                    height: { duration: 0.25, ease: "easeIn" },
+                    opacity: { duration: 0.15 }
+                  }
+                }}
+                className="overflow-hidden"
+              >
+                <div
+                  className="px-4 pb-4 pt-1 sm:px-5 sm:pb-5 text-[11px] sm:text-[12px] leading-[1.6] text-white/55 border-t border-white/[0.05] bg-black/10 select-text whitespace-pre-wrap cursor-text"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {data.announcementDetails}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

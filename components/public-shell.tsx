@@ -195,6 +195,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
       announcementLink: info.announcementLink || "",
       announcementLinkText: info.announcementLinkText || "",
       announcementType: info.announcementType || "info",
+      announcementDetails: info.announcementDetails || "",
     }} />
   </main>;
 }
