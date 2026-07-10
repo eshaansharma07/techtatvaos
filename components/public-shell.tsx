@@ -7,6 +7,7 @@ import { PremiumBackground } from "@/components/premium-background";
 import { CustomCursor } from "@/components/custom-cursor";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { QuoteBlock } from "@/components/quote-block";
+import { FloatingAnnouncement } from "@/components/floating-announcement";
 
 const publicLinks = [
   ["HOME", "/"],
@@ -188,6 +189,13 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     </footer>
+    <FloatingAnnouncement data={{
+      announcementEnabled: !!info.announcementEnabled,
+      announcementText: info.announcementText || "",
+      announcementLink: info.announcementLink || "",
+      announcementLinkText: info.announcementLinkText || "",
+      announcementType: info.announcementType || "info",
+    }} />
   </main>;
 }
 

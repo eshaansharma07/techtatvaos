@@ -14,7 +14,10 @@ const portalHosts = (
   .filter(Boolean);
 
 function isPortal(host: string) {
-  return portalHosts.includes(host.split(":")[0].toLowerCase());
+  const h = host.split(":")[0].toLowerCase();
+  if (portalHosts.includes(h)) return true;
+  if (process.env.NODE_ENV !== "production" && (h.startsWith("admin") || h.startsWith("portal") || h.includes("admin") || h.includes("portal"))) return true;
+  return false;
 }
 
 /* ── Viewport (shared by both apps) ── */

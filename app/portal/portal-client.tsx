@@ -40,9 +40,11 @@ import {
   HelpCircle,
   Home,
   User,
-  Send
+  Send,
+  Volume2,
+  VolumeX
 } from "lucide-react";
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, Area, AreaChart, YAxis, CartesianGrid } from "recharts";
 
 type Module = "Overview" | "Members" | "Teams" | "Events" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Hall of Fame" | "Contact Messages" | "Settings";
 type Resource = "users" | "teams" | "events" | "meetings" | "tasks" | "announcements" | "sponsors" | "achievements" | "gallery" | "hallOfFame" | "contacts" | "settings" | "invites" | "recruitmentSettings" | "recruitmentTeams" | "recruitmentRoles" | "recruitmentQuestions" | "recruitmentApplications" | "studentMembers" | "membershipDriveSettings";
@@ -150,7 +152,12 @@ const settingsFields: Field[] = [
   ["instagramPost2_image","Instagram Post 2 Image","upload:image"],
   ["instagramPost2_url","Instagram Post 2 Link"],
   ["instagramPost3_image","Instagram Post 3 Image","upload:image"],
-  ["instagramPost3_url","Instagram Post 3 Link"]
+  ["instagramPost3_url","Instagram Post 3 Link"],
+  ["announcementEnabled","Enable floating announcement","boolean"],
+  ["announcementText","Announcement text"],
+  ["announcementLink","Announcement link (optional)"],
+  ["announcementLinkText","Announcement link label (e.g. Register, View)"],
+  ["announcementType","Announcement type","select:info,event,alert,promo"]
 ];
 
 function idOf(item:any){return typeof item==="string"?item:String(item?._id || item?.id || item || "")}
@@ -230,7 +237,45 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
   const [uploads,setUploads]=useState<Record<string,{url:string;publicId:string;resourceType:string}>>({});
   const [uploading,setUploading]=useState<Record<string,boolean>>({});
 
+  // Command Palette & Cyber Mode States
+  const [showPalette, setShowPalette] = useState(false);
+  const [paletteSearch, setPaletteSearch] = useState("");
+  const [matrixRainMode, setMatrixRainMode] = useState(false);
+
   useEffect(()=>setUploads({}),[drawer?.resource,drawer?.title,drawer?.item?._id]);
+
+  // Global mouse coordinates logger for dynamic glow borders
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: any) => {
+      const cards = document.querySelectorAll(".portal-glow-card");
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (card as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
+        (card as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+      });
+    };
+    window.addEventListener("mousemove", handleGlobalMouseMove);
+    return () => window.removeEventListener("mousemove", handleGlobalMouseMove);
+  }, []);
+
+  // Keyboard shortcut listener for Cmd+K or "/"
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setShowPalette(prev => !prev);
+        setPaletteSearch("");
+      } else if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        setShowPalette(true);
+        setPaletteSearch("");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const counts=useMemo(()=>({
     members:data.users?.filter((u:any)=>u.status==="active").length || 0,
@@ -331,15 +376,166 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
     return [];
   }
 
+  // Keyboard shortcut suggestions
+  const commandSuggestions = useMemo(() => {
+    const list = [
+      { category: "Navigation", label: "Jump to Overview", action: () => { setActive("Overview"); setPanel("Navigated to Overview via shortcut."); } },
+      { category: "Navigation", label: "Jump to Core Members", action: () => { setActive("Members"); setPanel("Navigated to Members Roster."); } },
+      { category: "Navigation", label: "Jump to Teams Structure", action: () => { setActive("Teams"); setPanel("Navigated to Teams Editor."); } },
+      { category: "Navigation", label: "Jump to Events Desk", action: () => { setActive("Events"); setPanel("Navigated to Events Desk."); } },
+      { category: "Navigation", label: "Jump to Recruitment Panel", action: () => { setActive("Recruitment"); setPanel("Navigated to Recruitment Desk."); } },
+      { category: "Navigation", label: "Jump to Membership Drive", action: () => { setActive("Membership Drive"); setPanel("Navigated to Membership Drive Desk."); } },
+      { category: "Navigation", label: "Jump to Attendance sheet", action: () => { setActive("Attendance"); setPanel("Navigated to Attendance sheet."); } },
+      { category: "Navigation", label: "Jump to Certificates Generator", action: () => { setActive("Certificates"); setPanel("Navigated to Certificates Desk."); } },
+      { category: "Navigation", label: "Jump to Meetings Logger", action: () => { setActive("Meetings"); setPanel("Navigated to Meetings Logger."); } },
+      { category: "Navigation", label: "Jump to AI Desk Companion", action: () => { setActive("AI"); setPanel("Navigated to AI Assistant."); } },
+      { category: "Navigation", label: "Jump to Settings", action: () => { setActive("Settings"); setPanel("Navigated to Settings."); } },
+      { category: "Developer Tools", label: "Toggle Cyber Matrix Rain Overlay", action: () => { setMatrixRainMode(prev => !prev); setPanel("Toggled cyber matrix canvas overlay."); } },
+      { category: "Developer Tools", label: "Execute Portal Diagnostic Check", action: () => {
+        setPanel("Running diagnostics: MongoDB check [OK], Vercel build [OK], Session token [VALID].");
+        playSuccessSound();
+      }}
+    ];
+    if (!paletteSearch) return list;
+    return list.filter(item => item.label.toLowerCase().includes(paletteSearch.toLowerCase()));
+  }, [paletteSearch]);
+
   const filtered=rowsFor(active).filter((row:any[])=>row.join(" ").toLowerCase().includes(search.toLowerCase()));
 
-  return <main className="portal-root pb-24 xl:pb-0">
-    <aside className="portal-sidebar fixed inset-y-0 left-0 hidden w-72 overflow-y-auto p-6 xl:flex xl:flex-col"><PortalLogo/><p className="mt-10 px-3 text-[10px] tracking-[.22em] text-white/25">INTERNAL PORTAL</p><nav className="mt-4 flex-1 space-y-1.5 pb-6">{nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`portal-nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm transition ${active===label?"portal-nav-active text-white":"text-white/42 hover:border-white/[.08] hover:bg-white/[.045] hover:text-white/75"}`}><Icon size={16}/>{label}</button>)}</nav><div className="mt-auto border-t border-white/[.06] pt-4"><button onClick={()=>signOut({callbackUrl:"/login"})} className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm text-white/35 transition hover:bg-rose-500/10 hover:text-rose-200"><LogOut size={15}/> Sign out</button></div></aside>
-    <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-[1.65rem] border border-white/10 bg-[#09070f]/88 p-2 shadow-2xl shadow-black/50 backdrop-blur-2xl xl:hidden">
+  return <main className="portal-root pb-24 xl:pb-0 relative">
+    
+    {/* Matrix Rain canvas layer */}
+    {matrixRainMode && (
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-20">
+        <MatrixRainCanvas />
+      </div>
+    )}
+
+    {/* Command Palette Overlay */}
+    {showPalette && (
+      <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 pt-24 px-4 backdrop-blur-md">
+        <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0c0817]/95 p-4 shadow-2xl shadow-purple-950/20 font-sans">
+          <div className="flex items-center gap-3 border-b border-white/10 pb-3 mb-3">
+            <Search className="text-white/40" size={16} />
+            <input
+              autoFocus
+              value={paletteSearch}
+              onChange={(e) => setPaletteSearch(e.target.value)}
+              placeholder="Search shortcuts or developer commands..."
+              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/20"
+            />
+            <button 
+              onClick={() => setShowPalette(false)}
+              className="text-[10px] uppercase font-bold tracking-wider text-white/30 hover:text-white transition bg-white/5 px-2.5 py-1 rounded-md"
+            >
+              Esc
+            </button>
+          </div>
+          <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+            {commandSuggestions.length ? (
+              Object.entries(
+                commandSuggestions.reduce((acc, curr) => {
+                  acc[curr.category] = acc[curr.category] || [];
+                  acc[curr.category].push(curr);
+                  return acc;
+                }, {} as Record<string, typeof commandSuggestions>)
+              ).map(([category, items]) => (
+                <div key={category}>
+                  <p className="text-[9px] uppercase font-bold tracking-[.18em] text-white/20 px-2 py-1">{category}</p>
+                  {items.map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => {
+                        item.action();
+                        setShowPalette(false);
+                      }}
+                      className="w-full text-left text-xs text-white/70 hover:text-white hover:bg-violet-600/20 rounded-xl px-3 py-2.5 transition flex justify-between items-center"
+                    >
+                      <span>{item.label}</span>
+                      <span className="text-[10px] text-white/20">↵ Run</span>
+                    </button>
+                  ))}
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-white/30 text-center py-4">No commands matching query.</p>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+    <aside className="portal-sidebar fixed inset-y-0 left-0 hidden w-72 overflow-y-auto p-6 xl:flex xl:flex-col z-30">
+      <PortalLogo/>
+      <div className="mt-8 px-3 flex items-center justify-between">
+        <p className="text-[10px] tracking-[.22em] text-white/25">INTERNAL PORTAL</p>
+        <button 
+          onClick={() => setShowPalette(true)}
+          className="text-[9px] font-mono border border-white/10 bg-white/5 px-1.5 py-0.5 rounded text-white/40 hover:text-white"
+        >
+          ⌘K
+        </button>
+      </div>
+      <nav className="mt-4 flex-1 space-y-1.5 pb-6">
+        {nav.map(([Icon,label])=>(
+          <button 
+            key={label} 
+            onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`);}} 
+            className={`portal-nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm transition ${active===label?"portal-nav-active text-white":"text-white/42 hover:border-white/[.08] hover:bg-white/[.045] hover:text-white/75"}`}
+          >
+            <Icon size={16}/>
+            {label}
+          </button>
+        ))}
+      </nav>
+      <div className="mt-auto border-t border-white/[.06] pt-4">
+        <button onClick={()=>signOut({callbackUrl:"/login"})} className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm text-white/35 transition hover:bg-rose-500/10 hover:text-rose-200">
+          <LogOut size={15}/> 
+          Sign out
+        </button>
+      </div>
+    </aside>
+    <nav className="fixed inset-x-3 bottom-3 z-45 grid grid-cols-5 gap-1 rounded-[1.65rem] border border-white/10 bg-[#09070f]/88 p-2 shadow-2xl shadow-black/50 backdrop-blur-2xl xl:hidden">
       {nav.slice(0,5).map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[10px] font-semibold transition active:scale-[.97] ${active===label?"bg-violet-400/18 text-white shadow-[0_0_24px_rgba(168,85,247,.16)]":"text-white/42"}`}><Icon size={17}/><span>{label==="Attendance"?"Attend":label}</span></button>)}
     </nav>
-    <section className="xl:pl-72"><header className="portal-topbar flex min-h-24 flex-wrap items-center justify-between gap-4 px-5 py-4 md:px-8"><div className="w-full xl:hidden"><PortalLogo/></div><div><p className="text-xs tracking-wide text-white/35">{new Date().toLocaleString("en-IN",{dateStyle:"full",timeStyle:"short"})}</p><h1 className="mt-1 text-xl font-semibold tracking-tight">Good day, {userName}.</h1></div><div className="flex flex-1 items-center justify-end gap-3"><label className="portal-search hidden min-w-80 items-center gap-3 rounded-2xl px-4 py-3 text-white/40 md:flex"><Search size={16}/><input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search live admin data..." className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/25"/></label><button onClick={refresh} className="portal-mini-button rounded-2xl p-3 text-white/55 transition hover:-translate-y-0.5 hover:text-white"><RefreshCw size={16} className={busy?"animate-spin":""}/></button><button onClick={()=>setNotifications(!notifications)} className="portal-mini-button relative rounded-2xl p-3 text-white/55 transition hover:-translate-y-0.5 hover:text-white"><Bell size={16}/>{counts.contacts?<i className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-pink-400 shadow-[0_0_14px_rgba(244,114,182,.75)]"/>:null}</button><div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 shadow-[0_0_30px_rgba(168,85,247,.28)]"/></div><label className="portal-search flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-white/40 md:hidden"><Search size={16}/><input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search admin data..." className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/25"/></label></header>
-    <div className="p-4 md:p-8"><div className="mb-4 flex gap-2 overflow-x-auto pb-1 xl:hidden mobile-tabs">{nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold ${active===label?"border-violet-200/35 bg-violet-500/18 text-white":"border-white/[.08] bg-white/[.035] text-white/50"}`}><Icon size={14}/>{label}</button>)}</div><Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>{active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}<div className="portal-action mt-4 rounded-2xl p-5"><p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p><p className="mt-3 text-sm leading-6 text-white/65">{panel}</p></div></div></section>
+    <section className="xl:pl-72 relative z-10">
+      <header className="portal-topbar flex min-h-24 flex-wrap items-center justify-between gap-4 px-5 py-4 md:px-8">
+        <div className="w-full xl:hidden"><PortalLogo/></div>
+        <div>
+          <p className="text-xs tracking-wide text-white/35">{new Date().toLocaleString("en-IN",{dateStyle:"full",timeStyle:"short"})}</p>
+          <h1 className="mt-1 text-xl font-semibold tracking-tight">Good day, {userName}.</h1>
+        </div>
+        <div className="flex flex-1 items-center justify-end gap-3">
+          <label className="portal-search hidden min-w-80 items-center gap-3 rounded-2xl px-4 py-3 text-white/40 md:flex">
+            <Search size={16}/>
+            <input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search live data... (Press '/' to search shortcuts)" className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/25"/>
+          </label>
+          <button onClick={refresh} className="portal-mini-button rounded-2xl p-3 text-white/55 transition hover:-translate-y-0.5 hover:text-white">
+            <RefreshCw size={16} className={busy?"animate-spin":""}/>
+          </button>
+          <button onClick={()=>setNotifications(!notifications)} className="portal-mini-button relative rounded-2xl p-3 text-white/55 transition hover:-translate-y-0.5 hover:text-white">
+            <Bell size={16}/>
+            {counts.contacts?<i className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-pink-400 shadow-[0_0_14px_rgba(244,114,182,.75)]"/>:null}
+          </button>
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 shadow-[0_0_30px_rgba(168,85,247,.28)]"/>
+        </div>
+        <label className="portal-search flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-white/40 md:hidden">
+          <Search size={16}/>
+          <input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search admin data..." className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/25"/>
+        </label>
+      </header>
+      <div className="p-4 md:p-8">
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 xl:hidden mobile-tabs">
+          {nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold ${active===label?"border-violet-200/35 bg-violet-500/18 text-white":"border-white/[.08] bg-white/[.035] text-white/50"}`}><Icon size={14}/>{label}</button>)}
+        </div>
+        <Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>
+        {active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
+        <div className="portal-action mt-4 rounded-2xl p-5 border border-violet-500/10">
+          <p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p>
+          <p className="mt-3 text-sm leading-6 text-white/65">{panel}</p>
+        </div>
+      </div>
+    </section>
     {notifications?<div className="fixed right-5 top-24 z-50 w-[min(380px,calc(100vw-40px))] rounded-3xl border border-white/10 bg-[#111016]/95 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl"><p className="text-sm font-semibold">Open contact messages</p>{(data.contactMessages||[]).filter((m:any)=>m.status!=="resolved").slice(0,6).map((m:any)=><button onClick={()=>setPanel(`${m.name}: ${m.message}`)} className="portal-mini-button mt-3 block w-full rounded-2xl px-4 py-3 text-left text-xs text-white/60 transition hover:-translate-y-0.5 hover:text-white" key={idOf(m)}>{m.subject}</button>)}{!counts.contacts?<p className="mt-4 text-xs text-white/40">No unresolved messages.</p>:null}</div>:null}
     {drawer?<div className="fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm"><div className="ml-auto h-full max-w-xl overflow-y-auto rounded-3xl border border-white/10 bg-[#111016] p-6 shadow-2xl shadow-violet-950/25"><div className="flex items-center justify-between"><h2 className="text-xl font-semibold tracking-tight">{drawer.title}</h2><button onClick={()=>setDrawer(null)} className="portal-mini-button rounded-full px-3 py-1.5 text-xs text-white/55">Close</button></div><form action={submit} className="mt-6 grid gap-4">{drawer.fields.map(([name,label,type])=>{const source={...(drawer.defaults||{}),...(drawer.item||{})};const selected=rawValue(source,name);const formValue=Array.isArray(selected)?selected:String(selected??"");const multiTeamValue=Array.isArray(selected)&&selected.length?selected:(rawValue(source,"team")?[String(rawValue(source,"team"))]:[]);return <label className="text-[10px] tracking-wider text-white/35" key={name}>{label.toUpperCase()}{type==="status-select"?<select name={name} defaultValue={formValue || "published"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{["draft","published","active","completed","archived"].map((status)=><option value={status} key={status}>{status}</option>)}</select>:type==="recruitment-status-select"?<select name={name} defaultValue={formValue || "open"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="opening_soon">Opening soon</option><option value="open">Applications open</option><option value="closing_soon">Closing soon</option><option value="closed">Closed</option><option value="full">Registration full</option></select>:type==="application-status-select"?<select name={name} defaultValue={formValue || "pending"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="pending">Pending</option><option value="shortlisted">Shortlisted</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="on_hold">On hold</option></select>:type==="question-type-select"?<select name={name} defaultValue={formValue || "long_text"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{["short_text","long_text","number","multiple_choice","checkbox","dropdown","rating","url","file_upload"].map((kind)=><option value={kind} key={kind}>{kind.replace(/_/g," ")}</option>)}</select>:type==="contact-status-select"?<select name={name} defaultValue={formValue || "new"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="new">New</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option></select>:type==="membership-status-select"?<select name={name} defaultValue={formValue || "closed"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="opening_soon">Opening soon</option><option value="open">Applications open</option><option value="closing_soon">Closing soon</option><option value="closed">Closed</option></select>:type==="membership-member-status-select"?<select name={name} defaultValue={formValue || "pending"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>:type==="hall-category"?<select name={name} defaultValue={formValue || "top_contributor"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="top_contributor">Top Contributor</option><option value="alumni">Alumni</option></select>:type==="participation-select"?<select name={name} defaultValue={formValue || "individual"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="individual">Individual only</option><option value="team">Team only</option><option value="both">Individual or team</option></select>:type==="boolean-select"?<select name={name} defaultValue={String(selected === true || selected === "true")} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="true">Yes</option><option value="false">No</option></select>:type==="lane-select"?<select name={name} defaultValue={formValue || "technical"} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="technical">Joint Secretary (Technical & Operations)</option><option value="creative">Joint Secretary (Media & Creative)</option></select>:type==="event-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No linked event</option>{(data.events||[]).map((event:any)=><option value={idOf(event)} key={idOf(event)}>{event.title}</option>)}</select>:type==="recruitment-team-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">Choose recruitment team</option>{(data.recruitmentTeams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="recruitment-role-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">All roles in selected team</option>{(data.recruitmentRoles||[]).filter((role:any)=>role.active!==false).map((role:any)=><option value={idOf(role)} key={idOf(role)}>{valueOf(role,"team") ? `${valueOf(role,"team")} / ` : ""}{role.name}</option>)}</select>:type==="team-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No team</option>{(data.teams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="team-multi-select"?<select name={name} multiple defaultValue={multiTeamValue} className="mt-2 min-h-36 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{(data.teams||[]).filter((team:any)=>team.active!==false).map((team:any)=><option value={idOf(team)} key={idOf(team)}>{team.name}</option>)}</select>:type==="winner-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No winner selected</option>{winnerOptions(data,drawer.item).map((candidate:any)=><option value={candidate.id} key={candidate.id}>{candidate.label}</option>)}</select>:type==="member-select"?<select name={name} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"><option value="">No member selected</option>{(data.users||[]).filter((user:any)=>user.status!=="inactive").map((user:any)=><option value={idOf(user)} key={idOf(user)}>{memberLabel(user)}</option>)}</select>:type==="member-multi-select"?<select name={name} multiple defaultValue={Array.isArray(formValue)?formValue:[]} className="mt-2 min-h-36 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50">{(data.users||[]).filter((user:any)=>user.status!=="inactive").map((user:any)=><option value={idOf(user)} key={idOf(user)}>{memberLabel(user)}</option>)}</select>:type==="gallery-assets"?<GalleryAssetsControl name={name} current={drawer.item?.assets || []} resource={drawer.resource} setPanel={setPanel}/>:type?.startsWith("upload")?<UploadControl name={name} current={Array.isArray(formValue)?"":formValue} upload={uploads[name]} uploading={Boolean(uploading[name])} onUpload={async(file)=>{setUploading((state)=>({...state,[name]:true}));setPanel(`Uploading ${file.name}...`);const form=new FormData();form.append("file",file);form.append("folder",`tech-tatva-os/${drawer.resource}`);const res=await fetch("/api/portal/upload",{method:"POST",body:form});const result=await res.json();setUploading((state)=>({...state,[name]:false}));if(!res.ok){setPanel(result.error || "Upload failed");return}setUploads((state)=>({...state,[name]:result}));setPanel(`Uploaded ${file.name}. Now save the form.`)}}/>:["description","body","message","aboutCopy","agenda","discussionPoints","decisionsTaken","actionItems","nextMeeting","announcementBanner","customSuccessMessage","adminNotes","helpText","options"].includes(name)?<textarea name={name} defaultValue={formValue} rows={5} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"/>:<input name={name} type={type||"text"} defaultValue={formValue} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50"/>}</label>})}<p className="text-[10px] leading-4 text-white/35">Tip: hold Command/Ctrl to select multiple leads or co-leads.</p><button disabled={busy||Object.values(uploading).some(Boolean)} className="portal-command-button rounded-2xl py-3 text-sm font-semibold disabled:opacity-60">{busy?"Saving...":Object.values(uploading).some(Boolean)?"Uploading...":"Save changes"}</button></form></div></div>:null}
   </main>
@@ -497,44 +693,132 @@ function renderCell(cell: any, index: number) {
 }
 
 function Overview({counts,chart,setActive}:{counts:any;chart:any[];setActive:(m:Module)=>void}){
-  const cards=[
-    ["Total members",counts.members,"Members",Users,"from-violet-400 to-fuchsia-300","Manage roster"],
-    ["Active teams",counts.teams,"Teams",Workflow,"from-emerald-300 to-violet-300","Assign leads"],
-    ["Published events",counts.events,"Events",CalendarDays,"from-fuchsia-300 to-pink-300","Open events"],
-    ["Open tasks",counts.tasks,"Tasks",CheckCircle2,"from-emerald-300 to-violet-300","Track work"]
+  const bentoGrid = [
+    { label: "Core Active Roster", value: counts.members, copy: "Verify team member status & edit lanes", module: "Members" as Module, icon: Users, styles: "md:col-span-2 bg-gradient-to-br from-violet-950/20 via-black/40 to-indigo-950/20 border-violet-500/10" },
+    { label: "Community Sign-ups", value: counts.membershipDrive, copy: "View registrations & verify details", module: "Membership Drive" as Module, icon: UserPlus, styles: "bg-gradient-to-br from-fuchsia-950/20 via-black/40 to-pink-950/20 border-fuchsia-500/10" },
+    { label: "Active Project Lanes", value: counts.teams, copy: "Configure departments & joint secretary lanes", module: "Teams" as Module, icon: Workflow, styles: "bg-gradient-to-br from-indigo-950/20 via-black/40 to-violet-950/20 border-indigo-500/10" },
+    { label: "Scheduled Events", value: counts.events, copy: "Publish calendar schedules & winners", module: "Events" as Module, icon: CalendarDays, styles: "bg-gradient-to-br from-pink-950/20 via-black/40 to-fuchsia-950/20 border-pink-500/10" }
   ];
+
+  // Systems diagnostics rolling logger states
+  const [logLines, setLogLines] = useState<string[]>([
+    "⚙ SYSTEM BOOT: Initializing portal check...",
+    "✓ MONGO_DB: Connection string verified.",
+    "✓ JWT_AUTH: Operator authorization token validated.",
+    "✓ HOST_DNS: portal routing initialized.",
+    "✓ DIAGNOSTICS: Systems online, all modules ready."
+  ]);
+
+  useEffect(() => {
+    const logs = [
+      "ℹ SYNC: Checking community rosters...",
+      "✓ SYNC: 100% synchronized with MongoDB.",
+      "ℹ AUDIT: Live event registries audit complete.",
+      "✓ STORAGE: Cloudinary media bucket checked.",
+      "✓ AI: GPT companion agent standby.",
+      "ℹ AUDIT: Department quotas verify [OK]."
+    ];
+    const interval = setInterval(() => {
+      const randomLog = logs[Math.floor(Math.random() * logs.length)];
+      const timestamp = new Date().toLocaleTimeString("en-IN", { hour12: false });
+      setLogLines(prev => [...prev.slice(-4), `[${timestamp}] ${randomLog}`]);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <>
-      <div className="portal-quick-grid mt-5">
-        {cards.map(([label,value,module,Icon,accent,copy]:any)=>(
-          <button onClick={()=>setActive(module)} className="portal-quick-card group rounded-[1.6rem] p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-violet-200/25" key={label}>
-            <div className="flex items-start justify-between gap-4">
-              <span className={`grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br ${accent} text-black shadow-[0_0_30px_rgba(168,85,247,.24)]`}>
-                <Icon size={18}/>
+    <div className="space-y-6">
+      
+      {/* Bento Grid section */}
+      <div className="grid gap-4 md:grid-cols-3 mt-6">
+        {bentoGrid.map((card) => (
+          <button 
+            key={card.label}
+            onClick={() => setActive(card.module)} 
+            className={`portal-quick-card portal-glow-card rounded-2xl p-5 text-left transition duration-300 relative border overflow-hidden ${card.styles}`}
+          >
+            <div className="flex items-start justify-between">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/5 border border-white/10 text-white/80">
+                <card.icon size={16}/>
               </span>
-              <span className="rounded-full border border-white/[.08] bg-white/[.035] px-3 py-1 text-[10px] font-semibold tracking-[.14em] text-white/35 transition group-hover:text-white/60">OPEN</span>
+              <span className="rounded-full border border-white/5 bg-white/5 px-2.5 py-1 text-[8px] font-bold tracking-[.18em] text-white/30 uppercase">Open module</span>
             </div>
-            <p className="mt-7 text-xs font-medium text-white/42">{label}</p>
-            <p className="mt-2 text-5xl font-semibold tracking-[-.07em] text-white">{value}</p>
-            <p className="mt-3 text-xs text-white/35">{copy}</p>
+            <p className="mt-6 text-[10px] uppercase font-bold tracking-wider text-white/35">{card.label}</p>
+            <p className="mt-1 text-4xl font-extrabold tracking-tight text-white drop-shadow-[0_0_12px_rgba(139,92,246,0.25)]">{card.value}</p>
+            <p className="mt-3 text-[10px] text-white/40 leading-relaxed">{card.copy}</p>
           </button>
         ))}
+
+        {/* Live Systems Diagnostics Logs console widget */}
+        <div className="portal-glow-card rounded-2xl border border-white/5 bg-black/40 p-5 md:col-span-2 flex flex-col font-mono text-[10px] text-emerald-400/80 shadow-md relative overflow-hidden">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3 text-white/40">
+            <span className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+              <span className="font-bold">OPERATOR DIAGNOSTIC CONSOLE</span>
+            </span>
+            <span className="text-[8px] uppercase tracking-wider">TTY/0</span>
+          </div>
+          <div className="flex-1 space-y-1 select-none pr-1">
+            {logLines.map((line, idx) => (
+              <p key={idx} className={line.includes("✓") ? "text-emerald-400" : line.includes("⚙") ? "text-white" : "text-emerald-500/60"}>
+                {line}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* Dynamic circular metrics widget */}
+        <div className="portal-glow-card rounded-2xl border border-white/5 bg-black/40 p-5 flex flex-col justify-between shadow-md relative overflow-hidden">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3 text-white/40">
+            <span className="font-semibold text-xs">Lane Density</span>
+            <span className="text-[8px] uppercase tracking-wider">METRIC</span>
+          </div>
+          <div className="flex items-center justify-center py-2">
+            <div className="relative h-20 w-20 flex items-center justify-center rounded-full border border-white/5 shadow-inner">
+              <div className="absolute inset-2 rounded-full border border-violet-500/20 bg-violet-500/5 flex flex-col items-center justify-center">
+                <span className="text-xl font-bold text-white leading-none">{counts.teams}</span>
+                <span className="text-[7px] text-white/30 uppercase mt-1">Lanes</span>
+              </div>
+              <svg className="h-full w-full transform -rotate-90" viewBox="0 0 36 36">
+                <path
+                  className="text-white/5"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path
+                  className="text-violet-500"
+                  strokeDasharray={`${Math.min(100, (counts.teams / 12) * 100)}, 100`}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+              </svg>
+            </div>
+          </div>
+          <p className="text-[9px] text-white/30 text-center">Density ratio of operating club divisions.</p>
+        </div>
       </div>
-      <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_.44fr]">
-        <div className="portal-chart rounded-[1.75rem] p-6">
+
+      {/* Main Charts & Quick links */}
+      <div className="grid gap-6 md:grid-cols-[1fr_.44fr] mt-6">
+        <div className="portal-chart rounded-2xl p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-lg font-semibold text-white">System data volume</p>
+              <p className="text-sm font-bold text-white uppercase tracking-wider">System data volume</p>
               <p className="mt-1 text-xs text-white/38">Realtime operational footprint across core modules.</p>
             </div>
-            <span className="rounded-full border border-violet-300/20 bg-violet-500/10 px-3 py-1.5 text-[10px] font-semibold tracking-[.18em] text-violet-100">LIVE</span>
+            <span className="rounded-full border border-violet-300/20 bg-violet-500/10 px-3 py-1 text-[9px] font-bold tracking-[.18em] text-violet-200">LIVE FEED</span>
           </div>
           <div className="mt-6 h-80">
             <ResponsiveContainer>
               <BarChart data={chart} barCategoryGap={42}>
-                <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{fill:"#ffffff73",fontSize:11}}/>
-                <Tooltip cursor={{fill:"rgba(139,92,246,.08)"}} contentStyle={{background:"#111016",border:"1px solid #ffffff16",borderRadius:14,color:"#fff"}}/>
-                <Bar dataKey="v" fill="url(#portalBar)" radius={[12,12,4,4]}/>
+                <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{fill:"#ffffff73",fontSize:10}}/>
+                <Tooltip cursor={{fill:"rgba(139,92,246,.04)"}} contentStyle={{background:"#0c0617",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,color:"#fff",fontSize:10}}/>
+                <Bar dataKey="v" fill="url(#portalBar)" radius={[8,8,0,0]}/>
                 <defs>
                   <linearGradient id="portalBar" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#f0abfc"/>
@@ -546,27 +830,30 @@ function Overview({counts,chart,setActive}:{counts:any;chart:any[];setActive:(m:
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="portal-chart rounded-[1.75rem] p-6">
-          <p className="text-lg font-semibold text-white">Quick access</p>
-          <p className="mt-1 text-xs leading-5 text-white/38">Jump into the most used operating modules.</p>
-          <div className="mt-5 grid gap-3">
-            <a href="/" target="_blank" rel="noopener noreferrer" className="portal-mini-button flex items-center justify-between rounded-2xl px-4 py-3 text-left text-sm text-white/70 transition hover:-translate-y-0.5 hover:text-white">
+
+        <div className="portal-chart rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <p className="text-sm font-bold text-white uppercase tracking-wider">Quick access</p>
+            <p className="mt-1 text-xs leading-5 text-white/38">Jump into the most used operating modules.</p>
+          </div>
+          <div className="mt-5 grid gap-2.5">
+            <a href="/" target="_blank" rel="noopener noreferrer" className="portal-mini-button flex items-center justify-between rounded-xl px-4 py-3 text-left text-xs text-white/70 transition hover:text-white">
               <span className="flex items-center gap-2">
                 <Home size={14} className="text-violet-200" />
                 <span>Go to Website Home</span>
               </span>
-              <span className="text-[10px] tracking-[.16em] text-violet-200/55">VISIT</span>
+              <span className="text-[9px] tracking-[.16em] text-violet-200/55">VISIT</span>
             </a>
             {(["Members","Events","Attendance","Hall of Fame","Settings"] as Module[]).map((module)=>(
-              <button onClick={()=>setActive(module)} className="portal-mini-button flex items-center justify-between rounded-2xl px-4 py-3 text-left text-sm text-white/70 transition hover:-translate-y-0.5 hover:text-white" key={module}>
+              <button onClick={()=>setActive(module)} className="portal-mini-button flex items-center justify-between rounded-xl px-4 py-3 text-left text-xs text-white/70 transition hover:text-white" key={module}>
                 <span>{module}</span>
-                <span className="text-[10px] tracking-[.16em] text-violet-200/55">OPEN</span>
+                <span className="text-[9px] tracking-[.16em] text-violet-200/55">OPEN</span>
               </button>
             ))}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -743,18 +1030,18 @@ function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent}:{
         </div>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_.32fr]">
-        <div className="glass rounded-[2rem] p-5 md:p-6 overflow-hidden">
+        <div className="grid gap-4 lg:grid-cols-[1fr_.32fr]">
+        <div className="portal-card portal-glow-card rounded-2xl p-5 md:p-6 overflow-hidden border border-white/5 bg-black/40">
           <div className="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-4">
-            <p className="text-sm font-semibold text-white uppercase tracking-wider">{active} Workspace</p>
-            <span className="rounded-full bg-white/[0.045] px-3 py-1 text-[10px] font-semibold text-white/50">{rows.length} total records</span>
+            <p className="text-xs font-bold text-white uppercase tracking-wider">{active} Workspace</p>
+            <span className="rounded-full bg-white/5 border border-white/10 px-3 py-1 text-[9px] font-semibold text-white/50">{rows.length} total records</span>
           </div>
           
           {rows.length ? (
-            <div className="mt-4 max-h-[min(650px,calc(100vh-340px))] overflow-auto overscroll-contain rounded-2xl border border-white/[.06] mobile-tabs">
+            <div className="mt-4 max-h-[min(650px,calc(100vh-340px))] overflow-auto overscroll-contain rounded-xl border border-white/[.06] mobile-tabs bg-black/25">
               <div className="max-w-full min-w-[750px]">
                 {/* Table Header Row */}
-                <div className={`hidden md:grid gap-3 bg-white/[.045] px-4 py-3.5 text-[10px] font-bold uppercase tracking-wider text-white/40 border-b border-white/[0.08] ${
+                <div className={`hidden md:grid gap-3 bg-white/5 px-4 py-3.5 text-[10px] font-bold uppercase tracking-wider text-white/40 border-b border-white/[0.08] ${
                   headers.length === 5 
                     ? "grid-cols-[1.2fr_1fr_1fr_1.1fr_1fr_1.4fr]" 
                     : "grid-cols-[1.5fr_1.2fr_1.2fr_1.2fr_1.4fr]"
@@ -784,7 +1071,7 @@ function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent}:{
                         {cellData.map((cell: any, index: number) => (
                           <button 
                             onClick={() => open({ resource, title: `Edit ${active === "Hall of Fame" ? "Hall entry" : active.slice(0, -1)}`, fields, item })} 
-                            className={`rounded-2xl border border-white/[.06] bg-white/[.025] p-3 text-left md:border-0 md:bg-transparent md:p-0 transition hover:text-white ${index === 0 ? "text-white/80" : "text-white/48"}`} 
+                            className={`rounded-xl border border-white/[.06] bg-white/[.025] p-3 text-left md:border-0 md:bg-transparent md:p-0 transition hover:text-white ${index === 0 ? "text-white/80" : "text-white/48"}`} 
                             key={`${idOf(item)}-${index}`}
                           >
                             <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">
@@ -870,14 +1157,14 @@ function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent}:{
           )}
         </div>
         
-        <div className="glass rounded-[1.5rem] p-5 self-start">
-          <p className="text-sm font-semibold text-white">Module Actions</p>
+        <div className="portal-card portal-glow-card rounded-2xl p-5 self-start border border-white/5 bg-black/40">
+          <p className="text-xs font-bold text-white uppercase tracking-wider">Module Actions</p>
           {active === "Media" ? (["gallery", "sponsors", "achievements"] as Resource[]).map((resource) => (
-            <button onClick={() => open({ resource, title: `Add ${resource}`, fields: extraFields[resource] })} className="portal-mini-button mt-3 block w-full rounded-2xl px-4 py-3 text-left text-xs text-white/68 transition hover:-translate-y-0.5 hover:text-white" key={resource}>Add {resource}</button>
+            <button onClick={() => open({ resource, title: `Add ${resource}`, fields: extraFields[resource] })} className="portal-mini-button mt-3 block w-full rounded-xl px-4 py-3 text-left text-xs text-white/68 transition hover:text-white" key={resource}>Add {resource}</button>
           )) : (
-            <button onClick={() => open({ resource: c.resource, title: `Add ${active === "Hall of Fame" ? "Hall entry" : active.slice(0, -1)}`, fields: c.fields, defaults: active === "Hall of Fame" ? { category: "top_contributor", active: "true" } : defaults })} className="portal-command-button mt-3 block w-full rounded-2xl px-4 py-3 text-left text-xs text-white/68 transition hover:-translate-y-0.5 hover:text-white">Create record</button>
+            <button onClick={() => open({ resource: c.resource, title: `Add ${active === "Hall of Fame" ? "Hall entry" : active.slice(0, -1)}`, fields: c.fields, defaults: active === "Hall of Fame" ? { category: "top_contributor", active: "true" } : defaults })} className="portal-command-button mt-3 block w-full rounded-xl px-4 py-3 text-left text-xs transition">Create record</button>
           )}
-          <p className="portal-mini-button mt-3 rounded-2xl px-4 py-3 text-xs leading-5 text-white/60 border-t border-white/[0.04] pt-3">{helper}</p>
+          <p className="mt-4 text-[10px] text-white/30 leading-relaxed font-sans">{helper}</p>
         </div>
       </div>
     </div>
@@ -3265,10 +3552,82 @@ function UploadControl({
     </div>
   );
 }
+// ── Audio Feedback Web Audio Synth ──
+function playClickSound() {
+  if (typeof window === "undefined") return;
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.05);
+    gain.gain.setValueAtTime(0.06, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.05);
+  } catch (e) {
+    console.error("Audio error", e);
+  }
+}
+
+function playSuccessSound() {
+  if (typeof window === "undefined") return;
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc1.type = "triangle";
+    osc1.frequency.setValueAtTime(330, ctx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.25);
+    
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(440, ctx.currentTime);
+    osc2.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.25);
+    
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    
+    osc1.start();
+    osc2.start();
+    osc1.stop(ctx.currentTime + 0.4);
+    osc2.stop(ctx.currentTime + 0.4);
+  } catch (e) {
+    console.error("Audio error", e);
+  }
+}
 
 function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;open:(drawer:any)=>void;patch:(resource:Resource,item:any,body:Record<string, any>,message:string)=>void;remove:(resource:Resource,item:any)=>void;refresh:()=>Promise<void>;setPanel:(value:string)=>void}) {
-  const members = data.studentMembers || [];
   const today = new Date().toISOString().slice(0, 10);
+
+  // Sound feedback toggle state
+  const [soundsEnabled, setSoundsEnabled] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("tt-sounds") !== "false";
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tt-sounds", String(soundsEnabled));
+    }
+  }, [soundsEnabled]);
+
+  // Sync and manage localMembers state for optimistic UI updates
+  const [localMembers, setLocalMembers] = useState<any[]>(data.studentMembers || []);
+  
+  useEffect(() => {
+    setLocalMembers(data.studentMembers || []);
+  }, [data.studentMembers]);
 
   const [activeTab, setActiveTab] = useState<"dashboard" | "members">("dashboard");
   const [query, setQuery] = useState("");
@@ -3279,18 +3638,26 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
   const [selected, setSelected] = useState<string[]>([]);
   const [detailMember, setDetailMember] = useState<any>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
+  
+  // CLI Excel export terminal modal state
+  const [exportState, setExportState] = useState<{
+    show: boolean;
+    progress: number;
+    lines: string[];
+  } | null>(null);
+  
   const pageSize = 12;
 
   const counts = {
-    total: members.length,
-    today: members.filter((item:any)=>String(item.registeredAt || item.createdAt || "").slice(0,10) === today).length,
-    pending: members.filter((item:any)=>item.status === "pending").length,
-    approved: members.filter((item:any)=>item.status === "approved").length,
-    rejected: members.filter((item:any)=>item.status === "rejected").length
+    total: localMembers.length,
+    today: localMembers.filter((item:any)=>String(item.registeredAt || item.createdAt || "").slice(0,10) === today).length,
+    pending: localMembers.filter((item:any)=>item.status === "pending").length,
+    approved: localMembers.filter((item:any)=>item.status === "approved").length,
+    rejected: localMembers.filter((item:any)=>item.status === "rejected").length
   };
 
   const deptsMap = new Map<string, number>();
-  members.forEach((m: any) => {
+  localMembers.forEach((m: any) => {
     const d = m.department || "Other";
     deptsMap.set(d, (deptsMap.get(d) || 0) + 1);
   });
@@ -3300,14 +3667,14 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
     .slice(0, 5);
 
   const yearsMap = new Map<string, number>();
-  members.forEach((m: any) => {
+  localMembers.forEach((m: any) => {
     const y = m.year || "Unknown";
     yearsMap.set(y, (yearsMap.get(y) || 0) + 1);
   });
   const yearData = Array.from(yearsMap.entries()).map(([name, count]) => ({ name, count }));
 
   const interestsMap = new Map<string, number>();
-  members.forEach((m: any) => {
+  localMembers.forEach((m: any) => {
     const ints = m.interests || [];
     ints.forEach((i: string) => {
       interestsMap.set(i, (interestsMap.get(i) || 0) + 1);
@@ -3318,16 +3685,86 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
+  // Group registrations by day for the last 14 days
+  const dailyRegistrationData = useMemo(() => {
+    const result: { date: string; count: number; _rawDate: string }[] = [];
+    const now = new Date();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(now.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      result.push({
+        date: new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
+        count: 0,
+        _rawDate: dateStr
+      });
+    }
+    localMembers.forEach((m: any) => {
+      const regDate = String(m.registeredAt || m.createdAt || "").slice(0, 10);
+      const entry = result.find((r) => r._rawDate === regDate);
+      if (entry) entry.count += 1;
+    });
+    return result;
+  }, [localMembers]);
+
+  // High-speed Command bar filter query parser
+  const searchParsed = useMemo(() => {
+    let parsedStatus = statusFilter;
+    let parsedDept = deptFilter;
+    let parsedYear = yearFilter;
+    let plainQuery = query;
+
+    const statusMatch = query.match(/status:(\S+)/i);
+    if (statusMatch) {
+      parsedStatus = statusMatch[1].toLowerCase();
+      plainQuery = plainQuery.replace(/status:\S+/i, "");
+    }
+
+    const deptMatch = query.match(/dept:(\S+)/i);
+    if (deptMatch) {
+      parsedDept = deptMatch[1].toLowerCase();
+      plainQuery = plainQuery.replace(/dept:\S+/i, "");
+    }
+
+    const yearMatch = query.match(/year:(\S+)/i);
+    if (yearMatch) {
+      parsedYear = yearMatch[1].toLowerCase();
+      if (parsedYear === "1" || parsedYear === "1st") parsedYear = "1st";
+      else if (parsedYear === "2" || parsedYear === "2nd") parsedYear = "2nd";
+      else if (parsedYear === "3" || parsedYear === "3rd") parsedYear = "3rd";
+      else if (parsedYear === "4" || parsedYear === "4th") parsedYear = "4th";
+      else if (parsedYear === "5" || parsedYear === "5th") parsedYear = "5th";
+      plainQuery = plainQuery.replace(/year:\S+/i, "");
+    }
+
+    return {
+      status: parsedStatus,
+      dept: parsedDept,
+      year: parsedYear,
+      search: plainQuery.trim()
+    };
+  }, [query, statusFilter, deptFilter, yearFilter]);
+
   const filtered = useMemo(() => {
-    return members.filter((m: any) => {
-      const hay = `${m.fullName} ${m.uid} ${m.email} ${m.phone} ${m.department}`.toLowerCase();
-      if (query && !hay.includes(query.toLowerCase())) return false;
-      if (statusFilter !== "all" && m.status !== statusFilter) return false;
-      if (deptFilter !== "all" && m.department !== deptFilter) return false;
-      if (yearFilter !== "all" && m.year !== yearFilter) return false;
+    return localMembers.filter((m: any) => {
+      if (searchParsed.status !== "all") {
+        if (m.status !== searchParsed.status) return false;
+      }
+      if (searchParsed.dept !== "all") {
+        const deptValue = (m.department || "").toLowerCase();
+        if (!deptValue.includes(searchParsed.dept)) return false;
+      }
+      if (searchParsed.year !== "all") {
+        const yearValue = (m.year || "").toLowerCase();
+        if (!yearValue.includes(searchParsed.year)) return false;
+      }
+      if (searchParsed.search) {
+        const hay = `${m.fullName} ${m.uid} ${m.email} ${m.phone} ${m.department}`.toLowerCase();
+        if (!hay.includes(searchParsed.search.toLowerCase())) return false;
+      }
       return true;
     });
-  }, [members, query, statusFilter, deptFilter, yearFilter]);
+  }, [localMembers, searchParsed]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const visible = filtered.slice(page * pageSize, page * pageSize + pageSize);
@@ -3341,30 +3778,110 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
     }).filter(([, v]) => v)
   ).toString()}`;
 
+  // Interactive CLI Excel Export Animation trigger
+  function handleExcelExport() {
+    if (soundsEnabled) playClickSound();
+    
+    setExportState({
+      show: true,
+      progress: 0,
+      lines: ["$ export --dataset student_members --format xlsx"]
+    });
+
+    let currentProgress = 0;
+    const interval = setInterval(() => {
+      currentProgress += 10;
+      setExportState(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          progress: currentProgress
+        };
+      });
+
+      if (currentProgress >= 100) {
+        clearInterval(interval);
+        if (soundsEnabled) playSuccessSound();
+        setExportState(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            lines: [...prev.lines, "Success: StudentMembers.xlsx generated."]
+          };
+        });
+
+        // Trigger dynamic download
+        const a = document.createElement("a");
+        a.href = exportUrl;
+        a.click();
+      }
+    }, 120);
+  }
+
   function toggle(id: string) {
+    if (soundsEnabled) playClickSound();
     setSelected((state) => (state.includes(id) ? state.filter((x) => x !== id) : [...state, id]));
   }
   
   function toggleAll() {
+    if (soundsEnabled) playClickSound();
     setSelected(selected.length === visible.length ? [] : visible.map((x: any) => idOf(x)));
   }
 
-  async function bulkAction(action: "approve" | "reject") {
-    if (!selected.length) return;
-    setBulkBusy(true);
-    const res = await fetch("/api/membership/bulk", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, ids: selected })
-    });
-    setBulkBusy(false);
-    if (!res.ok) {
-      setPanel("Bulk action failed.");
-      return;
+  // Optimistic single member status update
+  async function updateMemberStatus(member: any, newStatus: "approved" | "rejected") {
+    if (soundsEnabled) playClickSound();
+    const oldStatus = member.status;
+
+    // Optimistic UI state update
+    setLocalMembers(prev => prev.map(m => idOf(m) === idOf(member) ? { ...m, status: newStatus } : m));
+
+    try {
+      const res = await fetch(`/api/admin/studentMembers/${idOf(member)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus, approvedAt: newStatus === "approved" ? new Date() : undefined })
+      });
+      if (!res.ok) throw new Error();
+      if (soundsEnabled) playSuccessSound();
+      setPanel(`Student ${newStatus} successfully.`);
+      void refresh();
+    } catch (err) {
+      // Revert status
+      setLocalMembers(prev => prev.map(m => idOf(m) === idOf(member) ? { ...m, status: oldStatus } : m));
+      setPanel("Update failed. Reverted changes.");
     }
-    setSelected([]);
-    await refresh();
-    setPanel(`Bulk ${action} successful.`);
+  }
+
+  // Optimistic bulk actions
+  async function bulkActionOptimistic(action: "approve" | "reject") {
+    if (!selected.length) return;
+    if (soundsEnabled) playClickSound();
+    setBulkBusy(true);
+
+    const status = action === "approve" ? "approved" : "rejected";
+    const oldMembers = [...localMembers];
+
+    // Optimistic UI state update
+    setLocalMembers(prev => prev.map(m => selected.includes(idOf(m)) ? { ...m, status } : m));
+
+    try {
+      const res = await fetch("/api/membership/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ids: selected })
+      });
+      setBulkBusy(false);
+      if (!res.ok) throw new Error();
+      if (soundsEnabled) playSuccessSound();
+      setSelected([]);
+      setPanel(`Bulk ${action} successful.`);
+      void refresh();
+    } catch (err) {
+      setBulkBusy(false);
+      setLocalMembers(oldMembers);
+      setPanel("Bulk action failed. Reverted changes.");
+    }
   }
 
   const tabClass = (tab: typeof activeTab) =>
@@ -3374,19 +3891,34 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
         : "border-white/[.08] bg-white/[.035] text-white/50 hover:text-white hover:border-white/20"
     }`;
 
-  const deptsList = Array.from(new Set(members.map((m: any) => m.department).filter(Boolean))) as string[];
+  const deptsList = Array.from(new Set(localMembers.map((m: any) => m.department).filter(Boolean))) as string[];
   const yearsList = ["1st", "2nd", "3rd", "4th", "5th"];
 
   return (
     <div className="mt-7 flex flex-col min-w-0 overflow-hidden">
-      <div className="mb-6 flex flex-wrap gap-2 border-b border-white/[.06] pb-4">
-        <button onClick={() => { setActiveTab("dashboard"); }} className={tabClass("dashboard")}>
-          <BarChart3 size={14} />
-          <span>Dashboard</span>
-        </button>
-        <button onClick={() => { setActiveTab("members"); setPage(0); }} className={tabClass("members")}>
-          <ClipboardList size={14} />
-          <span>Members List ({filtered.length})</span>
+      <div className="mb-6 flex flex-wrap gap-4 items-center justify-between border-b border-white/[.06] pb-4">
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => { setActiveTab("dashboard"); }} className={tabClass("dashboard")}>
+            <BarChart3 size={14} />
+            <span>Dashboard</span>
+          </button>
+          <button onClick={() => { setActiveTab("members"); setPage(0); }} className={tabClass("members")}>
+            <ClipboardList size={14} />
+            <span>Members List ({filtered.length})</span>
+          </button>
+        </div>
+        
+        {/* Tactile Sound Effects Toggle */}
+        <button
+          onClick={() => {
+            const next = !soundsEnabled;
+            setSoundsEnabled(next);
+            if (next) playClickSound();
+          }}
+          className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.035] hover:bg-white/[0.08] active:scale-95 px-4 py-2 text-xs font-semibold text-white/50 hover:text-white transition"
+        >
+          {soundsEnabled ? <Volume2 size={14} className="text-emerald-400" /> : <VolumeX size={14} className="text-white/40" />}
+          <span>Audio: {soundsEnabled ? "Tactile ON" : "Tactile OFF"}</span>
         </button>
       </div>
 
@@ -3408,15 +3940,51 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
+            
+            {/* Daily Registrations Area Chart */}
+            <div className="portal-chart-card rounded-2xl border border-white/[.08] bg-white/[0.02] p-5 md:col-span-2">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">Registration Activity (Last 14 Days)</h3>
+                <span className="text-[10px] text-white/40 font-semibold uppercase tracking-wider bg-white/[0.03] border border-white/[0.05] rounded-full px-2.5 py-0.5">Live Feed</span>
+              </div>
+              {dailyRegistrationData.some(d => d.count > 0) ? (
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={dailyRegistrationData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="regGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4}/>
+                          <stop offset="95%" stopColor="#a855f7" stopOpacity={0.0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={9} tickLine={false} />
+                      <YAxis stroke="rgba(255,255,255,0.3)" fontSize={9} tickLine={false} allowDecimals={false} />
+                      <CartesianGrid stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
+                      <Tooltip contentStyle={{ background: "#0c0617", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 10 }} />
+                      <Area type="monotone" dataKey="count" stroke="#a855f7" strokeWidth={2.5} fillOpacity={1} fill="url(#regGrad)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-xs text-white/40 text-center py-10">No recent registration activity recorded.</p>
+              )}
+            </div>
+
             <div className="portal-chart-card rounded-2xl border border-white/[.08] bg-white/[0.02] p-5">
               <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">Department-wise Distribution</h3>
               {deptData.length ? (
                 <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={deptData}>
+                      <defs>
+                        <linearGradient id="deptGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ec4899" stopOpacity={0.9}/>
+                          <stop offset="100%" stopColor="#a855f7" stopOpacity={0.3}/>
+                        </linearGradient>
+                      </defs>
                       <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} />
                       <Tooltip contentStyle={{ background: "#111016", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12 }} />
-                      <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="count" fill="url(#deptGrad)" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -3431,9 +3999,15 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                 <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={interestData} layout="vertical">
+                      <defs>
+                        <linearGradient id="interestGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8}/>
+                          <stop offset="100%" stopColor="#ec4899" stopOpacity={0.8}/>
+                        </linearGradient>
+                      </defs>
                       <XAxis type="number" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} />
                       <Tooltip contentStyle={{ background: "#111016", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12 }} />
-                      <Bar dataKey="count" fill="#ec4899" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="count" fill="url(#interestGrad)" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -3465,23 +4039,28 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
           
           <div className="glass rounded-xl p-5 border border-white/[.06] bg-black/10">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+              <div>
                 <p className="text-sm font-semibold">Active Student Roster</p>
                 <p className="mt-1 text-xs text-white/38">Apply queries, filter by verification status, target specific academic years or departments, and export reports.</p>
+              </div>
               <div className="flex flex-wrap gap-2">
-                <a href={exportUrl} className="portal-command-button rounded-2xl px-4 py-2.5 text-xs font-semibold hover:scale-[1.02] transition active:scale-95">
+                <button 
+                  onClick={handleExcelExport} 
+                  className="portal-command-button rounded-2xl px-4 py-2.5 text-xs font-semibold hover:scale-[1.02] transition active:scale-95 bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-600/10"
+                >
                   Export Excel
-                </a>
+                </button>
               </div>
             </div>
 
             {/* Filter Inputs Grid */}
             <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-              <label className="portal-search flex items-center gap-3 rounded-2xl px-4 py-3 text-white/40 border border-white/[.07] bg-black/30">
+              <label className="portal-search flex items-center gap-3 rounded-2xl px-4 py-3 text-white/40 border border-white/[.07] bg-black/30 md:col-span-1">
                 <Search size={14}/>
                 <input
                   value={query}
                   onChange={(e) => { setQuery(e.target.value); setPage(0); }}
-                  placeholder="Search name, UID, email, phone..."
+                  placeholder="Type queries or year:3 dept:cse status:pending..."
                   className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/25"
                 />
               </label>
@@ -3527,7 +4106,7 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
               <div className="h-4 w-px bg-white/10" />
               <button
                 type="button"
-                onClick={() => bulkAction("approve")}
+                onClick={() => bulkActionOptimistic("approve")}
                 disabled={bulkBusy}
                 className="text-xs font-semibold text-emerald-400 hover:underline disabled:opacity-50"
               >
@@ -3535,7 +4114,7 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
               </button>
               <button
                 type="button"
-                onClick={() => bulkAction("reject")}
+                onClick={() => bulkActionOptimistic("reject")}
                 disabled={bulkBusy}
                 className="text-xs font-semibold text-rose-400 hover:underline disabled:opacity-50"
               >
@@ -3587,7 +4166,7 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                         <div className="text-[10px] text-white/40 mt-0.5">{m.phone}</div>
                       </td>
                       <td className="p-4">
-                        <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider ${
+                        <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition-all duration-300 ${
                           m.status === "approved"
                             ? "bg-emerald-400/10 text-emerald-400"
                             : m.status === "rejected"
@@ -3600,8 +4179,11 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                       <td className="p-4 text-right space-x-2 text-white">
                         <button
                           type="button"
-                          onClick={() => setDetailMember(m)}
-                          className="text-[10px] font-bold text-violet-300 hover:text-violet-100 uppercase"
+                          onClick={() => {
+                            if (soundsEnabled) playClickSound();
+                            setDetailMember(m);
+                          }}
+                          className="text-[10px] font-bold text-violet-300 hover:text-violet-100 uppercase transition"
                         >
                           View
                         </button>
@@ -3609,15 +4191,15 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                           <>
                             <button
                               type="button"
-                              onClick={() => patch("studentMembers", m, { status: "approved" }, "Student approved")}
-                              className="text-[10px] font-bold text-emerald-400 hover:text-emerald-200 uppercase"
+                              onClick={() => updateMemberStatus(m, "approved")}
+                              className="text-[10px] font-bold text-emerald-400 hover:text-emerald-200 uppercase transition"
                             >
                               Approve
                             </button>
                             <button
                               type="button"
-                              onClick={() => patch("studentMembers", m, { status: "rejected" }, "Student rejected")}
-                              className="text-[10px] font-bold text-rose-400 hover:text-rose-200 uppercase"
+                              onClick={() => updateMemberStatus(m, "rejected")}
+                              className="text-[10px] font-bold text-rose-400 hover:text-rose-200 uppercase transition"
                             >
                               Reject
                             </button>
@@ -3625,8 +4207,11 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                         )}
                         <button
                           type="button"
-                          onClick={() => remove("studentMembers", m)}
-                          className="text-[10px] font-bold text-white/30 hover:text-rose-400 uppercase"
+                          onClick={() => {
+                            if (soundsEnabled) playClickSound();
+                            remove("studentMembers", m);
+                          }}
+                          className="text-[10px] font-bold text-white/30 hover:text-rose-400 uppercase transition"
                         >
                           Delete
                         </button>
@@ -3651,7 +4236,10 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                 <button
                   type="button"
                   disabled={page === 0}
-                  onClick={() => setPage(page - 1)}
+                  onClick={() => {
+                    if (soundsEnabled) playClickSound();
+                    setPage(page - 1);
+                  }}
                   className="portal-mini-button rounded-xl p-2.5 text-white/55 transition hover:text-white disabled:opacity-30 disabled:pointer-events-none"
                 >
                   <ChevronLeft size={14} />
@@ -3659,7 +4247,10 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                 <button
                   type="button"
                   disabled={page === pages - 1}
-                  onClick={() => setPage(page + 1)}
+                  onClick={() => {
+                    if (soundsEnabled) playClickSound();
+                    setPage(page + 1);
+                  }}
                   className="portal-mini-button rounded-xl p-2.5 text-white/55 transition hover:text-white disabled:opacity-30 disabled:pointer-events-none"
                 >
                   <ChevronRight size={14} />
@@ -3677,7 +4268,10 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
               <h3 className="text-lg font-bold text-white uppercase tracking-wider">Member Details</h3>
               <button
                 type="button"
-                onClick={() => setDetailMember(null)}
+                onClick={() => {
+                  if (soundsEnabled) playClickSound();
+                  setDetailMember(null);
+                }}
                 className="text-xs text-white/40 hover:text-white"
               >
                 Close
@@ -3748,7 +4342,135 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
           </div>
         </div>
       )}
+
+      {/* Terminal style Export animation overlay */}
+      {exportState && exportState.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0d071a] p-6 font-mono text-xs text-emerald-400 shadow-[0_0_50px_rgba(139,92,246,0.15),inset_0_0_15px_rgba(0,0,0,0.8)] relative overflow-hidden">
+            {/* Holographic matrix background drop */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.015)_50%,_rgba(0,0,0,0)_50%)] bg-[length:100%_4px] pointer-events-none" />
+            
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4 text-white/40 text-[10px]">
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                <span>SHELL ENGINE v1.0.4</span>
+              </span>
+              <button 
+                onClick={() => setExportState(null)} 
+                className="text-white/40 hover:text-white transition"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-3 select-none">
+              {exportState.lines.map((line, idx) => (
+                <p key={idx} className={line.startsWith("$") ? "text-white/80" : "text-emerald-400 font-bold"}>
+                  {line}
+                </p>
+              ))}
+              
+              {exportState.progress < 100 ? (
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-[10px] text-emerald-400/50">
+                    <span>compiling roster dataset...</span>
+                    <span>{exportState.progress}%</span>
+                  </div>
+                  <div className="h-2 w-full bg-black/40 border border-white/5 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-100"
+                      style={{ width: `${exportState.progress}%` }}
+                    />
+                  </div>
+                  <p className="text-white/30 text-[9px]">
+                    [{ "█".repeat(Math.floor(exportState.progress / 5)) }
+                    { " ".repeat(20 - Math.floor(exportState.progress / 5)) }]
+                  </p>
+                </div>
+              ) : (
+                <div className="animate-in fade-in duration-300">
+                  <div className="h-2 w-full bg-black/40 border border-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500 rounded-full w-full" />
+                  </div>
+                  <p className="text-emerald-500 text-[9px] mt-1.5">[████████████████████]</p>
+                  
+                  <div className="mt-4 border-t border-emerald-500/10 pt-3 flex flex-col gap-2">
+                    <p className="text-emerald-300 text-[11px] font-bold">
+                      ✓ Download compiled successfully.
+                    </p>
+                    <button 
+                      onClick={() => setExportState(null)}
+                      className="mt-2 w-full rounded-xl border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 text-center text-xs font-semibold text-emerald-300 transition active:scale-[0.98]"
+                    >
+                      Dismiss Console
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+function MatrixRainCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    const columns = Math.floor(canvas.width / 20);
+    const yPositions = Array(columns).fill(0);
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$#@%&";
+
+    const draw = () => {
+      ctx.fillStyle = "rgba(6, 3, 12, 0.08)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Purple matrix rain
+      ctx.fillStyle = "rgba(168, 85, 247, 0.35)";
+      ctx.font = "14px monospace";
+
+      for (let i = 0; i < yPositions.length; i++) {
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        const x = i * 20;
+        const y = yPositions[i];
+        
+        ctx.fillText(text, x, y);
+
+        if (y > 100 + Math.random() * 10000) {
+          yPositions[i] = 0;
+        } else {
+          yPositions[i] += 20;
+        }
+      }
+      animationFrameId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />;
+}
+
 

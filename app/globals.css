@@ -292,10 +292,9 @@ body:before {
   min-height: 100vh;
   color: #fff;
   background:
-    radial-gradient(circle at 16% 7%, rgba(253,186,116,.14), transparent 28%),
-    radial-gradient(circle at 52% 0%, rgba(139,92,246,.16), transparent 32%),
-    radial-gradient(circle at 84% 16%, rgba(232,121,166,.14), transparent 25%),
-    linear-gradient(135deg, #100712 0%, #170b19 42%, #070305 100%);
+    radial-gradient(circle at 10% 5%, rgba(139,92,246,0.18), transparent 30%),
+    radial-gradient(circle at 90% 95%, rgba(236,72,153,0.12), transparent 35%),
+    linear-gradient(135deg, #06030c 0%, #0d071a 50%, #040207 100%);
 }
 .portal-root:before {
   content: "";
@@ -303,10 +302,9 @@ body:before {
   inset: 0;
   z-index: -2;
   background-image:
-    linear-gradient(rgba(255,255,255,.026) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.026) 1px, transparent 1px);
-  background-size: 46px 46px;
-  mask-image: radial-gradient(circle at 50% 22%, #000 0%, transparent 72%);
+    radial-gradient(rgba(255,255,255,.015) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 80%);
 }
 .portal-root:after {
   content: "";
@@ -315,190 +313,184 @@ body:before {
   z-index: -1;
   pointer-events: none;
   background:
-    linear-gradient(110deg, transparent 0%, rgba(253,186,116,.07) 38%, transparent 48%),
-    radial-gradient(circle at 60% 100%, rgba(232,121,166,.12), transparent 38%);
+    radial-gradient(circle at 50% 50%, rgba(139,92,246,0.03), transparent 50%);
 }
 .portal-sidebar {
-  background:
-    linear-gradient(180deg, rgba(22,10,23,.94), rgba(9,4,9,.88)),
-    radial-gradient(circle at 50% 0%, rgba(232,121,166,.16), transparent 34%);
-  box-shadow: inset -1px 0 rgba(255,255,255,.05), 18px 0 70px rgba(0,0,0,.25);
+  background: rgba(9, 5, 20, 0.4);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 20px 0 80px rgba(0,0,0,0.4);
 }
 .portal-logo-mark {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 28px rgba(139,92,246,.18), inset 0 0 18px rgba(255,255,255,.04);
-}
-.portal-logo-mark:after {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.38), transparent);
-  transform: rotate(25deg) translateX(-120%);
-  animation: portalSweep 5.5s ease-in-out infinite;
+  box-shadow: 0 0 30px rgba(139,92,246,0.25), inset 0 0 15px rgba(255,255,255,0.05);
 }
 .portal-nav-item {
   position: relative;
   border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .portal-nav-item:before {
   content: "";
   position: absolute;
-  inset: 8px auto 8px 0;
+  inset: 10px auto 10px 0;
   width: 3px;
   pointer-events: none;
   border-radius: 999px;
-  background: linear-gradient(#d8b4fe, #f4a7c4, #fdba74);
+  background: linear-gradient(to bottom, #a855f7, #ec4899);
   opacity: 0;
   transform: scaleY(.4);
-  transition: .25s ease;
+  transition: .3s ease;
 }
 .portal-nav-active {
-  border-color: rgba(216,180,254,.28);
-  background: linear-gradient(90deg, rgba(168,85,247,.16), rgba(253,186,116,.055));
-  box-shadow: 0 0 34px rgba(232,121,166,.13), inset 0 1px rgba(255,250,241,.08);
+  border-color: rgba(168,85,247,0.25);
+  background: linear-gradient(90deg, rgba(168,85,247,0.12), rgba(236,72,153,0.02));
+  box-shadow: 0 4px 30px rgba(139,92,246,0.1), inset 0 1px rgba(255,255,255,0.05);
+  color: #fff !important;
 }
 .portal-nav-active:before {
   opacity: 1;
   transform: scaleY(1);
 }
 .portal-topbar {
-  background: linear-gradient(180deg, rgba(12,10,17,.82), rgba(8,7,12,.58));
-  border-bottom: 1px solid rgba(255,255,255,.075);
-  backdrop-filter: blur(22px);
+  background: rgba(6, 3, 12, 0.3);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
 }
 .portal-search {
-  background: rgba(255,255,255,.045);
-  border: 1px solid rgba(255,255,255,.09);
-  box-shadow: inset 0 1px rgba(255,255,255,.05);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: inset 0 1px rgba(255,255,255,0.02);
+  transition: all 0.3s ease;
+}
+.portal-search:focus-within {
+  border-color: rgba(168,85,247,0.4);
+  box-shadow: 0 0 20px rgba(139,92,246,0.15);
 }
 .portal-hero {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.09);
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
-    radial-gradient(circle at 16% 0%, rgba(253,186,116,.12), transparent 28%),
-    radial-gradient(circle at 58% 4%, rgba(168,85,247,.16), transparent 32%),
-    rgba(22,10,23,.6);
-  box-shadow: 0 24px 80px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.09);
-  backdrop-filter: blur(22px);
-}
-.portal-hero:after {
-  content: "";
-  position: absolute;
-  right: -12%;
-  top: -70%;
-  width: 42%;
-  height: 180%;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(216,180,254,.16), transparent);
-  transform: rotate(24deg);
-}
-.portal-hero > * {
-  position: relative;
-  z-index: 1;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(15, 10, 25, 0.3);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 1px rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
 }
 .portal-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.09);
-  background:
-    linear-gradient(145deg, rgba(255,250,241,.11), rgba(255,250,241,.026)),
-    rgba(22,10,23,.66);
-  box-shadow: 0 18px 55px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.08);
-  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.015);
+  box-shadow: 0 15px 45px rgba(0,0,0,0.25), inset 0 1px rgba(255,255,255,0.03);
+  backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
 }
-.portal-card:before {
-  content: "";
+/* Mouse hover glow trail classes */
+.portal-glow-card {
+  position: relative;
+}
+.portal-glow-card::before {
+  content: '';
   position: absolute;
-  inset: -1px;
-  background: radial-gradient(circle at 85% 10%, rgba(168,85,247,.28), transparent 28%);
-  opacity: .65;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    140px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+    rgba(168,85,247,0.3) 0%,
+    rgba(236,72,153,0.1) 50%,
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
   pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.portal-glow-card:hover::before {
+  opacity: 1;
 }
 .portal-quick-grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 .portal-quick-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.09);
-  background:
-    linear-gradient(145deg, rgba(255,250,241,.105), rgba(255,250,241,.026)),
-    radial-gradient(circle at 100% 0%, rgba(253,186,116,.16), transparent 34%),
-    radial-gradient(circle at 0% 10%, rgba(232,121,166,.08), transparent 30%),
-    rgba(22,10,23,.66);
-  box-shadow: 0 18px 58px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.015);
+  box-shadow: 0 15px 45px rgba(0,0,0,0.25), inset 0 1px rgba(255,255,255,0.04);
   backdrop-filter: blur(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.portal-quick-card:after {
-  content: "";
-  position: absolute;
-  inset: auto 18px 16px 18px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(216,180,254,.45), transparent);
-  opacity: .45;
+.portal-quick-card:hover {
+  border-color: rgba(168,85,247,0.25);
+  background: rgba(139,92,246,0.03);
+  box-shadow: 0 20px 50px rgba(139,92,246,0.08);
 }
 .portal-command-button {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.14);
-  background: linear-gradient(135deg, #fffaf1, #f7e7d7 46%, #f4a7c4 78%, #fdba74);
-  color: #170711;
-  box-shadow: 0 16px 48px rgba(232,121,166,.2);
+  border: 1px solid rgba(168,85,247,0.2);
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(139,92,246,0.2);
+  transition: all 0.3s ease;
 }
-.portal-command-button:before {
-  content: "";
-  position: absolute;
-  inset: -80% auto -80% -30%;
-  width: 30%;
-  transform: rotate(18deg);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
-  opacity: 0;
-  transition: .6s ease;
+.portal-command-button:hover {
+  border-color: rgba(168,85,247,0.4);
+  box-shadow: 0 15px 40px rgba(139,92,246,0.35);
+  transform: translateY(-1px);
 }
-.portal-command-button:hover:before { left: 120%; opacity: .9; }
-.portal-command-button > * { position: relative; z-index: 1; }
+.portal-command-button:active {
+  transform: translateY(0);
+}
 .portal-mini-button {
-  border: 1px solid rgba(255,255,255,.09);
-  background: linear-gradient(135deg, rgba(255,255,255,.065), rgba(255,255,255,.025));
-  box-shadow: inset 0 1px rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.02);
+  box-shadow: inset 0 1px rgba(255,255,255,0.02);
   backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+.portal-mini-button:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.1);
 }
 .portal-link-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.09);
-  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.02);
   padding: .45rem .75rem;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .03em;
   transition: .2s ease;
 }
-.portal-link-action:hover { transform: translateY(-1px); background: rgba(232,121,166,.13); }
+.portal-link-action:hover {
+  transform: translateY(-1px);
+  background: rgba(139,92,246,0.1);
+  border-color: rgba(168,85,247,0.25);
+}
 .portal-card > * {
   position: relative;
   z-index: 1;
 }
 .portal-chart {
-  border: 1px solid rgba(255,255,255,.09);
-  background:
-    linear-gradient(180deg, rgba(255,250,241,.075), rgba(255,250,241,.022)),
-    rgba(22,10,23,.64);
-  box-shadow: 0 18px 65px rgba(0,0,0,.26), inset 0 1px rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.015);
+  box-shadow: 0 15px 45px rgba(0,0,0,0.25), inset 0 1px rgba(255,255,255,0.03);
   backdrop-filter: blur(20px);
 }
 .portal-action {
-  border: 1px solid rgba(216,180,254,.18);
-  background: linear-gradient(135deg, rgba(168,85,247,.12), rgba(253,186,116,.065));
-  box-shadow: inset 0 1px rgba(255,255,255,.06);
+  border: 1px solid rgba(168,85,247,0.15);
+  background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(236,72,153,0.03));
+  box-shadow: inset 0 1px rgba(255,255,255,0.02);
 }
 .mobile-tabs {
   scrollbar-width: none;
@@ -1065,3 +1057,35 @@ body:before {
   }
 }
 
+/* ── Membership Card Holographic Shimmer ── */
+@keyframes cardShimmer {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  100% { transform: translateX(200%) rotate(25deg); }
+}
+@keyframes cardGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+.membership-card-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255,255,255,0.03) 30%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.03) 70%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  animation: cardShimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
