@@ -321,7 +321,7 @@ export function InstagramFeed({
                 </div>
 
                 {/* Text details for live posts */}
-                {post.caption ? (
+                {post.image ? (
                   <div className="mt-5 flex flex-col justify-between flex-grow px-2">
                     <div>
                       <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-wider text-violet-300/80 uppercase">
@@ -329,28 +329,12 @@ export function InstagramFeed({
                         <span>{post.isReel ? "Reel" : "Post"}</span>
                       </div>
                       <p className="mt-3 pl-3 border-l border-white/10 group-hover:border-pink-500/30 text-[13px] font-medium leading-relaxed text-white/70 group-hover:text-white transition-all duration-300 line-clamp-2 min-h-[44px] px-0.5">
-                        {formatCaption(post.caption)}
+                        {formatCaption(post.caption || "View this post on Instagram.")}
                       </p>
                     </div>
                     <div className="mt-5 pt-3 border-t border-white/[.04] flex items-center justify-between text-[8px] font-mono tracking-[0.15em] text-white/25">
                       <span>{displayHandle.toUpperCase()}</span>
-                      <span>{formatDate(post.timestamp)}</span>
-                    </div>
-                  </div>
-                ) : post.image ? (
-                  <div className="mt-5 flex flex-col justify-between flex-grow px-2">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-wider text-violet-300/80 uppercase">
-                        <Instagram size={10} className="text-pink-400/90" />
-                        <span>Featured</span>
-                      </div>
-                      <p className="mt-3 pl-3 border-l border-white/10 group-hover:border-pink-500/30 text-[13px] font-medium leading-relaxed text-white/40 line-clamp-2 min-h-[44px] px-0.5 italic">
-                        Manual fallback display.
-                      </p>
-                    </div>
-                    <div className="mt-5 pt-3 border-t border-white/[.04] flex items-center justify-between text-[8px] font-mono tracking-[0.15em] text-white/25">
-                      <span>{displayHandle.toUpperCase()}</span>
-                      <span>ACTIVE</span>
+                      <span>{post.timestamp ? formatDate(post.timestamp) : "ACTIVE"}</span>
                     </div>
                   </div>
                 ) : null}
