@@ -424,7 +424,7 @@ export async function deleteResource(resource: AdminResource, id: string) {
   }
   if (resource === "meetings") return Meeting.findByIdAndUpdate(id, { status: "archived" }, { new: true });
   if (resource === "tasks") return Task.findByIdAndDelete(id);
-  if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { status: "archived" }, { new: true });
+  if (resource === "announcements") return Announcement.findByIdAndDelete(id);
   if (resource === "sponsors") return Sponsor.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "achievements") return Achievement.findByIdAndDelete(id);
   if (resource === "gallery") return Gallery.findByIdAndUpdate(id, { published: false }, { new: true });

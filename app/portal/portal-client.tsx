@@ -333,7 +333,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
     setBusy(true);
     const res=await fetch(`/api/admin/${resource}/${idOf(item)}`,{method:"DELETE"});
     setBusy(false);
-    setPanel(res.ok?(resource==="events"?"Event deleted permanently.":resource==="users"?"Member deleted permanently.":"Record removed from public/active views."):"Delete/archive failed.");
+    setPanel(res.ok?(resource==="events"?"Event deleted permanently.":resource==="users"?"Member deleted permanently.":resource==="announcements"?"Announcement deleted permanently.":"Record removed from public/active views."):"Delete/archive failed.");
     await refresh();
   }
 
