@@ -24,6 +24,20 @@ import {
   MembershipDriveSettings
 } from "@/lib/models";
 
+function parseLocalDate(val: any): Date | undefined {
+  if (!val) return undefined;
+  if (val instanceof Date) return val;
+  const str = String(val).trim();
+  if (!str) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(str) && !str.includes("Z") && !/[+-]\d{2}/.test(str)) {
+    return new Date(`${str}+05:30`);
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    return new Date(`${str}T00:00:00+05:30`);
+  }
+  return new Date(str);
+}
+
 export const adminResources = [
   "users",
   "teams",
@@ -119,10 +133,10 @@ function normalizeEventBody(input: Record<string, any>, create = false) {
   if (body.participationMode !== undefined || create) normalized.participationMode = participationModes.has(String(body.participationMode)) ? body.participationMode : "individual";
   if (create || body.status !== undefined) normalized.status = normalizeEventStatus(body.status, "published");
   if (create || body.registrationOpen !== undefined) normalized.registrationOpen = body.registrationOpen === true || body.registrationOpen === "true";
-  if (body.registrationStart) normalized.registrationStart = new Date(body.registrationStart);
-  if (body.registrationEnd) normalized.registrationEnd = new Date(body.registrationEnd);
-  if (body.startAt) normalized.startAt = new Date(body.startAt);
-  if (body.endAt) normalized.endAt = new Date(body.endAt);
+  if (body.registrationStart) normalized.registrationStart = parseLocalDate(body.registrationStart);
+  if (body.registrationEnd) normalized.registrationEnd = parseLocalDate(body.registrationEnd);
+  if (body.startAt) normalized.startAt = parseLocalDate(body.startAt);
+  if (body.endAt) normalized.endAt = parseLocalDate(body.endAt);
   if (body.leads !== undefined) normalized.leads = refIds(body.leads);
   if ("winnerFirst" in input) normalized.winnerFirst = refId(input.winnerFirst) || null;
   if ("winnerSecond" in input) normalized.winnerSecond = refId(input.winnerSecond) || null;
@@ -219,8 +233,8 @@ function normalizeRecruitmentSettings(input: Record<string, any>) {
   if ("emailOnInterview" in input) normalized.emailOnInterview = input.emailOnInterview === true || input.emailOnInterview === "true";
   if ("autoCloseAfterDeadline" in input) normalized.autoCloseAfterDeadline = input.autoCloseAfterDeadline === true || input.autoCloseAfterDeadline === "true";
   if ("manualOverride" in input) normalized.manualOverride = input.manualOverride === true || input.manualOverride === "true";
-  if (body.openingDate) normalized.openingDate = new Date(body.openingDate);
-  if (body.closingDate) normalized.closingDate = new Date(body.closingDate);
+  if (body.openingDate) normalized.openingDate = parseLocalDate(body.openingDate);
+  if (body.closingDate) normalized.closingDate = parseLocalDate(body.closingDate);
   if (body.maximumApplications !== undefined) normalized.maximumApplications = Number(body.maximumApplications) || undefined;
   return normalized;
 }
@@ -232,8 +246,8 @@ function normalizeMembershipDriveSettings(input: Record<string, any>) {
   if ("registrationEnabled" in input) normalized.registrationEnabled = input.registrationEnabled === true || input.registrationEnabled === "true";
   if ("autoCloseAfterDeadline" in input) normalized.autoCloseAfterDeadline = input.autoCloseAfterDeadline === true || input.autoCloseAfterDeadline === "true";
   if ("manualOverride" in input) normalized.manualOverride = input.manualOverride === true || input.manualOverride === "true";
-  if (body.openingDate) normalized.openingDate = new Date(body.openingDate);
-  if (body.closingDate) normalized.closingDate = new Date(body.closingDate);
+  if (body.openingDate) normalized.openingDate = parseLocalDate(body.openingDate);
+  if (body.closingDate) normalized.closingDate = parseLocalDate(body.closingDate);
   return normalized;
 }
 
@@ -300,20 +314,20 @@ export async function createResource(resource: AdminResource, input: Record<stri
   if (resource === "meetings") {
     return Meeting.create({
       ...body,
-      date: body.date ? new Date(body.date) : undefined,
+      date: body.date ? parseLocalDate(body.date) : undefined,
       organizer: refId(body.organizer),
       attendees: refIds(body.attendees),
       actionItems: parseActionItems(body.actionItems)
     });
   }
   if (resource === "tasks") {
-    return Task.create({ ...body, createdBy: actorId, dueAt: body.dueAt ? new Date(body.dueAt) : undefined });
+    return Task.create({ ...body, createdBy: actorId, dueAt: body.dueAt ? parseLocalDate(body.dueAt) : undefined });
   }
   if (resource === "announcements") {
-    return Announcement.create({ ...body, author: actorId, publishAt: body.publishAt ? new Date(body.publishAt) : new Date() });
+    return Announcement.create({ ...body, author: actorId, publishAt: body.publishAt ? parseLocalDate(body.publishAt) : new Date() });
   }
   if (resource === "sponsors") return Sponsor.create({ ...body, active: body.active !== "false" });
-  if (resource === "achievements") return Achievement.create({ ...body, awardedAt: body.awardedAt ? new Date(body.awardedAt) : undefined, featured: body.featured === true || body.featured === "true" });
+  if (resource === "achievements") return Achievement.create({ ...body, awardedAt: body.awardedAt ? parseLocalDate(body.awardedAt) : undefined, featured: body.featured === true || body.featured === "true" });
   if (resource === "gallery") {
     return Gallery.create(normalizeGalleryBody(input));
   }
@@ -342,11 +356,11 @@ export async function updateResource(resource: AdminResource, id: string, input:
     return user;
   }
   if (resource === "events") return Event.findByIdAndUpdate(id, normalizeEventBody(input), { new: true, runValidators: true });
-  if (resource === "meetings") return Meeting.findByIdAndUpdate(id, { ...body, date: body.date ? new Date(body.date) : undefined, organizer: refId(body.organizer), attendees: refIds(body.attendees), actionItems: parseActionItems(body.actionItems) }, { new: true });
-  if (resource === "tasks") return Task.findByIdAndUpdate(id, { ...body, dueAt: body.dueAt ? new Date(body.dueAt) : undefined }, { new: true });
-  if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { ...body, publishAt: body.publishAt ? new Date(body.publishAt) : undefined }, { new: true });
+  if (resource === "meetings") return Meeting.findByIdAndUpdate(id, { ...body, date: body.date ? parseLocalDate(body.date) : undefined, organizer: refId(body.organizer), attendees: refIds(body.attendees), actionItems: parseActionItems(body.actionItems) }, { new: true });
+  if (resource === "tasks") return Task.findByIdAndUpdate(id, { ...body, dueAt: body.dueAt ? parseLocalDate(body.dueAt) : undefined }, { new: true });
+  if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { ...body, publishAt: body.publishAt ? parseLocalDate(body.publishAt) : undefined }, { new: true });
   if (resource === "sponsors") return Sponsor.findByIdAndUpdate(id, { ...body, active: body.active !== "false" }, { new: true });
-  if (resource === "achievements") return Achievement.findByIdAndUpdate(id, { ...body, awardedAt: body.awardedAt ? new Date(body.awardedAt) : undefined, featured: body.featured === true || body.featured === "true" }, { new: true });
+  if (resource === "achievements") return Achievement.findByIdAndUpdate(id, { ...body, awardedAt: body.awardedAt ? parseLocalDate(body.awardedAt) : undefined, featured: body.featured === true || body.featured === "true" }, { new: true });
   if (resource === "gallery") return Gallery.findByIdAndUpdate(id, normalizeGalleryBody(input), { new: true });
   if (resource === "hallOfFame") return HallOfFame.findByIdAndUpdate(id, { ...body, year: body.year ? Number(body.year) : undefined, order: body.order ? Number(body.order) : undefined, active: body.active !== "false" }, { new: true });
   if (resource === "contacts") return ContactMessage.findByIdAndUpdate(id, { status: body.status }, { new: true });

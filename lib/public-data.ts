@@ -83,6 +83,15 @@ export async function getClubInfo() {
   return Object.fromEntries(rows.map((row) => [row.key, row.value])) as Record<string, any>;
 }
 
+export async function getLatestPublicAnnouncement() {
+  await connectDB();
+  return Announcement.findOne({
+    status: "published",
+    publishAt: { $lte: new Date() }
+  }).sort({ publishAt: -1 }).lean();
+}
+
+
 export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   await connectDB();
   const events = await Event.find({ status: { $in: ["published", "active", "completed"] } })

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Calendar, GraduationCap, Instagram, Github, Linkedin } from "lucide-react";
-import { getClubInfo, getPublicEvents } from "@/lib/public-data";
+import { getClubInfo, getPublicEvents, getLatestPublicAnnouncement } from "@/lib/public-data";
 import { MotionLogo, SiteLoader } from "@/components/brand-motion";
 import { MobilePublicMenu } from "@/components/mobile-public-menu";
 import { PremiumBackground } from "@/components/premium-background";
@@ -27,7 +27,10 @@ const DiscordIcon = ({ size = 14 }: { size?: number }) => (
 );
 
 export async function PublicShell({ children }: { children: React.ReactNode }) {
-  const info = await getClubInfo();
+  const [info, latestAnn] = await Promise.all([
+    getClubInfo(),
+    getLatestPublicAnnouncement()
+  ]);
   
   // Load dynamic events and workshops for rich footer
   const events = await getPublicEvents(10);
@@ -190,12 +193,12 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
       </div>
     </footer>
     <FloatingAnnouncement data={{
-      announcementEnabled: !!info.announcementEnabled,
-      announcementText: info.announcementText || "",
-      announcementLink: info.announcementLink || "",
-      announcementLinkText: info.announcementLinkText || "",
-      announcementType: info.announcementType || "info",
-      announcementDetails: info.announcementDetails || "",
+      announcementEnabled: latestAnn ? ((latestAnn as any).status === "published") : !!info.announcementEnabled,
+      announcementText: latestAnn ? (latestAnn as any).title : (info.announcementText || ""),
+      announcementLink: latestAnn ? "" : (info.announcementLink || ""),
+      announcementLinkText: latestAnn ? "" : (info.announcementLinkText || ""),
+      announcementType: latestAnn ? "info" : (info.announcementType || "info"),
+      announcementDetails: latestAnn ? (latestAnn as any).body : (info.announcementDetails || ""),
     }} />
   </main>;
 }
