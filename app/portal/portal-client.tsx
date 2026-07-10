@@ -1067,11 +1067,11 @@ function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent}:{
                     const isMeeting = active === "Meetings";
                     const cellData = row.slice(0, -1);
                     const gridClass = cellData.length === 5 
-                      ? "grid-cols-[1.2fr_1fr_1fr_1.1fr_1fr_1.4fr]" 
-                      : "grid-cols-[1.5fr_1.2fr_1.2fr_1.2fr_1.4fr]";
+                      ? "md:grid-cols-[1.2fr_1fr_1fr_1.1fr_1fr_1.4fr]" 
+                      : "md:grid-cols-[1.5fr_1.2fr_1.2fr_1.2fr_1.4fr]";
 
                     return (
-                      <div className={`grid gap-3 p-4 text-sm hover:bg-white/[0.02] transition md:grid-cols-none md:text-xs md:items-center ${gridClass}`} key={idOf(item)}>
+                      <div className={`grid grid-cols-1 gap-3 p-4 text-sm hover:bg-white/[0.02] transition md:grid md:text-xs md:items-center ${gridClass}`} key={idOf(item)}>
                         {cellData.map((cell: any, index: number) => (
                           <button 
                             onClick={() => open({ resource, title: `Edit ${active === "Hall of Fame" ? "Hall entry" : active.slice(0, -1)}`, fields, item })} 
