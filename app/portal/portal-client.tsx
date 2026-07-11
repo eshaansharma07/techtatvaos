@@ -3158,6 +3158,28 @@ function ProfileCard({ name, photo, role, email, phone, copiedKey, onCopy }: { n
 
 function Settings({ info, open }: { info: any; open: (drawer: any) => void }) {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleSelfDelete() {
+    if (!window.confirm("ARE YOU ABSOLUTELY SURE? This will permanently delete your account, event registrations, attendance records, and revoke all portal access immediately. This action CANNOT be undone.")) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/portal/account/delete", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        alert("Account successfully deleted. You will now be redirected.");
+        window.location.href = "/";
+      } else {
+        alert(data.error || "Failed to delete account.");
+        setDeleting(false);
+      }
+    } catch (e) {
+      alert("Network error, please try again.");
+      setDeleting(false);
+    }
+  }
 
   function handleCopy(key: string, val: string) {
     navigator.clipboard.writeText(val);
@@ -3393,6 +3415,21 @@ function Settings({ info, open }: { info: any; open: (drawer: any) => void }) {
               <p className="mt-2 text-xs leading-relaxed text-white/40">
                 Operator accounts are invite-only. Invited users can access this admin panel using their email accounts once invited by a current operator.
               </p>
+            </div>
+
+            <div className="mt-6 border-t border-rose-500/20 pt-4">
+              <p className="text-[10px] text-rose-400 uppercase tracking-wider font-semibold">Danger Zone</p>
+              <p className="mt-2 text-xs leading-relaxed text-white/40">
+                Permanently delete your account and revoke all portal permissions immediately. This action is irreversible.
+              </p>
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={handleSelfDelete}
+                className="mt-3.5 w-full flex items-center justify-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs font-bold text-rose-300 hover:bg-rose-500/20 active:scale-95 transition disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {deleting ? "Deleting account..." : "Delete My Account"}
+              </button>
             </div>
           </div>
         </div>

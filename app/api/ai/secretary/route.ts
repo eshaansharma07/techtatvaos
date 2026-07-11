@@ -14,7 +14,7 @@ const allowedRoles = new Set(["super_admin", "president", "vice_president", "sec
 
 async function context() {
   const [members, teams, events, registrations, attendance, tasks, announcements, meetings, documents] = await Promise.all([
-    User.find({ memberType: "club_member", status: "active" }).select("name uid email team role").populate("team", "name").limit(300).lean(),
+    User.find({ memberType: "club_member", status: "active" }).select("name team role").populate("team", "name").limit(300).lean(),
     Team.find({ active: true }).select("name lead coLeads members").populate("lead", "name").populate("coLeads", "name").limit(100).lean(),
     Event.find({}).select("title status category startAt venue team").populate("team", "name").sort({ startAt: -1 }).limit(120).lean(),
     EventRegistration.find({ status: "confirmed" }).select("event user mode teamName").populate("event", "title").limit(500).lean(),
