@@ -5,6 +5,8 @@ import { connectDB } from "@/lib/db";
 import { User } from "@/lib/models";
 import { verifyTotp } from "@/lib/portal";
 
+import { rateLimit } from "@/lib/rate-limit";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret:
     process.env.AUTH_SECRET ||
@@ -27,6 +29,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const otp = String(credentials?.otp || "");
 
         if (!email || !password) return null;
+        if (!rateLimit(`login:${email}`, 5, 60_000)) return null;
 
         await connectDB();
         const user = await User.findOne({ email, status: "active" })

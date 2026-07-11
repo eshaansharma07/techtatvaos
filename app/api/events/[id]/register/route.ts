@@ -129,11 +129,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 }
 
+import { audit, requirePortal } from "@/lib/portal";
+
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const input = registrationInput.safeParse(await req.json());
+  const blocked = await requirePortal(req);
+  if (blocked) return blocked;
+
+  const bodyJson = await req.json().catch(() => ({}));
+  const input = registrationInput.safeParse(bodyJson);
   if (!input.success) return NextResponse.json({ error: input.error.flatten() }, { status: 400 });
+
   await connectDB();
   const { id } = await params;
   const record = await EventRegistration.findOneAndUpdate({ event: id, user: input.data.userId }, { status: "cancelled" }, { new: true });
+  await audit(req, "portal.event.registration.cancel", { eventId: id, userId: input.data.userId });
   return NextResponse.json(record);
 }
