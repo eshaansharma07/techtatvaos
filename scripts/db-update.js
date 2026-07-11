@@ -1,6 +1,7 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 
-const uri = "mongodb+srv://eshaansharma800_db_user:EYznrcAWvoDZ8wxy@cluster0.niwb9lv.mongodb.net/tech-tatva-os?appName=Cluster0";
+const uri = process.env.MONGODB_URI;
 
 const ClubInfoSchema = new mongoose.Schema({
   key: { type: String, required: true, unique: true },

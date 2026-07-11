@@ -76,3 +76,10 @@ Attendance records are tied to event registrations and preserve method, marker, 
 ## Expansion Points
 
 The model layer is intentionally modular for certificate generation, alumni records, recruitment, elections, merchandise, sponsorship CRM, mobile API consumers, and external calendar synchronization.
+
+## ⚠️ Security Notice (Important)
+
+If any secret (such as the `MONGODB_URI` connection string) was previously hardcoded in the codebase, those values may still exist in the Git commit history. 
+> [!WARNING]
+> **You must rotate any previously hardcoded database credentials, API keys, or JWT tokens immediately to prevent unauthorized access.** Always use environment variables for managing credentials.
+
