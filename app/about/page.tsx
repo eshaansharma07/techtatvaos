@@ -26,15 +26,15 @@ function bullets(value: string | undefined, fallback: string[]) {
 
 function SignalCard({ icon: Icon, label, title, copy }: { icon: any; label: string; title: string; copy: string }) {
   return (
-    <article className="about-signal-card group rounded-[2rem] p-6 md:p-7">
+    <article className="glass-brutalist group rounded-[2rem] p-6 md:p-7">
       <div className="flex items-center justify-between">
-        <span className="grid h-12 w-12 place-items-center rounded-2xl border border-violet-200/15 bg-violet-400/10 text-violet-100">
+        <span className="grid h-12 w-12 place-items-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
           <Icon size={18} />
         </span>
-        <span className="text-[10px] font-semibold tracking-[.22em] text-white/28">LIVE</span>
+        <span className="text-[10px] font-semibold tracking-[.22em] text-emerald-400">ACTIVE</span>
       </div>
-      <p className="mt-8 text-[10px] font-semibold tracking-[.28em] text-violet-200/75">{label}</p>
-      <h2 className="mt-3 text-2xl font-semibold tracking-[-.045em] text-white md:text-3xl">{title}</h2>
+      <p className="mt-8 text-[10px] font-semibold tracking-[.28em] text-[#00FF66]">{label}</p>
+      <h2 className="mt-3 text-2xl font-bold tracking-[-.045em] text-white md:text-3xl">{title}</h2>
       <p className="mt-4 text-sm leading-7 text-white/48">{copy}</p>
     </article>
   );
@@ -42,9 +42,9 @@ function SignalCard({ icon: Icon, label, title, copy }: { icon: any; label: stri
 
 function Principle({ index, title, copy }: { index: string; title: string; copy: string }) {
   return (
-    <div className="about-principle rounded-[1.45rem] p-5">
-      <p className="text-[10px] font-semibold tracking-[.2em] text-fuchsia-200/70">{index}</p>
-      <h3 className="mt-5 text-lg font-semibold tracking-[-.03em] text-white">{title}</h3>
+    <div className="glass-brutalist rounded-[1.45rem] p-5">
+      <p className="text-[10px] font-semibold tracking-[.2em] text-emerald-400">{index}</p>
+      <h3 className="mt-5 text-lg font-bold tracking-[-.03em] text-white">{title}</h3>
       <p className="mt-3 text-sm leading-6 text-white/42">{copy}</p>
     </div>
   );
@@ -78,28 +78,26 @@ export default async function About() {
 
   return (
     <PublicShell>
-      <section className="about-stage relative overflow-hidden px-6 pb-24 pt-40 md:pt-48">
-        <div className="absolute inset-0 grid-bg opacity-[.12]" />
-        <div className="about-orb about-orb-one" />
-        <div className="about-orb about-orb-two" />
+      <section className="relative overflow-hidden px-6 pb-24 pt-40 md:pt-48 spatial-grid-bg">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(0,255,102,0.06),transparent_45%)] pointer-events-none" />
 
         <div className="relative mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] gap-12 lg:grid-cols-[1fr_.78fr] lg:items-center">
           <Reveal>
             <div>
-              <p className="inline-flex rounded-full border border-violet-200/15 bg-white/[.035] px-4 py-2 text-[10px] font-semibold tracking-[.28em] text-violet-100/80">
+              <span className="inline-flex rounded-xl border-2 border-black bg-[#00FF66] px-4 py-1.5 text-[10px] font-bold tracking-[.28em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] uppercase">
                 ABOUT TECH TATVA
-              </p>
-              <h1 className="mt-7 max-w-5xl text-3xl xs:text-5xl font-semibold leading-[.88] tracking-[-.085em] text-white md:text-8xl lg:text-[112px]">
+              </span>
+              <h1 className="mt-7 max-w-5xl text-3xl xs:text-5xl font-extrabold leading-[.88] tracking-[-0.05em] text-white md:text-8xl lg:text-[112px]">
                 Built for students who execute.
               </h1>
               <p className="mt-8 max-w-2xl text-base leading-8 text-white/52 md:text-lg md:leading-9">
                 {heroCopy}
               </p>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <Link href="/events" className="action-pill inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5">
+              <div className="mt-9 flex flex-wrap gap-4">
+                <Link href="/events" className="brutalist-btn-green inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5">
                   Explore events <ArrowUpRight size={15} />
                 </Link>
-                <Link href="/teams" className="ghost-pill inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm transition hover:-translate-y-0.5">
+                <Link href="/teams" className="brutalist-btn-dark inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm transition hover:-translate-y-0.5">
                   See teams <Radar size={15} />
                 </Link>
               </div>
@@ -107,17 +105,17 @@ export default async function About() {
           </Reveal>
 
           <Reveal delay={0.12}>
-            <div className="about-console rounded-[2.4rem] p-5">
-              <div className="about-radar mx-auto grid h-72 w-72 place-items-center rounded-full md:h-96 md:w-96">
-                <div className="about-radar-line" />
-                <div className="grid h-28 w-28 place-items-center rounded-[2rem] border border-white/10 bg-black/35 text-violet-100 shadow-[0_0_70px_rgba(168,85,247,.22)]">
-                  <CircuitBoard size={42} />
+            <div className="glass-brutalist rounded-[2.4rem] p-5">
+              <div className="relative mx-auto grid h-72 w-72 place-items-center rounded-full border-2 border-dashed border-emerald-500/20 md:h-96 md:w-96">
+                <div className="absolute inset-4 rounded-full border border-[#00FF66]/10 animate-[spin_40s_linear_infinite]" />
+                <div className="grid h-28 w-28 place-items-center rounded-[2rem] border-2 border-emerald-500/30 bg-black/75 text-emerald-400 shadow-[0_0_40px_rgba(0,255,102,0.15)]">
+                  <CircuitBoard size={42} className="animate-pulse" />
                 </div>
               </div>
               <div className="mt-5 grid grid-cols-3 gap-3">
                 {["LEARN", "BUILD", "LEAD"].map((item) => (
-                  <div className="rounded-2xl border border-white/[.07] bg-white/[.035] px-4 py-4 text-center" key={item}>
-                    <p className="text-[10px] font-semibold tracking-[.18em] text-white/46">{item}</p>
+                  <div className="glass-brutalist px-4 py-4 text-center rounded-xl" key={item}>
+                    <p className="text-[10px] font-bold tracking-[.18em] text-white">{item}</p>
                   </div>
                 ))}
               </div>
@@ -139,11 +137,11 @@ export default async function About() {
 
       <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-24">
         <Reveal>
-          <div className="about-band rounded-[2.2rem] p-7 md:p-10">
+          <div className="glass-brutalist rounded-[2.2rem] p-7 md:p-10">
             <div className="grid gap-10 lg:grid-cols-[.75fr_1fr] lg:items-end">
               <div>
-                <p className="text-[10px] font-semibold tracking-[.3em] text-violet-200/75">OPERATING PRINCIPLES</p>
-                <h2 className="mt-5 text-3xl font-semibold leading-[.95] tracking-[-.06em] text-white md:text-6xl">
+                <p className="text-[10px] font-semibold tracking-[.3em] text-emerald-400">OPERATING PRINCIPLES</p>
+                <h2 className="mt-5 text-3xl font-extrabold leading-[.95] tracking-[-.06em] text-white md:text-6xl">
                   Precise work. Public proof.
                 </h2>
               </div>
@@ -164,8 +162,8 @@ export default async function About() {
         <div className="grid gap-10 lg:grid-cols-[.55fr_1fr]">
           <Reveal>
             <div className="lg:sticky lg:top-32">
-              <p className="text-[10px] font-semibold tracking-[.3em] text-fuchsia-200/75">LEGACY SIGNAL</p>
-              <h2 className="mt-5 max-w-sm text-4xl font-semibold leading-[.98] tracking-[-.055em] text-white md:text-5xl">
+              <p className="text-[10px] font-semibold tracking-[.3em] text-[#00FF66]">LEGACY SIGNAL</p>
+              <h2 className="mt-5 max-w-sm text-4xl font-extrabold leading-[.98] tracking-[-.055em] text-white md:text-5xl">
                 Milestones, without the noise.
               </h2>
               <p className="mt-5 max-w-md text-sm leading-7 text-white/42">
@@ -174,12 +172,12 @@ export default async function About() {
             </div>
           </Reveal>
           <div className="relative">
-            <div className="absolute left-5 top-4 h-[calc(100%-2rem)] w-px bg-gradient-to-b from-violet-300/70 via-fuchsia-300/25 to-transparent" />
+            <div className="absolute left-5 top-4 h-[calc(100%-2rem)] w-px bg-gradient-to-b from-emerald-500/70 via-emerald-800/20 to-transparent" />
             <div className="grid gap-4">
               {timeline.map((item: any, index: number) => (
                 <Reveal key={`${item.year}-${item.text}`} delay={index * 0.05}>
-                  <div className="about-timeline-card relative ml-12 rounded-[1.6rem] p-5">
-                    <span className="absolute -left-12 top-6 grid h-10 w-10 place-items-center rounded-full border border-violet-200/30 bg-[#090711] text-[10px] font-semibold text-violet-100 shadow-[0_0_28px_rgba(168,85,247,.22)]">
+                  <div className="glass-brutalist relative ml-12 rounded-[1.6rem] p-5">
+                    <span className="absolute -left-12 top-6 grid h-10 w-10 place-items-center rounded-xl border-2 border-black bg-[#00FF66] text-[10px] font-bold text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
                       {item.year}
                     </span>
                     <p className="text-sm leading-7 text-white/58">{item.text}</p>
@@ -193,17 +191,17 @@ export default async function About() {
 
       <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 pb-28">
         <Reveal>
-          <div className="aurora-shell rounded-[2.2rem] px-7 py-12 md:px-12">
-            <Sparkles className="absolute right-8 top-8 h-20 w-20 text-white/[.04]" />
-            <p className="text-[10px] font-semibold tracking-[.3em] text-violet-200/70">THE CLUB LAYER</p>
-            <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-[.98] tracking-[-.055em] text-white md:text-6xl">
+          <div className="glass-brutalist rounded-[2.2rem] px-7 py-12 md:px-12 relative overflow-hidden">
+            <Sparkles className="absolute right-8 top-8 h-20 w-20 text-emerald-400/[.04]" />
+            <p className="text-[10px] font-semibold tracking-[.3em] text-[#00FF66]">THE CLUB LAYER</p>
+            <h2 className="mt-5 max-w-3xl text-3xl font-extrabold leading-[.98] tracking-[-.055em] text-white md:text-6xl">
               Events, teams, attendance, certificates, and reports in one living system.
             </h2>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/events" className="action-pill inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold">
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link href="/events" className="brutalist-btn-green inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold">
                 Enter events <Zap size={15} />
               </Link>
-              <Link href="/contact" className="ghost-pill inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm">
+              <Link href="/contact" className="brutalist-btn-dark inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm">
                 Contact the club <Layers3 size={15} />
               </Link>
             </div>

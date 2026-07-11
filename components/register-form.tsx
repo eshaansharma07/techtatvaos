@@ -58,35 +58,35 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   return (
     <form action={submit} className="mt-7 space-y-3">
       {canChoose ? (
-        <div className="grid grid-cols-2 gap-2 rounded-xl border border-white/[.07] bg-black/25 p-2">
+        <div className="grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-black/40 p-2">
           {(["individual", "team"] as const).map((option) => (
-            <button type="button" onClick={() => setMode(option)} className={`rounded-full px-4 py-2 text-xs font-semibold transition ${mode === option ? "bg-white text-black shadow-[0_0_24px_rgba(255,255,255,.18)]" : "border border-white/[.08] bg-white/[.025] text-white/55 hover:border-violet-300/25 hover:bg-violet-500/[.08] hover:text-white"}`} key={option}>
+            <button type="button" onClick={() => setMode(option)} className={`rounded-xl px-4 py-2 text-xs font-bold transition ${mode === option ? "bg-[#00FF66] text-black border border-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)]" : "brutalist-btn-dark hover:border-emerald-500/50"}`} key={option}>
               {option === "team" ? "Team" : "Individual"}
             </button>
           ))}
         </div>
       ) : null}
-
+ 
       {mode === "team" ? (
-        <label className="block text-[10px] tracking-wider text-white/35">
+        <label className="block text-[10px] tracking-wider text-white/35 font-bold">
           TEAM NAME
-          <input name="teamName" required className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50" />
+          <input name="teamName" required className="mt-2 w-full rounded-xl border border-white/10 bg-black/45 px-3 py-3 text-sm text-white outline-none focus:border-emerald-500/50" />
         </label>
       ) : null}
-
-      <p className="flex items-center gap-2 pt-2 text-xs text-white/45"><Users size={14} className="text-violet-300" /> {mode === "team" ? "Team leader details" : "Candidate details"}</p>
+ 
+      <p className="flex items-center gap-2 pt-2 text-xs text-white/45 font-bold"><Users size={14} className="text-emerald-400" /> {mode === "team" ? "Team leader details" : "Candidate details"}</p>
       {fields.map(([name, label, type]) => (
-        <label className="block text-[10px] tracking-wider text-white/35" key={name}>
+        <label className="block text-[10px] tracking-wider text-white/35 font-bold" key={name}>
           {label.toUpperCase()}
-          <input name={name} required type={type} className="mt-2 w-full rounded-lg border border-white/[.07] bg-black/25 px-3 py-3 text-sm text-white outline-none focus:border-violet-400/50" />
+          <input name={name} required type={type} className="mt-2 w-full rounded-xl border border-white/10 bg-black/45 px-3 py-3 text-sm text-white outline-none focus:border-emerald-500/50" />
         </label>
       ))}
-
+ 
       {mode === "team" ? (
-        <div className="rounded-xl border border-white/[.07] bg-white/[.025] p-3">
+        <div className="glass-brutalist rounded-xl p-3">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs text-white/55">Team members</p>
-            <button type="button" onClick={() => setMemberCount((count) => Math.min(maxTeamSize, count + 1))} disabled={memberCount >= maxTeamSize} className="ghost-pill flex items-center gap-1 rounded-full px-3 py-2 text-[10px] text-violet-100 disabled:opacity-40">
+            <p className="text-xs text-white/55 font-bold">Team members</p>
+            <button type="button" onClick={() => setMemberCount((count) => Math.min(maxTeamSize, count + 1))} disabled={memberCount >= maxTeamSize} className="brutalist-btn-dark flex items-center gap-1 rounded-xl px-3 py-2 text-[10px] disabled:opacity-40">
               <Plus size={12} /> Add member
             </button>
           </div>
@@ -95,11 +95,11 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
             {teamSlots.slice(1).map((_, index) => {
               const slot = index + 1;
               return (
-                <div className="rounded-xl border border-white/[.06] bg-black/20 p-3" key={slot}>
-                  <p className="text-[10px] tracking-wider text-white/35">MEMBER {slot}</p>
+                <div className="glass-brutalist rounded-xl p-3" key={slot}>
+                  <p className="text-[10px] tracking-wider text-white/35 font-bold">MEMBER {slot}</p>
                   <div className="mt-3 grid gap-2">
                     {fields.map(([field, label, type]) => (
-                      <input key={field} name={`member_${slot}_` + field} placeholder={label} required type={type} className="rounded-lg border border-white/[.07] bg-black/25 px-3 py-2.5 text-xs text-white outline-none placeholder:text-white/25 focus:border-violet-400/50" />
+                      <input key={field} name={`member_${slot}_` + field} placeholder={label} required type={type} className="rounded-xl border border-white/10 bg-black/45 px-3 py-2.5 text-xs text-white outline-none placeholder:text-white/25 focus:border-emerald-500/50" />
                     ))}
                   </div>
                 </div>
@@ -108,11 +108,11 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
           </div>
         </div>
       ) : null}
-
-      <button disabled={loading} className="action-pill flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold disabled:opacity-60">
+ 
+      <button disabled={loading} className="brutalist-btn-green flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold disabled:opacity-60">
         {loading ? "Registering..." : mode === "team" ? "Register team" : "Register for this event"} <ArrowUpRight size={15}/>
       </button>
-      {status ? <p className="rounded-lg bg-violet-500/10 p-3 text-center text-xs text-violet-100">{status}</p> : null}
+      {status ? <p className="rounded-xl border-2 border-black bg-emerald-500/10 p-3 text-center text-xs text-emerald-300 shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">{status}</p> : null}
     </form>
   );
 }

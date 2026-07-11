@@ -66,7 +66,7 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
         onClick={toggleMenu}
         aria-label="Toggle Navigation Menu"
         aria-expanded={isOpen}
-        className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[.08] bg-white/[.04] text-white/70 shadow-[inset_0_1px_rgba(255,255,255,.05)] backdrop-blur-xl transition active:scale-[.95] hover:text-white hover:border-white/20"
+        className="flex h-11 w-11 items-center justify-center glass-brutalist rounded-xl text-white/80 transition active:scale-[.95]"
       >
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -91,7 +91,7 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 26, stiffness: 220 }}
-                className="fixed inset-y-0 right-0 z-[10000] flex w-[310px] max-w-[85vw] flex-col justify-between bg-gradient-to-b from-[#0c0512] to-[#040206] p-6 shadow-[0_0_50px_rgba(0,0,0,0.85)] border-l border-white/[0.08] pt-[calc(1.5rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] pl-[calc(1.5rem+env(safe-area-inset-left))] pr-[calc(1.5rem+env(safe-area-inset-right))]"
+                className="fixed inset-y-0 right-0 z-[10000] flex w-[310px] max-w-[85vw] flex-col justify-between glass-brutalist bg-black/95 p-6 shadow-[0_0_50px_rgba(0,0,0,0.85)] border-l-2 border-black pt-[calc(1.5rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] pl-[calc(1.5rem+env(safe-area-inset-left))] pr-[calc(1.5rem+env(safe-area-inset-right))]"
               >
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
@@ -101,7 +101,7 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
                   <button
                     onClick={toggleMenu}
                     aria-label="Close Navigation Menu"
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-white/[.08] bg-white/[.03] text-white/55 transition hover:bg-white/[.08] hover:text-white"
+                    className="flex h-11 w-11 items-center justify-center glass-brutalist rounded-xl text-white/85 transition"
                   >
                     <X size={20} />
                   </button>
@@ -109,8 +109,8 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
 
                 {/* Navigation Section Title */}
                 <div className="flex items-center gap-2 px-3 py-2 mt-4">
-                  <Sparkles className="text-violet-300 h-3.5 w-3.5 animate-pulse" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-violet-200/80">Navigation</span>
+                  <Sparkles className="text-emerald-400 h-3.5 w-3.5 animate-pulse" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-emerald-400">Navigation</span>
                 </div>
 
                 {/* Navigation Items */}
@@ -122,13 +122,13 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
                         href={href}
                         key={href}
                         onClick={toggleMenu}
-                        className={`flex min-h-12 items-center gap-3.5 rounded-2xl border px-4 py-3 text-xs font-semibold tracking-[0.04em] transition active:scale-[0.98] ${
+                        className={`flex min-h-12 items-center gap-3.5 rounded-xl border-2 px-4 py-3 text-xs tracking-[0.04em] transition active:scale-[0.98] ${
                           active
-                            ? "border-violet-200/35 bg-violet-400/18 text-white shadow-[0_0_20px_rgba(168,85,247,0.14)]"
-                            : "border-transparent bg-transparent text-white/55 hover:bg-white/[0.03] hover:text-white"
+                            ? "border-[#00FF66] bg-black text-[#00FF66] font-bold shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]"
+                            : "border-transparent bg-transparent text-white/80 font-medium hover:bg-white/[0.03] hover:text-white"
                         }`}
                       >
-                        <Icon size={16} className={active ? "text-violet-200" : "text-white/35"} />
+                        <Icon size={16} className={active ? "text-[#00FF66]" : "text-white/35"} />
                         <span>{label}</span>
                       </Link>
                     );
@@ -140,7 +140,7 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
                   <Link
                     href="/contact"
                     onClick={toggleMenu}
-                    className="flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-[0_8px_24px_rgba(168,85,247,0.22)] transition active:scale-[0.98] hover:shadow-[0_12px_28px_rgba(168,85,247,0.34)] duration-300"
+                    className="brutalist-btn-green flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-xl text-xs font-bold uppercase tracking-[0.14em] text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] transition active:scale-[0.98] duration-300"
                   >
                     <span>Connect with us</span>
                     <ArrowUpRight size={14} />

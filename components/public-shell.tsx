@@ -57,9 +57,9 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
       <div className="public-header-inner mx-auto flex max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] flex-row items-center justify-between px-5 py-4 md:mt-4 md:h-[4.75rem] md:px-5 md:py-0">
         <MotionLogo logo={info.logo}/>
         <nav className="public-nav hidden w-auto items-center gap-1 text-xs font-medium tracking-[.15em] text-white/50 md:flex">
-          {publicLinks.map(([label,href])=><Link className="rounded-full px-4 py-3 transition hover:bg-white/[.07] hover:text-white" key={href} href={href}>{label}</Link>)}
+          {publicLinks.map(([label,href])=><Link className="rounded-xl px-4 py-3 transition hover:bg-[#00FF66] hover:text-black font-bold uppercase" key={href} href={href}>{label}</Link>)}
         </nav>
-        <Link href="/contact" className="public-header-cta hidden min-h-11 items-center gap-2 rounded-full px-5 text-xs font-semibold tracking-[.12em] md:inline-flex">
+        <Link href="/contact" className="brutalist-btn-purple hidden min-h-11 items-center gap-2 rounded-xl px-5 text-xs font-bold tracking-[.12em] md:inline-flex shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
           CONNECT <ArrowUpRight size={14}/>
         </Link>
         <MobilePublicMenu logo={info.logo}/>
@@ -69,24 +69,24 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     {children}
     
     <footer className="public-footer px-5 py-10 md:px-6 md:py-16">
-      <div className="public-footer-card mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] rounded-[2rem] p-6 md:p-8">
+      <div className="glass-brutalist mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] rounded-[2rem] p-6 md:p-8">
         
         {/* RICH FOOTER INFORMATION CARDS */}
         <div className="grid gap-4 sm:grid-cols-3 pb-8 mb-8 border-b border-white/[.06]">
           
           {/* Block 1: Latest Completed Event */}
-          <div className="rounded-2xl border border-white/[0.065] bg-white/[0.015] p-5 backdrop-blur-xl">
-            <div className="flex items-center gap-2 text-violet-300 text-[10px] font-semibold uppercase tracking-wider">
+          <div className="glass-brutalist rounded-[22px] p-5">
+            <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
               <Calendar size={11} />
               <span>Latest Event</span>
             </div>
             {latestEvent ? (
               <div className="mt-3">
-                <h5 className="text-xs font-semibold text-white truncate">{latestEvent.title}</h5>
+                <h5 className="text-xs font-bold text-white truncate">{latestEvent.title}</h5>
                 <p className="mt-1 text-[10px] text-white/40 line-clamp-2 leading-relaxed">
                   {latestEvent.description || "Explore and register for Tech Tatva club events."}
                 </p>
-                <Link href={`/events/${latestEvent.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-semibold text-violet-300 hover:text-white transition">
+                <Link href={`/events/${latestEvent.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-[#00FF66] hover:underline transition">
                   View details <ArrowUpRight size={10} />
                 </Link>
               </div>
@@ -96,20 +96,20 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
               </p>
             )}
           </div>
-
+ 
           {/* Block 2: Upcoming Technical Workshop */}
-          <div className="rounded-2xl border border-white/[0.065] bg-white/[0.015] p-5 backdrop-blur-xl">
-            <div className="flex items-center gap-2 text-fuchsia-300 text-[10px] font-semibold uppercase tracking-wider">
+          <div className="glass-brutalist rounded-[22px] p-5">
+            <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
               <GraduationCap size={11} />
               <span>Upcoming Bootcamp</span>
             </div>
             {upcomingWorkshop ? (
               <div className="mt-3">
-                <h5 className="text-xs font-semibold text-white truncate">{upcomingWorkshop.title}</h5>
+                <h5 className="text-xs font-bold text-white truncate">{upcomingWorkshop.title}</h5>
                 <p className="mt-1 text-[10px] text-white/40 line-clamp-2 leading-relaxed">
                   {upcomingWorkshop.description || "Bootcamps and workshops led by seniors."}
                 </p>
-                <Link href={`/events/${upcomingWorkshop.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-semibold text-fuchsia-300 hover:text-white transition">
+                <Link href={`/events/${upcomingWorkshop.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-[#00FF66] hover:underline transition">
                   Register now <ArrowUpRight size={10} />
                 </Link>
               </div>
@@ -119,11 +119,11 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
               </p>
             )}
           </div>
-
+ 
           {/* Block 3: Dynamic Newsletter Subscription Form */}
           <NewsletterForm />
         </div>
-
+ 
         <div className="grid gap-8 lg:grid-cols-[1.05fr_.75fr_.5fr] lg:items-start">
           <div className="space-y-6">
             <div>
@@ -135,21 +135,21 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
               <QuoteBlock />
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-2 text-xs font-semibold tracking-[.13em] text-white/52 sm:grid-cols-3">
+ 
+          <div className="grid grid-cols-2 gap-2 text-xs font-bold tracking-[.13em] text-white/52 sm:grid-cols-3">
             {[...publicLinks, ["CONTACT", "/contact"] as const].map(([label, href]) => (
-              <Link href={href} key={href} className="rounded-2xl border border-white/[0.065] bg-white/[0.035] px-4 py-3 transition hover:border-white/15 hover:bg-white/[0.065] hover:text-white">
+              <Link href={href} key={href} className="glass-brutalist rounded-xl px-4 py-3 transition hover:border-[#00FF66]/50 hover:text-white">
                 {label}
               </Link>
             ))}
           </div>
-          <Link href="/contact" className="action-pill flex min-h-14 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition hover:-translate-y-0.5">Start a conversation <ArrowUpRight size={16}/></Link>
+          <Link href="/contact" className="brutalist-btn-green flex min-h-14 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] text-black">Start a conversation <ArrowUpRight size={16}/></Link>
         </div>
         
         <div className="mt-10 border-t border-white/[.06] pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <span className="text-[9px] font-semibold tracking-[.2em] text-white/35 uppercase block mb-3">Affiliation</span>
-            <div className="inline-flex items-center justify-center rounded-xl bg-white/[0.97] px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.2)] hover:bg-white hover:scale-[1.02] transition duration-300">
+            <span className="text-[9px] font-bold tracking-[.2em] text-white/35 uppercase block mb-3">Affiliation</span>
+            <div className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,255,102,0.6)] hover:scale-[1.02] transition duration-300">
               <img
                 src="/chandigarh-university-logo.png"
                 alt="Chandigarh University"

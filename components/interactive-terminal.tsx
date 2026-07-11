@@ -288,23 +288,23 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
 
   return (
     <div 
-      className="glass relative w-full max-w-2xl rounded-3xl border border-white/[0.065] bg-white/[0.015] p-5 backdrop-blur-xl overflow-hidden text-white/80"
+      className="glass-brutalist relative w-full max-w-2xl rounded-3xl p-5 overflow-hidden text-white/80"
     >
       {/* Console Subheader Bar */}
       <div className="flex items-center justify-between pb-3 border-b border-white/[0.05] select-none">
         <div className="flex items-center gap-2">
-          <Terminal size={12} className="text-violet-300" />
-          <span className="text-[10px] font-semibold tracking-[0.2em] text-white/40 uppercase">OS COMMAND CENTER</span>
+          <Terminal size={12} className="text-emerald-400" />
+          <span className="text-[10px] font-bold tracking-[0.2em] text-[#00FF66] uppercase">OS COMMAND CENTER</span>
         </div>
-        <div className={`flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[8px] font-mono font-semibold tracking-wider uppercase transition-colors duration-500 ${latencyColor}`}>
+        <div className={`flex items-center gap-1.5 px-2.5 py-0.5 text-[8px] font-mono transition-colors duration-500 ${latencyColor}`}>
           <Wifi size={8} />
           <span>{latencyText}</span>
         </div>
       </div>
-
+ 
       {/* Console Input Bar */}
-      <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/[0.05] bg-black/45 px-4 py-3 focus-within:border-violet-500/20 transition-all duration-300">
-        <span className="text-violet-300 text-xs font-semibold select-none">❯</span>
+      <div className="mt-4 flex items-center gap-3 rounded-2xl border-2 border-black bg-black/75 px-4 py-3 focus-within:border-[#00FF66]/50 transition-all duration-300">
+        <span className="text-[#00FF66] text-xs font-semibold select-none">❯</span>
         <input
           ref={inputRef}
           type="text"
@@ -317,23 +317,23 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
         />
         <button 
           onClick={() => executeCommand(input)}
-          className="text-white/30 hover:text-white/70 transition-colors"
+          className="text-white/30 hover:text-[#00FF66] transition-colors"
         >
           <Wifi size={13} className="rotate-95" />
         </button>
       </div>
-
+ 
       {/* Terminal Output Log */}
       <div 
         ref={scrollRef}
-        className="mt-4 p-4 rounded-2xl bg-black/35 border border-white/[0.03] h-[130px] overflow-y-auto space-y-1.5 font-mono text-[11px] leading-relaxed scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10"
+        className="mt-4 p-4 rounded-2xl bg-black/60 border-2 border-black h-[130px] overflow-y-auto space-y-1.5 font-mono text-[11px] leading-relaxed scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10"
       >
         {history.map((line, idx) => (
           <div key={idx} className="space-y-1">
             <div 
               className={`
-                ${line.type === "success" ? "text-emerald-300/90" : ""}
-                ${line.type === "info" ? "text-violet-300/80" : ""}
+                ${line.type === "success" ? "text-[#00FF66]" : ""}
+                ${line.type === "info" ? "text-emerald-400" : ""}
                 ${line.type === "error" ? "text-rose-400" : ""}
                 ${line.type === "input" ? "text-white" : ""}
                 ${line.type === "system" ? "text-white/45" : ""}
@@ -345,42 +345,42 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
           </div>
         ))}
       </div>
-
+ 
       {/* Action shortcuts */}
       <div className="mt-4 flex flex-wrap gap-2 pt-3 border-t border-white/[0.04]">
         <button
           onClick={() => clickShortcut("instagram")}
-          className="flex items-center gap-1.5 rounded-full border border-pink-500/10 bg-pink-500/5 px-3.5 py-1.5 text-[9px] font-semibold text-pink-300/70 hover:border-pink-500/20 hover:bg-pink-500/10 hover:text-pink-200 transition"
+          className="flex items-center gap-1.5 rounded-xl glass-brutalist px-3.5 py-1.5 text-[9px] font-bold text-white/80 hover:border-[#f472b6] transition"
         >
-          <ImageIcon size={10} />
+          <ImageIcon size={10} className="text-[#f472b6]" />
           <span>LATEST INSTAGRAM POST</span>
         </button>
         <button
           onClick={() => clickShortcut("event")}
-          className="flex items-center gap-1.5 rounded-full border border-violet-500/10 bg-violet-500/5 px-3.5 py-1.5 text-[9px] font-semibold text-violet-300/70 hover:border-violet-500/20 hover:bg-violet-500/10 hover:text-violet-200 transition"
+          className="flex items-center gap-1.5 rounded-xl glass-brutalist px-3.5 py-1.5 text-[9px] font-bold text-white/80 hover:border-[#a855f7] transition"
         >
-          <Calendar size={10} />
+          <Calendar size={10} className="text-[#a855f7]" />
           <span>LATEST EVENT INFO</span>
         </button>
         <button
           onClick={() => clickShortcut("stats")}
-          className="flex items-center gap-1.5 rounded-full border border-emerald-500/10 bg-emerald-500/5 px-3.5 py-1.5 text-[9px] font-semibold text-emerald-300/70 hover:border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-200 transition"
+          className="flex items-center gap-1.5 rounded-xl glass-brutalist px-3.5 py-1.5 text-[9px] font-bold text-white/80 hover:border-[#06b6d4] transition"
         >
-          <Database size={10} />
+          <Database size={10} className="text-[#06b6d4]" />
           <span>DATABASE METRICS</span>
         </button>
         <button
           onClick={() => clickShortcut("gravity")}
-          className="flex items-center gap-1.5 rounded-full border border-amber-500/10 bg-amber-500/5 px-3.5 py-1.5 text-[9px] font-semibold text-amber-300/70 hover:border-amber-500/20 hover:bg-amber-500/10 hover:text-amber-200 transition"
+          className="flex items-center gap-1.5 rounded-xl glass-brutalist px-3.5 py-1.5 text-[9px] font-bold text-white/80 hover:border-[#f59e0b] transition"
         >
-          <Shield size={10} />
+          <Shield size={10} className="text-[#f59e0b]" />
           <span>TOGGLE PHYSICS</span>
         </button>
         <button
           onClick={() => clickShortcut("join")}
-          className="flex items-center gap-1.5 rounded-full border border-fuchsia-500/15 bg-fuchsia-500/5 px-3.5 py-1.5 text-[9px] font-semibold text-fuchsia-300/70 hover:border-fuchsia-500/30 hover:bg-fuchsia-500/10 hover:text-fuchsia-200 transition"
+          className="flex items-center gap-1.5 rounded-xl glass-brutalist px-3.5 py-1.5 text-[9px] font-bold text-white/80 hover:border-[#00FF66] transition"
         >
-          <Sparkles size={10} />
+          <Sparkles size={10} className="text-[#00FF66]" />
           <span>JOIN COMMUNITY</span>
         </button>
       </div>

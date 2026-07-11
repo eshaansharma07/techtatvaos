@@ -150,7 +150,7 @@ export function InteractiveHero3D() {
             const averageZ = (p1.z + p2.z) / 2;
             const lineOpacity = Math.max(0, 0.15 - (averageZ + radius) / (radius * 4));
 
-            ctx.strokeStyle = `rgba(168, 85, 247, ${lineOpacity})`;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${lineOpacity * 1.5})`;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -167,8 +167,8 @@ export function InteractiveHero3D() {
         // Create glowing gradient for nodes
         const grad = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, nodeSize * 2.8);
         grad.addColorStop(0, `rgba(255, 255, 255, ${nodeOpacity})`);
-        grad.addColorStop(0.3, `rgba(192, 132, 252, ${nodeOpacity * 0.7})`);
-        grad.addColorStop(1, "rgba(139, 92, 246, 0)");
+        grad.addColorStop(0.3, `rgba(255, 255, 255, ${nodeOpacity * 0.8})`);
+        grad.addColorStop(1, "rgba(255, 255, 255, 0)");
 
         ctx.fillStyle = grad;
         ctx.beginPath();
@@ -179,8 +179,8 @@ export function InteractiveHero3D() {
       // Draw a subtle center hologram core
       const coreSize = 35;
       const coreGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, coreSize * 1.5);
-      coreGrad.addColorStop(0, "rgba(232, 121, 166, 0.08)");
-      coreGrad.addColorStop(0.5, "rgba(139, 92, 246, 0.03)");
+      coreGrad.addColorStop(0, "rgba(255, 255, 255, 0.05)");
+      coreGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.01)");
       coreGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = coreGrad;
       ctx.beginPath();
@@ -201,7 +201,7 @@ export function InteractiveHero3D() {
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
       {/* Blurred background glow */}
-      <div className="absolute top-[45%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full bg-violet-600/6 blur-[60px]" />
+      <div className="absolute top-[45%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full bg-white/[0.03] blur-[60px]" />
       <canvas 
         ref={canvasRef} 
         className="w-full h-full max-w-[420px] max-h-[420px] aspect-square object-contain"

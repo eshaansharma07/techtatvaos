@@ -18,31 +18,31 @@ interface AnnouncementData {
 const typeConfig: Record<AnnouncementType, { icon: typeof Info; gradient: string; glow: string; border: string; dot: string }> = {
   info: {
     icon: Info,
-    gradient: "from-violet-500/15 via-violet-500/5 to-transparent",
-    glow: "bg-violet-500/20",
-    border: "border-violet-500/20",
-    dot: "bg-violet-400",
+    gradient: "from-emerald-500/10 to-transparent",
+    glow: "bg-emerald-500/5",
+    border: "border-[#00FF66]",
+    dot: "bg-[#00FF66]",
   },
   event: {
     icon: Sparkles,
-    gradient: "from-fuchsia-500/15 via-fuchsia-500/5 to-transparent",
-    glow: "bg-fuchsia-500/20",
-    border: "border-fuchsia-500/20",
-    dot: "bg-fuchsia-400",
+    gradient: "from-emerald-500/10 to-transparent",
+    glow: "bg-emerald-500/5",
+    border: "border-[#00FF66]",
+    dot: "bg-[#00FF66]",
   },
   alert: {
     icon: AlertTriangle,
-    gradient: "from-amber-500/15 via-amber-500/5 to-transparent",
-    glow: "bg-amber-500/20",
-    border: "border-amber-500/20",
-    dot: "bg-amber-400",
+    gradient: "from-emerald-500/10 to-transparent",
+    glow: "bg-emerald-500/5",
+    border: "border-[#00FF66]",
+    dot: "bg-[#00FF66]",
   },
   promo: {
     icon: Megaphone,
-    gradient: "from-emerald-500/15 via-emerald-500/5 to-transparent",
-    glow: "bg-emerald-500/20",
-    border: "border-emerald-500/20",
-    dot: "bg-emerald-400",
+    gradient: "from-emerald-500/10 to-transparent",
+    glow: "bg-emerald-500/5",
+    border: "border-[#00FF66]",
+    dot: "bg-[#00FF66]",
   },
 };
 
@@ -98,7 +98,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
       <div className={`absolute -inset-4 rounded-[2rem] ${cfg.glow} blur-[40px] opacity-40`} />
 
       <div
-        className={`relative overflow-hidden rounded-2xl border ${cfg.border} bg-[#0a0812]/90 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]`}
+        className={`relative overflow-hidden rounded-2xl border-2 ${cfg.border} bg-[#0a0812]/95 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]`}
       >
         {/* Gradient accent */}
         <div className={`absolute inset-0 bg-gradient-to-r ${cfg.gradient} pointer-events-none`} />
@@ -114,12 +114,12 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
             {/* Pulsing dot + icon */}
             <div className="flex shrink-0 items-center gap-2">
               <span className={`h-2 w-2 rounded-full ${cfg.dot} animate-pulse`} />
-              <Icon size={15} className="text-white/60" />
+              <Icon size={15} className="text-[#00FF66]" />
             </div>
 
             {/* Text content */}
             <div className="min-w-0 flex-1">
-              <p className="text-[12px] sm:text-[13px] font-medium text-white/80 leading-snug truncate">
+              <p className="text-[12px] sm:text-[13px] font-bold text-white/80 leading-snug truncate">
                 {data.announcementText}
               </p>
             </div>
@@ -129,7 +129,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
               <div onClick={(e) => e.stopPropagation()}>
                 <Link
                   href={data.announcementLink}
-                  className="group flex shrink-0 items-center gap-1 rounded-full bg-white/[0.08] px-3 py-1.5 text-[10px] sm:text-[11px] font-semibold text-white/70 transition hover:bg-white/[0.14] hover:text-white"
+                  className="brutalist-btn-green flex shrink-0 items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] sm:text-[11px] font-bold text-black border border-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)]"
                 >
                   {data.announcementLinkText || "View"}
                   <ArrowRight size={11} className="transition group-hover:translate-x-0.5" />
@@ -183,7 +183,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
                 className="overflow-hidden"
               >
                 <div
-                  className="px-4 pb-4 pt-1 sm:px-5 sm:pb-5 text-[11px] sm:text-[12px] leading-[1.6] text-white/55 border-t border-white/[0.05] bg-black/10 select-text whitespace-pre-wrap cursor-text"
+                  className="px-4 pb-4 pt-1 sm:px-5 sm:pb-5 text-[11px] sm:text-[12px] leading-[1.6] text-white/55 border-t-2 border-black bg-black/60 select-text whitespace-pre-wrap cursor-text"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {data.announcementDetails}

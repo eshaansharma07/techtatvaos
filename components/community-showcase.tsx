@@ -60,12 +60,12 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
     : FALLBACK_ITEMS;
 
   return (
-    <section className="border-t border-white/[.06] bg-white/[0.005] py-20 md:py-28">
+    <section className="border-t border-white/10 bg-black/10 py-20 md:py-28 relative z-10">
       <div className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 md:px-6">
         <Reveal>
           <div className="mb-14 max-w-2xl">
-            <p className="mb-4 text-[10px] font-semibold tracking-[.3em] text-violet-300">CLUB LIFE</p>
-            <h2 className="text-3xl font-medium tracking-tight md:text-5xl text-white">Tech Tatva in action.</h2>
+            <p className="mb-4 text-[10px] font-bold tracking-[.3em] text-emerald-400">CLUB LIFE</p>
+            <h2 className="text-3xl font-extrabold tracking-tight md:text-5xl text-white">Tech Tatva in action.</h2>
             <p className="mt-4 text-sm leading-7 text-white/45">
               Glimpses of active collaboration, late-night coding sessions, practical workshops, and mentorship inside the university.
             </p>
@@ -75,12 +75,26 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
         <div className="grid gap-6 md:grid-cols-3">
           {displayItems.map((item, i) => {
             const Icon = item.icon;
+            const cardStyles = [
+              "glass-brutalist-green",
+              "glass-brutalist-purple",
+              "glass-brutalist-pink"
+            ];
+            const activeCardStyle = cardStyles[i % cardStyles.length];
+
+            const textStyles = [
+              "text-[#00FF66]",
+              "text-[#a855f7]",
+              "text-[#f472b6]"
+            ];
+            const activeTextStyle = textStyles[i % textStyles.length];
+
             return (
               <Reveal key={item.id} delay={i * 0.08}>
-                <div className="premium-card group h-full rounded-[2rem] p-6 border border-white/[0.06] bg-white/[0.015] backdrop-blur-xl flex flex-col justify-between overflow-hidden">
+                <div className={`${activeCardStyle} group h-full rounded-[2rem] p-6 flex flex-col justify-between overflow-hidden`}>
                   
                   {/* Image/Visual Container */}
-                  <div className="relative w-full aspect-[1.8/1] rounded-2xl overflow-hidden bg-black/40 border border-white/[0.04] mb-6 flex items-center justify-center">
+                  <div className="relative w-full aspect-[1.8/1] rounded-xl overflow-hidden bg-black/40 border-2 border-black mb-6 flex items-center justify-center">
                     {item.image ? (
                       <img 
                         src={item.image} 
@@ -89,17 +103,17 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
                         loading="lazy"
                       />
                     ) : (
-                      // High-end abstract gradient representation if no image is present (with subtle bloom/glow)
-                      <div className="absolute inset-0 bg-gradient-to-br from-violet-950/40 via-fuchsia-950/20 to-black flex flex-col items-center justify-center p-4">
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(139,92,246,0.12),transparent_60%)]" />
-                        <Icon className="h-8 w-8 text-violet-300/40 mb-2 transition duration-500 group-hover:scale-110 group-hover:text-violet-300" />
+                      // High-end abstract representation if no image is present
+                      <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-black flex flex-col items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(0,255,102,0.06),transparent_60%)]" />
+                        <Icon className="h-8 w-8 text-emerald-400/40 mb-2 transition duration-500 group-hover:scale-110 group-hover:text-emerald-400" />
                         
-                        {/* Production TODO Marker - Subtle and fits the developer-centric/Linear design language */}
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full border border-violet-500/20 bg-violet-500/5 px-2.5 py-0.5 text-[8px] font-semibold tracking-wider text-violet-200/60 uppercase">
+                        {/* Production TODO Marker */}
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-xl border-2 border-black bg-[#00FF66] px-2.5 py-0.5 text-[8px] font-bold tracking-wider text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] uppercase">
                           <Sparkles size={8} /> TODO: Add asset
                         </div>
                         
-                        <span className="text-[9px] font-semibold tracking-widest text-white/20 uppercase">{item.category}</span>
+                        <span className="text-[9px] font-bold tracking-widest text-white/20 uppercase">{item.category}</span>
                       </div>
                     )}
                   </div>
@@ -108,14 +122,14 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-[10px] font-semibold tracking-[0.2em] text-violet-300/70 uppercase">
+                        <span className={`text-[10px] font-bold tracking-[0.2em] ${activeTextStyle} uppercase`}>
                           {item.category}
                         </span>
-                        <span className="text-[10px] text-white/30">
+                        <span className="text-[10px] text-white/30 font-mono">
                           {item.date}
                         </span>
                       </div>
-                      <h3 className="mt-3 text-lg font-semibold text-white tracking-tight group-hover:text-violet-100 transition-colors">
+                      <h3 className={`mt-3 text-lg font-bold text-white tracking-tight group-hover:${activeTextStyle} transition-colors`}>
                         {item.title}
                       </h3>
                       <p className="mt-2 text-xs leading-5 text-white/40">

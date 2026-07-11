@@ -32,7 +32,7 @@ export function ContactForm() {
   return (
     <form
       action={submit}
-      className="contact-card premium-card grid gap-5 rounded-[2.5rem] border border-white/[0.06] bg-white/[0.01] p-6 backdrop-blur-xl md:grid-cols-2 md:p-10"
+      className="glass-brutalist grid gap-5 rounded-[2.5rem] p-6 md:grid-cols-2 md:p-10"
     >
       {[
         ["name", "Full Name", "text", "Eshaan Sharma"],
@@ -51,7 +51,7 @@ export function ContactForm() {
             name={name}
             type={type}
             placeholder={placeholder}
-            className="mt-2.5 min-h-[3.75rem] w-full rounded-2xl border border-white/10 bg-white/[0.015] px-5 py-3 text-sm text-white placeholder-white/20 outline-none transition duration-200 focus:border-violet-500/50 focus:bg-violet-500/[0.03] focus:ring-1 focus:ring-violet-500/20"
+            className="mt-2.5 min-h-[3.75rem] w-full rounded-2xl border border-white/10 bg-white/[0.015] px-5 py-3 text-sm text-white placeholder-white/20 outline-none transition duration-200 focus:border-emerald-500/50 focus:bg-emerald-500/[0.03] focus:ring-1 focus:ring-emerald-500/20"
           />
         </label>
       ))}
@@ -63,13 +63,13 @@ export function ContactForm() {
           name="message"
           rows={6}
           placeholder="Write your message details here..."
-          className="mt-2.5 w-full rounded-2xl border border-white/10 bg-white/[0.015] px-5 py-4 text-sm text-white placeholder-white/20 outline-none transition duration-200 focus:border-violet-500/50 focus:bg-violet-500/[0.03] focus:ring-1 focus:ring-violet-500/20"
+          className="mt-2.5 w-full rounded-2xl border border-white/10 bg-white/[0.015] px-5 py-4 text-sm text-white placeholder-white/20 outline-none transition duration-200 focus:border-emerald-500/50 focus:bg-emerald-500/[0.03] focus:ring-1 focus:ring-emerald-500/20"
         />
       </label>
-
+ 
       <button
         disabled={loading}
-        className="group relative flex min-h-[3.75rem] items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-violet-500/30 bg-violet-500/10 px-6 text-sm font-semibold text-violet-200 transition duration-300 hover:border-violet-500/50 hover:bg-violet-500/20 active:scale-[0.98] disabled:opacity-60 md:col-span-2"
+        className="brutalist-btn-green flex min-h-[3.75rem] items-center justify-center gap-2.5 rounded-2xl text-sm font-semibold text-black active:scale-[0.98] disabled:opacity-60 md:col-span-2"
       >
         {loading ? (
           "Sending message..."
@@ -79,9 +79,9 @@ export function ContactForm() {
           </>
         )}
       </button>
-
+ 
       {status && (
-        <p className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-4 text-center text-xs font-medium text-violet-200 md:col-span-2">
+        <p className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center text-xs font-semibold text-emerald-300 md:col-span-2">
           {status}
         </p>
       )}
