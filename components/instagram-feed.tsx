@@ -69,7 +69,7 @@ export function InstagramFeed({
       let fetchedStats = null;
       let apiPosts: InstagramPost[] = [];
       try {
-        const res = await fetch(`/api/instagram?t=${Date.now()}`);
+        const res = await fetch("/api/instagram");
         if (res.ok) {
           const data = await res.json();
           if (data.stats) {

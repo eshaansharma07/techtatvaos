@@ -4,7 +4,7 @@ import { JoinClient } from "./join-client";
 import fs from "fs";
 import path from "path";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 10;
 
 export default async function JoinPage() {
   const status = await getMembershipDriveStatus();

@@ -3,7 +3,7 @@ import { ContactForm } from "@/components/contact-form";
 import { getClubInfo } from "@/lib/public-data";
 import { Mail, MapPin, Instagram, Linkedin, Github, MessageSquare } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function Contact() {
   const info = await getClubInfo();
