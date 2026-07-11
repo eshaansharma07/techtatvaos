@@ -47,7 +47,7 @@ export default async function Home() {
     ═══════════════════════════════════════════════════════════════════ */}
     <section className="relative flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center overflow-hidden md:hidden spatial-grid-bg">
       {/* Cinematic background */}
-      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_25%] opacity-20"/>
+      <Image src="/tech-tatva-hero-v2.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_25%] opacity-20"/>
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black"/>
 
       {/* Center-aligned content */}
@@ -93,7 +93,7 @@ export default async function Home() {
         DESKTOP HERO — hidden on mobile, shown on md+
     ═══════════════════════════════════════════════════════════════════ */}
     <section className="relative hidden min-h-[980px] overflow-hidden pt-24 md:block spatial-grid-bg">
-      <Image src="/tech-tatva-hero.png" alt="" fill priority sizes="100vw" className="object-cover object-center opacity-40"/>
+      <Image src="/tech-tatva-hero-v2.png" alt="" fill priority sizes="100vw" className="object-cover object-center opacity-40"/>
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/40 to-black"/>
       <div className="absolute inset-0 grid-bg opacity-[.06]"/>
 

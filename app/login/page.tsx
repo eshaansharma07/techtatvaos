@@ -5,7 +5,7 @@ import { LoginForm } from "@/components/login-form";
 export default function LoginPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-ink text-white">
-      <Image src="/tech-tatva-hero.png" alt="" fill priority className="object-cover opacity-45" />
+      <Image src="/tech-tatva-hero-v2.png" alt="" fill priority className="object-cover opacity-45" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(139,92,246,.32),transparent_35%),linear-gradient(120deg,rgba(0,0,0,.92),rgba(6,5,9,.7)_50%,rgba(0,0,0,.96))]" />
       <div className="absolute inset-0 grid-bg opacity-20" />
       <section className="relative mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-6 py-16 lg:grid-cols-[1.05fr_.95fr]">
