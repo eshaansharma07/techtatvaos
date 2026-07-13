@@ -4,6 +4,7 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
 import { getPublicGalleryAlbum } from "@/lib/public-data";
 import { GalleryLightbox } from "@/components/gallery-lightbox";
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary-client";
 
 export const revalidate = 60;
 
@@ -24,7 +25,7 @@ export default async function GalleryAlbum({ params }: { params: Promise<{ id: s
           {cover?.url ? cover.kind === "video" ? (
             <video src={cover.url} muted playsInline className="absolute inset-0 h-full w-full object-cover opacity-[.18]" />
           ) : (
-            <img src={cover.url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-[.18]" />
+            <img src={optimizeCloudinaryUrl(cover.url, 800)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-[.18]" />
           ) : null}
           <div className="absolute inset-0 bg-gradient-to-br from-black via-black/76 to-emerald-950/20" />
           <div className="relative">
