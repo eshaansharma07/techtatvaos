@@ -29,6 +29,7 @@ export function InteractiveHero3D() {
     if (prefersReducedMotion) return;
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (window.innerWidth < 768) return;
       // Normalize mouse to [-1, 1] relative to viewport center
       const x = (e.clientX / window.innerWidth) * 2 - 1;
       const y = (e.clientY / window.innerHeight) * 2 - 1;
@@ -88,6 +89,11 @@ export function InteractiveHero3D() {
 
     const tick = () => {
       if (!canvas || !ctx) return;
+
+      if (window.innerWidth < 768 || document.visibilityState === "hidden") {
+        animationId = requestAnimationFrame(tick);
+        return;
+      }
       
       const width = canvas.width;
       const height = canvas.height;

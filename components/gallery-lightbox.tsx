@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, X, Image as ImageIcon, Video, LayoutGrid, MonitorPlay, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary";
 
 interface Asset {
   url: string;
@@ -11,13 +12,15 @@ interface Asset {
 }
 
 // Stateful Premium Image Component to handle loading/errors gracefully
-function GalleryImage({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
+function GalleryImage({ src, alt, className = "", width = 800 }: { src: string; alt: string; className?: string; width?: number }) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
   const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     setStatus("loading");
   }, [src, retryKey]);
+
+  const optimizedSrc = optimizeCloudinaryUrl(src, width);
 
   return (
     <div className="relative w-full h-full min-h-[220px] bg-black/40 flex items-center justify-center overflow-hidden">
@@ -57,7 +60,7 @@ function GalleryImage({ src, alt, className = "" }: { src: string; alt: string; 
       {/* Main Image tag */}
       <img
         key={`${src}-${retryKey}`}
-        src={src}
+        src={optimizedSrc}
         alt={alt}
         onLoad={() => setStatus("loaded")}
         onError={() => setStatus("error")}
@@ -180,7 +183,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
               {activeAsset.kind === "image" && (
                 <div 
                   className="absolute inset-0 z-0 bg-cover bg-center filter blur-3xl opacity-20 scale-110 pointer-events-none transition-all duration-1000"
-                  style={{ backgroundImage: `url(${activeAsset.url})` }}
+                  style={{ backgroundImage: `url(${optimizeCloudinaryUrl(activeAsset.url, 200)})` }}
                 />
               )}
 
@@ -200,7 +203,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center cursor-zoom-in" onClick={() => setLightboxIndex(activeIndex)}>
-                    <GalleryImage src={activeAsset.url} alt={activeAsset.caption || albumTitle} className="rounded-xl shadow-2xl max-h-full max-w-full" />
+                    <GalleryImage src={activeAsset.url} alt={activeAsset.caption || albumTitle} width={1200} className="rounded-xl shadow-2xl max-h-full max-w-full" />
                   </div>
                 )}
               </div>
@@ -269,7 +272,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
                           <Video size={14} className="text-white/60" />
                         </div>
                       ) : (
-                        <img src={asset.url} alt="" className="h-full w-full object-cover" />
+                        <img src={optimizeCloudinaryUrl(asset.url, 150)} alt="" className="h-full w-full object-cover" />
                       )}
                     </button>
                   ))}
@@ -378,7 +381,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
                   />
                 ) : (
                   <img
-                    src={activeLightboxAsset.url}
+                    src={optimizeCloudinaryUrl(activeLightboxAsset.url, 1600)}
                     alt=""
                     className="max-h-[74vh] max-w-full rounded-xl shadow-2xl object-contain border border-white/5 transition-transform"
                   />

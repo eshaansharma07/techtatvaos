@@ -114,6 +114,11 @@ export function PremiumBackground() {
     }
 
     const tick = () => {
+      if (window.innerWidth < 768 || document.visibilityState === "hidden") {
+        animationId = requestAnimationFrame(tick);
+        return;
+      }
+
       mouseCoords.current.x += (targetCoords.current.x - mouseCoords.current.x) * 0.045;
       mouseCoords.current.y += (targetCoords.current.y - mouseCoords.current.y) * 0.045;
 

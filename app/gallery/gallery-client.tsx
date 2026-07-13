@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Search, FolderOpen, Calendar, Image as ImageIcon, Video, Filter, Compass } from "lucide-react";
 import { Reveal } from "@/components/reveal";
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary";
 
 interface Asset {
   url: string;
@@ -122,7 +123,7 @@ export function GalleryClient({ initialAlbums = [] }: { initialAlbums: Album[] }
                         />
                       ) : (
                         <img
-                          src={coverAsset.url}
+                          src={optimizeCloudinaryUrl(coverAsset.url, 800)}
                           alt=""
                           className="h-full w-full object-cover opacity-45 group-hover:opacity-60 group-hover:scale-105 transition-all duration-[1000ms] ease-out"
                           loading="lazy"
