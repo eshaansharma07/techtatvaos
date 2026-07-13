@@ -381,7 +381,7 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
           className="flex items-center gap-1.5 rounded-xl glass-brutalist px-3.5 py-1.5 text-[9px] font-bold text-white/80 hover:border-[#00FF66] transition"
         >
           <Sparkles size={10} className="text-[#00FF66]" />
-          <span>JOIN COMMUNITY</span>
+          <span>JOIN CLUB</span>
         </button>
       </div>
     </div>
