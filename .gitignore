@@ -6,3 +6,5 @@ node_modules
 *.tsbuildinfo
 .DS_Store
 .vercel
+output
+tmp_pdf_images
