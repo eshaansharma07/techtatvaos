@@ -268,7 +268,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
 
   <!-- UID / Year -->
   <text x="24" y="165" fill="rgba(255,255,255,0.3)" font-family="system-ui, -apple-system, sans-serif" font-size="7.5" font-weight="800" letter-spacing="1.5">UNIVERSITY UID</text>
-  <text x="24" y="181" fill="monospace" font-size="12" font-weight="700" fill="white">${escapedUid}</text>
+  <text x="24" y="181" font-family="monospace" font-size="12" font-weight="700" fill="white">${escapedUid}</text>
 
   <text x="180" y="165" fill="rgba(255,255,255,0.3)" font-family="system-ui, -apple-system, sans-serif" font-size="7.5" font-weight="800" letter-spacing="1.5">ACADEMIC YEAR</text>
   <text x="180" y="181" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="11.5" font-weight="700">${escapedYear}</text>
