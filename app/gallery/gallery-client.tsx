@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Search, FolderOpen, Calendar, Image as ImageIcon, Video, Filter, Compass } from "lucide-react";
 import { Reveal } from "@/components/reveal";
-import { optimizeCloudinaryUrl } from "@/lib/cloudinary";
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary-client";
 
 interface Asset {
   url: string;

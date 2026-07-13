@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, X, Image as ImageIcon, Video, LayoutGrid, MonitorPlay, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { optimizeCloudinaryUrl } from "@/lib/cloudinary";
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary-client";
 
 interface Asset {
   url: string;
