@@ -15,9 +15,13 @@ interface Asset {
 function GalleryImage({ src, alt, className = "", width = 800 }: { src: string; alt: string; className?: string; width?: number }) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
   const [retryKey, setRetryKey] = useState(0);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     setStatus("loading");
+    if (imgRef.current && imgRef.current.complete) {
+      setStatus("loaded");
+    }
   }, [src, retryKey]);
 
   const optimizedSrc = optimizeCloudinaryUrl(src, width);
@@ -59,6 +63,7 @@ function GalleryImage({ src, alt, className = "", width = 800 }: { src: string; 
 
       {/* Main Image tag */}
       <img
+        ref={imgRef}
         key={`${src}-${retryKey}`}
         src={optimizedSrc}
         alt={alt}
