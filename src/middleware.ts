@@ -47,5 +47,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|tech-tatva-hero-v2.png|logo-colour\\.png|logo-colour\\.svg|icons/|manifest.*\\.json|sw\\.js).*)"]
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|icons/|manifest.*\\.json|sw\\.js).*)"]
 };
