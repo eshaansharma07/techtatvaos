@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { 
   ArrowRight, 
   ArrowLeft,
@@ -222,16 +223,17 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
         <ArrowRight size={14} />
       </button>
 
-      {/* Fullscreen Overlay Wizard */}
-      <AnimatePresence>
-        {isOpen && (
-          <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/96 backdrop-blur-xl flex items-center justify-center p-3 md:p-6">
+      {/* Fullscreen Overlay Wizard — portalled to document.body to escape backdrop-filter stacking */}
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black/95 backdrop-blur-xl flex items-center justify-center p-3 md:p-6">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="w-full max-w-2xl bg-graphite/90 border border-white/10 rounded-[2rem] p-5 md:p-9 shadow-[0_0_80px_rgba(0,255,102,0.06)] relative overflow-hidden flex flex-col justify-between min-h-[580px]"
+              className="w-full max-w-2xl max-h-[90vh] bg-graphite/90 border border-white/10 rounded-[2rem] p-5 md:p-9 shadow-[0_0_80px_rgba(0,255,102,0.06)] relative overflow-y-auto flex flex-col"
             >
               {/* Top corners design brackets */}
               <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-emerald-500/30 pointer-events-none" />
@@ -723,7 +725,9 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </div>
   );
 }

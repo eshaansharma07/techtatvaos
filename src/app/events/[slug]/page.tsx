@@ -90,7 +90,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           </div>
         </div>
 
-        <div className="mt-6 grid gap-5 md:mt-8 lg:grid-cols-[1fr_390px] relative z-10">
+        <div className="mt-6 grid gap-5 md:mt-8 lg:grid-cols-[1fr_390px] lg:items-start relative z-10">
           <div className="glass-brutalist rounded-[2rem] p-6 md:p-8">
             <p className="text-[10px] font-bold uppercase tracking-[.24em] text-emerald-400">Brief</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-[-.045em] text-white">About the event</h2>
