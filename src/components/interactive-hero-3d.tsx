@@ -83,17 +83,10 @@ export function InteractiveHero3D() {
       nodes.push({ x, y, z, ox: x, oy: y, oz: z });
     }
 
-    let angleX = 0;
-    let angleY = 0;
     const focalLength = 300;
 
     const tick = () => {
       if (!canvas || !ctx) return;
-
-      if (window.innerWidth < 768 || document.visibilityState === "hidden") {
-        animationId = requestAnimationFrame(tick);
-        return;
-      }
       
       const width = canvas.width;
       const height = canvas.height;
@@ -102,15 +95,9 @@ export function InteractiveHero3D() {
 
       ctx.clearRect(0, 0, width, height);
 
-      // Lerp mouse target for inertia
-      mouseCoords.current.x += (targetCoords.current.x - mouseCoords.current.x) * 0.05;
-      mouseCoords.current.y += (targetCoords.current.y - mouseCoords.current.y) * 0.05;
-
-      // Base rotation rate + mouse influence
-      if (!prefersReducedMotion) {
-        angleY += (0.003 + mouseCoords.current.x * 0.008) * speedMultiplier.current;
-        angleX += (0.002 + mouseCoords.current.y * 0.008) * speedMultiplier.current;
-      }
+      // Static angles to render the sphere in a perfect view angle
+      const angleY = 0.5;
+      const angleX = 0.3;
 
       const cosY = Math.cos(angleY);
       const sinY = Math.sin(angleY);
@@ -156,7 +143,7 @@ export function InteractiveHero3D() {
             const averageZ = (p1.z + p2.z) / 2;
             const lineOpacity = Math.max(0, 0.15 - (averageZ + radius) / (radius * 4));
 
-            ctx.strokeStyle = `rgba(255, 255, 255, ${lineOpacity * 1.5})`;
+            ctx.strokeStyle = `rgba(0, 0, 0, ${lineOpacity * 1.8})`;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -170,44 +157,31 @@ export function InteractiveHero3D() {
         const nodeSize = Math.max(0.5, (node.scale * 3.5));
         const nodeOpacity = Math.max(0.05, 0.65 - (node.z + radius) / (radius * 3.2));
 
-        // Create glowing gradient for nodes
+        // Create glowing gradient for nodes (dark ink for light mode)
         const grad = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, nodeSize * 2.8);
-        grad.addColorStop(0, `rgba(255, 255, 255, ${nodeOpacity})`);
-        grad.addColorStop(0.3, `rgba(255, 255, 255, ${nodeOpacity * 0.8})`);
-        grad.addColorStop(1, "rgba(255, 255, 255, 0)");
+        grad.addColorStop(0, `rgba(0, 0, 0, ${nodeOpacity})`);
+        grad.addColorStop(0.3, `rgba(0, 0, 0, ${nodeOpacity * 0.8})`);
+        grad.addColorStop(1, "rgba(0, 0, 0, 0)");
 
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.arc(node.x, node.y, nodeSize * 2.8, 0, Math.PI * 2);
         ctx.fill();
       });
-
-      // Draw a subtle center hologram core
-      const coreSize = 35;
-      const coreGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, coreSize * 1.5);
-      coreGrad.addColorStop(0, "rgba(255, 255, 255, 0.05)");
-      coreGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.01)");
-      coreGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = coreGrad;
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, coreSize * 1.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      animationId = requestAnimationFrame(tick);
     };
 
     tick();
+    window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationId);
     };
   }, [prefersReducedMotion]);
 
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
       {/* Blurred background glow */}
-      <div className="absolute top-[45%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full bg-white/[0.03] blur-[60px]" />
+      <div className="absolute top-[45%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full bg-[#00FF66]/[0.08] blur-[60px]" />
       <canvas 
         ref={canvasRef} 
         className="w-full h-full max-w-[420px] max-h-[420px] aspect-square object-contain"

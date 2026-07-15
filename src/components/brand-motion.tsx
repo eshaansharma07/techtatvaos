@@ -27,10 +27,16 @@ export function MotionLogo({ logo }: { logo?: string }) {
 }
 
 export function SiteLoader({ logo }: { logo?: string }) {
-  const [visible, setVisible] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    // Check if already loaded in this session to skip loader
+    if (typeof window !== "undefined" && sessionStorage.getItem("tt_loaded") === "true") {
+      return; // Skip setting mounted to true to prevent transition flash
+    }
+
+    setMounted(true);
     const startTime = Date.now();
     const duration = 1350; // duration in ms
 
@@ -40,7 +46,9 @@ export function SiteLoader({ logo }: { logo?: string }) {
       setProgress(pct);
       if (elapsed >= duration) {
         clearInterval(interval);
-        setVisible(false);
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("tt_loaded", "true");
+        }
       }
     }, 16);
 
@@ -49,7 +57,8 @@ export function SiteLoader({ logo }: { logo?: string }) {
     };
   }, []);
 
-  if (!visible) return null;
+  if (!mounted) return null;
+  if (progress >= 100) return null;
 
   return (
     <div className="site-loader" aria-label="Loading Tech Tatva">

@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { ArrowUpRight, Calendar, GraduationCap, Instagram, Github, Linkedin } from "lucide-react";
-import { getClubInfo, getPublicEvents, getLatestPublicAnnouncement } from "@/lib/public-data";
+import { ArrowUpRight, Github, Linkedin } from "lucide-react";
+import { getClubInfo, getLatestPublicAnnouncement } from "@/lib/public-data";
 import { MotionLogo, SiteLoader } from "@/components/brand-motion";
 import { MobilePublicMenu } from "@/components/mobile-public-menu";
 import { PremiumBackground } from "@/components/premium-background";
-import { CustomCursor } from "@/components/custom-cursor";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { QuoteBlock } from "@/components/quote-block";
 import { FloatingAnnouncement } from "@/components/floating-announcement";
@@ -31,27 +30,12 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     getClubInfo(),
     getLatestPublicAnnouncement()
   ]);
-  
-  // Load dynamic events and workshops for rich footer
-  const events = await getPublicEvents(10);
-  const now = new Date();
-  const upcomingEvents = events.filter(e => !e.startAt || new Date(e.startAt) > now);
-  const pastEvents = events.filter(e => e.startAt && new Date(e.startAt) <= now);
 
-  const latestEvent = pastEvents[pastEvents.length - 1] || events[0] || null;
-  const upcomingWorkshop = upcomingEvents.find(e => e.category?.toLowerCase().includes("workshop") || e.title?.toLowerCase().includes("workshop")) || upcomingEvents[0] || null;
-
-  return <main className="site-canvas min-h-screen overflow-hidden bg-ink">
+  return <main className="site-canvas min-h-screen overflow-hidden public-theme bg-zinc-50 text-black">
     <SiteLoader logo={info.logo}/>
     
     {/* Premium Animated Parallax Particle Background */}
     <PremiumBackground />
-
-    {/* Custom Glow Cursor Aura and Ripple System */}
-    <CustomCursor />
-
-    {/* Subtle Vignette & Depth Bloom Layer */}
-    <div className="premium-vignette" aria-hidden="true" />
 
     <header className="public-header fixed inset-x-0 top-0 z-50">
       <div className="public-header-inner mx-auto flex max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] flex-row items-center justify-between px-5 py-4 md:mt-4 md:h-[4.75rem] md:px-5 md:py-0">
@@ -71,92 +55,35 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     <footer className="public-footer px-5 py-10 md:px-6 md:py-16">
       <div className="glass-brutalist mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] rounded-[2rem] p-6 md:p-8">
         
-        {/* RICH FOOTER INFORMATION CARDS */}
-        <div className="grid gap-4 sm:grid-cols-3 pb-8 mb-8 border-b border-white/[.06]">
-          
-          {/* Block 1: Latest Completed Event */}
-          <div className="glass-brutalist rounded-[22px] p-5">
-            <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-              <Calendar size={11} />
-              <span>Latest Event</span>
-            </div>
-            {latestEvent ? (
-              <div className="mt-3">
-                <h5 className="text-xs font-bold text-white truncate">{latestEvent.title}</h5>
-                <p className="mt-1 text-[10px] text-white/40 line-clamp-2 leading-relaxed">
-                  {latestEvent.description || "Explore and register for Tech Tatva club events."}
-                </p>
-                <Link href={`/events/${latestEvent.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-[#00FF66] hover:underline transition">
-                  View details <ArrowUpRight size={10} />
-                </Link>
-              </div>
-            ) : (
-              <p className="mt-3 text-[10px] text-white/35 leading-relaxed">
-                No past event documents active. Keep exploring for newly announced sessions!
-              </p>
-            )}
-          </div>
- 
-          {/* Block 2: Upcoming Technical Workshop */}
-          <div className="glass-brutalist rounded-[22px] p-5">
-            <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-              <GraduationCap size={11} />
-              <span>Upcoming Bootcamp</span>
-            </div>
-            {upcomingWorkshop ? (
-              <div className="mt-3">
-                <h5 className="text-xs font-bold text-white truncate">{upcomingWorkshop.title}</h5>
-                <p className="mt-1 text-[10px] text-white/40 line-clamp-2 leading-relaxed">
-                  {upcomingWorkshop.description || "Bootcamps and workshops led by seniors."}
-                </p>
-                <Link href={`/events/${upcomingWorkshop.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-[#00FF66] hover:underline transition">
-                  Register now <ArrowUpRight size={10} />
-                </Link>
-              </div>
-            ) : (
-              <p className="mt-3 text-[10px] text-white/35 leading-relaxed">
-                No upcoming bootcamps scheduled right now. Check back soon!
-              </p>
-            )}
-          </div>
- 
-          {/* Block 3: Dynamic Newsletter Subscription Form */}
-          <NewsletterForm />
-        </div>
- 
-        <div className="grid gap-8 lg:grid-cols-[1.05fr_.75fr_.5fr] lg:items-start">
+        {/* 2-Column Footer Layout */}
+        <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-start pb-8 border-b border-black/10">
+          {/* Column 1: Brand Info & Socials */}
           <div className="space-y-6">
             <div>
               <MotionLogo logo={info.logo}/>
-              <p className="mt-6 max-w-xl text-sm leading-7 text-white/46">{info.footerCopy || "Ideas, events, teams, and stories from the Tech Tatva community."}</p>
+              <p className="mt-4 max-w-sm text-xs leading-6 text-black/60">{info.footerCopy || "Ideas, events, teams, and stories from the Tech Tatva community."}</p>
             </div>
-            {/* Random Tech Quote Block */}
             <div className="max-w-md">
               <QuoteBlock />
             </div>
           </div>
- 
-          <div className="grid grid-cols-2 gap-2 text-xs font-bold tracking-[.13em] text-white/52 sm:grid-cols-3">
-            {[...publicLinks, ["CONTACT", "/contact"] as const].map(([label, href]) => (
-              <Link href={href} key={href} className="glass-brutalist rounded-xl px-4 py-3 transition hover:border-[#00FF66]/50 hover:text-white">
-                {label}
-              </Link>
-            ))}
-          </div>
-          <Link href="/contact" className="brutalist-btn-green flex min-h-14 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] text-black">Start a conversation <ArrowUpRight size={16}/></Link>
+
+          {/* Column 2: Newsletter Form */}
+          <NewsletterForm />
         </div>
         
-        <div className="mt-10 border-t border-white/[.06] pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <span className="text-[9px] font-bold tracking-[.2em] text-white/35 uppercase block mb-3">Affiliation</span>
-            <div className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,255,102,0.6)] hover:scale-[1.02] transition duration-300">
+        {/* Bottom copyright row with affiliation */}
+        <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between text-[11px] text-black/40 font-medium">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="inline-flex items-center justify-center rounded-xl bg-white px-3 py-1.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
               <img
                 src="/chandigarh-university-logo.png"
                 alt="Chandigarh University"
-                className="h-7 w-auto object-contain"
+                className="h-6 w-auto object-contain"
                 loading="lazy"
               />
             </div>
+            <span>© {new Date().getFullYear()} Tech Tatva Chandigarh University. All rights reserved.</span>
           </div>
 
           {/* Social Media Link Badges */}
@@ -165,7 +92,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
               href={info.githubUrl || "https://github.com"} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.025] text-white/45 hover:border-white/15 hover:bg-white/[0.06] hover:text-white transition"
+              className="group flex h-10 w-10 items-center justify-center rounded-xl border-2 border-black bg-white text-black hover:bg-[#00FF66] transition shadow-[2px_2px_0px_0px_#000000]"
               aria-label="Tech Tatva GitHub Link"
             >
               <Github size={15} className="transition group-hover:scale-110" />
@@ -174,7 +101,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
               href={info.discordUrl || "https://discord.gg"} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.025] text-white/45 hover:border-white/15 hover:bg-white/[0.06] hover:text-white transition"
+              className="group flex h-10 w-10 items-center justify-center rounded-xl border-2 border-black bg-white text-black hover:bg-[#00FF66] transition shadow-[2px_2px_0px_0px_#000000]"
               aria-label="Tech Tatva Discord Link"
             >
               <DiscordIcon size={15} />
@@ -183,7 +110,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
               href={info.linkedinUrl || "https://linkedin.com"} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.025] text-white/45 hover:border-white/15 hover:bg-white/[0.06] hover:text-white transition"
+              className="group flex h-10 w-10 items-center justify-center rounded-xl border-2 border-black bg-white text-black hover:bg-[#00FF66] transition shadow-[2px_2px_0px_0px_#000000]"
               aria-label="Tech Tatva LinkedIn Link"
             >
               <Linkedin size={15} className="transition group-hover:scale-110" />
@@ -202,4 +129,3 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     }} />
   </main>;
 }
-
