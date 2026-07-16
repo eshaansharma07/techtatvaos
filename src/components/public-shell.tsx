@@ -8,6 +8,8 @@ import { NewsletterForm } from "@/components/newsletter-form";
 import { QuoteBlock } from "@/components/quote-block";
 import { FloatingAnnouncement } from "@/components/floating-announcement";
 
+import { ThemeToggle, HeaderThemeToggle } from "@/components/theme-toggle";
+
 const publicLinks = [
   ["HOME", "/"],
   ["ABOUT", "/about"],
@@ -43,9 +45,12 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
         <nav className="public-nav hidden w-auto items-center gap-1 text-xs font-medium tracking-[.15em] text-white/50 md:flex">
           {publicLinks.map(([label,href])=><Link className="rounded-xl px-4 py-3 transition hover:bg-[#00FF66] hover:text-black font-bold uppercase" key={href} href={href}>{label}</Link>)}
         </nav>
-        <Link href="/contact" className="brutalist-btn-purple hidden min-h-11 items-center gap-2 rounded-xl px-5 text-xs font-bold tracking-[.12em] md:inline-flex shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
-          CONNECT <ArrowUpRight size={14}/>
-        </Link>
+        <div className="hidden md:flex items-center">
+          <HeaderThemeToggle />
+          <Link href="/contact" className="brutalist-btn-purple min-h-11 inline-flex items-center gap-2 rounded-xl px-5 text-xs font-bold tracking-[.12em] shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+            CONNECT <ArrowUpRight size={14}/>
+          </Link>
+        </div>
         <MobilePublicMenu logo={info.logo}/>
       </div>
     </header>
@@ -127,5 +132,6 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
       announcementType: latestAnn ? "info" : (info.announcementType || "info"),
       announcementDetails: latestAnn ? (latestAnn as any).body : (info.announcementDetails || ""),
     }} />
+    <ThemeToggle />
   </main>;
 }

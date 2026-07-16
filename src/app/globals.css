@@ -1342,6 +1342,9 @@ body:before {
   --theme-bg: #fafafa;
   --theme-text: #080808;
   --theme-text-muted: #666666;
+  --theme-border: #000000;
+  --theme-shadow: #000000;
+  --theme-card-bg: #ffffff;
   
   background-color: var(--theme-bg) !important;
   color: var(--theme-text) !important;
@@ -1687,8 +1690,8 @@ body:before {
   -webkit-backdrop-filter: none !important;
 }
 
-/* Floating Chatbot Overrides for Light Theme */
-.public-theme .public-chat-trigger {
+/* Floating Chatbot Overrides */
+.public-chat-trigger {
   background: #00FF66 !important;
   background-image: none !important;
   color: #000000 !important;
@@ -1699,16 +1702,18 @@ body:before {
   transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.15s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-.public-theme .public-chat-trigger:hover {
+.public-chat-trigger:hover {
   transform: translate(-2px, -2px) scale(1.05) !important;
   box-shadow: 5px 5px 0px 0px #000000 !important;
 }
 
-.public-theme .public-chat-trigger svg {
+.public-chat-trigger svg {
   color: #000000 !important;
+  z-index: 10 !important;
+  position: relative !important;
 }
 
-.public-theme .public-chat-trigger span {
+.public-chat-trigger span {
   display: none !important; /* Hide neon pulse / glow */
 }
 
@@ -1805,12 +1810,21 @@ body:before {
 }
 
 /* Premium Monochrome Images & Avatars */
-.public-theme img {
+.public-theme img:not(.brand-mark):not(.no-grayscale) {
   filter: grayscale(100%) !important;
   transition: filter 0.3s ease !important;
 }
-.public-theme img:hover {
+.public-theme img:not(.brand-mark):not(.no-grayscale):hover {
   filter: grayscale(0%) !important;
+}
+
+/* Explicitly disable grayscale on brand logo and exempted images */
+.public-theme img.brand-mark,
+.public-theme img.no-grayscale,
+.public-theme .brand-mark,
+.public-theme .no-grayscale {
+  filter: grayscale(0%) !important;
+  filter: none !important;
 }
 
 /* Subtle Hover Scale Animations and Green Glows */
@@ -1834,7 +1848,540 @@ body:before {
   box-shadow: 5px 5px 0px 0px #00FF66, 0 0 15px rgba(0, 255, 102, 0.15) !important;
 }
 
+/* Public Recruitment Form Styles */
+.public-theme form {
+  background: #ffffff !important;
+}
 
+.public-theme form .bg-black\/40,
+.public-theme form .bg-black\/45,
+.public-theme form .bg-white\/\[\.03\],
+.public-theme form .bg-white\/\[0\.03\],
+.public-theme form .bg-black\/20 {
+  background-color: #fafafa !important;
+}
 
+.public-theme form .border-white\/10,
+.public-theme form .border-white\/\[\.08\],
+.public-theme form .border-white\/\[0\.08\],
+.public-theme form .border-white\/\[\.07\],
+.public-theme form .border-white\/\[0\.07\] {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
 
+.public-theme form input,
+.public-theme form select,
+.public-theme form textarea {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+}
 
+.public-theme form input:focus,
+.public-theme form select:focus,
+.public-theme form textarea:focus {
+  border-color: #00FF66 !important;
+}
+
+/* Team and Role selection buttons in recruitment form */
+.public-theme form button.border {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  box-shadow: 3px 3px 0px 0px #000000 !important;
+}
+
+.public-theme form button.border.bg-emerald-500\/10 {
+  background: #00FF66 !important;
+  box-shadow: 4px 4px 0px 0px #000000 !important;
+}
+
+.public-theme form button.border.border-emerald-500 {
+  border-color: #000000 !important;
+  border-width: 2px !important;
+}
+
+/* Step list button indicators on top */
+.public-theme form button.bg-emerald-400\/10 {
+  background: rgba(0, 255, 102, 0.1) !important;
+  color: #10b981 !important;
+}
+
+.public-chat-trigger span {
+  display: none !important; /* Hide neon pulse / glow */
+}
+
+.public-theme .public-chat-window {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 4px 4px 0px 0px #000000 !important;
+  color: #000000 !important;
+  bottom: 6rem !important;
+  right: 1.5rem !important;
+}
+
+.public-theme .public-chat-header {
+  background: #fafafa !important;
+  border-bottom: 2px solid #000000 !important;
+  color: #000000 !important;
+}
+
+.public-theme .public-chat-header p {
+  color: #000000 !important;
+}
+
+.public-theme .public-chat-header span {
+  color: #666666 !important;
+}
+
+.public-theme .public-chat-header svg {
+  color: #000000 !important;
+}
+
+.public-theme .public-chat-header button {
+  color: #000000 !important;
+}
+
+.public-theme .public-chat-header button:hover {
+  background: rgba(0,0,0,0.05) !important;
+}
+
+.public-theme .public-chat-user-message {
+  background: #00FF66 !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+}
+
+.public-theme .public-chat-model-message {
+  background: #fafafa !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.15) !important;
+}
+
+.public-theme .public-chat-window span.font-mono {
+  color: rgba(0,0,0,0.4) !important;
+}
+
+.public-theme .public-chat-input-container {
+  background: #fafafa !important;
+  border-top: 2px solid #000000 !important;
+}
+
+.public-theme .public-chat-input {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+}
+
+.public-theme .public-chat-input:focus {
+  border-color: #00FF66 !important;
+}
+
+.public-theme .public-chat-input::placeholder {
+  color: rgba(0,0,0,0.3) !important;
+}
+
+.public-theme .public-chat-input-container button {
+  background: #00FF66 !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  box-shadow: 1px 1px 0px 0px #000000 !important;
+}
+
+.public-theme .public-chat-input-container button:hover {
+  background: #00FF66 !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+}
+
+.public-theme .public-chat-window .animate-pulse {
+  color: rgba(0,0,0,0.5) !important;
+  background: #fafafa !important;
+  border: 2px solid #000000 !important;
+}
+
+/* Premium Monochrome Images & Avatars */
+.public-theme img:not(.brand-mark):not(.no-grayscale) {
+  filter: grayscale(100%) !important;
+  transition: filter 0.3s ease !important;
+}
+.public-theme img:not(.brand-mark):not(.no-grayscale):hover {
+  filter: grayscale(0%) !important;
+}
+
+/* Explicitly disable grayscale on brand logo and exempted images */
+.public-theme img.brand-mark,
+.public-theme img.no-grayscale,
+.public-theme .brand-mark,
+.public-theme .no-grayscale {
+  filter: grayscale(0%) !important;
+  filter: none !important;
+}
+
+/* Subtle Hover Scale Animations and Green Glows */
+.public-theme .glass-brutalist {
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.public-theme .glass-brutalist:hover {
+  transform: scale(1.01) translateY(-2px) !important;
+  border-color: #00FF66 !important;
+  box-shadow: 5px 5px 0px 0px #00FF66, 0 0 15px rgba(0, 255, 102, 0.15) !important;
+}
+
+.public-theme .event-card {
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.public-theme .event-card:hover {
+  transform: scale(1.01) translateY(-2px) !important;
+  border-color: #00FF66 !important;
+  box-shadow: 5px 5px 0px 0px #00FF66, 0 0 15px rgba(0, 255, 102, 0.15) !important;
+}
+
+/* Public Recruitment Form Styles */
+.public-theme form {
+  background: #ffffff !important;
+}
+
+.public-theme form .bg-black\/40,
+.public-theme form .bg-black\/45,
+.public-theme form .bg-white\/\[\.03\],
+.public-theme form .bg-white\/\[0\.03\],
+.public-theme form .bg-black\/20 {
+  background-color: #fafafa !important;
+}
+
+.public-theme form .border-white\/10,
+.public-theme form .border-white\/\[\.08\],
+.public-theme form .border-white\/\[0\.08\],
+.public-theme form .border-white\/\[\.07\],
+.public-theme form .border-white\/\[0\.07\] {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+.public-theme form input,
+.public-theme form select,
+.public-theme form textarea {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+}
+
+.public-theme form input:focus,
+.public-theme form select:focus,
+.public-theme form textarea:focus {
+  border-color: #00FF66 !important;
+}
+
+/* Team and Role selection buttons in recruitment form */
+.public-theme form button.border {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  box-shadow: 3px 3px 0px 0px #000000 !important;
+}
+
+.public-theme form button.border.bg-emerald-500\/10 {
+  background: #00FF66 !important;
+  box-shadow: 4px 4px 0px 0px #000000 !important;
+}
+
+.public-theme form button.border.border-emerald-500 {
+  border-color: #000000 !important;
+  border-width: 2px !important;
+}
+
+/* Step list button indicators on top */
+.public-theme form button.bg-emerald-400\/10 {
+  background: rgba(0, 255, 102, 0.1) !important;
+  color: #10b981 !important;
+  border: 1px solid rgba(0, 255, 102, 0.2) !important;
+}
+
+.public-theme form button.bg-white\/\[\.05\] {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Progress bar background */
+.public-theme form .bg-white\/\[\.06\] {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Success panel and timeline year shadow overrides */
+.public-theme .shadow-\[4px_4px_0px_0px_rgba\(255\,255\,255\,0\.8\)\] {
+  box-shadow: 4px 4px 0px 0px #000000 !important;
+}
+
+.public-theme .shadow-\[2px_2px_0px_0px_rgba\(255\,255\,255\,0\.8\)\] {
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+}
+
+/* Vision/Mission Icon wrapper */
+.public-theme article.glass-brutalist span.bg-emerald-500\/10 {
+  background: rgba(0, 255, 102, 0.1) !important;
+  border: 1px solid rgba(0, 255, 102, 0.2) !important;
+  color: #000000 !important;
+}
+
+/* ── PUBLIC DARK MODE SYSTEM ── */
+.public-theme.dark {
+  --theme-bg: #09090b;
+  --theme-text: #ffffff;
+  --theme-text-muted: rgba(255, 255, 255, 0.55);
+  --theme-border: #3f3f46;
+  --theme-shadow: #000000;
+  --theme-card-bg: #18181b;
+}
+
+/* Background overrides */
+.public-theme.dark .bg-zinc-50,
+.public-theme.dark .bg-zinc-100,
+.public-theme.dark .bg-white,
+.public-theme.dark .bg-\[\#fafafa\],
+.public-theme.dark .bg-\[rgba\(255\,255\,255\,0\.03\)\] {
+  background-color: var(--theme-card-bg) !important;
+}
+
+/* Page base background matching */
+.public-theme.dark section.bg-\[\#fafafa\] {
+  background-color: var(--theme-bg) !important;
+}
+
+/* Small backgrounds like pills, chips and tags */
+.public-theme.dark .bg-black\/5,
+.public-theme.dark .bg-black\/\[0\.03\],
+.public-theme.dark .bg-black\/\[0\.05\],
+.public-theme.dark .bg-black\/20 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.public-theme.dark .bg-white\/50 {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Borders and dividers */
+.public-theme.dark .border-black {
+  border-color: var(--theme-border) !important;
+}
+
+.public-theme.dark .border-black\/10,
+.public-theme.dark .border-black\/20 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Map connection lines and dividers to dark grey */
+.public-theme.dark .border-black\/15,
+.public-theme.dark .border-t-2.border-black,
+.public-theme.dark .border-b-2.border-black,
+.public-theme.dark .border-y-2.border-black {
+  border-color: var(--theme-border) !important;
+}
+
+.public-theme.dark .bg-black\/15 {
+  background-color: var(--theme-border) !important;
+}
+
+/* Homepage header next room text gradient override */
+.public-theme.dark h1 .from-black.to-zinc-600 {
+  background-image: linear-gradient(to right, #ffffff, #a1a1aa) !important;
+  color: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+.public-theme.dark .slice-t {
+  color: var(--theme-text) !important;
+}
+
+.public-theme.dark h1 span.font-extrabold.italic {
+  background: linear-gradient(to right, #ffffff 30%, rgba(255, 255, 255, 0.4) 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Text and typography Legibility */
+.public-theme.dark .text-black:not(.brutalist-btn-green):not(.brutalist-btn-dark):not(button) {
+  color: var(--theme-text) !important;
+}
+
+.public-theme.dark .text-black\/20,
+.public-theme.dark .text-black\/25,
+.public-theme.dark .text-black\/30,
+.public-theme.dark .text-black\/35,
+.public-theme.dark .text-black\/40,
+.public-theme.dark .text-black\/45,
+.public-theme.dark .text-black\/50,
+.public-theme.dark .text-black\/55,
+.public-theme.dark .text-black\/60,
+.public-theme.dark .text-black\/70 {
+  color: var(--theme-text-muted) !important;
+}
+
+/* Map Tailwind gray and neutral text to light counterparts in dark mode */
+.public-theme.dark .text-zinc-900,
+.public-theme.dark .text-zinc-800,
+.public-theme.dark .text-zinc-700,
+.public-theme.dark .text-neutral-900,
+.public-theme.dark .text-neutral-800,
+.public-theme.dark .text-neutral-700 {
+  color: var(--theme-text) !important;
+}
+.public-theme.dark .text-zinc-600,
+.public-theme.dark .text-zinc-500,
+.public-theme.dark .text-zinc-400,
+.public-theme.dark .text-neutral-600,
+.public-theme.dark .text-neutral-500,
+.public-theme.dark .text-neutral-400,
+.public-theme.dark p.text-white\/45,
+.public-theme.dark p.text-white\/50,
+.public-theme.dark span.text-white\/48 {
+  color: var(--theme-text-muted) !important;
+}
+
+/* Map dynamic shadow offsets (black and white variations) to solid black */
+.public-theme.dark .shadow-\[2px_2px_0px_0px_\#000\],
+.public-theme.dark .shadow-\[3px_3px_0px_0px_\#000\],
+.public-theme.dark .shadow-\[4px_4px_0px_0px_\#000\],
+.public-theme.dark .shadow-\[2px_2px_0px_0px_rgba\(0\,0\,0\,0\.15\)\],
+.public-theme.dark .shadow-\[2px_2px_0px_0px_rgba\(255\,255\,255\,0\.8\)\],
+.public-theme.dark .shadow-\[3px_3px_0px_0px_rgba\(255\,255\,255\,0\.8\)\],
+.public-theme.dark .shadow-\[4px_4px_0px_0px_rgba\(255\,255\,255\,0\.8\)\] {
+  box-shadow: 3px 3px 0px 0px var(--theme-shadow) !important;
+}
+
+.public-theme.dark .glass-brutalist {
+  background: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: 4px 4px 0px 0px var(--theme-shadow) !important;
+  color: var(--theme-text) !important;
+}
+
+.public-theme.dark .glass-brutalist:hover {
+  border-color: #00FF66 !important;
+  box-shadow: 4px 4px 0px 0px var(--theme-shadow) !important;
+}
+
+/* Dynamic Forms & Input Controls in Dark Mode */
+.public-theme.dark form,
+.public-theme.dark .glass-brutalist form {
+  background: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.public-theme.dark input,
+.public-theme.dark select,
+.public-theme.dark textarea,
+.public-theme.dark form input,
+.public-theme.dark form select,
+.public-theme.dark form textarea {
+  background: #27272a !important;
+  border: 2px solid var(--theme-border) !important;
+  color: var(--theme-text) !important;
+  box-shadow: 2px 2px 0px 0px var(--theme-shadow) !important;
+}
+
+.public-theme.dark form input:focus,
+.public-theme.dark form select:focus,
+.public-theme.dark form textarea:focus {
+  border-color: #00FF66 !important;
+}
+
+.public-theme.dark form button.border {
+  background: var(--theme-card-bg) !important;
+  border: 2px solid var(--theme-border) !important;
+  color: var(--theme-text) !important;
+  box-shadow: 3px 3px 0px 0px var(--theme-shadow) !important;
+}
+
+.public-theme.dark form button.border.bg-emerald-500\/10 {
+  background: #00FF66 !important;
+  color: #000000 !important;
+  box-shadow: 4px 4px 0px 0px var(--theme-shadow) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.public-theme.dark form button.bg-white\/\[\.05\] {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid var(--theme-border) !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.public-theme.dark form .bg-white\/\[\.06\] {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Invert navigation items in dark mode header */
+.public-theme.dark nav.public-nav a {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.public-theme.dark nav.public-nav a:hover {
+  color: #000000 !important;
+}
+
+/* Chat window theme support */
+.public-theme.dark .public-chat-window {
+  background: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: 4px 4px 0px 0px var(--theme-shadow) !important;
+}
+.public-theme.dark .public-chat-header {
+  background: #27272a !important;
+  border-color: var(--theme-border) !important;
+}
+.public-theme.dark .public-chat-header p {
+  color: var(--theme-text) !important;
+}
+.public-theme.dark .public-chat-input-container {
+  background: #27272a !important;
+  border-color: var(--theme-border) !important;
+}
+.public-theme.dark .public-chat-input-container input {
+  background: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+/* Invert dark mode toggle button display states */
+.dark-mode-toggle-btn {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+.public-theme.dark .dark-mode-toggle-btn {
+  background-color: var(--theme-card-bg) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: 3px 3px 0px 0px var(--theme-shadow) !important;
+}
+
+/* Invert header menu bar and nav backgrounds in dark mode */
+.public-theme.dark .public-header {
+  background: linear-gradient(180deg, rgba(9, 9, 11, 0.8), transparent) !important;
+}
+.public-theme.dark .public-header-inner {
+  background: rgba(24, 24, 27, 0.98) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: 4px 4px 0px 0px var(--theme-shadow) !important;
+  color: var(--theme-text) !important;
+}
+.public-theme.dark .public-nav {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+.public-theme.dark .public-header-inner .brutalist-btn-purple {
+  box-shadow: 2px 2px 0px 0px var(--theme-shadow) !important;
+}
+
+/* Logo visibility in dark mode */
+.public-theme.dark .brand-title,
+.public-theme.dark .brand-title span,
+.public-theme.dark .brand-mark-fallback {
+  color: var(--theme-text) !important;
+}

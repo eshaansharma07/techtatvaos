@@ -1,46 +1,42 @@
-import { Award, Crown, Medal, Sparkles, Star, Users } from "lucide-react";
+import { Award, Crown, Medal, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
+import { Reveal } from "@/components/reveal";
 import { getHallOfFameData, type HallMember } from "@/lib/public-data";
 
 export const revalidate = 60;
-
-const tones = {
-  violet: "border-[#00FF66] bg-black/45 text-white shadow-[#00FF66]/10",
-  emerald: "border-[#00FF66]/60 bg-black/45 text-white shadow-[#00FF66]/5",
-  fuchsia: "border-[#00FF66]/55 bg-black/45 text-white shadow-[#00FF66]/5",
-  amber: "border-[#00FF66]/40 bg-black/45 text-white shadow-[#00FF66]/5"
-};
 
 function initials(name: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "TT";
 }
 
 function HallAvatar({ person, large = false }: { person: HallMember; large?: boolean }) {
-  const size = large ? "h-24 w-24 rounded-[1.6rem] text-2xl" : "h-16 w-16 rounded-2xl text-base";
+  const size = large ? "h-24 w-24 rounded-2xl text-2xl" : "h-16 w-16 rounded-xl text-base";
   return person.image ? (
-    <img src={person.image} alt="" loading="lazy" className={`${size} border-2 border-black object-cover shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]`} />
+    <img src={person.image} alt="" loading="lazy" className={`${size} border-2 border-black object-cover shadow-[2px_2px_0px_0px_#000] no-grayscale`} />
   ) : (
-    <div className={`${size} grid place-items-center border-2 border-black bg-black/40 font-bold text-white shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]`}>
+    <div className={`${size} grid place-items-center border-2 border-black bg-[#00FF66] font-bold text-black shadow-[2px_2px_0px_0px_#000]`}>
       {initials(person.name)}
     </div>
   );
 }
 
-function HallCard({ person, tone = "violet", featured = false }: { person: HallMember; tone?: keyof typeof tones; featured?: boolean }) {
+function HallCard({ person, featured = false }: { person: HallMember; featured?: boolean }) {
   return (
-    <article className={`group relative overflow-hidden rounded-[2rem] border-2 p-5 shadow-2xl backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-[#00FF66]/80 ${tones[tone]} ${featured ? "md:p-7" : ""}`}>
-      <div className="pointer-events-none absolute inset-0 grid-bg opacity-[.13]" />
-      <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/10 blur-3xl transition group-hover:bg-white/15" />
-      <div className="relative flex items-start gap-4">
+    <article className={`group relative overflow-hidden rounded-[2rem] border-2 border-black p-6 shadow-[3px_3px_0px_0px_#000] bg-white transition hover:-translate-y-0.5 hover:border-[#00FF66] hover:shadow-[3px_3px_0px_0px_#000_#00FF66] ${featured ? "md:p-8" : ""}`}>
+      <div className="relative flex flex-col sm:flex-row items-start gap-4">
         <HallAvatar person={person} large={featured} />
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-[#00FF66]">{person.title || person.category.replace("_", " ")}</p>
-          <h3 className={`${featured ? "text-3xl" : "text-xl"} mt-2 font-bold tracking-[-.04em] text-white`}>{person.name}</h3>
-          {person.subtitle ? <p className="mt-2 text-sm leading-6 text-white/50">{person.subtitle}</p> : null}
-          <div className="mt-4 flex flex-wrap gap-2">
-            {person.team ? <span className="glass-brutalist rounded-xl px-3 py-1 text-[10px] font-bold tracking-[.12em] text-white/80">{person.team.toUpperCase()}</span> : null}
-            {person.batch ? <span className="glass-brutalist rounded-xl px-3 py-1 text-[10px] font-bold tracking-[.12em] text-white/80">BATCH {person.batch}</span> : null}
-            {person.year ? <span className="glass-brutalist rounded-xl px-3 py-1 text-[10px] font-bold tracking-[.12em] text-white/80">{person.year}</span> : null}
+        <div className="min-w-0 flex-1">
+          <span className="inline-flex rounded-lg border border-black bg-black/5 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[.18em] text-black/60">
+            {person.title || person.category.replace("_", " ")}
+          </span>
+          <h3 className={`${featured ? "text-2xl sm:text-4xl" : "text-lg sm:text-xl"} mt-2 font-extrabold tracking-tight text-black`}>
+            {person.name}
+          </h3>
+          {person.subtitle ? <p className="mt-1 text-xs text-black/50">{person.subtitle}</p> : null}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {person.team ? <span className="rounded-lg border border-black/10 bg-black/[0.03] px-2 py-1 text-[9px] font-bold text-black/50">{person.team.toUpperCase()}</span> : null}
+            {person.batch ? <span className="rounded-lg border border-black/10 bg-black/[0.03] px-2 py-1 text-[9px] font-bold text-black/50">BATCH {person.batch}</span> : null}
+            {person.year ? <span className="rounded-lg border border-black/10 bg-black/[0.03] px-2 py-1 text-[9px] font-bold text-black/50">{person.year}</span> : null}
           </div>
         </div>
       </div>
@@ -50,30 +46,32 @@ function HallCard({ person, tone = "violet", featured = false }: { person: HallM
 
 function EmptyLegacy({ label }: { label: string }) {
   return (
-    <div className="glass-brutalist rounded-[1.5rem] p-6 text-center">
-      <Star className="mx-auto text-emerald-400" size={20} />
-      <p className="mt-3 text-sm font-bold text-white">No {label} added yet.</p>
-      <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-white/35">Add real names from the portal when the club is ready to publish this legacy section.</p>
+    <div className="rounded-[1.5rem] border-2 border-dashed border-black/15 p-8 text-center bg-white/50">
+      <p className="text-sm font-bold text-black/40">No {label} recorded yet.</p>
     </div>
   );
 }
 
-function LegacySection({ title, eyebrow, icon: Icon, people, tone }: { title: string; eyebrow: string; icon: typeof Crown; people: HallMember[]; tone: keyof typeof tones }) {
+function LegacySection({ title, eyebrow, icon: Icon, people }: { title: string; eyebrow: string; icon: typeof Crown; people: HallMember[] }) {
   return (
-    <section className="mt-6 rounded-[2rem] glass-brutalist p-5 md:mt-8 md:p-7 relative z-10">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <section className="mt-10 rounded-[2.2rem] glass-brutalist p-6 md:p-8 relative z-10">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-black pb-5 mb-6">
         <div>
-          <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.26em] text-emerald-400"><Icon size={14} />{eyebrow}</p>
-          <h2 className="mt-3 text-3xl font-extrabold tracking-[-.055em] text-white md:text-5xl">{title}</h2>
+          <p className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[.26em] text-black/40">
+            <Icon size={12} className="text-[#00FF66]" /> {eyebrow}
+          </p>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-black md:text-4xl">{title}</h2>
         </div>
-        <span className="brutalist-btn-dark rounded-xl px-4 py-2 text-[10px] font-bold tracking-[.16em] text-white">{people.length} RECORDS</span>
+        <span className="rounded-xl border-2 border-black bg-white px-4 py-2 text-[10px] font-bold tracking-[.16em] text-black shadow-[2px_2px_0px_0px_#000] uppercase">
+          {people.length} Records
+        </span>
       </div>
       {people.length ? (
-        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {people.map((person) => <HallCard person={person} tone={tone} key={person.id} />)}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {people.map((person) => <HallCard person={person} key={person.id} />)}
         </div>
       ) : (
-        <div className="mt-5"><EmptyLegacy label={title.toLowerCase()} /></div>
+        <EmptyLegacy label={title.toLowerCase()} />
       )}
     </section>
   );
@@ -85,51 +83,80 @@ export default async function HallOfFamePage() {
 
   return (
     <PublicShell>
-      <section className="relative mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-28 md:px-6 md:pb-28 md:pt-44 spatial-grid-bg">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(0,255,102,0.05),transparent_45%)] pointer-events-none" />
+      <section className="relative mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-24 pt-32 md:px-6 md:pt-44 spatial-grid-bg">
 
-        <div className="glass-brutalist relative overflow-hidden rounded-[2rem] px-5 py-10 text-center md:rounded-[2.3rem] md:px-10 md:py-14 relative z-10">
-          <p className="relative flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[.34em] text-emerald-400">
-            <Sparkles size={13} />
-            CLUB LEGACY
-          </p>
-          <h1 className="relative mx-auto mt-5 max-w-4xl text-3xl xs:text-5xl font-extrabold leading-[.92] tracking-[-.065em] text-white md:text-7xl">
-            Hall of Fame
-          </h1>
-          <p className="relative mx-auto mt-5 max-w-2xl text-[15px] leading-7 text-white/52 md:text-sm">
-            A living record of the people who shaped Tech Tatva: office bearers, leads, contributors, and alumni.
-          </p>
-          <div className="relative mt-7 flex flex-wrap justify-center gap-3">
-            {["Secretary", "Joint Secretaries", "Team Leads", "Top Contributors", "Alumni"].map((item) => (
-              <span className="brutalist-btn-dark rounded-xl px-4 py-2 text-[10px] font-bold tracking-[.14em] text-white" key={item}>{item.toUpperCase()}</span>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-[1.15fr_.85fr] relative z-10">
-          <div className="glass-brutalist rounded-[2rem] p-5 md:p-7">
-            <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.26em] text-emerald-400"><Crown size={14} /> Current Secretary</p>
-            <div className="mt-5">
-              {hall.secretary.length ? <HallCard person={hall.secretary[0]} tone="violet" featured /> : <EmptyLegacy label="secretary details" />}
+        {/* ── HERO ── */}
+        <Reveal>
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b-2 border-black pb-10 mb-10">
+            <div>
+              <span className="inline-flex rounded-xl border-2 border-black bg-[#00FF66] px-4 py-1.5 text-[10px] font-bold tracking-[.28em] text-black shadow-[2px_2px_0px_0px_#000] uppercase">
+                Club Legacy
+              </span>
+              <h1 className="mt-5 text-[clamp(2.8rem,7vw,6.5rem)] font-extrabold leading-[.88] tracking-[-0.06em] text-black">
+                Hall of Fame.
+              </h1>
+              <p className="mt-6 max-w-xl text-sm leading-7 text-black/55">
+                A living archive documenting the leaders, coordinators, and exceptional contributors who built Tech Tatva over the years.
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {[`${total} Records`, "Alumni Connected"].map((chip) => (
+                <span key={chip} className="rounded-xl border-2 border-black bg-white px-4 py-2.5 text-[10px] font-bold tracking-[.14em] text-black shadow-[2px_2px_0px_0px_#000] uppercase">
+                  {chip}
+                </span>
+              ))}
             </div>
           </div>
-          <div className="glass-brutalist rounded-[2rem] p-5 md:p-7">
-            <p className="text-[10px] font-bold uppercase tracking-[.26em] text-white/40">Legacy index</p>
-            <p className="mt-4 text-6xl font-extrabold tracking-[-.08em] text-[#00FF66]">{total}</p>
-            <p className="mt-3 text-sm leading-6 text-white/45">Published records drawn from the portal, team structure, and club settings.</p>
-            <div className="mt-6 grid grid-cols-2 gap-3 text-xs text-white/48">
-              <span className="glass-brutalist rounded-xl p-3 font-bold">{hall.jointSecretaries.length} Jt. Secretaries</span>
-              <span className="glass-brutalist rounded-xl p-3 font-bold">{hall.teamLeads.length} Leads</span>
-              <span className="glass-brutalist rounded-xl p-3 font-bold">{hall.topContributors.length} Contributors</span>
-              <span className="glass-brutalist rounded-xl p-3 font-bold">{hall.alumni.length} Alumni</span>
+        </Reveal>
+
+        {/* ── SECRETARY & STATS ROW ── */}
+        <div className="grid gap-6 md:grid-cols-[1.2fr_.8fr] mb-6">
+          <Reveal>
+            <div className="glass-brutalist rounded-[2.2rem] p-6 md:p-8 h-full flex flex-col justify-between">
+              <div>
+                <p className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[.26em] text-black/40 mb-4">
+                  <Crown size={12} className="text-[#00FF66]" /> Current Secretary
+                </p>
+                {hall.secretary.length ? (
+                  <HallCard person={hall.secretary[0]} featured />
+                ) : (
+                  <EmptyLegacy label="secretary details" />
+                )}
+              </div>
             </div>
-          </div>
+          </Reveal>
+
+          <Reveal delay={0.08}>
+            <div className="glass-brutalist rounded-[2.2rem] p-6 md:p-8 h-full flex flex-col justify-between">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-[.26em] text-black/40">Legacy Indexes</p>
+                <p className="mt-4 text-7xl font-extrabold tracking-tighter text-black leading-none">{total}</p>
+                <p className="mt-3 text-xs leading-5 text-black/50">Verified active logs retrieved from historical data registers.</p>
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-2 text-[10px] font-bold text-black/60">
+                <span className="rounded-lg border border-black/10 bg-black/[0.03] p-2.5 text-center">{hall.jointSecretaries.length} Joint Secs</span>
+                <span className="rounded-lg border border-black/10 bg-black/[0.03] p-2.5 text-center">{hall.teamLeads.length} Leads</span>
+                <span className="rounded-lg border border-black/10 bg-black/[0.03] p-2.5 text-center">{hall.topContributors.length} Contributors</span>
+                <span className="rounded-lg border border-black/10 bg-black/[0.03] p-2.5 text-center">{hall.alumni.length} Alumni</span>
+              </div>
+            </div>
+          </Reveal>
         </div>
 
-        <LegacySection title="Joint Secretaries" eyebrow="Office bearers" icon={Crown} people={hall.jointSecretaries} tone="amber" />
-        <LegacySection title="Team Leads" eyebrow="Execution layer" icon={Medal} people={hall.teamLeads} tone="emerald" />
-        <LegacySection title="Top Contributors" eyebrow="People who moved the club" icon={Award} people={hall.topContributors} tone="fuchsia" />
-        <LegacySection title="Alumni" eyebrow="The long memory" icon={Users} people={hall.alumni} tone="emerald" />
+        {/* ── LEGACY CATEGORIES ── */}
+        <Reveal delay={0.12}>
+          <LegacySection title="Joint Secretaries" eyebrow="Operational officers" icon={Crown} people={hall.jointSecretaries} />
+        </Reveal>
+        <Reveal delay={0.15}>
+          <LegacySection title="Team Leads" eyebrow="Execution leads" icon={Award} people={hall.teamLeads} />
+        </Reveal>
+        <Reveal delay={0.18}>
+          <LegacySection title="Top Contributors" eyebrow="Active builders" icon={Medal} people={hall.topContributors} />
+        </Reveal>
+        <Reveal delay={0.21}>
+          <LegacySection title="Alumni Network" eyebrow="Legacy memory" icon={Users} people={hall.alumni} />
+        </Reveal>
       </section>
     </PublicShell>
   );
