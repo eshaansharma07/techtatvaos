@@ -4,7 +4,6 @@ import { getClubInfo, getPublicEvents, getLatestPublicAnnouncement } from "@/lib
 import { MotionLogo, SiteLoader } from "@/components/brand-motion";
 import { MobilePublicMenu } from "@/components/mobile-public-menu";
 import { PremiumBackground } from "@/components/premium-background";
-import { CustomCursor } from "@/components/custom-cursor";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { QuoteBlock } from "@/components/quote-block";
 import { FloatingAnnouncement } from "@/components/floating-announcement";
@@ -47,8 +46,6 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     {/* Premium Animated Parallax Particle Background */}
     <PremiumBackground />
 
-    {/* Custom Glow Cursor Aura and Ripple System */}
-    <CustomCursor />
 
     {/* Subtle Vignette & Depth Bloom Layer */}
     <div className="premium-vignette" aria-hidden="true" />

@@ -9,7 +9,6 @@ import { AnimatedCounter } from "@/components/animated-counter";
 import { InteractiveHero3D } from "@/components/interactive-hero-3d";
 import { CommunityShowcase } from "@/components/community-showcase";
 import { InstagramFeed } from "@/components/instagram-feed";
-import { InteractiveTerminal } from "@/components/interactive-terminal";
 import { MobileInteractiveSections } from "@/components/mobile-interactive";
 
 export const revalidate = 10;
@@ -111,23 +110,7 @@ export default async function Home() {
               Discover real club events, register as a candidate, explore teams, and follow the work Tech Tatva publishes for students.
             </p>
  
-            {/* Interactive Developer CLI Terminal Widget */}
-            <div className="mt-8 mb-4 hidden lg:block">
-              <InteractiveTerminal 
-                stats={stats}
-                instagram={{
-                  handle: clubInfo?.instagramHandle,
-                  post1_image: clubInfo?.instagramPost1_image,
-                  post1_url: clubInfo?.instagramPost1_url,
-                }}
-                event={nextEvent ? {
-                  title: nextEvent.title,
-                  description: nextEvent.description,
-                  slug: nextEvent.slug,
-                  venue: nextEvent.venue,
-                } : undefined}
-              />
-            </div>
+
  
             <div className="mt-10 flex flex-wrap gap-4">
               {driveStatus && driveStatus.registrationEnabled ? (
@@ -228,25 +211,10 @@ export default async function Home() {
           </div>
         </Reveal>
 
-        <Reveal delay={.12} className="block lg:hidden mt-8 w-full">
-          <InteractiveTerminal 
-            stats={stats}
-            instagram={{
-              handle: clubInfo?.instagramHandle,
-              post1_image: clubInfo?.instagramPost1_image,
-              post1_url: clubInfo?.instagramPost1_url,
-            }}
-            event={nextEvent ? {
-              title: nextEvent.title,
-              description: nextEvent.description,
-              slug: nextEvent.slug,
-              venue: nextEvent.venue,
-            } : undefined}
-          />
-        </Reveal>
+
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] grid-cols-3 gap-3 px-6 md:grid-cols-5">{statRows.map(([n,l])=><div key={l} className="glass-brutalist rounded-[1.75rem] px-7 py-7 transition duration-300 hover:-translate-y-1 hover:border-emerald-500/50"><p className="text-4xl font-semibold tracking-[-.055em] text-white"><AnimatedCounter value={n} /></p><p className="mt-2 text-[10px] tracking-[.18em] text-white/38">{l.toUpperCase()}</p></div>)}</div>
+
     </section>
     {/* Mobile interactive sections — swipeable carousels, touch cards */}
     <MobileInteractiveSections
@@ -346,6 +314,6 @@ export default async function Home() {
     {/* Real Human Presence: Community Showcase Grid */}
     <CommunityShowcase galleryData={gallery} />
  
-    <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 py-20 md:px-6 md:py-28"><div className="glass-brutalist relative overflow-hidden rounded-3xl px-6 py-12 md:px-16 md:py-16"><Zap className="absolute -right-6 -top-8 h-52 w-52 text-white/[.035]"/><p className="text-[10px] tracking-[.3em] text-[#00FF66] font-bold">ACCESS THE NETWORK</p><h2 className="mt-6 max-w-2xl text-4xl font-extrabold tracking-tight md:text-6xl text-white">The future needs people who show up early.</h2><p className="mt-5 max-w-xl text-sm leading-7 text-white/50 font-medium">Find your team, enter the room, and start making something that matters.</p><Link href="/contact" className="brutalist-btn-green mt-8 inline-flex min-h-12 items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">Connect with us <ArrowUpRight size={15}/></Link></div></section>
+
   </PublicShell>;
 }
