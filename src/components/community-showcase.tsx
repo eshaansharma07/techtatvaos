@@ -64,7 +64,7 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
       <div className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 md:px-6">
         <Reveal>
           <div className="mb-14 max-w-2xl">
-            <p className="mb-4 text-[10px] font-bold tracking-[.3em] text-emerald-400">CLUB LIFE</p>
+            <p className="mb-4 text-[10px] font-bold tracking-[.3em] text-blue-400">CLUB LIFE</p>
             <h2 className="text-3xl font-extrabold tracking-tight md:text-5xl text-white">Tech Tatva in action.</h2>
             <p className="mt-4 text-sm leading-7 text-white/45">
               Glimpses of active collaboration, late-night coding sessions, practical workshops, and mentorship inside the university.

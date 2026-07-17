@@ -50,14 +50,15 @@ export default async function Home() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black"/>
 
       {/* Center-aligned content */}
-      <div className="relative z-10 flex flex-col items-center px-7 text-center">
-        {/* Eyebrow badge */}
-        <div className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-[#00FF66] px-4 py-1.5 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
-          <span className="h-1.5 w-1.5 rounded-full bg-black animate-pulse"/>
-          <span className="text-[10px] font-bold tracking-[.25em] text-black uppercase">Tech Tatva</span>
+      <div className="absolute top-1/4 z-10 flex w-full justify-center opacity-0 animate-in slide-in-from-bottom-5 fade-in duration-1000 fill-mode-forwards" style={{ animationDelay: "150ms" }}>
+        <div className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-blue-500 px-4 py-1.5 text-xs font-bold text-white shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+          </span>
+          ACTIVE SESSION
         </div>
-
-        {/* Main headline */}
+      </div>   {/* Main headline */}
         <h1 className="mt-7 text-[13vw] font-extrabold leading-[1] tracking-[-0.05em] text-white">
           Enter the<br/>next room.
         </h1>
@@ -82,10 +83,9 @@ export default async function Home() {
             Meet the teams <ChevronRight size={14}/>
           </Link>
         </div>
-      </div>
 
       {/* Bottom edge fade-out line */}
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00FF66]/20"/>
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500/20"/>
     </section>
 
     {/* ═══════════════════════════════════════════════════════════════════
@@ -226,15 +226,15 @@ export default async function Home() {
       achievements={achievements as any}
     />
     <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 py-20 md:px-6 md:py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="brutalist-btn-dark mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
-    <section className="hidden md:block border-y border-white/10 bg-black/10"><div className="mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] gap-10 px-5 py-20 md:px-6 md:py-28 lg:grid-cols-[.9fr_1.1fr] lg:gap-14"><Reveal><SectionTitle eyebrow="ONE SYSTEM / MANY DISCIPLINES" title="Teams building the future." copy="Explore the public team structure and the disciplines behind club work."/><Link className="brutalist-btn-dark inline-flex min-h-12 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold" href="/teams">Explore the network <ArrowRight size={15}/></Link></Reveal><div className="grid gap-4 sm:grid-cols-2">{teams.length?teams.slice(0,6).map((team,i)=><Reveal key={team.id} delay={i*.04}><div className="glass-brutalist group rounded-[22px] p-5 transition duration-300 hover:-translate-y-1 hover:border-[#00FF66]/50"><div className="flex justify-between"><Orbit size={18} className="text-[#00FF66]"/><span className="brutalist-btn-dark rounded-xl px-3 py-1 text-xs text-white/80 font-bold">{team.members}</span></div><h3 className="mt-7 text-base font-bold text-white">{team.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{team.description || "Team details coming soon."}</p></div></Reveal>):<EmptyState title="Team information is coming soon." copy="The public team structure has not been published yet."/>}</div></div></section>
+    <section className="hidden md:block border-y border-white/10 bg-black/10"><div className="mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] gap-10 px-5 py-20 md:px-6 md:py-28 lg:grid-cols-[.9fr_1.1fr] lg:gap-14"><Reveal><SectionTitle eyebrow="ONE SYSTEM / MANY DISCIPLINES" title="Teams building the future." copy="Explore the public team structure and the disciplines behind club work."/><Link className="brutalist-btn-dark inline-flex min-h-12 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold" href="/teams">Explore the network <ArrowRight size={15}/></Link></Reveal><div className="grid gap-4 sm:grid-cols-2">{teams.length?teams.slice(0,6).map((team,i)=><Reveal key={team.id} delay={i*.04}><div className="glass-brutalist group rounded-[22px] p-5 transition duration-300 hover:-translate-y-1 hover:border-blue-500/50"><div className="flex justify-between"><Orbit size={18} className="text-blue-400"/><span className="brutalist-btn-dark rounded-xl px-3 py-1 text-xs text-white/80 font-bold">{team.members}</span></div><h3 className="mt-7 text-base font-bold text-white">{team.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{team.description || "Team details coming soon."}</p></div></Reveal>):<EmptyState title="Team information is coming soon." copy="The public team structure has not been published yet."/>}</div></div></section>
     
     {driveStatus && driveStatus.status !== "closed" && (
       <section className="hidden md:block border-b border-white/10 py-20 md:py-28">
         <div className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 md:px-6">
           <Reveal>
-            <div className="mb-12 max-w-3xl">
-              <p className="mb-4 text-[10px] font-bold tracking-[.3em] text-[#00FF66]">MEMBERSHIP DRIVE</p>
-              <h2 className="text-3xl font-extrabold tracking-tight md:text-5xl text-white">Join the Tech Tatva Club.</h2>
+            <div className="max-w-xl">
+              <p className="mb-4 text-[10px] font-bold tracking-[.3em] text-purple-400">MEMBERSHIP DRIVE</p>
+              <h2 className="text-4xl font-extrabold tracking-tight md:text-6xl text-white">Join the Tech Tatva Club.</h2>
               <p className="mt-4 text-sm leading-7 text-white/45">
                 Take your technical and creative skills to the next level. Connect with peers, participate in exclusive bootcamps, and build project portfolios that matter.
               </p>
@@ -298,7 +298,7 @@ export default async function Home() {
       </section>
     )}
 
-    {achievements.length ? <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-20"><div className="grid gap-4 md:grid-cols-3">{achievements.slice(0,3).map((item:any)=><div className="glass-brutalist rounded-[22px] p-6" key={item._id}><p className="text-[10px] tracking-[.2em] text-[#00FF66] font-bold">{item.kind || "ACHIEVEMENT"}</p><p className="mt-4 text-lg font-bold text-white">{item.title}</p><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p></div>)}</div></section> : null}
+    {achievements.length ? <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-20"><div className="grid gap-4 md:grid-cols-3">{achievements.slice(0,3).map((item:any)=><div className="glass-brutalist rounded-[22px] p-6" key={item._id}><p className="text-[10px] tracking-[.2em] text-orange-400 font-bold">{item.kind || "ACHIEVEMENT"}</p><p className="mt-4 text-lg font-bold text-white">{item.title}</p><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p></div>)}</div></section> : null}
     
     {/* Dedicated Instagram posts feed */}
     <InstagramFeed
