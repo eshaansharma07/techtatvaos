@@ -218,6 +218,16 @@ export default async function Home() {
 
     </section>
 
+    {/* Mobile interactive sections — swipeable carousels, touch cards */}
+    <MobileInteractiveSections
+      teams={teams.slice(0, 6).map(t => ({ id: t.id, name: t.name, description: t.description || "", members: t.members }))}
+      events={events.map(e => ({ slug: e.slug, title: e.title, description: e.description || "", registrationOpen: !!e.registrationOpen, venue: e.venue }))}
+      stats={{ members: stats.members, events: stats.events, community: stats.community || 0 }}
+      driveStatus={driveStatus}
+      achievements={achievements as any}
+    />
+    <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 py-20 md:px-6 md:py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="brutalist-btn-dark mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
+
     {/* Dedicated Instagram posts feed */}
     <InstagramFeed
       handle={clubInfo?.instagramHandle}
@@ -229,16 +239,6 @@ export default async function Home() {
       post3_image={clubInfo?.instagramPost3_image}
       post3_url={clubInfo?.instagramPost3_url}
     />
-
-    {/* Mobile interactive sections — swipeable carousels, touch cards */}
-    <MobileInteractiveSections
-      teams={teams.slice(0, 6).map(t => ({ id: t.id, name: t.name, description: t.description || "", members: t.members }))}
-      events={events.map(e => ({ slug: e.slug, title: e.title, description: e.description || "", registrationOpen: !!e.registrationOpen, venue: e.venue }))}
-      stats={{ members: stats.members, events: stats.events, community: stats.community || 0 }}
-      driveStatus={driveStatus}
-      achievements={achievements as any}
-    />
-    <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 py-20 md:px-6 md:py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="brutalist-btn-dark mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
     <section className="hidden md:block border-y border-white/10 bg-black/10"><div className="mx-auto grid max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] gap-10 px-5 py-20 md:px-6 md:py-28 lg:grid-cols-[.9fr_1.1fr] lg:gap-14"><Reveal><SectionTitle eyebrow="ONE SYSTEM / MANY DISCIPLINES" title="Teams building the future." copy="Explore the public team structure and the disciplines behind club work."/><Link className="brutalist-btn-dark inline-flex min-h-12 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold" href="/teams">Explore the network <ArrowRight size={15}/></Link></Reveal><div className="grid gap-4 sm:grid-cols-2">{teams.length?teams.slice(0,6).map((team,i)=><Reveal key={team.id} delay={i*.04}><div className="glass-brutalist group rounded-[22px] p-5 transition duration-300 hover:-translate-y-1 hover:border-blue-500/50"><div className="flex justify-between"><Orbit size={18} className="text-blue-400"/><span className="brutalist-btn-dark rounded-xl px-3 py-1 text-xs text-white/80 font-bold">{team.members}</span></div><h3 className="mt-7 text-base font-bold text-white">{team.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{team.description || "Team details coming soon."}</p></div></Reveal>):<EmptyState title="Team information is coming soon." copy="The public team structure has not been published yet."/>}</div></div></section>
     
     {driveStatus && driveStatus.status !== "closed" && (
