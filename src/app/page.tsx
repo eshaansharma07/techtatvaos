@@ -6,7 +6,7 @@ import { PublicShell } from "@/components/public-shell";
 import { Reveal } from "@/components/reveal";
 import { getPublicHomeData, getMembershipDriveStatus } from "@/lib/public-data";
 import { InteractiveHero3D } from "@/components/interactive-hero-3d";
-import { SocialConnectBanner } from "@/components/social-connect-banner";
+
 
 export const dynamic = "force-dynamic";
 
@@ -204,7 +204,7 @@ export default async function Home() {
       {/* ═══════════════════════════════════════════════════════════════════
           SOCIAL CONNECT BANNER SECTION (Instagram Popup)
           ═══════════════════════════════════════════════════════════════════ */}
-      <SocialConnectBanner />
+
       
       {/* ═══════════════════════════════════════════════════════════════════
           MEMBERSHIP DRIVE JOIN CTA BANNER SECTION
