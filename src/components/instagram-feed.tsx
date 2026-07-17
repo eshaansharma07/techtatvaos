@@ -122,7 +122,7 @@ export function InstagramFeed({
         <Reveal>
           <div className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div className="max-w-2xl">
-              <p className="mb-4 text-[10px] font-semibold tracking-[0.4em] text-emerald-400 uppercase">SOCIAL CONNECT</p>
+              <p className="mb-4 text-[10px] font-semibold tracking-[0.4em] text-purple-400 uppercase">SOCIAL CONNECT</p>
               <h2 className="text-4xl font-extrabold tracking-tight md:text-6xl text-white">Captured on Instagram.</h2>
               <p className="mt-4 text-sm leading-8 text-white/50">
                 Join our active student club of builders. We post live updates, technology news, event announcements, and design highlights.
@@ -130,20 +130,20 @@ export function InstagramFeed({
             </div>
             
             <div className="flex flex-wrap items-center gap-4 shrink-0">
-              <div className="inline-flex items-center gap-2.5 rounded-xl border-2 border-black bg-[#00FF66] px-4 py-2 shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+              <div className="inline-flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 shadow-[2px_2px_0px_0px_rgba(255,255,255,0.1)] text-white">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                 </span>
-                <Instagram size={14} className="text-black" />
-                <span className="text-xs font-bold tracking-tight text-black">{displayHandle}</span>
+                <Instagram size={14} className="text-white" />
+                <span className="text-xs font-bold tracking-tight text-white">{displayHandle}</span>
               </div>
  
               <a 
                 href={profileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="brutalist-btn-green flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-xs tracking-wider transition hover:-translate-y-0.5 text-black font-semibold"
+                className="brutalist-btn-theme flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-xs tracking-wider transition hover:-translate-y-0.5 text-white font-semibold"
               >
                 <span>VISIT PROFILE</span>
                 <ArrowUpRight size={13} />
@@ -161,7 +161,7 @@ export function InstagramFeed({
                 href={post.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="glass-brutalist group flex flex-col justify-between h-full rounded-[2.2rem] p-3 hover:-translate-y-1.5 hover:border-emerald-500 transition-all duration-500"
+                className="glass-brutalist group flex flex-col justify-between h-full rounded-[2.2rem] p-3 hover:-translate-y-1.5 hover:border-purple-500 transition-all duration-500"
               >
                 {/* Visual Container */}
                 <div className="relative aspect-square w-full rounded-[1.6rem] overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center">
@@ -178,16 +178,16 @@ export function InstagramFeed({
                       
                       {/* Hover action overlay */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0">
-                        <span className="flex items-center gap-1.5 rounded-xl border border-black bg-[#00FF66] px-4 py-2 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+                        <span className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-blue-500 px-4 py-2 text-xs font-bold text-white shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
                           <Instagram size={14} /> Open Post <ArrowUpRight size={12} />
                         </span>
                       </div>
                     </>
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-[#0c0c0e] to-black flex flex-col items-center justify-center p-6 text-center">
-                      <Instagram className="h-8 w-8 text-emerald-400/30 mb-2 transition duration-500 group-hover:scale-110 group-hover:text-emerald-400" />
+                      <Instagram className="h-8 w-8 text-blue-400/30 mb-2 transition duration-500 group-hover:scale-110 group-hover:text-blue-400" />
                       
-                      <div className="absolute top-4 right-4 flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-0.5 text-[8px] font-semibold tracking-wider text-emerald-300/60 uppercase">
+                      <div className="absolute top-4 right-4 flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/5 px-2.5 py-0.5 text-[8px] font-semibold tracking-wider text-blue-300/60 uppercase">
                         <Sparkles size={8} /> TODO: Add post
                       </div>
                       

@@ -54,9 +54,9 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
       <div className="public-header-inner mx-auto flex max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] flex-row items-center justify-between px-5 py-4 md:mt-4 md:h-[4.75rem] md:px-5 md:py-0">
         <MotionLogo logo={info.logo}/>
         <nav className="public-nav hidden w-auto items-center gap-1 text-xs font-medium tracking-[.15em] text-white/50 md:flex">
-          {publicLinks.map(([label,href])=><Link className="rounded-xl px-4 py-3 transition hover:bg-[#00FF66] hover:text-black font-bold uppercase" key={href} href={href}>{label}</Link>)}
+          {publicLinks.map(([label,href])=><Link className="rounded-xl px-4 py-3 transition hover:bg-white/10 hover:text-white font-bold uppercase" key={href} href={href}>{label}</Link>)}
         </nav>
-        <Link href="/contact" className="brutalist-btn-purple hidden min-h-11 items-center gap-2 rounded-xl px-5 text-xs font-bold tracking-[.12em] md:inline-flex shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+        <Link href="/contact" className="brutalist-btn-theme hidden min-h-11 items-center gap-2 rounded-xl px-5 text-xs font-bold tracking-[.12em] md:inline-flex shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
           CONNECT <ArrowUpRight size={14}/>
         </Link>
         <MobilePublicMenu logo={info.logo}/>
@@ -73,7 +73,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
           
           {/* Block 1: Latest Completed Event */}
           <div className="glass-brutalist rounded-[22px] p-5">
-            <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-purple-400 text-[10px] font-bold uppercase tracking-wider">
               <Calendar size={11} />
               <span>Latest Event</span>
             </div>
@@ -83,7 +83,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
                 <p className="mt-1 text-[10px] text-white/40 line-clamp-2 leading-relaxed">
                   {latestEvent.description || "Explore and register for Tech Tatva club events."}
                 </p>
-                <Link href={`/events/${latestEvent.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-[#00FF66] hover:underline transition">
+                <Link href={`/events/${latestEvent.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-blue-400 hover:underline transition">
                   View details <ArrowUpRight size={10} />
                 </Link>
               </div>
@@ -96,7 +96,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
  
           {/* Block 2: Upcoming Technical Workshop */}
           <div className="glass-brutalist rounded-[22px] p-5">
-            <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-purple-400 text-[10px] font-bold uppercase tracking-wider">
               <GraduationCap size={11} />
               <span>Upcoming Bootcamp</span>
             </div>
@@ -106,7 +106,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
                 <p className="mt-1 text-[10px] text-white/40 line-clamp-2 leading-relaxed">
                   {upcomingWorkshop.description || "Bootcamps and workshops led by seniors."}
                 </p>
-                <Link href={`/events/${upcomingWorkshop.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-[#00FF66] hover:underline transition">
+                <Link href={`/events/${upcomingWorkshop.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-blue-400 hover:underline transition">
                   Register now <ArrowUpRight size={10} />
                 </Link>
               </div>
@@ -135,18 +135,18 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
  
           <div className="grid grid-cols-2 gap-2 text-xs font-bold tracking-[.13em] text-white/52 sm:grid-cols-3">
             {[...publicLinks, ["CONTACT", "/contact"] as const].map(([label, href]) => (
-              <Link href={href} key={href} className="glass-brutalist rounded-xl px-4 py-3 transition hover:border-[#00FF66]/50 hover:text-white">
+              <Link href={href} key={href} className="glass-brutalist rounded-xl px-4 py-3 transition hover:border-purple-500/50 hover:text-white">
                 {label}
               </Link>
             ))}
           </div>
-          <Link href="/contact" className="brutalist-btn-green flex min-h-14 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] text-black">Start a conversation <ArrowUpRight size={16}/></Link>
+          <Link href="/contact" className="brutalist-btn-theme flex min-h-14 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold border border-white/20 shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] text-white">Start a conversation <ArrowUpRight size={16}/></Link>
         </div>
         
         <div className="mt-10 border-t border-white/[.06] pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <span className="text-[9px] font-bold tracking-[.2em] text-white/35 uppercase block mb-3">Affiliation</span>
-            <div className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,255,102,0.6)] hover:scale-[1.02] transition duration-300">
+            <div className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_rgba(139,92,246,0.6)] hover:scale-[1.02] transition duration-300">
               <img
                 src="/chandigarh-university-logo.png"
                 alt="Chandigarh University"

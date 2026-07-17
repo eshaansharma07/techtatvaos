@@ -76,16 +76,16 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
           {displayItems.map((item, i) => {
             const Icon = item.icon;
             const cardStyles = [
-              "glass-brutalist-green",
-              "glass-brutalist-purple",
-              "glass-brutalist-pink"
+              "glass-brutalist",
+              "glass-brutalist",
+              "glass-brutalist"
             ];
             const activeCardStyle = cardStyles[i % cardStyles.length];
 
             const textStyles = [
-              "text-[#00FF66]",
-              "text-[#a855f7]",
-              "text-[#f472b6]"
+              "text-blue-400",
+              "text-purple-400",
+              "text-orange-400"
             ];
             const activeTextStyle = textStyles[i % textStyles.length];
 
@@ -104,12 +104,12 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
                       />
                     ) : (
                       // High-end abstract representation if no image is present
-                      <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-black flex flex-col items-center justify-center p-4">
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(0,255,102,0.06),transparent_60%)]" />
-                        <Icon className="h-8 w-8 text-emerald-400/40 mb-2 transition duration-500 group-hover:scale-110 group-hover:text-emerald-400" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-black to-black flex flex-col items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(59,130,246,0.06),transparent_60%)]" />
+                        <Icon className={`h-8 w-8 ${activeTextStyle} opacity-40 mb-2 transition duration-500 group-hover:scale-110 group-hover:opacity-100`} />
                         
                         {/* Production TODO Marker */}
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-xl border-2 border-black bg-[#00FF66] px-2.5 py-0.5 text-[8px] font-bold tracking-wider text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] uppercase">
+                        <div className={`absolute top-3 right-3 flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase ${activeTextStyle}`}>
                           <Sparkles size={8} /> TODO: Add asset
                         </div>
                         

@@ -13,8 +13,8 @@ import { MobileInteractiveSections } from "@/components/mobile-interactive";
 
 export const revalidate = 10;
 
-const SectionTitle = ({ eyebrow, title, copy }: { eyebrow: string; title: string; copy?: string }) => <div className="mb-10 max-w-2xl"><p className="mb-4 text-[10px] font-semibold tracking-[.3em] text-emerald-400">{eyebrow}</p><h2 className="text-3xl font-medium tracking-tight md:text-5xl">{title}</h2>{copy&&<p className="mt-4 text-sm leading-7 text-white/45">{copy}</p>}</div>;
-const EmptyState = ({ title, copy, href, action }: { title: string; copy: string; href?: string; action?: string }) => <div className="glass-brutalist rounded-[1.6rem] p-8 text-center"><p className="text-sm text-white/75">{title}</p><p className="mx-auto mt-3 max-w-md text-xs leading-6 text-white/42">{copy}</p>{href&&action?<Link className="brutalist-btn-green mt-5 rounded-xl px-4 py-2 text-xs" href={href}>{action}</Link>:null}</div>;
+const SectionTitle = ({ eyebrow, title, copy }: { eyebrow: string; title: string; copy?: string }) => <div className="mb-10 max-w-2xl"><p className="mb-4 text-[10px] font-semibold tracking-[.3em] text-orange-400">{eyebrow}</p><h2 className="text-3xl font-medium tracking-tight md:text-5xl">{title}</h2>{copy&&<p className="mt-4 text-sm leading-7 text-white/45">{copy}</p>}</div>;
+const EmptyState = ({ title, copy, href, action }: { title: string; copy: string; href?: string; action?: string }) => <div className="glass-brutalist rounded-[1.6rem] p-8 text-center"><p className="text-sm text-white/75">{title}</p><p className="mx-auto mt-3 max-w-md text-xs leading-6 text-white/42">{copy}</p>{href&&action?<Link className="brutalist-btn-theme mt-5 rounded-xl px-4 py-2 text-xs" href={href}>{action}</Link>:null}</div>;
 const mobileQuickLinks = [
   ["Events", "/events", "Register"],
   ["Teams", "/teams", "Structure"],
@@ -92,7 +92,8 @@ export default async function Home() {
         DESKTOP HERO — hidden on mobile, shown on md+
     ═══════════════════════════════════════════════════════════════════ */}
     <section className="relative hidden min-h-[980px] overflow-hidden pt-24 md:block spatial-grid-bg">
-      <Image src="/tech-tatva-hero-v2.png" alt="" fill priority sizes="100vw" className="object-cover object-center opacity-40"/>
+      <div className="mirror-floor" />
+      <Image src="/tech-tatva-hero-v2.png" alt="" fill priority sizes="100vw" className="object-cover object-center opacity-20 mix-blend-overlay"/>
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/40 to-black"/>
       <div className="absolute inset-0 grid-bg opacity-[.06]"/>
 
@@ -102,7 +103,7 @@ export default async function Home() {
       <div className="relative mx-auto grid min-h-[790px] max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] items-center gap-8 px-6 py-16 lg:grid-cols-[1.05fr_.75fr]">
         <Reveal>
           <div>
-            <p className="text-[10px] font-semibold tracking-[.34em] text-emerald-400">TECH TATVA</p>
+            <p className="text-[10px] font-semibold tracking-[.34em] text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-orange-400">TECH TATVA</p>
             <h1 className="mt-6 max-w-5xl text-7xl font-extrabold leading-[1.1] tracking-[-0.04em] text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] lg:text-[104px] lg:leading-[1.05]">
               Enter the nex<span className="slice-t">t</span> <span className="font-extrabold italic text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/30">room.</span>
             </h1>
@@ -115,21 +116,21 @@ export default async function Home() {
             <div className="mt-10 flex flex-wrap gap-4">
               {driveStatus && driveStatus.registrationEnabled ? (
                 <>
-                  <Link href="/join" className="brutalist-btn-green rounded-2xl px-6 py-3.5 text-sm font-semibold">
+                  <Link href="/join" className="brutalist-btn-theme rounded-2xl px-6 py-3.5 text-sm font-semibold">
                     Join Tech Tatva <ArrowRight size={16} className="transition group-hover:translate-x-0.5"/>
                   </Link>
-                  <Link href="/events" className="brutalist-btn-purple rounded-2xl px-6 py-3.5 text-sm">
+                  <Link href="/events" className="brutalist-btn-theme rounded-2xl px-6 py-3.5 text-sm">
                     Browse registrations <ChevronRight size={16}/>
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link href="/events" className="brutalist-btn-cyan rounded-2xl px-6 py-3.5 text-sm font-semibold">
+                  <Link href="/events" className="brutalist-btn-theme rounded-2xl px-6 py-3.5 text-sm font-semibold">
                     Browse registrations <ArrowRight size={16} className="transition group-hover:translate-x-0.5"/>
                   </Link>
                 </>
               )}
-              <Link href="/teams" className="brutalist-btn-pink rounded-2xl px-6 py-3.5 text-sm">
+              <Link href="/teams" className="brutalist-btn-theme rounded-2xl px-6 py-3.5 text-sm">
                 Explore teams <ChevronRight size={16}/>
               </Link>
             </div>
@@ -144,12 +145,12 @@ export default async function Home() {
               <div>
                 <div className="flex items-center justify-between">
                   <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] border border-white/10 text-white"><Ticket size={16}/></span>
-                  <span className={nextEvent?.registrationOpen ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[9px] font-bold tracking-[.18em] text-[#00FF66] uppercase" : "rounded-xl border border-white/10 bg-white/[0.05] px-3 py-1 text-[9px] font-bold tracking-[.18em] text-white/45 uppercase"}>
+                  <span className={nextEvent?.registrationOpen ? "rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-[9px] font-bold tracking-[.18em] text-blue-400 uppercase" : "rounded-xl border border-white/10 bg-white/[0.05] px-3 py-1 text-[9px] font-bold tracking-[.18em] text-white/45 uppercase"}>
                     {nextEvent ? nextEvent.registrationOpen ? "REGISTRATION OPEN" : "EVENT LIVE" : "NO ACTIVE EVENT"}
                   </span>
                 </div>
                 <p className="mt-8 text-[9px] font-bold tracking-[.3em] text-white/35">NEXT EVENT SIGNAL</p>
-                <h3 className="mt-2 text-2xl font-bold tracking-tight text-white group-hover:text-[#00FF66] transition-colors">{nextEvent?.title || "Events will appear here"}</h3>
+                <h3 className="mt-2 text-2xl font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors">{nextEvent?.title || "Events will appear here"}</h3>
                 <p className="mt-3 text-xs leading-6 text-white/40 line-clamp-3">{nextEvent?.description || "When the admin publishes an event, candidates will see it here and can register from the event page."}</p>
               </div>
 
@@ -201,11 +202,11 @@ export default async function Home() {
             <Link href="/join" className="glass-brutalist rounded-[2rem] p-5 flex flex-col justify-between min-h-[140px] group transition-all duration-300 hover:border-white border-white/10 bg-white/[0.02] relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.01] to-transparent pointer-events-none" />
               <div className="flex items-center justify-between">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#00FF66] animate-pulse" />
+                <span className="h-2.5 w-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_10px_rgba(249,115,22,0.6)]" />
                 <ArrowUpRight size={18} className="text-white/40 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
               </div>
               <div>
-                <p className="text-xl font-bold tracking-tight text-white group-hover:text-[#00FF66] transition-colors">JOIN CLUB</p>
+                <p className="text-xl font-bold tracking-tight text-white group-hover:text-orange-400 transition-colors">JOIN CLUB</p>
               </div>
             </Link>
           </div>
