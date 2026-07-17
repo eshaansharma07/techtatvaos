@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Calendar, Check, Clock, MapPin, Sparkles, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
@@ -53,7 +54,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
             <div className="max-w-3xl">
               {event.certEventLogo ? (
                 <div className="mb-5 inline-flex items-center justify-center rounded-2xl bg-black/40 border border-white/10 p-3 h-14 w-14 backdrop-blur-md">
-                  <img src={optimizeCloudinaryUrl(event.certEventLogo, 120)} alt="" className="h-full w-full object-contain" />
+                  <Image width={1200} height={1200} src={optimizeCloudinaryUrl(event.certEventLogo, 120)} alt="" className="h-full w-full object-contain" />
                 </div>
               ) : null}
               <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-purple-500 px-4 py-1.5 text-[10px] font-bold tracking-[.24em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
@@ -83,7 +84,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
             {event.banner ? (
               <div className="glass-brutalist rounded-[2rem] p-3 shadow-2xl">
                 <div className="grid min-h-[260px] place-items-center overflow-hidden rounded-[1.25rem] bg-black/40 p-4 md:min-h-[420px] md:p-6">
-                  <img src={optimizeCloudinaryUrl(event.banner, 1000)} alt="" className="max-h-[330px] max-w-full object-contain drop-shadow-[0_24px_70px_rgba(0,0,0,.45)] md:max-h-[490px]" />
+                  <Image width={1200} height={1200} src={optimizeCloudinaryUrl(event.banner, 1000)} alt="" className="max-h-[330px] max-w-full object-contain drop-shadow-[0_24px_70px_rgba(0,0,0,.45)] md:max-h-[490px]" />
                 </div>
               </div>
             ) : null}

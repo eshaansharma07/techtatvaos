@@ -5,7 +5,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 31536000
+    minimumCacheTTL: 31536000,
+    remotePatterns: [
+      { protocol: "https", hostname: "**" }
+    ]
   },
   async headers() {
     return [

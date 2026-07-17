@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, X, Image as ImageIcon, Video, LayoutGrid, MonitorPlay, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
@@ -62,8 +63,7 @@ function GalleryImage({ src, alt, className = "", width = 800 }: { src: string; 
       )}
 
       {/* Main Image tag */}
-      <img
-        ref={imgRef}
+      <Image width={1200} height={1200}         ref={imgRef}
         key={`${src}-${retryKey}`}
         src={optimizedSrc}
         alt={alt}
@@ -277,7 +277,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
                           <Video size={14} className="text-white/60" />
                         </div>
                       ) : (
-                        <img src={optimizeCloudinaryUrl(asset.url, 150)} alt="" className="h-full w-full object-cover" />
+                        <Image width={1200} height={1200} src={optimizeCloudinaryUrl(asset.url, 150)} alt="" className="h-full w-full object-cover" />
                       )}
                     </button>
                   ))}
@@ -385,8 +385,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
                     key={activeLightboxAsset.url}
                   />
                 ) : (
-                  <img
-                    src={optimizeCloudinaryUrl(activeLightboxAsset.url, 1600)}
+                  <Image width={1200} height={1200}                     src={optimizeCloudinaryUrl(activeLightboxAsset.url, 1600)}
                     alt=""
                     className="max-h-[74vh] max-w-full rounded-xl shadow-2xl object-contain border border-white/5 transition-transform"
                   />

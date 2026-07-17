@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
  
 import { useEffect, useState } from "react";
 import { Instagram, ArrowUpRight, Sparkles } from "lucide-react";
@@ -167,7 +168,7 @@ export function InstagramFeed({
                 <div className="relative aspect-square w-full rounded-[1.6rem] overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center">
                   {post.image ? (
                     <>
-                      <img 
+                      <Image width={1200} height={1200} 
                         src={post.image} 
                         alt="Instagram content" 
                         className="object-cover w-full h-full transition duration-700 group-hover:scale-105"

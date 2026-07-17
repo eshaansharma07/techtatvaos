@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
@@ -8,7 +9,7 @@ interface CustomCursorProps {}
 // Glowing triangular pointer based on Tech Tatva rounded triangular logo
 const TriangleIcon = ({ showArrow }: { showArrow?: boolean }) => (
   <div className="relative w-full h-full flex items-center justify-center">
-    <img 
+    <Image width={1200} height={1200} 
       src="/logo-colour.svg" 
       alt="Tech Tatva Logo Pointer" 
       className="w-full h-full object-contain filter drop-shadow-[0_2px_8px_rgba(168,85,247,0.35)]"

@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useState } from "react";
 import { ChevronDown, Crown, ShieldCheck, Sparkles, Users } from "lucide-react";
@@ -18,7 +19,7 @@ function PersonCard({ label, name, sub, photo, tone = "violet" }: { label: strin
     <div className={`relative overflow-hidden rounded-3xl border-2 p-4 text-center ${tones[tone]}`}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,.03),transparent_48%)]" />
       <div className="relative">
-        {photo ? <img src={photo} alt="" className="mx-auto mb-3 h-14 w-14 rounded-xl border border-white/15 object-cover" /> : <Crown className="mx-auto mb-3 text-purple-400" size={19} />}
+        {photo ? <Image width={1200} height={1200} src={photo} alt="" className="mx-auto mb-3 h-14 w-14 rounded-xl border border-white/15 object-cover" /> : <Crown className="mx-auto mb-3 text-purple-400" size={19} />}
         <p className="text-[10px] font-bold uppercase tracking-[.18em] text-purple-400">{label}</p>
         <p className="mt-2 text-lg font-bold tracking-[-.03em] text-white">{name || "Add details in portal"}</p>
         {sub ? <p className="mt-1 text-xs leading-5 text-white/48">{sub}</p> : null}

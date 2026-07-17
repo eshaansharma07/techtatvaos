@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Crown, Network, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
 import { MobileTeamAccordion } from "@/components/mobile-team-accordion";
@@ -33,7 +34,7 @@ function PersonNode({ label, name, sub, photo, tone = "violet" }: { label: strin
     <div className={`relative mx-auto w-full max-w-[430px] overflow-hidden rounded-[2rem] border-2 p-5 text-center shadow-[4px_4px_0px_0px_rgba(168,85,247,0.15)] backdrop-blur-xl ${toneClass}`}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,.03),transparent_42%)]" />
       <div className="relative">
-      {photo ? <img src={photo} alt="" className="mx-auto mb-3 h-16 w-16 rounded-xl border-2 border-black object-cover shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]" /> : <Crown className="mx-auto mb-3 text-purple-400" size={20} />}
+      {photo ? <Image width={1200} height={1200} src={photo} alt="" className="mx-auto mb-3 h-16 w-16 rounded-xl border-2 border-black object-cover shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]" /> : <Crown className="mx-auto mb-3 text-purple-400" size={20} />}
       <p className="text-[10px] font-bold uppercase tracking-[.18em] text-purple-400">{label}</p>
       <p className="mt-2 text-lg font-bold text-white">{name || "Add details in portal"}</p>
       {sub ? <p className="mt-1 text-xs leading-5 text-white/55">{sub}</p> : null}

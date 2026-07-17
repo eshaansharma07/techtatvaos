@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Calendar, GraduationCap, Instagram, Github, Linkedin } from "lucide-react";
 import { getClubInfo, getPublicEvents, getLatestPublicAnnouncement } from "@/lib/public-data";
@@ -147,11 +148,12 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
           <div>
             <span className="text-[9px] font-bold tracking-[.2em] text-white/35 uppercase block mb-3">Affiliation</span>
             <div className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_rgba(139,92,246,0.6)] hover:scale-[1.02] transition duration-300">
-              <img
+              <Image
                 src="/chandigarh-university-logo.png"
                 alt="Chandigarh University"
                 className="h-7 w-auto object-contain"
-                loading="lazy"
+                width={100}
+                height={50}
               />
             </div>
           </div>

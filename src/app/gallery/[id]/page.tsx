@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Sparkles } from "lucide-react";
@@ -25,7 +26,7 @@ export default async function GalleryAlbum({ params }: { params: Promise<{ id: s
           {cover?.url ? cover.kind === "video" ? (
             <video src={cover.url} muted playsInline className="absolute inset-0 h-full w-full object-cover opacity-[.18]" />
           ) : (
-            <img src={optimizeCloudinaryUrl(cover.url, 800)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-[.18]" />
+            <Image width={1200} height={1200} src={optimizeCloudinaryUrl(cover.url, 800)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-[.18]" />
           ) : null}
           <div className="absolute inset-0 bg-gradient-to-br from-black via-black/76 to-purple-950/20" />
           <div className="relative">

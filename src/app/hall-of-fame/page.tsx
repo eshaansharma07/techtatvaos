@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Award, Crown, Medal, Sparkles, Star, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
 import { getHallOfFameData, type HallMember } from "@/lib/public-data";
@@ -18,7 +19,7 @@ function initials(name: string) {
 function HallAvatar({ person, large = false }: { person: HallMember; large?: boolean }) {
   const size = large ? "h-24 w-24 rounded-[1.6rem] text-2xl" : "h-16 w-16 rounded-2xl text-base";
   return person.image ? (
-    <img src={person.image} alt="" loading="lazy" className={`${size} border-2 border-black object-cover shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]`} />
+    <Image width={1200} height={1200} src={person.image} alt="" loading="lazy" className={`${size} border-2 border-black object-cover shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]`} />
   ) : (
     <div className={`${size} grid place-items-center border-2 border-black bg-black/40 font-bold text-white shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]`}>
       {initials(person.name)}

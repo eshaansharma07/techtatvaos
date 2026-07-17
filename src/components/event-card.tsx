@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import type { PublicEvent } from "@/lib/public-data";
@@ -20,7 +21,7 @@ export function EventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
   const gradient = gradients[index % gradients.length];
   return <Link href={`/events/${event.slug}`} className="event-card glass-brutalist group block overflow-hidden rounded-[1.75rem] transition duration-500 active:scale-[.99] md:rounded-3xl md:hover:-translate-y-1.5 md:hover:border-purple-500/50">
     <div className={`event-card-media relative h-60 overflow-hidden bg-gradient-to-br ${gradient} p-5 md:h-52`}>
-      {event.banner ? <div className="absolute inset-0 grid place-items-center overflow-hidden bg-black/10 p-5"><img src={event.banner} alt="" className="h-full w-full object-contain opacity-95 drop-shadow-[0_22px_46px_rgba(0,0,0,.38)] transition duration-700 group-hover:scale-[1.035]" /></div> : null}
+      {event.banner ? <div className="absolute inset-0 grid place-items-center overflow-hidden bg-black/10 p-5"><Image width={1200} height={1200} src={event.banner} alt="" className="h-full w-full object-contain opacity-95 drop-shadow-[0_22px_46px_rgba(0,0,0,.38)] transition duration-700 group-hover:scale-[1.035]" /></div> : null}
       <div className="absolute inset-0 grid-bg opacity-25"/>
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.02)_45%,rgba(0,0,0,.45))]"/>
       <span className="relative z-10 rounded-xl border border-white/20 bg-black/50 px-3 py-1.5 text-[10px] font-bold tracking-[.22em] text-blue-300 backdrop-blur">{(event.category || "EVENT").toUpperCase()}</span>

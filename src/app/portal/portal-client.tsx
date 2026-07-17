@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { type MouseEvent, useEffect, useMemo, useState, useRef } from "react";
 import { signOut } from "next-auth/react";
@@ -228,7 +229,7 @@ function exportDashboardSummary(data:Data){
   ];
   downloadTextFile(`tech-tatva-summary-${new Date().toISOString().slice(0,10)}.csv`,rows.map((row)=>row.map(csvCell).join(",")).join("\n"));
 }
-function PortalLogo(){return <a href="/portal" className="group flex items-center gap-3 font-semibold tracking-tight"><span className="portal-logo-mark grid h-11 w-11 place-items-center rounded-2xl border border-violet-300/30 bg-violet-500/10 text-violet-200"><img src="/logo-colour.png" alt="Tech Tatva Logo" className="w-6 h-6 object-contain" /></span><span className="leading-tight"><span className="block text-sm tracking-[.08em] text-white">TECH TATVA</span><i className="block text-xs font-normal tracking-[.18em] text-violet-200/45">PORTAL OS</i></span></a>}
+function PortalLogo(){return <a href="/portal" className="group flex items-center gap-3 font-semibold tracking-tight"><span className="portal-logo-mark grid h-11 w-11 place-items-center rounded-2xl border border-violet-300/30 bg-violet-500/10 text-violet-200"><Image width={1200} height={1200} src="/logo-colour.png" alt="Tech Tatva Logo" className="w-6 h-6 object-contain" /></span><span className="leading-tight"><span className="block text-sm tracking-[.08em] text-white">TECH TATVA</span><i className="block text-xs font-normal tracking-[.18em] text-violet-200/45">PORTAL OS</i></span></a>}
 
 export function PortalClient({ initialData, userName }: { initialData: Data; userName: string }) {
   const [data,setData]=useState(()=>normalizePortalData(initialData));
@@ -3120,7 +3121,7 @@ function ProfileCard({ name, photo, role, email, phone, copiedKey, onCopy }: { n
     <div className="relative overflow-hidden rounded-2xl border border-white/[.06] bg-black/25 p-5 flex gap-4 items-start hover:border-white/[.1] transition">
       <div className="relative h-16 w-16 rounded-full overflow-hidden border border-white/10 bg-black/40 flex-shrink-0 flex items-center justify-center">
         {photo ? (
-          <img src={photo} alt={name || role} className="h-full w-full object-cover" />
+          <Image width={1200} height={1200} src={photo} alt={name || role} className="h-full w-full object-cover" />
         ) : (
           <User size={28} className="text-white/20" />
         )}
@@ -3206,7 +3207,7 @@ function Settings({ info, open }: { info: any; open: (drawer: any) => void }) {
               <div className="rounded-2xl border border-white/[.05] bg-black/20 p-5 flex items-center gap-4">
                 <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-white/10 bg-black/40 flex items-center justify-center">
                   {info.logo ? (
-                    <img src={info.logo} alt="Logo" className="h-full w-full object-contain p-1" />
+                    <Image width={1200} height={1200} src={info.logo} alt="Logo" className="h-full w-full object-contain p-1" />
                   ) : (
                     <span className="text-white/20 text-xs uppercase font-bold">LOGO</span>
                   )}
@@ -3511,7 +3512,7 @@ function GalleryAssetsControl({
                 {asset.kind === "video" ? (
                   <video src={asset.url} className="h-20 w-24 rounded-xl object-cover" muted playsInline />
                 ) : (
-                  <img src={asset.url} alt="" className="h-20 w-24 rounded-xl object-cover" />
+                  <Image width={1200} height={1200} src={asset.url} alt="" className="h-20 w-24 rounded-xl object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
@@ -3568,7 +3569,7 @@ function UploadControl({
       {value ? (
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-white/[.06] pb-3">
           {preview ? (
-            <img src={value} alt="" className="h-16 w-24 rounded-lg object-cover border border-white/10" />
+            <Image width={1200} height={1200} src={value} alt="" className="h-16 w-24 rounded-lg object-cover border border-white/10" />
           ) : (
             <p className="break-all text-xs text-white/45 flex-1">{value}</p>
           )}

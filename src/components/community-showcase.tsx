@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { Camera, Code, Cpu, Sparkles, Terminal } from "lucide-react";
 import { Reveal } from "./reveal";
@@ -96,7 +97,7 @@ export function CommunityShowcase({ galleryData = [] }: { galleryData?: any[] })
                   {/* Image/Visual Container */}
                   <div className="relative w-full aspect-[1.8/1] rounded-xl overflow-hidden bg-black/40 border-2 border-black mb-6 flex items-center justify-center">
                     {item.image ? (
-                      <img 
+                      <Image width={1200} height={1200} 
                         src={item.image} 
                         alt={item.title} 
                         className="object-cover w-full h-full transition duration-700 group-hover:scale-105"

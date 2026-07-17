@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -105,7 +106,7 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
                   type: "success",
                   node: (
                     <div className="mt-2 flex gap-3 items-center rounded-xl border border-white/10 bg-white/5 p-2 max-w-sm">
-                      <img 
+                      <Image width={1200} height={1200} 
                         src={livePost.image} 
                         alt="Instagram Latest Preview" 
                         className="w-12 h-12 object-cover rounded-md border border-white/10 bg-black/40"
@@ -144,7 +145,7 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
             node: (
               <div className="mt-2 flex gap-3 items-center rounded-xl border border-white/10 bg-white/5 p-2 max-w-sm">
                 {postImg ? (
-                  <img 
+                  <Image width={1200} height={1200} 
                     src={postImg} 
                     alt="Instagram Latest Preview" 
                     className="w-12 h-12 object-cover rounded-md border border-white/10 bg-black/40"

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Hexagon } from "lucide-react";
 
 export function MotionLogo({ logo }: { logo?: string }) {
@@ -11,7 +12,7 @@ export function MotionLogo({ logo }: { logo?: string }) {
       <span className="brand-mark-wrap">
         <span className="brand-mark-aura" />
         {logo ? (
-          <img src={logo} alt="" className="brand-mark" />
+          <Image src={logo} alt="" className="brand-mark" width={100} height={100} />
         ) : (
           <span className="brand-mark-fallback">
             <Hexagon size={28} />
@@ -28,25 +29,36 @@ export function MotionLogo({ logo }: { logo?: string }) {
 
 export function SiteLoader({ logo }: { logo?: string }) {
   const [visible, setVisible] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const circleRef = useRef<SVGCircleElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const startTime = Date.now();
     const duration = 1350; // duration in ms
+    let animationFrameId: number;
 
-    const interval = setInterval(() => {
+    const updateProgress = () => {
       const elapsed = Date.now() - startTime;
       const pct = Math.min(Math.floor((elapsed / duration) * 100), 100);
-      setProgress(pct);
-      if (elapsed >= duration) {
-        clearInterval(interval);
+      
+      if (textRef.current) {
+        textRef.current.innerText = pct.toString().padStart(3, "0");
+      }
+      
+      if (circleRef.current) {
+        circleRef.current.style.strokeDashoffset = (276 - (276 * pct) / 100).toString();
+      }
+
+      if (elapsed < duration) {
+        animationFrameId = requestAnimationFrame(updateProgress);
+      } else {
         setVisible(false);
       }
-    }, 16);
-
-    return () => {
-      clearInterval(interval);
     };
+
+    animationFrameId = requestAnimationFrame(updateProgress);
+
+    return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
   if (!visible) return null;
@@ -58,8 +70,8 @@ export function SiteLoader({ logo }: { logo?: string }) {
         <div className="loader-sexy-spinner">
           <svg viewBox="0 0 100 100" className="spinner-svg-outer">
             <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.03)" strokeWidth="1.5" fill="none" />
-            <circle cx="50" cy="50" r="44" stroke="#ffffff" strokeWidth="2" fill="none" 
-              strokeDasharray="276" strokeDashoffset={276 - (276 * progress) / 100}
+            <circle ref={circleRef} cx="50" cy="50" r="44" stroke="#ffffff" strokeWidth="2" fill="none" 
+              strokeDasharray="276" strokeDashoffset="276"
               strokeLinecap="round" className="spinner-progress-circle" />
           </svg>
           <div className="spinner-inner-glow" />
@@ -73,7 +85,7 @@ export function SiteLoader({ logo }: { logo?: string }) {
         {/* Minimalist percentage counter */}
         <div className="loader-sexy-meta">
           <span className="loader-sexy-status">INITIALIZING SYSTEM</span>
-          <span className="loader-sexy-percentage">{progress.toString().padStart(3, "0")}</span>
+          <span ref={textRef} className="loader-sexy-percentage">000</span>
         </div>
       </div>
     </div>

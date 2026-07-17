@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { FormEvent, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
@@ -810,7 +811,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                               <div className="flex items-center gap-2.5">
                                 {logoBase64 ? (
                                   <div className="h-[28px] w-[28px] rounded-lg overflow-hidden ring-1 ring-white/10">
-                                    <img src={logoBase64} alt="" className="h-full w-full object-contain" />
+                                    <Image width={1200} height={1200} src={logoBase64} alt="" className="h-full w-full object-contain" />
                                   </div>
                                 ) : (
                                   <div className="h-[28px] w-[28px] rounded-lg bg-purple-500/20 border border-purple-400/30" />
@@ -827,7 +828,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
 
                               {cuLogoBase64 ? (
                                 <div className="bg-white px-2 py-[5px] rounded-[7px] shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-                                  <img src={cuLogoBase64} alt="" className="h-[13px] w-auto object-contain" />
+                                  <Image width={1200} height={1200} src={cuLogoBase64} alt="" className="h-[13px] w-auto object-contain" />
                                 </div>
                               ) : null}
                             </div>
