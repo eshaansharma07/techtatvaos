@@ -1,69 +1,49 @@
 import { CalendarDays, Sparkles } from "lucide-react";
-import Link from "next/link";
 import { EventCard } from "@/components/event-card";
 import { PublicShell } from "@/components/public-shell";
-import { Reveal } from "@/components/reveal";
 import { getPublicEvents, getPublicTeams } from "@/lib/public-data";
 
 export const revalidate = 60;
 
 export default async function EventsPage() {
   const [events, teams] = await Promise.all([getPublicEvents(), getPublicTeams()]);
+  const chips = [teams.length ? `${teams.length} active teams` : "No teams yet", `${events.length} public events`, "Upcoming first"];
 
   return (
     <PublicShell>
-      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-24 pt-32 md:px-6 md:pt-44 spatial-grid-bg">
-
-        {/* ── HERO ── */}
-        <Reveal>
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b-2 border-black pb-10 mb-10">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44 spatial-grid-bg">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(0,255,102,0.05),transparent_45%)] pointer-events-none" />
+        <div className="glass-brutalist rounded-[2rem] p-6 md:rounded-[2.6rem] md:p-14 relative z-10">
+          <div className="grid gap-10 lg:grid-cols-[1fr_.7fr] lg:items-end">
             <div>
-              <span className="inline-flex rounded-xl border-2 border-black bg-[#00FF66] px-4 py-1.5 text-[10px] font-bold tracking-[.28em] text-black shadow-[2px_2px_0px_0px_#000] uppercase">
-                Club Calendar
-              </span>
-              <h1 className="mt-5 text-[clamp(2.8rem,7vw,6.5rem)] font-extrabold leading-[.88] tracking-[-0.06em] text-black">
-                Events worth<br />
-                <span className="text-black/25">showing up for.</span>
+              <p className="text-[10px] font-bold tracking-[.34em] text-emerald-400 uppercase">CLUB CALENDAR</p>
+              <h1 className="mt-5 text-3xl xs:text-5xl font-extrabold leading-[.86] tracking-[-.08em] text-white md:text-8xl">
+                Events worth <br className="hidden md:inline" />
+                <span className="text-[#00FF66]">showing up for.</span>
               </h1>
-              <p className="mt-6 max-w-xl text-sm leading-7 text-black/55">
-                Workshops, hackathons, and guest speaker sessions organized by Tech Tatva. Dynamic listings straight from the administration database.
+              <p className="mt-6 max-w-2xl text-[15px] leading-8 text-white/58 md:text-base">
+                Public events, workshops, and registrations are listed here. Every visible card is powered by real admin-published data.
               </p>
             </div>
-            
-            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-              <div className="flex flex-wrap gap-2">
-                {[`${events.length} Events`, `${teams.length} Teams`].map((chip) => (
-                  <span key={chip} className="rounded-xl border-2 border-black bg-white px-4 py-2.5 text-[10px] font-bold tracking-[.14em] text-black shadow-[2px_2px_0px_0px_#000] uppercase">
-                    {chip}
-                  </span>
-                ))}
-              </div>
-              <Link href="/join" className="brutalist-btn-green inline-flex min-h-11 items-center gap-1.5 rounded-xl px-5 text-[10px] font-bold tracking-[.14em] uppercase text-black whitespace-nowrap">
-                Register Now →
-              </Link>
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              {chips.map((x, index) => (
+                <span key={x} className="brutalist-btn-dark inline-flex min-h-12 items-center gap-2 rounded-xl px-4 py-3 text-[10px] font-bold tracking-[.14em] text-white/80">
+                  {index === 0 ? <Sparkles size={13} className="text-[#00FF66]" /> : <CalendarDays size={13} className="text-emerald-400" />} {x.toUpperCase()}
+                </span>
+              ))}
             </div>
           </div>
-        </Reveal>
-
-        {/* ── EVENTS GRID ── */}
+        </div>
+ 
         {events.length ? (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {events.map((event, index) => (
-              <Reveal key={event.slug} delay={index * 0.05}>
-                <EventCard event={event} index={index} />
-              </Reveal>
-            ))}
+          <div className="relative z-10 mt-8 grid gap-5 md:mt-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {events.map((event, index) => <EventCard event={event} index={index} key={event.slug} />)}
           </div>
         ) : (
-          <Reveal>
-            <div className="glass-brutalist rounded-[2rem] p-12 text-center">
-              <CalendarDays className="mx-auto text-black/20 mb-4" size={32} />
-              <h3 className="text-lg font-bold text-black">No public events scheduled</h3>
-              <p className="mx-auto mt-2 max-w-sm text-sm text-black/40">
-                The events board is currently empty. Check back soon for upcoming hackathons, tech talks, and registrations.
-              </p>
-            </div>
-          </Reveal>
+          <div className="glass-brutalist mt-8 rounded-3xl p-10 text-center relative z-10">
+            <p className="text-lg font-bold text-white">No public events yet.</p>
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-white/40">Check back soon for upcoming sessions, workshops, and registrations.</p>
+          </div>
         )}
       </section>
     </PublicShell>

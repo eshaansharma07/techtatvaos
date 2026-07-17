@@ -90,7 +90,7 @@ export function FloatingAIChat() {
       {/* Floating Chat Bubble Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 text-white shadow-[0_0_30px_rgba(139,92,246,0.45)] hover:scale-110 active:scale-95 transition-all duration-300 group public-chat-trigger"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 text-white shadow-[0_0_30px_rgba(139,92,246,0.45)] hover:scale-110 active:scale-95 transition-all duration-300 group"
       >
         <span className="absolute -inset-1 rounded-full bg-violet-400/20 blur opacity-40 group-hover:opacity-75 transition-opacity" />
         <span className="absolute -inset-0.5 rounded-full border border-white/20 animate-pulse" />
@@ -99,14 +99,14 @@ export function FloatingAIChat() {
 
       {/* Interactive Chat Window */}
       <div
-        className={`fixed bottom-24 right-6 z-50 flex w-[335px] h-[480px] xs:w-[360px] sm:w-[380px] flex-col justify-between overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#0c0512]/92 backdrop-blur-2xl shadow-[0_30px_80px_rgba(20,8,26,0.65)] transition-all duration-300 transform origin-bottom-right public-chat-window ${
+        className={`fixed bottom-24 right-6 z-50 flex w-[335px] h-[480px] xs:w-[360px] sm:w-[380px] flex-col justify-between overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#0c0512]/92 backdrop-blur-2xl shadow-[0_30px_80px_rgba(20,8,26,0.65)] transition-all duration-300 transform origin-bottom-right ${
           isOpen ? "scale-100 opacity-100 translate-y-0" : "scale-75 opacity-0 translate-y-10 pointer-events-none"
         }`}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.03] via-transparent to-pink-500/[0.03]" />
         
         {/* Header */}
-        <div className="relative flex items-center justify-between border-b border-white/[0.06] bg-white/[0.015] px-5 py-4 shrink-0 public-chat-header">
+        <div className="relative flex items-center justify-between border-b border-white/[0.06] bg-white/[0.015] px-5 py-4 shrink-0">
           <div className="flex items-center gap-3">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet-400 to-fuchsia-300 text-black shadow-[0_0_20px_rgba(139,92,246,0.22)]">
               <Brain size={15} />
@@ -137,8 +137,8 @@ export function FloatingAIChat() {
               <div
                 className={`px-3.5 py-2.5 rounded-2xl text-[12px] leading-relaxed max-w-[88%] break-words shadow-sm ${
                   m.role === "user"
-                    ? "bg-violet-500/15 border border-violet-500/25 text-white rounded-tr-none public-chat-user-message"
-                    : "bg-white/[0.03] border border-white/[0.06] text-white/80 rounded-tl-none font-sans public-chat-model-message"
+                    ? "bg-violet-500/15 border border-violet-500/25 text-white rounded-tr-none"
+                    : "bg-white/[0.03] border border-white/[0.06] text-white/80 rounded-tl-none font-sans"
                 }`}
               >
                 {m.text}
@@ -162,7 +162,7 @@ export function FloatingAIChat() {
         </div>
 
         {/* Input Box */}
-        <div className="relative border-t border-white/[0.05] bg-[#0c0512]/60 p-4 shrink-0 public-chat-input-container">
+        <div className="relative border-t border-white/[0.05] bg-[#0c0512]/60 p-4 shrink-0">
           <input
             type="text"
             value={prompt}
@@ -172,7 +172,7 @@ export function FloatingAIChat() {
             }}
             disabled={asking}
             placeholder={asking ? "Assistant is compiling records..." : "Ask about events, teams, registrations..."}
-            className="w-full rounded-2xl border border-white/[.07] bg-black/45 py-3.5 pl-4 pr-12 text-[12px] text-white outline-none placeholder:text-white/22 focus:border-violet-400/40 disabled:opacity-60 transition public-chat-input"
+            className="w-full rounded-2xl border border-white/[.07] bg-black/45 py-3.5 pl-4 pr-12 text-[12px] text-white outline-none placeholder:text-white/22 focus:border-violet-400/40 disabled:opacity-60 transition"
           />
           <button
             onClick={sendMessage}
