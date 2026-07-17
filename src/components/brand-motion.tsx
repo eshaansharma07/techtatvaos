@@ -27,12 +27,16 @@ export function MotionLogo({ logo }: { logo?: string }) {
   );
 }
 
+let hasLoaded = false;
+
 export function SiteLoader({ logo }: { logo?: string }) {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(!hasLoaded);
   const circleRef = useRef<SVGCircleElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    if (hasLoaded) return;
+
     const startTime = Date.now();
     const duration = 1350; // duration in ms
     let animationFrameId: number;
@@ -53,6 +57,7 @@ export function SiteLoader({ logo }: { logo?: string }) {
         animationFrameId = requestAnimationFrame(updateProgress);
       } else {
         setVisible(false);
+        hasLoaded = true;
       }
     };
 
