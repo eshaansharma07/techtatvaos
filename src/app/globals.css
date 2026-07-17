@@ -17,7 +17,7 @@
   --tt-coral: #fb7185;
   --tt-peach: #fdba74;
   --tt-amber: #f7c35f;
-  --tt-mint: #00FF66;
+  --tt-mint: #a855f7;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -115,14 +115,14 @@ body:before {
 }
 .glass-brutalist-green {
   background: rgba(12, 12, 14, 0.8);
-  border: 2px solid rgba(0, 255, 102, 0.35);
-  box-shadow: 5px 5px 0px 0px rgba(0, 255, 102, 0.15);
+  border: 2px solid rgba(168, 85, 247, 0.35);
+  box-shadow: 5px 5px 0px 0px rgba(168, 85, 247, 0.15);
   backdrop-filter: blur(16px);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .glass-brutalist-green:hover {
-  border-color: #00FF66;
-  box-shadow: 5px 5px 0px 0px #00FF66;
+  border-color: #a855f7;
+  box-shadow: 5px 5px 0px 0px #a855f7;
   transform: translateY(-2px);
 }
 .glass-brutalist-purple {
@@ -306,14 +306,14 @@ body:before {
   transition: all 0.15s ease;
 }
 .brutalist-btn-dark:hover {
-  border-color: #00FF66;
-  color: #00FF66;
+  border-color: #a855f7;
+  color: #a855f7;
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px 0px #00FF66;
+  box-shadow: 4px 4px 0px 0px #a855f7;
 }
 .brutalist-btn-dark:active {
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0px 0px #00FF66;
+  box-shadow: 1px 1px 0px 0px #a855f7;
 }
 .edge { border: 1px solid rgba(255,255,255,.08); }
 .glow { box-shadow: 0 0 80px rgba(232,121,166,.22); }
@@ -443,7 +443,7 @@ body:before {
   padding: .25rem;
 }
 .public-header-cta {
-  background: #00FF66;
+  background: #a855f7;
   color: #000000;
   border: 2px solid #000000;
   box-shadow: 3px 3px 0px 0px #000000;
@@ -452,7 +452,7 @@ body:before {
 .public-header-cta:hover {
   transform: translate(-1px, -1px);
   box-shadow: 4px 4px 0px 0px #000000;
-  background: #00FF66;
+  background: #a855f7;
   color: #000000;
 }
 .public-footer {
@@ -1129,7 +1129,7 @@ body:before {
   color: #ffffff;
 }
 .loader-sexy-logo span {
-  background: linear-gradient(100deg, #fff 12%, #00FF66 56%, #34d399);
+  background: linear-gradient(100deg, #fff 12%, #a855f7 56%, #3b82f6);
   -webkit-background-clip: text;
   color: transparent;
 }
