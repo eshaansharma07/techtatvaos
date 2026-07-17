@@ -27,9 +27,9 @@ export default async function GalleryAlbum({ params }: { params: Promise<{ id: s
           ) : (
             <img src={optimizeCloudinaryUrl(cover.url, 800)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-[.18]" />
           ) : null}
-          <div className="absolute inset-0 bg-gradient-to-br from-black via-black/76 to-emerald-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-black/76 to-purple-950/20" />
           <div className="relative">
-            <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-[#00FF66] px-4 py-1.5 text-[10px] font-bold tracking-[.28em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+            <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-purple-500 px-4 py-1.5 text-[10px] font-bold tracking-[.28em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
               <Sparkles size={12} />
               Album overview
             </span>
@@ -38,7 +38,7 @@ export default async function GalleryAlbum({ params }: { params: Promise<{ id: s
               Tap any published moment below to experience the album as a clean, media-first archive.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <span className="rounded-xl border-2 border-black bg-[#00FF66] px-4 py-2 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">{album.event || "Club gallery"}</span>
+              <span className="rounded-xl border-2 border-black bg-purple-500 px-4 py-2 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">{album.event || "Club gallery"}</span>
               <span className="glass-brutalist px-4 py-2 text-xs text-white/80 font-bold rounded-xl">{album.assetCount || 0} media items</span>
               {album.eventDate ? <span className="glass-brutalist px-4 py-2 text-xs text-white/80 font-bold rounded-xl">{new Date(album.eventDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span> : null}
             </div>

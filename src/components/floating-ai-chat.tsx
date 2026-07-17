@@ -114,7 +114,7 @@ export function FloatingAIChat() {
             <div>
               <p className="text-xs font-bold text-white tracking-tight">Tech Tatva AI Assistant</p>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
                 <span className="text-[9px] text-white/40 tracking-wider">ONLINE</span>
               </div>
             </div>

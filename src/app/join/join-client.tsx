@@ -339,7 +339,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
               placeholder="e.g. Eshaan Sharma"
               value={form.fullName}
               onChange={(e) => update("fullName", e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-emerald-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-purple-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
               required
             />
           </div>
@@ -350,7 +350,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
               placeholder="e.g. 22BCS1001"
               value={form.uid}
               onChange={(e) => update("uid", e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-emerald-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-purple-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
               required
             />
           </div>
@@ -364,7 +364,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                   onClick={() => update("gender", g)}
                   className={`border rounded-xl py-2.5 px-3 text-[10px] font-bold uppercase tracking-wider transition ${
                     form.gender === g
-                      ? "border-emerald-500/50 bg-emerald-500/10 text-white"
+                      ? "border-purple-500/50 bg-purple-500/10 text-white"
                       : "border-white/[0.06] bg-white/[0.01] text-white/40 hover:text-white"
                   }`}
                 >
@@ -388,7 +388,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
               placeholder="e.g. john.doe@student.chd.edu.in"
               value={form.email}
               onChange={(e) => update("email", e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-emerald-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-purple-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
               required
             />
           </div>
@@ -399,7 +399,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
               placeholder="e.g. 9876543210"
               value={form.phone}
               onChange={(e) => update("phone", e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-emerald-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-purple-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
               required
             />
           </div>
@@ -410,7 +410,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
               placeholder="e.g. CSE-801-A"
               value={form.section}
               onChange={(e) => update("section", e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-emerald-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-purple-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
             />
           </div>
         </div>
@@ -426,7 +426,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
             <select
               value={form.department}
               onChange={(e) => update("department", e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-emerald-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition appearance-none cursor-pointer"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-purple-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition appearance-none cursor-pointer"
               required
             >
               <option value="" disabled className="bg-neutral-950 text-white/40">Select Department</option>
@@ -442,7 +442,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
             <select
               value={form.year}
               onChange={(e) => update("year", e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-emerald-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition appearance-none cursor-pointer"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-purple-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition appearance-none cursor-pointer"
               required
             >
               <option value="" disabled className="bg-neutral-950 text-white/40">Select Year</option>
@@ -474,7 +474,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                   onClick={() => toggleInterest(interest)}
                   className={`rounded-xl border p-2.5 text-left text-[10px] font-bold transition ${
                     selected
-                      ? "border-emerald-500/50 bg-emerald-500/10 text-white"
+                      ? "border-purple-500/50 bg-purple-500/10 text-white"
                       : "border-white/[0.05] bg-white/[0.015] text-white/40 hover:border-white/10 hover:text-white"
                   }`}
                 >
@@ -491,14 +491,14 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
       desc: "Review your details before compiling your membership badge.",
       fields: (
         <div className="space-y-3 font-mono text-[10px] leading-5 text-white/70 bg-black/40 border border-white/[0.05] rounded-xl p-4">
-          <div><span className="text-emerald-400 font-bold">ALIAS:</span> {form.fullName || "Guest Builder"}</div>
-          <div><span className="text-emerald-400 font-bold">UID:</span> {form.uid || "N/A"}</div>
-          <div><span className="text-emerald-400 font-bold">EMAIL:</span> {form.email || "N/A"}</div>
-          <div><span className="text-emerald-400 font-bold">PHONE:</span> {form.phone || "N/A"}</div>
-          <div><span className="text-emerald-400 font-bold">DEPT:</span> {form.department || "N/A"}</div>
-          <div><span className="text-emerald-400 font-bold">YEAR:</span> {form.year ? `${form.year} Year` : "N/A"}</div>
+          <div><span className="text-purple-400 font-bold">ALIAS:</span> {form.fullName || "Guest Builder"}</div>
+          <div><span className="text-purple-400 font-bold">UID:</span> {form.uid || "N/A"}</div>
+          <div><span className="text-purple-400 font-bold">EMAIL:</span> {form.email || "N/A"}</div>
+          <div><span className="text-purple-400 font-bold">PHONE:</span> {form.phone || "N/A"}</div>
+          <div><span className="text-purple-400 font-bold">DEPT:</span> {form.department || "N/A"}</div>
+          <div><span className="text-purple-400 font-bold">YEAR:</span> {form.year ? `${form.year} Year` : "N/A"}</div>
           <div>
-            <span className="text-emerald-400 font-bold">INTERESTS:</span>{" "}
+            <span className="text-purple-400 font-bold">INTERESTS:</span>{" "}
             {form.interests.length > 0 ? form.interests.join(", ") : "None"}
           </div>
           <div className="border-t border-white/[0.05] pt-2 mt-2 text-[9px] text-white/30">
@@ -512,7 +512,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
   return (
     <div className="relative w-full">
       {initialStatus.announcementBanner && isOpen && (
-        <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white text-center py-2.5 px-4 text-xs font-semibold tracking-wide">
+        <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white text-center py-2.5 px-4 text-xs font-semibold tracking-wide">
           <span className="inline-flex items-center gap-1.5">
             <Sparkles size={14} className="animate-pulse" />
             {initialStatus.announcementBanner}
@@ -522,26 +522,26 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
 
       <div className="relative min-h-[90vh] py-16 px-5 flex flex-col items-center justify-center spatial-grid-bg">
         {/* Background Gradients */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(0,255,102,0.08),transparent_45%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(168,85,247,0.08),transparent_45%)] pointer-events-none" />
         <div className="absolute inset-0 grid-bg opacity-[0.06] pointer-events-none" />
 
         <div className="max-w-5xl w-full">
           <Reveal>
             <div className="text-center mb-12">
-              <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-[#00FF66] px-4 py-1.5 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+              <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-purple-500 px-4 py-1.5 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
                 <UserPlus size={14} />
                 <span>Tech Tatva Membership</span>
               </span>
               <h1 className="mt-6 text-4xl sm:text-6xl font-bold tracking-tight text-white leading-tight">
-                Enter the <span className="text-[#00FF66]">Club.</span>
+                Enter the <span className="text-purple-400">Club.</span>
               </h1>
               <p className="mt-4 text-sm sm:text-base text-white/50 max-w-xl mx-auto leading-relaxed">
                 Connect with like-minded builders, get priority access to events, collaborate on technical tasks, and get certified.
               </p>
 
               {source === "qr" && (
-                <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-300">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-purple-500/25 bg-purple-500/10 px-4 py-1.5 text-xs font-semibold text-purple-300">
+                  <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
                   <span>Offline Membership Drive Sign-up</span>
                 </div>
               )}
@@ -551,13 +551,13 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
           {!isOpen && (
             <Reveal delay={0.1}>
               <div className="glass-brutalist rounded-[2rem] p-8 sm:p-12 text-center max-w-xl mx-auto">
-                <ShieldAlert size={48} className="mx-auto text-emerald-400 animate-pulse" />
+                <ShieldAlert size={48} className="mx-auto text-purple-400 animate-pulse" />
                 <h2 className="mt-6 text-2xl font-bold text-white">Drive is Currently Inactive</h2>
                 <p className="mt-4 text-sm leading-relaxed text-white/50">
                   The official Tech Tatva membership drive is currently closed. If you believe this is in error, contact the administrators.
                 </p>
                 {initialStatus.openingDate && (
-                  <p className="mt-4 text-xs font-semibold text-emerald-400">
+                  <p className="mt-4 text-xs font-semibold text-purple-400">
                     Expected to go live: {new Date(initialStatus.openingDate).toLocaleDateString("en-IN", { dateStyle: "long" })}
                   </p>
                 )}
@@ -586,7 +586,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                         className="text-center py-8"
                         key="success-card"
                       >
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 mb-6">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-purple-500/10 text-purple-400 mb-6">
                           <CheckCircle2 size={32} />
                         </div>
                         <h2 className="text-2xl font-bold text-white">Registration Successful!</h2>
@@ -597,7 +597,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
                           <button
                             onClick={downloadBadge}
-                            className="brutalist-btn-green flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-bold text-black"
+                            className="brutalist-btn-purple flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-bold text-black"
                           >
                             <Download size={14} />
                             Download Developer Badge
@@ -638,7 +638,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                               Step {step + 1} of 5
                             </span>
                           </div>
-                          <span className="font-sans text-[9px] font-bold tracking-wider text-emerald-400">
+                          <span className="font-sans text-[9px] font-bold tracking-wider text-purple-400">
                             {source.toUpperCase()} STATUS
                           </span>
                         </div>
@@ -754,12 +754,12 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                         <div className="absolute inset-0">
                           
                           {/* Rich gradient background - visible and vibrant */}
-                          <div className="absolute inset-0 bg-[#0c0c0e] border-[2px] border-emerald-500/30" />
+                          <div className="absolute inset-0 bg-[#0c0c0e] border-[2px] border-purple-500/30" />
 
                           {/* Colorful gradient orbs */}
                           <div className="absolute inset-0 overflow-hidden">
                             <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full" style={{
-                              background: 'radial-gradient(circle, rgba(0,255,102,0.15) 0%, transparent 65%)',
+                              background: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 65%)',
                               filter: 'blur(15px)'
                             }} />
                             <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full" style={{
@@ -788,16 +788,16 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                             className="absolute inset-0 pointer-events-none transition-all duration-150"
                             style={{
                               background: isHoveringCard 
-                                ? `radial-gradient(300px circle at ${50 + tiltCoords.x * 40}% ${50 + tiltCoords.y * 40}%, rgba(0,255,102,0.06), transparent 55%)`
+                                ? `radial-gradient(300px circle at ${50 + tiltCoords.x * 40}% ${50 + tiltCoords.y * 40}%, rgba(168,85,247,0.06), transparent 55%)`
                                 : 'none',
                             }}
                           />
                           
                           {/* Top accent bar - gradient beam */}
-                          <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-emerald-500 via-[#00FF66] to-emerald-500" />
+                          <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-purple-500 via-purple-500 to-purple-500" />
                           
                           {/* Bottom subtle accent */}
-                          <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+                          <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
 
                           {/* Glowing border */}
                           <div className="absolute inset-0 rounded-[18px] border border-white/[0.12]" />
@@ -813,13 +813,13 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                                     <img src={logoBase64} alt="" className="h-full w-full object-contain" />
                                   </div>
                                 ) : (
-                                  <div className="h-[28px] w-[28px] rounded-lg bg-emerald-500/20 border border-emerald-400/30" />
+                                  <div className="h-[28px] w-[28px] rounded-lg bg-purple-500/20 border border-purple-400/30" />
                                 )}
                                 <div>
                                   <span className="text-[11px] font-black tracking-[.22em] text-white block leading-none">
                                     TECH TATVA
                                   </span>
-                                  <span className="text-[6px] font-bold tracking-[.18em] text-emerald-400/50 block mt-[3px] uppercase">
+                                  <span className="text-[6px] font-bold tracking-[.18em] text-purple-400/50 block mt-[3px] uppercase">
                                     Student Club
                                   </span>
                                 </div>
@@ -847,15 +847,15 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                                 <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/20" />
                               </div>
                               
-                              <span className="inline-flex items-center gap-[5px] bg-emerald-400/[0.08] border border-emerald-400/25 rounded-full px-[9px] py-[3px] backdrop-blur-sm">
-                                <span className="h-[5px] w-[5px] rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)] animate-pulse" />
-                                <span className="text-[6.5px] font-bold text-emerald-300 uppercase tracking-[.14em]">Active Member</span>
+                              <span className="inline-flex items-center gap-[5px] bg-purple-400/[0.08] border border-purple-400/25 rounded-full px-[9px] py-[3px] backdrop-blur-sm">
+                                <span className="h-[5px] w-[5px] rounded-full bg-purple-400 shadow-[0_0_6px_rgba(52,211,153,0.6)] animate-pulse" />
+                                <span className="text-[6.5px] font-bold text-purple-300 uppercase tracking-[.14em]">Active Member</span>
                               </span>
                             </div>
 
                             {/* Name + Department */}
                             <div className="min-w-0">
-                              <span className="text-[15px] font-extrabold text-white tracking-[.03em] block truncate leading-none drop-shadow-[0_0_12px_rgba(0,255,102,0.3)]">
+                              <span className="text-[15px] font-extrabold text-white tracking-[.03em] block truncate leading-none drop-shadow-[0_0_12px_rgba(168,85,247,0.3)]">
                                 {(form.fullName || "YOUR NAME HERE").toUpperCase()}
                               </span>
                               <span className="text-[7px] font-bold text-white/25 tracking-[.14em] uppercase block mt-[5px] truncate">

@@ -203,11 +203,11 @@ export function InstagramFeed({
                 {post.image ? (
                   <div className="mt-5 flex flex-col justify-between flex-grow px-2">
                     <div>
-                      <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-wider text-emerald-400 uppercase">
-                        <Instagram size={10} className="text-emerald-400" />
+                      <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-wider text-purple-400 uppercase">
+                        <Instagram size={10} className="text-purple-400" />
                         <span>{post.isReel ? "Reel" : "Post"}</span>
                       </div>
-                      <p className="mt-3 pl-3 border-l border-white/10 group-hover:border-emerald-500/30 text-[13px] font-medium leading-relaxed text-white/70 group-hover:text-white transition-all duration-300 line-clamp-2 min-h-[44px] px-0.5">
+                      <p className="mt-3 pl-3 border-l border-white/10 group-hover:border-purple-500/30 text-[13px] font-medium leading-relaxed text-white/70 group-hover:text-white transition-all duration-300 line-clamp-2 min-h-[44px] px-0.5">
                         {formatCaption(post.caption || "View this post on Instagram.")}
                       </p>
                     </div>

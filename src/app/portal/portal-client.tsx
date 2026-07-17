@@ -574,7 +574,7 @@ function getWorkspaceStats(active: Module, data: Data) {
     const inactiveCount = total - activeCount;
     return [
       { label: "Total Members", value: total, tone: "violet" },
-      { label: "Active Roster", value: activeCount, tone: "emerald" },
+      { label: "Active Roster", value: activeCount, tone: "blue" },
       { label: "Inactive/Archived", value: inactiveCount, tone: "rose" }
     ];
   }
@@ -584,7 +584,7 @@ function getWorkspaceStats(active: Module, data: Data) {
     const inactiveCount = total - activeCount;
     return [
       { label: "Total Teams", value: total, tone: "violet" },
-      { label: "Active Lanes", value: activeCount, tone: "emerald" },
+      { label: "Active Lanes", value: activeCount, tone: "blue" },
       { label: "Archived Lanes", value: inactiveCount, tone: "rose" }
     ];
   }
@@ -594,7 +594,7 @@ function getWorkspaceStats(active: Module, data: Data) {
     const drafts = total - published;
     return [
       { label: "Total Events", value: total, tone: "violet" },
-      { label: "Published & Active", value: published, tone: "emerald" },
+      { label: "Published & Active", value: published, tone: "blue" },
       { label: "Drafts / Hidden", value: drafts, tone: "amber" }
     ];
   }
@@ -604,7 +604,7 @@ function getWorkspaceStats(active: Module, data: Data) {
     const drafts = total - completed;
     return [
       { label: "Total Meetings", value: total, tone: "violet" },
-      { label: "Completed Meetings", value: completed, tone: "emerald" },
+      { label: "Completed Meetings", value: completed, tone: "blue" },
       { label: "Draft / Pending", value: drafts, tone: "amber" }
     ];
   }
@@ -615,7 +615,7 @@ function getWorkspaceStats(active: Module, data: Data) {
     return [
       { label: "Total Tasks", value: total, tone: "violet" },
       { label: "Pending Tasks", value: pending, tone: "amber" },
-      { label: "Completed", value: completed, tone: "emerald" }
+      { label: "Completed", value: completed, tone: "blue" }
     ];
   }
   if (active === "Announcements") {
@@ -624,7 +624,7 @@ function getWorkspaceStats(active: Module, data: Data) {
     const drafts = total - published;
     return [
       { label: "Total Announcements", value: total, tone: "violet" },
-      { label: "Published", value: published, tone: "emerald" },
+      { label: "Published", value: published, tone: "blue" },
       { label: "Drafts", value: drafts, tone: "amber" }
     ];
   }
@@ -632,7 +632,7 @@ function getWorkspaceStats(active: Module, data: Data) {
     return [
       { label: "Gallery Albums", value: data.gallery?.length || 0, tone: "violet" },
       { label: "Club Sponsors", value: data.sponsors?.length || 0, tone: "amber" },
-      { label: "Achievements", value: data.achievements?.length || 0, tone: "emerald" }
+      { label: "Achievements", value: data.achievements?.length || 0, tone: "blue" }
     ];
   }
   if (active === "Hall of Fame") {
@@ -640,7 +640,7 @@ function getWorkspaceStats(active: Module, data: Data) {
     const activeCount = data.hallOfFame?.filter((h: any) => h.active !== false).length || 0;
     return [
       { label: "Total Hall Entries", value: total, tone: "violet" },
-      { label: "Active Public", value: activeCount, tone: "emerald" },
+      { label: "Active Public", value: activeCount, tone: "blue" },
       { label: "Archived", value: total - activeCount, tone: "rose" }
     ];
   }
@@ -650,7 +650,7 @@ function getWorkspaceStats(active: Module, data: Data) {
     return [
       { label: "Total Messages", value: total, tone: "violet" },
       { label: "Unresolved", value: unresolved, tone: "rose" },
-      { label: "Resolved", value: total - unresolved, tone: "emerald" }
+      { label: "Resolved", value: total - unresolved, tone: "blue" }
     ];
   }
   return [];
@@ -662,8 +662,8 @@ function renderCell(cell: any, index: number) {
   
   if (lower === "active" || lower === "published" || lower === "open" || lower === "resolved" || lower === "present") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-300 border border-emerald-500/15">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-400/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-blue-300 border border-blue-500/15">
+        <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
         {text}
       </span>
     );
@@ -754,17 +754,17 @@ function Overview({counts,chart,setActive}:{counts:any;chart:any[];setActive:(m:
         ))}
 
         {/* Live Systems Diagnostics Logs console widget */}
-        <div className="portal-glow-card rounded-2xl border border-white/5 bg-black/40 p-5 md:col-span-2 flex flex-col font-mono text-[10px] text-emerald-400/80 shadow-md relative overflow-hidden">
+        <div className="portal-glow-card rounded-2xl border border-white/5 bg-black/40 p-5 md:col-span-2 flex flex-col font-mono text-[10px] text-blue-400/80 shadow-md relative overflow-hidden">
           <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3 text-white/40">
             <span className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping" />
               <span className="font-bold">OPERATOR DIAGNOSTIC CONSOLE</span>
             </span>
             <span className="text-[8px] uppercase tracking-wider">TTY/0</span>
           </div>
           <div className="flex-1 space-y-1 select-none pr-1">
             {logLines.map((line, idx) => (
-              <p key={idx} className={line.includes("✓") ? "text-emerald-400" : line.includes("⚙") ? "text-white" : "text-emerald-500/60"}>
+              <p key={idx} className={line.includes("✓") ? "text-blue-400" : line.includes("⚙") ? "text-white" : "text-blue-500/60"}>
                 {line}
               </p>
             ))}
@@ -870,10 +870,10 @@ function splitPortalTeams(teams:any[]){
   return {operations,creative}
 }
 
-function PortalStructureNode({label,name,meta,tone="violet",onEdit}:{label:string;name?:string;meta?:string;tone?:"violet"|"emerald"|"fuchsia";onEdit?:()=>void}){
+function PortalStructureNode({label,name,meta,tone="violet",onEdit}:{label:string;name?:string;meta?:string;tone?:"violet"|"blue"|"fuchsia";onEdit?:()=>void}){
   const tones={
     violet:"border-violet-300/25 bg-violet-500/10 text-violet-100 shadow-[0_0_20px_rgba(139,92,246,0.15)]",
-    emerald:"border-emerald-300/25 bg-emerald-500/10 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.15)]",
+    blue:"border-blue-300/25 bg-blue-500/10 text-blue-100 shadow-[0_0_20px_rgba(16,185,129,0.15)]",
     fuchsia:"border-fuchsia-300/25 bg-fuchsia-500/10 text-fuchsia-100 shadow-[0_0_20px_rgba(217,70,239,0.15)]"
   };
   return (
@@ -915,7 +915,7 @@ function PortalTeamTreeCard({team,index,open,remove,restore}:{team:any;index:num
         </div>
         <div className="mt-4 flex flex-wrap gap-2 pt-3 border-t border-white/[0.04]">
           <button onClick={()=>open({resource:"teams",title:`Edit ${team.name}`,fields,item:team})} className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-2.5 py-1 text-[10px] font-semibold text-violet-200 transition hover:bg-violet-500/20">Edit team</button>
-          <button onClick={()=>open({resource:"users",title:`Add member to ${team.name}`,fields:config.Members.fields,defaults:{teams:[idOf(team)]}})} className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-200 transition hover:bg-emerald-500/20">Add member</button>
+          <button onClick={()=>open({resource:"users",title:`Add member to ${team.name}`,fields:config.Members.fields,defaults:{teams:[idOf(team)]}})} className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/20">Add member</button>
           {inactive?(
             <button onClick={()=>restore("teams",team)} className="inline-flex items-center gap-1 rounded-full border border-teal-500/30 bg-teal-500/10 px-2.5 py-1 text-[10px] font-semibold text-teal-200 transition hover:bg-teal-500/20">Restore</button>
           ):(
@@ -927,7 +927,7 @@ function PortalTeamTreeCard({team,index,open,remove,restore}:{team:any;index:num
   );
 }
 
-function TeamLaneEditor({title,subtitle,teams,tone,open,remove,restore}:{title:string;subtitle:string;teams:any[];tone:"emerald"|"fuchsia";open:(drawer:any)=>void;remove:(resource:Resource,item:any)=>void;restore:(resource:Resource,item:any)=>void}){
+function TeamLaneEditor({title,subtitle,teams,tone,open,remove,restore}:{title:string;subtitle:string;teams:any[];tone:"blue"|"fuchsia";open:(drawer:any)=>void;remove:(resource:Resource,item:any)=>void;restore:(resource:Resource,item:any)=>void}){
   return (
     <div>
       <PortalStructureNode label={title} name={subtitle} tone={tone}/>
@@ -949,10 +949,10 @@ function PortalAdvisoryRow({info,open}:{info:any;open:(drawer:any)=>void}){
   const columns=advisors.length + 1 + (coFaculty?1:0);
   return (
     <div className={`mx-auto grid w-full max-w-6xl gap-3 ${columns>=4?"md:grid-cols-4":columns>=3?"md:grid-cols-3":columns>=2?"md:grid-cols-2":"md:grid-cols-1"}`}>
-      <PortalStructureNode label="Faculty Champion" name={info.facultyChampionName} meta={info.facultyChampionEmail || "Update from Settings"} tone="emerald" onEdit={()=>open({resource:"settings",title:"Update faculty champion and student advisors",fields:settingsFields,item:info})}/>
-      {coFaculty?<PortalStructureNode label="Co-Faculty Champion" name={info.coFacultyChampionName} meta={info.coFacultyChampionEmail || info.coFacultyChampionPhone || "Update from Settings"} tone="emerald" onEdit={()=>open({resource:"settings",title:"Update co-faculty champion",fields:settingsFields,item:info})}/>:null}
+      <PortalStructureNode label="Faculty Champion" name={info.facultyChampionName} meta={info.facultyChampionEmail || "Update from Settings"} tone="blue" onEdit={()=>open({resource:"settings",title:"Update faculty champion and student advisors",fields:settingsFields,item:info})}/>
+      {coFaculty?<PortalStructureNode label="Co-Faculty Champion" name={info.coFacultyChampionName} meta={info.coFacultyChampionEmail || info.coFacultyChampionPhone || "Update from Settings"} tone="blue" onEdit={()=>open({resource:"settings",title:"Update co-faculty champion",fields:settingsFields,item:info})}/>:null}
       {advisors.map((name:string,index:number)=>(
-        <PortalStructureNode key={`${name}-${index}`} label={`Student Advisor ${index+1}`} name={name} meta={index===0?info.studentAdvisorOneEmail:info.studentAdvisorTwoEmail} tone="emerald" onEdit={()=>open({resource:"settings",title:"Update student advisors",fields:settingsFields,item:info})}/>
+        <PortalStructureNode key={`${name}-${index}`} label={`Student Advisor ${index+1}`} name={name} meta={index===0?info.studentAdvisorOneEmail:info.studentAdvisorTwoEmail} tone="blue" onEdit={()=>open({resource:"settings",title:"Update student advisors",fields:settingsFields,item:info})}/>
       ))}
     </div>
   );
@@ -970,17 +970,17 @@ function TeamStructureEditor({data,open,remove,restore}:{data:Data;open:(drawer:
       <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-5 md:p-7">
         <div className="absolute inset-0 grid-bg opacity-20"/>
         <div className="relative grid gap-6">
-          <div className="rounded-[1.7rem] border border-emerald-300/15 bg-emerald-400/[.035] p-5 shadow-[inset_0_1px_rgba(255,255,255,0.02)]">
-            <p className="mb-4 text-center text-[10px] font-bold uppercase tracking-[.22em] text-emerald-100/55">Advisory Tree</p>
+          <div className="rounded-[1.7rem] border border-blue-300/15 bg-blue-400/[.035] p-5 shadow-[inset_0_1px_rgba(255,255,255,0.02)]">
+            <p className="mb-4 text-center text-[10px] font-bold uppercase tracking-[.22em] text-blue-100/55">Advisory Tree</p>
             <PortalAdvisoryRow info={info} open={open}/>
           </div>
           <div className="rounded-[1.7rem] border border-violet-300/15 bg-violet-400/[.035] p-5 shadow-[inset_0_1px_rgba(255,255,255,0.02)]">
             <p className="mb-4 text-center text-[10px] font-bold uppercase tracking-[.22em] text-violet-100/55">Club Operations Tree</p>
             <PortalOperationsRoot info={info} open={open}/>
             <div className="mx-auto h-10 w-px bg-white/25"/>
-            <div className="mx-auto hidden h-px max-w-4xl bg-gradient-to-r from-emerald-300/0 via-emerald-300/45 to-fuchsia-300/45 md:block"/>
+            <div className="mx-auto hidden h-px max-w-4xl bg-gradient-to-r from-blue-300/0 via-blue-300/45 to-fuchsia-300/45 md:block"/>
             <div className="mt-6 grid gap-8 2xl:grid-cols-2">
-              <TeamLaneEditor title="2. Joint Secretary (Technical & Operations)" subtitle={info.jointSecretaryOneName || "Assign in Settings"} teams={operations} tone="emerald" open={open} remove={remove} restore={restore}/>
+              <TeamLaneEditor title="2. Joint Secretary (Technical & Operations)" subtitle={info.jointSecretaryOneName || "Assign in Settings"} teams={operations} tone="blue" open={open} remove={remove} restore={restore}/>
               <TeamLaneEditor title="3. Joint Secretary (Media & Creative)" subtitle={info.jointSecretaryTwoName || "Assign in Settings"} teams={creative} tone="fuchsia" open={open} remove={remove} restore={restore}/>
             </div>
           </div>
@@ -1020,7 +1020,7 @@ function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent}:{
           {stats.map((stat) => {
             const tones = {
               violet: "border-violet-500/15 bg-violet-500/[0.03] text-violet-200 shadow-[inset_0_1px_rgba(255,255,255,0.01)]",
-              emerald: "border-emerald-500/15 bg-emerald-500/[0.03] text-emerald-200 shadow-[inset_0_1px_rgba(255,255,255,0.01)]",
+              blue: "border-blue-500/15 bg-blue-500/[0.03] text-blue-200 shadow-[inset_0_1px_rgba(255,255,255,0.01)]",
               amber: "border-amber-500/15 bg-amber-500/[0.03] text-amber-200 shadow-[inset_0_1px_rgba(255,255,255,0.01)]",
               rose: "border-rose-500/15 bg-rose-500/[0.03] text-rose-200 shadow-[inset_0_1px_rgba(255,255,255,0.01)]"
             };
@@ -1094,7 +1094,7 @@ function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent}:{
                           
                           {isEvent ? (
                             <>
-                              <button onClick={() => patch(resource, item, { status: "published" }, "Event published. It is visible on the public website.")} className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-200 transition hover:bg-emerald-500/20">
+                              <button onClick={() => patch(resource, item, { status: "published" }, "Event published. It is visible on the public website.")} className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/20">
                                 <Check size={10} /> Publish
                               </button>
                               <button onClick={() => patch(resource, item, { status: "draft", registrationOpen: "false" }, "Event moved to draft and hidden publicly.")} className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/[0.05] px-2.5 py-1 text-[10px] font-semibold text-white/60 transition hover:bg-white/10">
@@ -1131,11 +1131,11 @@ function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent}:{
                               <Trash2 size={10} /> Delete
                             </button>
                           ) : active === "Contact Messages" ? (
-                            <button onClick={() => patch(resource, item, { status: item.status === "resolved" ? "new" : "resolved" }, item.status === "resolved" ? "Message reopened." : "Message marked resolved.")} className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-200 transition hover:bg-emerald-500/20">
+                            <button onClick={() => patch(resource, item, { status: item.status === "resolved" ? "new" : "resolved" }, item.status === "resolved" ? "Message reopened." : "Message marked resolved.")} className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/20">
                               {item.status === "resolved" ? "Reopen" : "Resolve"}
                             </button>
                           ) : inactive ? (
-                            <button onClick={() => restore(resource, item)} className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-200 transition hover:bg-emerald-500/20">
+                            <button onClick={() => restore(resource, item)} className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/20">
                               Restore
                             </button>
                           ) : !isEvent ? (
@@ -1266,7 +1266,7 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
   }
   
   function statusBadge(status: string) {
-    return `h-fit rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] ${status==="accepted"?"bg-emerald-400/10 text-emerald-200":status==="rejected"?"bg-rose-400/10 text-rose-200":status==="shortlisted"?"bg-violet-400/10 text-violet-100":status==="on_hold"?"bg-amber-400/10 text-amber-100":"bg-white/[.06] text-white/45"}`;
+    return `h-fit rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em] ${status==="accepted"?"bg-blue-400/10 text-blue-200":status==="rejected"?"bg-rose-400/10 text-rose-200":status==="shortlisted"?"bg-violet-400/10 text-violet-100":status==="on_hold"?"bg-amber-400/10 text-amber-100":"bg-white/[.06] text-white/45"}`;
   }
   
   function SortButton({column,label}:{column:typeof sortKey;label:string}) {
@@ -1321,7 +1321,7 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
               ["Today", counts.today, "border-fuchsia-500/20 text-fuchsia-200 bg-fuchsia-500/[0.02]"],
               ["Pending", counts.pending, "border-white/10 text-white/60 bg-white/[0.01]"],
               ["Shortlisted", counts.shortlisted, "border-violet-400/20 text-violet-100 bg-violet-400/[0.02]"],
-              ["Accepted", counts.accepted, "border-emerald-500/20 text-emerald-200 bg-emerald-500/[0.02]"],
+              ["Accepted", counts.accepted, "border-blue-500/20 text-blue-200 bg-blue-500/[0.02]"],
               ["Rejected", counts.rejected, "border-rose-500/20 text-rose-200 bg-rose-500/[0.02]"],
               ["On hold", counts.onHold, "border-amber-500/20 text-amber-200 bg-amber-500/[0.02]"]
             ].map(([label, value, styles]: any) => (
@@ -1392,7 +1392,7 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
                 <button disabled={!selected.length||bulkBusy} onClick={()=>bulk("shortlist")} className="portal-link-action text-violet-200 border-violet-500/20 disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-transparent">
                   Bulk shortlist
                 </button>
-                <button disabled={!selected.length||bulkBusy} onClick={()=>bulk("accept")} className="portal-link-action text-emerald-200 border-emerald-500/20 disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-transparent">
+                <button disabled={!selected.length||bulkBusy} onClick={()=>bulk("accept")} className="portal-link-action text-blue-200 border-blue-500/20 disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-transparent">
                   Bulk accept
                 </button>
                 <button disabled={!selected.length||bulkBusy} onClick={()=>bulk("reject")} className="portal-link-action text-rose-200 border-rose-500/20 disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-transparent">
@@ -1446,7 +1446,7 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
                     <button onClick={()=>patch("recruitmentApplications",item,{status:"shortlisted"},"Application shortlisted.")} className="portal-link-action text-violet-200 border-violet-500/20 hover:bg-violet-500/10">
                       Shortlist
                     </button>
-                    <button onClick={()=>patch("recruitmentApplications",item,{status:"accepted"},"Application accepted.")} className="portal-link-action text-emerald-200 border-emerald-500/20 hover:bg-emerald-500/10">
+                    <button onClick={()=>patch("recruitmentApplications",item,{status:"accepted"},"Application accepted.")} className="portal-link-action text-blue-200 border-blue-500/20 hover:bg-blue-500/10">
                       <Check size={12} className="mr-1"/> Accept
                     </button>
                     <button onClick={()=>patch("recruitmentApplications",item,{status:"on_hold"},"Application moved on hold.")} className="portal-link-action text-amber-200 border-amber-500/20 hover:bg-amber-500/10">
@@ -1496,7 +1496,7 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
               <div className="flex flex-col gap-3 text-xs">
                 <div className="flex justify-between items-center bg-black/20 p-2.5 rounded-lg border border-white/[0.02]">
                   <span className="text-white/45">Portal Status</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider ${settings?.status === "open" ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/25" : "bg-rose-500/10 text-rose-300 border border-rose-500/25"}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider ${settings?.status === "open" ? "bg-blue-500/10 text-blue-300 border border-blue-500/25" : "bg-rose-500/10 text-rose-300 border border-rose-500/25"}`}>
                     {settings?.status || "open"}
                   </span>
                 </div>
@@ -1560,7 +1560,7 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
                   <div className="flex flex-col gap-2 rounded-xl border border-white/[.05] bg-black/30 p-3 text-xs" key={idOf(row)}>
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-semibold text-white/80 truncate" title={row.name}>{row.name}</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold ${row.active === "false" || row.active === false ? "bg-rose-500/10 text-rose-300 border border-rose-500/20" : "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"}`}>
+                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold ${row.active === "false" || row.active === false ? "bg-rose-500/10 text-rose-300 border border-rose-500/20" : "bg-blue-500/10 text-blue-300 border border-blue-500/20"}`}>
                         {row.active === "false" || row.active === false ? "Inactive" : "Active"}
                       </span>
                     </div>
@@ -1633,7 +1633,7 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
                           {valueOf(row,"role")}
                         </span>
                       )}
-                      <span className="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/5 text-emerald-300 font-mono">
+                      <span className="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/5 text-blue-300 font-mono">
                         {row.type}
                       </span>
                     </div>
@@ -2066,10 +2066,10 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
 
         {/* MOM Generator Card */}
         <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.04] via-transparent to-violet-500/[0.04]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.04] via-transparent to-violet-500/[0.04]" />
           <div className="relative">
             <div className="flex items-center gap-4">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-emerald-300 to-teal-300 text-black shadow-[0_0_30px_rgba(16,185,129,.24)]">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-300 to-teal-300 text-black shadow-[0_0_30px_rgba(16,185,129,.24)]">
                 <MessageSquare size={18} />
               </span>
               <div>
@@ -2077,13 +2077,13 @@ function AIDesk({ data, setPanel }: { data: Data; setPanel: (value: string) => v
                 <p className="mt-1 text-xs text-white/38">Generate official M2M/MOM documents using your format template and meeting records.</p>
               </div>
             </div>
-            <select value={meetingId} onChange={(event) => setMeetingId(event.target.value)} className="mt-5 w-full rounded-2xl border border-white/[.07] bg-black/35 px-4 py-3.5 text-sm text-white outline-none focus:border-emerald-400/40 transition">
+            <select value={meetingId} onChange={(event) => setMeetingId(event.target.value)} className="mt-5 w-full rounded-2xl border border-white/[.07] bg-black/35 px-4 py-3.5 text-sm text-white outline-none focus:border-blue-400/40 transition">
               <option value="">Select meeting</option>
               {meetings.map((meeting: any) => <option value={idOf(meeting)} key={idOf(meeting)}>{meeting.title}</option>)}
             </select>
             {selectedMeeting ? (
-              <div className="mt-3 rounded-xl border border-emerald-500/15 bg-emerald-500/[0.04] px-4 py-2.5 text-xs text-emerald-200/70">
-                <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Selected: {selectedMeeting.title}</span>
+              <div className="mt-3 rounded-xl border border-blue-500/15 bg-blue-500/[0.04] px-4 py-2.5 text-xs text-blue-200/70">
+                <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" /> Selected: {selectedMeeting.title}</span>
               </div>
             ) : (
               <p className="mt-3 text-xs text-white/30">Create a meeting from the Meetings tab first.</p>
@@ -2312,7 +2312,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
   return (
     <div className="mt-7 grid gap-5 xl:grid-cols-[1fr_.42fr] animate-in fade-in duration-200">
       <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.02] via-transparent to-emerald-500/[0.02]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.02] via-transparent to-blue-500/[0.02]" />
         
         <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] pb-5 mb-6">
           <div>
@@ -2338,9 +2338,9 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
               <p className="text-[9px] uppercase tracking-[.18em] text-white/35">Total Registered</p>
               <p className="mt-2 text-2xl font-bold tracking-tight text-white">{participants.length}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
-              <p className="text-[9px] uppercase tracking-[.18em] text-emerald-300/60">Present</p>
-              <p className="mt-2 text-2xl font-bold tracking-tight text-emerald-300">{presentCount}</p>
+            <div className="rounded-2xl border border-blue-500/15 bg-blue-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
+              <p className="text-[9px] uppercase tracking-[.18em] text-blue-300/60">Present</p>
+              <p className="mt-2 text-2xl font-bold tracking-tight text-blue-300">{presentCount}</p>
             </div>
             <div className="rounded-2xl border border-rose-500/15 bg-rose-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
               <p className="text-[9px] uppercase tracking-[.18em] text-rose-300/60">Absent</p>
@@ -2380,7 +2380,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
                     <span className="rounded-2xl border border-white/[.06] bg-white/[.02] px-3 py-2 capitalize text-white/48 md:border-0 md:bg-transparent md:px-0 md:py-0">{row.mode}</span>
                     
                     <div className="flex flex-wrap items-center gap-3 md:justify-end md:pr-4">
-                      <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider border ${isPresent ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300" : "bg-white/[0.04] border-white/[0.06] text-white/40"}`}>
+                      <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider border ${isPresent ? "bg-blue-500/10 border-blue-500/20 text-blue-300" : "bg-white/[0.04] border-white/[0.06] text-white/40"}`}>
                         {isPresent ? "Present" : "Absent"}
                       </span>
                       
@@ -2389,7 +2389,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
                           {busy ? "Saving..." : "Mark absent"}
                         </button>
                       ) : (
-                        <button type="button" disabled={busy} onClick={(event) => { event.preventDefault(); event.stopPropagation(); void mark(row, "present"); }} className="min-h-11 md:min-h-0 flex items-center justify-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/20 active:scale-95 transition disabled:cursor-wait disabled:opacity-60">
+                        <button type="button" disabled={busy} onClick={(event) => { event.preventDefault(); event.stopPropagation(); void mark(row, "present"); }} className="min-h-11 md:min-h-0 flex items-center justify-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-3.5 py-1.5 text-[10px] font-bold text-blue-300 hover:bg-blue-500/20 active:scale-95 transition disabled:cursor-wait disabled:opacity-60">
                           {busy ? "Saving..." : "Mark present"}
                         </button>
                       )}
@@ -2435,7 +2435,7 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
             <p className="mt-5 text-[10px] text-white/32 uppercase tracking-wider font-semibold border-t border-white/[0.06] pt-4">Roster Summary</p>
             <div className="mt-3 rounded-2xl bg-black/35 border border-white/[0.05] p-4 text-xs space-y-2 text-white/50">
               <div className="flex justify-between"><span>Registrations count:</span><span className="font-semibold text-white">{participants.length}</span></div>
-              <div className="flex justify-between"><span>Marked present:</span><span className="font-semibold text-emerald-300">{presentCount}</span></div>
+              <div className="flex justify-between"><span>Marked present:</span><span className="font-semibold text-blue-300">{presentCount}</span></div>
             </div>
           </div>
         </div>
@@ -2791,9 +2791,9 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
                 <p className="text-[9px] uppercase tracking-[.18em] text-white/35">Total Candidates</p>
                 <p className="mt-2 text-2xl font-bold tracking-tight text-white">{totalCount}</p>
               </div>
-              <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
-                <p className="text-[9px] uppercase tracking-[.18em] text-emerald-300/60">Generated</p>
-                <p className="mt-2 text-2xl font-bold tracking-tight text-emerald-300">{generatedCount} / {totalCount}</p>
+              <div className="rounded-2xl border border-blue-500/15 bg-blue-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
+                <p className="text-[9px] uppercase tracking-[.18em] text-blue-300/60">Generated</p>
+                <p className="mt-2 text-2xl font-bold tracking-tight text-blue-300">{generatedCount} / {totalCount}</p>
               </div>
               <div className="rounded-2xl border border-violet-500/15 bg-violet-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
                 <p className="text-[9px] uppercase tracking-[.18em] text-violet-300/60">Winners</p>
@@ -2907,7 +2907,7 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
                         <div>
                           <input type="text" value={row.recipientName} onChange={e => updateCandidateField(idx, "recipientName", e.target.value)} className="w-full bg-transparent border-0 p-0 text-white/90 font-bold focus:ring-0 tracking-tight outline-none" />
                           {row.teamName ? <span className="text-[9px] text-violet-400 block mt-0.5">Team: {row.teamName}</span> : null}
-                          {row.isPresent ? <span className="inline-block mt-0.5 rounded px-1.5 py-0.5 text-[8px] bg-emerald-500/10 text-emerald-300 font-medium border border-emerald-500/10">Present</span> : null}
+                          {row.isPresent ? <span className="inline-block mt-0.5 rounded px-1.5 py-0.5 text-[8px] bg-blue-500/10 text-blue-300 font-medium border border-blue-500/10">Present</span> : null}
                         </div>
                         
                         {/* UID & Email */}
@@ -3279,7 +3279,7 @@ function Settings({ info, open }: { info: any; open: (drawer: any) => void }) {
 
         {/* Section 2: Faculty Champions */}
         <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-200 border-b border-white/[0.06] pb-4 mb-5">Faculty Champions</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-blue-200 border-b border-white/[0.06] pb-4 mb-5">Faculty Champions</h3>
           <div className="grid gap-4 md:grid-cols-2">
             <ProfileCard
               name={info.facultyChampionName}
@@ -3362,7 +3362,7 @@ function Settings({ info, open }: { info: any; open: (drawer: any) => void }) {
                 <span className="font-semibold text-white mt-1.5 block">Activity Report Layout</span>
               </div>
               {info.postActivityReportTemplate ? (
-                <a href={info.postActivityReportTemplate} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/20 transition">
+                <a href={info.postActivityReportTemplate} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-[10px] font-bold text-blue-300 hover:bg-blue-500/20 transition">
                   <FileText size={12} /> View Template PDF
                 </a>
               ) : (
@@ -3376,7 +3376,7 @@ function Settings({ info, open }: { info: any; open: (drawer: any) => void }) {
                 <span className="font-semibold text-white mt-1.5 block">Minutes of Meeting Layout</span>
               </div>
               {info.momTemplate ? (
-                <a href={info.momTemplate} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/20 transition">
+                <a href={info.momTemplate} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-[10px] font-bold text-blue-300 hover:bg-blue-500/20 transition">
                   <FileText size={12} /> View Template PDF
                 </a>
               ) : (
@@ -3958,7 +3958,7 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
           }}
           className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.035] hover:bg-white/[0.08] active:scale-95 px-4 py-2 text-xs font-semibold text-white/50 hover:text-white transition"
         >
-          {soundsEnabled ? <Volume2 size={14} className="text-emerald-400" /> : <VolumeX size={14} className="text-white/40" />}
+          {soundsEnabled ? <Volume2 size={14} className="text-blue-400" /> : <VolumeX size={14} className="text-white/40" />}
           <span>Audio: {soundsEnabled ? "Tactile ON" : "Tactile OFF"}</span>
         </button>
       </div>
@@ -3970,7 +3970,7 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
               ["Total Registered", counts.total, "border-violet-500/20 text-violet-200 bg-violet-500/[0.02]"],
               ["Today's Sign-ups", counts.today, "border-fuchsia-500/20 text-fuchsia-200 bg-fuchsia-500/[0.02]"],
               ["Pending Approval", counts.pending, "border-white/10 text-white/60 bg-white/[0.01]"],
-              ["Approved Members", counts.approved, "border-emerald-500/20 text-emerald-200 bg-emerald-500/[0.02]"],
+              ["Approved Members", counts.approved, "border-blue-500/20 text-blue-200 bg-blue-500/[0.02]"],
               ["Rejected Entries", counts.rejected, "border-rose-500/20 text-rose-200 bg-rose-500/[0.02]"]
             ].map(([label, value, styles]: any) => (
               <div className={`portal-card rounded-2xl p-4 border ${styles}`} key={label}>
@@ -4149,7 +4149,7 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                 type="button"
                 onClick={() => bulkActionOptimistic("approve")}
                 disabled={bulkBusy}
-                className="text-xs font-semibold text-emerald-400 hover:underline disabled:opacity-50"
+                className="text-xs font-semibold text-blue-400 hover:underline disabled:opacity-50"
               >
                 Approve Selected
               </button>
@@ -4209,7 +4209,7 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                       <td className="p-4">
                         <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition-all duration-300 ${
                           m.status === "approved"
-                            ? "bg-emerald-400/10 text-emerald-400"
+                            ? "bg-blue-400/10 text-blue-400"
                             : m.status === "rejected"
                             ? "bg-rose-400/10 text-rose-400"
                             : "bg-white/10 text-white/60"
@@ -4233,7 +4233,7 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
                             <button
                               type="button"
                               onClick={() => updateMemberStatus(m, "approved")}
-                              className="text-[10px] font-bold text-emerald-400 hover:text-emerald-200 uppercase transition"
+                              className="text-[10px] font-bold text-blue-400 hover:text-blue-200 uppercase transition"
                             >
                               Approve
                             </button>
@@ -4387,13 +4387,13 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
       {/* Terminal style Export animation overlay */}
       {exportState && exportState.show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0d071a] p-6 font-mono text-xs text-emerald-400 shadow-[0_0_50px_rgba(139,92,246,0.15),inset_0_0_15px_rgba(0,0,0,0.8)] relative overflow-hidden">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0d071a] p-6 font-mono text-xs text-blue-400 shadow-[0_0_50px_rgba(139,92,246,0.15),inset_0_0_15px_rgba(0,0,0,0.8)] relative overflow-hidden">
             {/* Holographic matrix background drop */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.015)_50%,_rgba(0,0,0,0)_50%)] bg-[length:100%_4px] pointer-events-none" />
             
             <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4 text-white/40 text-[10px]">
               <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                <span className="h-2 w-2 rounded-full bg-blue-500 animate-ping" />
                 <span>SHELL ENGINE v1.0.4</span>
               </span>
               <button 
@@ -4406,20 +4406,20 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
             
             <div className="space-y-3 select-none">
               {exportState.lines.map((line, idx) => (
-                <p key={idx} className={line.startsWith("$") ? "text-white/80" : "text-emerald-400 font-bold"}>
+                <p key={idx} className={line.startsWith("$") ? "text-white/80" : "text-blue-400 font-bold"}>
                   {line}
                 </p>
               ))}
               
               {exportState.progress < 100 ? (
                 <div className="space-y-1.5">
-                  <div className="flex justify-between text-[10px] text-emerald-400/50">
+                  <div className="flex justify-between text-[10px] text-blue-400/50">
                     <span>compiling roster dataset...</span>
                     <span>{exportState.progress}%</span>
                   </div>
                   <div className="h-2 w-full bg-black/40 border border-white/5 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-100"
+                      className="h-full bg-gradient-to-r from-blue-500 to-teal-400 rounded-full transition-all duration-100"
                       style={{ width: `${exportState.progress}%` }}
                     />
                   </div>
@@ -4431,17 +4431,17 @@ function MembershipDriveDesk({data,open,patch,remove,refresh,setPanel}:{data:Dat
               ) : (
                 <div className="animate-in fade-in duration-300">
                   <div className="h-2 w-full bg-black/40 border border-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full w-full" />
+                    <div className="h-full bg-blue-500 rounded-full w-full" />
                   </div>
-                  <p className="text-emerald-500 text-[9px] mt-1.5">[████████████████████]</p>
+                  <p className="text-blue-500 text-[9px] mt-1.5">[████████████████████]</p>
                   
-                  <div className="mt-4 border-t border-emerald-500/10 pt-3 flex flex-col gap-2">
-                    <p className="text-emerald-300 text-[11px] font-bold">
+                  <div className="mt-4 border-t border-blue-500/10 pt-3 flex flex-col gap-2">
+                    <p className="text-blue-300 text-[11px] font-bold">
                       ✓ Download compiled successfully.
                     </p>
                     <button 
                       onClick={() => setExportState(null)}
-                      className="mt-2 w-full rounded-xl border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 text-center text-xs font-semibold text-emerald-300 transition active:scale-[0.98]"
+                      className="mt-2 w-full rounded-xl border border-blue-500/20 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-2 text-center text-xs font-semibold text-blue-300 transition active:scale-[0.98]"
                     >
                       Dismiss Console
                     </button>

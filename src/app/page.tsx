@@ -71,7 +71,7 @@ export default async function Home() {
         {/* Primary CTA */}
         <div className="mt-8 flex w-full max-w-[280px] flex-col gap-3">
           {driveStatus && driveStatus.registrationEnabled ? (
-            <Link href="/join" className="brutalist-btn-green group h-[52px] rounded-xl text-[15px] font-bold">
+            <Link href="/join" className="brutalist-btn-purple group h-[52px] rounded-xl text-[15px] font-bold">
               Join the club <ArrowRight size={16} className="transition group-active:translate-x-1"/>
             </Link>
           ) : (
@@ -141,7 +141,7 @@ export default async function Home() {
           <div className="grid gap-4 grid-cols-2">
             {/* Bento Box 1: Next Event Details (Col Span 2) */}
             <div className="col-span-2 glass-brutalist rounded-[2rem] p-6 flex flex-col justify-between relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(0,255,102,0.02),transparent_40%)] pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.02),transparent_40%)] pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between">
                   <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] border border-white/10 text-white"><Ticket size={16}/></span>
@@ -217,6 +217,19 @@ export default async function Home() {
 
 
     </section>
+
+    {/* Dedicated Instagram posts feed */}
+    <InstagramFeed
+      handle={clubInfo?.instagramHandle}
+      profileUrl={clubInfo?.instagramUrl}
+      post1_image={clubInfo?.instagramPost1_image}
+      post1_url={clubInfo?.instagramPost1_url}
+      post2_image={clubInfo?.instagramPost2_image}
+      post2_url={clubInfo?.instagramPost2_url}
+      post3_image={clubInfo?.instagramPost3_image}
+      post3_url={clubInfo?.instagramPost3_url}
+    />
+
     {/* Mobile interactive sections — swipeable carousels, touch cards */}
     <MobileInteractiveSections
       teams={teams.slice(0, 6).map(t => ({ id: t.id, name: t.name, description: t.description || "", members: t.members }))}
@@ -300,18 +313,6 @@ export default async function Home() {
 
     {achievements.length ? <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-20"><div className="grid gap-4 md:grid-cols-3">{achievements.slice(0,3).map((item:any)=><div className="glass-brutalist rounded-[22px] p-6" key={item._id}><p className="text-[10px] tracking-[.2em] text-orange-400 font-bold">{item.kind || "ACHIEVEMENT"}</p><p className="mt-4 text-lg font-bold text-white">{item.title}</p><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p></div>)}</div></section> : null}
     
-    {/* Dedicated Instagram posts feed */}
-    <InstagramFeed
-      handle={clubInfo?.instagramHandle}
-      profileUrl={clubInfo?.instagramUrl}
-      post1_image={clubInfo?.instagramPost1_image}
-      post1_url={clubInfo?.instagramPost1_url}
-      post2_image={clubInfo?.instagramPost2_image}
-      post2_url={clubInfo?.instagramPost2_url}
-      post3_image={clubInfo?.instagramPost3_image}
-      post3_url={clubInfo?.instagramPost3_url}
-    />
- 
     {/* Real Human Presence: Community Showcase Grid */}
     <CommunityShowcase galleryData={gallery} />
  

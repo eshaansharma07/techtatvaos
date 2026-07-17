@@ -6,20 +6,20 @@ import type { PublicTeam } from "@/lib/public-data";
 
 type ClubInfo = Record<string, any>;
 
-function PersonCard({ label, name, sub, photo, tone = "violet" }: { label: string; name?: string; sub?: string; photo?: string; tone?: "violet" | "emerald" | "fuchsia" | "amber" | "rose" }) {
+function PersonCard({ label, name, sub, photo, tone = "violet" }: { label: string; name?: string; sub?: string; photo?: string; tone?: "violet" | "purple" | "fuchsia" | "amber" | "rose" }) {
   const tones = {
-    violet: "border-[#00FF66] bg-black/40 text-white",
-    emerald: "border-[#00FF66]/60 bg-black/40 text-white",
-    fuchsia: "border-[#00FF66]/55 bg-black/40 text-white",
-    amber: "border-[#00FF66]/40 bg-black/40 text-white",
-    rose: "border-[#00FF66]/20 bg-black/40 text-white"
+    violet: "border-purple-500 bg-black/40 text-white",
+    purple: "border-purple-500/60 bg-black/40 text-white",
+    fuchsia: "border-purple-500/55 bg-black/40 text-white",
+    amber: "border-purple-500/40 bg-black/40 text-white",
+    rose: "border-purple-500/20 bg-black/40 text-white"
   };
   return (
     <div className={`relative overflow-hidden rounded-3xl border-2 p-4 text-center ${tones[tone]}`}>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,102,.03),transparent_48%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,.03),transparent_48%)]" />
       <div className="relative">
-        {photo ? <img src={photo} alt="" className="mx-auto mb-3 h-14 w-14 rounded-xl border border-white/15 object-cover" /> : <Crown className="mx-auto mb-3 text-emerald-400" size={19} />}
-        <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#00FF66]">{label}</p>
+        {photo ? <img src={photo} alt="" className="mx-auto mb-3 h-14 w-14 rounded-xl border border-white/15 object-cover" /> : <Crown className="mx-auto mb-3 text-purple-400" size={19} />}
+        <p className="text-[10px] font-bold uppercase tracking-[.18em] text-purple-400">{label}</p>
         <p className="mt-2 text-lg font-bold tracking-[-.03em] text-white">{name || "Add details in portal"}</p>
         {sub ? <p className="mt-1 text-xs leading-5 text-white/48">{sub}</p> : null}
       </div>
@@ -34,9 +34,9 @@ function TeamPanel({ team }: { team: PublicTeam }) {
       <button type="button" onClick={() => setOpen(!open)} className="flex min-h-20 w-full items-center justify-between gap-4 px-5 text-left active:bg-white/[.04]">
         <div>
           <p className="text-base font-bold text-white">{team.name}</p>
-          <p className="mt-1 text-[11px] uppercase tracking-[.18em] text-emerald-400 font-bold">{team.members} active members</p>
+          <p className="mt-1 text-[11px] uppercase tracking-[.18em] text-purple-400 font-bold">{team.members} active members</p>
         </div>
-        <ChevronDown size={18} className={`shrink-0 text-emerald-400 transition ${open ? "rotate-180" : ""}`} />
+        <ChevronDown size={18} className={`shrink-0 text-purple-400 transition ${open ? "rotate-180" : ""}`} />
       </button>
       {open ? (
         <div className="border-t border-white/[.07] px-5 py-5">
@@ -57,7 +57,7 @@ function TeamPanel({ team }: { team: PublicTeam }) {
               <div className="mt-3 grid max-h-56 gap-2 overflow-y-auto pr-1">
                 {team.memberNames.length ? team.memberNames.map((member) => (
                   <p key={member} className="flex items-center gap-2 rounded-xl glass-brutalist px-3 py-2.5 text-sm text-white/68">
-                    <ShieldCheck size={13} className="text-[#00FF66]" />
+                    <ShieldCheck size={13} className="text-purple-400" />
                     {member}
                   </p>
                 )) : <p className="text-sm text-white/42">Members will appear after they are assigned.</p>}
@@ -72,12 +72,12 @@ function TeamPanel({ team }: { team: PublicTeam }) {
 
 export function MobileTeamAccordion({ technical, creative, info }: { technical: PublicTeam[]; creative: PublicTeam[]; info: ClubInfo }) {
   const groups = [
-    ["Joint Secretary", info.jointSecretaryOneName || "Assign Joint Secretary", technical, "emerald", "technical"],
+    ["Joint Secretary", info.jointSecretaryOneName || "Assign Joint Secretary", technical, "purple", "technical"],
     ["Joint Secretary", info.jointSecretaryTwoName || "Assign Joint Secretary", creative, "fuchsia", "creative"]
   ] as const;
   const advisors = [
-    { label: "Faculty Champion", name: info.facultyChampionName, sub: info.facultyChampionEmail, photo: info.facultyChampionPhoto, tone: "emerald" as const },
-    { label: "Co-Faculty Champion", name: info.coFacultyChampionName, sub: info.coFacultyChampionEmail || info.coFacultyChampionPhone, photo: info.coFacultyChampionPhoto, tone: "emerald" as const },
+    { label: "Faculty Champion", name: info.facultyChampionName, sub: info.facultyChampionEmail, photo: info.facultyChampionPhoto, tone: "purple" as const },
+    { label: "Co-Faculty Champion", name: info.coFacultyChampionName, sub: info.coFacultyChampionEmail || info.coFacultyChampionPhone, photo: info.coFacultyChampionPhoto, tone: "purple" as const },
     { label: "Student Advisor 1", name: info.studentAdvisorOneName, sub: info.studentAdvisorOneEmail, photo: info.studentAdvisorOnePhoto, tone: "amber" as const },
     { label: "Student Advisor 2", name: info.studentAdvisorTwoName, sub: info.studentAdvisorTwoEmail, photo: info.studentAdvisorTwoPhoto, tone: "rose" as const }
   ].filter((person) => person.name || person.sub || person.photo || person.label === "Faculty Champion");
@@ -85,17 +85,17 @@ export function MobileTeamAccordion({ technical, creative, info }: { technical: 
   return (
     <div className="md:hidden">
       <div className="rounded-[2rem] glass-brutalist p-4 shadow-2xl">
-        <p className="flex items-center gap-2 px-2 text-[10px] font-bold uppercase tracking-[.24em] text-emerald-400"><Sparkles size={13} /> Club hierarchy</p>
+        <p className="flex items-center gap-2 px-2 text-[10px] font-bold uppercase tracking-[.24em] text-purple-400"><Sparkles size={13} /> Club hierarchy</p>
         <div className="mt-4 grid gap-4">
           <section className="rounded-[1.6rem] glass-brutalist p-3">
-            <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-[.22em] text-[#00FF66]">Advisory Tree</p>
+            <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-[.22em] text-purple-400">Advisory Tree</p>
             <div className="grid gap-3">
               {advisors.map((person) => <PersonCard key={person.label} {...person} />)}
             </div>
           </section>
 
           <section className="rounded-[1.6rem] glass-brutalist p-3">
-            <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-[.22em] text-[#00FF66]">Club Operations Tree</p>
+            <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-[.22em] text-purple-400">Club Operations Tree</p>
             <PersonCard label="1. Secretary" name={info.secretaryName} sub={info.secretaryEmail} photo={info.secretaryPhoto} tone="violet" />
           </section>
 

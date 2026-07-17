@@ -54,7 +54,7 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
         const latency = Date.now() - startTime;
         if (res.ok) {
           setLatencyText(`PING: ${latency}ms (STABLE)`);
-          setLatencyColor("text-emerald-300 border-emerald-500/20 bg-emerald-500/5");
+          setLatencyColor("text-purple-300 border-purple-500/20 bg-purple-500/5");
         } else {
           setLatencyText(`PING: ${latency}ms (WARN)`);
           setLatencyColor("text-amber-300 border-amber-500/20 bg-amber-500/5");
@@ -293,8 +293,8 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
       {/* Console Subheader Bar */}
       <div className="flex items-center justify-between pb-3 border-b border-white/[0.05] select-none">
         <div className="flex items-center gap-2">
-          <Terminal size={12} className="text-emerald-400" />
-          <span className="text-[10px] font-bold tracking-[0.2em] text-[#00FF66] uppercase">OS COMMAND CENTER</span>
+          <Terminal size={12} className="text-purple-400" />
+          <span className="text-[10px] font-bold tracking-[0.2em] text-purple-400 uppercase">OS COMMAND CENTER</span>
         </div>
         <div className={`flex items-center gap-1.5 px-2.5 py-0.5 text-[8px] font-mono transition-colors duration-500 ${latencyColor}`}>
           <Wifi size={8} />
@@ -303,8 +303,8 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
       </div>
  
       {/* Console Input Bar */}
-      <div className="mt-4 flex items-center gap-3 rounded-2xl border-2 border-black bg-black/75 px-4 py-3 focus-within:border-[#00FF66]/50 transition-all duration-300">
-        <span className="text-[#00FF66] text-xs font-semibold select-none">❯</span>
+      <div className="mt-4 flex items-center gap-3 rounded-2xl border-2 border-black bg-black/75 px-4 py-3 focus-within:border-purple-500/50 transition-all duration-300">
+        <span className="text-purple-400 text-xs font-semibold select-none">❯</span>
         <input
           ref={inputRef}
           type="text"
@@ -317,7 +317,7 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
         />
         <button 
           onClick={() => executeCommand(input)}
-          className="text-white/30 hover:text-[#00FF66] transition-colors"
+          className="text-white/30 hover:text-purple-400 transition-colors"
         >
           <Wifi size={13} className="rotate-95" />
         </button>
@@ -332,8 +332,8 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
           <div key={idx} className="space-y-1">
             <div 
               className={`
-                ${line.type === "success" ? "text-[#00FF66]" : ""}
-                ${line.type === "info" ? "text-emerald-400" : ""}
+                ${line.type === "success" ? "text-purple-400" : ""}
+                ${line.type === "info" ? "text-purple-400" : ""}
                 ${line.type === "error" ? "text-rose-400" : ""}
                 ${line.type === "input" ? "text-white" : ""}
                 ${line.type === "system" ? "text-white/45" : ""}
@@ -378,9 +378,9 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
         </button>
         <button
           onClick={() => clickShortcut("join")}
-          className="flex items-center gap-1.5 rounded-xl glass-brutalist px-3.5 py-1.5 text-[9px] font-bold text-white/80 hover:border-[#00FF66] transition"
+          className="flex items-center gap-1.5 rounded-xl glass-brutalist px-3.5 py-1.5 text-[9px] font-bold text-white/80 hover:border-purple-500 transition"
         >
-          <Sparkles size={10} className="text-[#00FF66]" />
+          <Sparkles size={10} className="text-purple-400" />
           <span>JOIN CLUB</span>
         </button>
       </div>

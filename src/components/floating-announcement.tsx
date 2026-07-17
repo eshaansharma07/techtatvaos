@@ -114,7 +114,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
             {/* Pulsing dot + icon */}
             <div className="flex shrink-0 items-center gap-2">
               <span className={`h-2 w-2 rounded-full ${cfg.dot} animate-pulse`} />
-              <Icon size={15} className="text-[#00FF66]" />
+              <Icon size={15} className="text-purple-400" />
             </div>
 
             {/* Text content */}
@@ -129,7 +129,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
               <div onClick={(e) => e.stopPropagation()}>
                 <Link
                   href={data.announcementLink}
-                  className="brutalist-btn-green flex shrink-0 items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] sm:text-[11px] font-bold text-black border border-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)]"
+                  className="brutalist-btn-purple flex shrink-0 items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] sm:text-[11px] font-bold text-black border border-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)]"
                 >
                   {data.announcementLinkText || "View"}
                   <ArrowRight size={11} className="transition group-hover:translate-x-0.5" />

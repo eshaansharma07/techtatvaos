@@ -12,14 +12,14 @@ export default async function EventsPage() {
   return (
     <PublicShell>
       <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44 spatial-grid-bg">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(0,255,102,0.05),transparent_45%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(168,85,247,0.05),transparent_45%)] pointer-events-none" />
         <div className="glass-brutalist rounded-[2rem] p-6 md:rounded-[2.6rem] md:p-14 relative z-10">
           <div className="grid gap-10 lg:grid-cols-[1fr_.7fr] lg:items-end">
             <div>
-              <p className="text-[10px] font-bold tracking-[.34em] text-emerald-400 uppercase">CLUB CALENDAR</p>
+              <p className="text-[10px] font-bold tracking-[.34em] text-purple-400 uppercase">CLUB CALENDAR</p>
               <h1 className="mt-5 text-3xl xs:text-5xl font-extrabold leading-[.86] tracking-[-.08em] text-white md:text-8xl">
                 Events worth <br className="hidden md:inline" />
-                <span className="text-[#00FF66]">showing up for.</span>
+                <span className="text-purple-400">showing up for.</span>
               </h1>
               <p className="mt-6 max-w-2xl text-[15px] leading-8 text-white/58 md:text-base">
                 Public events, workshops, and registrations are listed here. Every visible card is powered by real admin-published data.
@@ -28,7 +28,7 @@ export default async function EventsPage() {
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
               {chips.map((x, index) => (
                 <span key={x} className="brutalist-btn-dark inline-flex min-h-12 items-center gap-2 rounded-xl px-4 py-3 text-[10px] font-bold tracking-[.14em] text-white/80">
-                  {index === 0 ? <Sparkles size={13} className="text-[#00FF66]" /> : <CalendarDays size={13} className="text-emerald-400" />} {x.toUpperCase()}
+                  {index === 0 ? <Sparkles size={13} className="text-purple-400" /> : <CalendarDays size={13} className="text-purple-400" />} {x.toUpperCase()}
                 </span>
               ))}
             </div>

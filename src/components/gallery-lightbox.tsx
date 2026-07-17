@@ -33,9 +33,9 @@ function GalleryImage({ src, alt, className = "", width = 800 }: { src: string; 
         <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
           {/* Pulsing visual core */}
           <div className="relative flex items-center justify-center">
-            <div className="absolute h-12 w-12 rounded-full border-2 border-emerald-500/20 animate-ping" />
-            <div className="relative h-8 w-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-              <ImageIcon size={14} className="text-emerald-400 animate-pulse" />
+            <div className="absolute h-12 w-12 rounded-full border-2 border-purple-500/20 animate-ping" />
+            <div className="relative h-8 w-8 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+              <ImageIcon size={14} className="text-purple-400 animate-pulse" />
             </div>
           </div>
           <span className="mt-4 text-[9px] font-bold tracking-[0.2em] text-white/30 uppercase animate-pulse">
@@ -139,7 +139,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
       {/* Switch Layout & Global Controls */}
       <div className="flex items-center justify-between border-b border-white/10 pb-6 mb-8">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-[#00FF66] animate-pulse" />
+          <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
           <span className="text-[10px] font-bold tracking-[0.25em] text-white/40 uppercase font-mono">
             {assets.length} ARCHIVED MOMENTS
           </span>
@@ -151,7 +151,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
             onClick={() => setViewMode("cinema")}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition ${
               viewMode === "cinema"
-                ? "bg-[#00FF66] border border-black text-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.4)]"
+                ? "bg-purple-500 border border-black text-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.4)]"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -161,7 +161,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
             onClick={() => setViewMode("grid")}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition ${
               viewMode === "grid"
-                ? "bg-[#00FF66] border border-black text-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.4)]"
+                ? "bg-purple-500 border border-black text-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.4)]"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -216,13 +216,13 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
               {/* Left/Right floating slides button controls */}
               <button
                 onClick={prevAsset}
-                className="absolute left-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full bg-black/60 border border-white/10 hover:border-[#00FF66]/30 text-white hover:text-[#00FF66] flex items-center justify-center transition active:scale-95 shadow-lg backdrop-blur"
+                className="absolute left-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full bg-black/60 border border-white/10 hover:border-purple-500/30 text-white hover:text-purple-400 flex items-center justify-center transition active:scale-95 shadow-lg backdrop-blur"
               >
                 <ChevronLeft size={18} />
               </button>
               <button
                 onClick={nextAsset}
-                className="absolute right-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full bg-black/60 border border-white/10 hover:border-[#00FF66]/30 text-white hover:text-[#00FF66] flex items-center justify-center transition active:scale-95 shadow-lg backdrop-blur"
+                className="absolute right-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full bg-black/60 border border-white/10 hover:border-purple-500/30 text-white hover:text-purple-400 flex items-center justify-center transition active:scale-95 shadow-lg backdrop-blur"
               >
                 <ChevronRight size={18} />
               </button>
@@ -235,19 +235,19 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
 
             {/* Right Col: Details Panel & Dynamic Content */}
             <div className="glass-brutalist rounded-[2rem] p-6 md:p-8 flex flex-col justify-between min-h-[360px] relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(0,255,102,0.02),transparent_40%)] pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.02),transparent_40%)] pointer-events-none" />
               
               <div>
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-[9px] font-bold tracking-widest text-white/50 uppercase">
-                    <Sparkles size={8} className="text-[#00FF66]" /> EXHIBITION LOG
+                    <Sparkles size={8} className="text-purple-400" /> EXHIBITION LOG
                   </span>
                   <span className="text-[9px] font-mono tracking-widest text-white/30 uppercase">
                     {activeAsset.kind === "video" ? "MPEG-4 ARCHIVE" : "JPEG FORMAT"}
                   </span>
                 </div>
 
-                <p className="mt-8 text-[9px] font-bold tracking-[.3em] text-[#00FF66] uppercase">ACTIVE CAPTION</p>
+                <p className="mt-8 text-[9px] font-bold tracking-[.3em] text-purple-400 uppercase">ACTIVE CAPTION</p>
                 <h3 className="mt-3 text-lg leading-7 text-white/80 select-all font-sans font-medium">
                   {activeAsset.caption || "Tech Tatva club activity captured live."}
                 </h3>
@@ -268,7 +268,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
                       onClick={() => setActiveIndex(i)}
                       className={`relative h-14 w-20 rounded-xl border overflow-hidden shrink-0 transition-all snap-center ${
                         i === activeIndex 
-                          ? "border-[#00FF66] scale-102 ring-1 ring-[#00FF66]/20 shadow-[0_0_15px_rgba(0,255,102,0.15)]" 
+                          ? "border-purple-500 scale-102 ring-1 ring-[rgba(168, 85, 247, 1)]/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]" 
                           : "border-white/10 hover:border-white/30 opacity-40 hover:opacity-80"
                       }`}
                     >
@@ -301,13 +301,13 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
               <figure
                 key={index}
                 onClick={() => setLightboxIndex(index)}
-                className="glass-brutalist group relative overflow-hidden rounded-[2rem] border border-white/10 hover:border-[#00FF66]/30 hover:-translate-y-1.5 cursor-pointer shadow-lg transition-all duration-500 flex flex-col"
+                className="glass-brutalist group relative overflow-hidden rounded-[2rem] border border-white/10 hover:border-purple-500/30 hover:-translate-y-1.5 cursor-pointer shadow-lg transition-all duration-500 flex flex-col"
               >
                 {/* Media frame */}
                 <div className="relative aspect-[1.5/1] w-full overflow-hidden bg-black select-none border-b border-white/5">
                   {asset.kind === "video" ? (
                     <div className="h-full w-full flex items-center justify-center bg-black/80">
-                      <Video size={36} className="text-[#00FF66] opacity-80 group-hover:scale-110 transition duration-500" />
+                      <Video size={36} className="text-purple-400 opacity-80 group-hover:scale-110 transition duration-500" />
                       <span className="absolute bottom-4 left-4 rounded-lg bg-black/60 border border-white/10 px-2 py-0.5 text-[8px] font-mono text-white/80">
                         VIDEO
                       </span>
@@ -325,7 +325,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
                 {/* Caption slot */}
                 <figcaption className="p-5 flex-grow flex flex-col justify-between bg-white/[0.01]">
                   <div>
-                    <span className="text-[8px] font-bold tracking-[0.18em] text-[#00FF66] uppercase block font-mono">
+                    <span className="text-[8px] font-bold tracking-[0.18em] text-purple-400 uppercase block font-mono">
                       {asset.kind === "video" ? "VIDEO ARCHIVE" : "IMAGE CAPTION"}
                     </span>
                     <p className="mt-2 text-xs leading-5 text-white/50 group-hover:text-white/80 line-clamp-2 transition duration-300 font-sans">
@@ -351,7 +351,7 @@ export function GalleryLightbox({ assets, albumTitle }: { assets: Asset[]; album
             {/* Lightbox Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 bg-black/40">
               <div>
-                <p className="text-[10px] font-bold text-[#00FF66] tracking-[0.25em] uppercase font-mono">{albumTitle}</p>
+                <p className="text-[10px] font-bold text-purple-400 tracking-[0.25em] uppercase font-mono">{albumTitle}</p>
                 <p className="text-xs text-white/40 mt-0.5 font-mono">
                   MOMENT {lightboxIndex + 1} OF {assets.length}
                 </p>

@@ -217,7 +217,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
           setStep(1);
           setStatus("");
         }}
-        className="brutalist-btn-green w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-xs tracking-wider font-extrabold uppercase mt-6"
+        className="brutalist-btn-purple w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-xs tracking-wider font-extrabold uppercase mt-6"
       >
         <span>Start Registration</span>
         <ArrowRight size={14} />
@@ -233,19 +233,19 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="w-full max-w-2xl max-h-[90vh] bg-graphite/90 border border-white/10 rounded-[2rem] p-5 md:p-9 shadow-[0_0_80px_rgba(0,255,102,0.06)] relative overflow-y-auto flex flex-col"
+              className="w-full max-w-2xl max-h-[90vh] bg-graphite/90 border border-white/10 rounded-[2rem] p-5 md:p-9 shadow-[0_0_80px_rgba(168,85,247,0.06)] relative overflow-y-auto flex flex-col"
             >
               {/* Top corners design brackets */}
-              <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-emerald-500/30 pointer-events-none" />
-              <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-emerald-500/30 pointer-events-none" />
-              <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-emerald-500/30 pointer-events-none" />
-              <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-emerald-500/30 pointer-events-none" />
+              <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-purple-500/30 pointer-events-none" />
+              <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-purple-500/30 pointer-events-none" />
+              <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-purple-500/30 pointer-events-none" />
+              <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-purple-500/30 pointer-events-none" />
 
               {/* Modal Header */}
               {step < 5 && (
                 <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
                   <div>
-                    <span className="text-[9px] font-mono tracking-[0.25em] text-emerald-400 uppercase font-black">REGISTRATION DESK</span>
+                    <span className="text-[9px] font-mono tracking-[0.25em] text-purple-400 uppercase font-black">REGISTRATION DESK</span>
                     <h2 className="text-md font-bold text-white mt-0.5">Secure Candidate Onboarding</h2>
                   </div>
                   <button 
@@ -268,15 +268,15 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                       <div key={s.num} className="flex items-center gap-2 shrink-0">
                         <div className={`h-6 w-6 rounded-lg text-[10px] font-mono font-bold flex items-center justify-center transition ${
                           isActive 
-                            ? "bg-[#00FF66] text-black border border-black shadow-[1px_1px_0px_rgba(255,255,255,0.4)]" 
+                            ? "bg-purple-500 text-black border border-black shadow-[1px_1px_0px_rgba(255,255,255,0.4)]" 
                             : isCompleted 
-                              ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400" 
+                              ? "bg-purple-500/10 border border-purple-500/30 text-purple-400" 
                               : "border border-white/10 text-white/30 bg-white/5"
                         }`}>
                           {isCompleted ? <Check size={11} /> : s.num}
                         </div>
                         <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                          isActive ? "text-[#00FF66]" : isCompleted ? "text-white/60" : "text-white/25"
+                          isActive ? "text-purple-400" : isCompleted ? "text-white/60" : "text-white/25"
                         }`}>{s.label}</span>
                         {i < totalSteps - 1 && <span className="text-white/10 select-none font-mono text-[9px]">&rarr;</span>}
                       </div>
@@ -302,11 +302,11 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           onClick={() => setMode("individual")}
                           className={`glass-brutalist flex flex-col items-center text-center p-6 rounded-2xl border transition-all duration-300 ${
                             mode === "individual" 
-                              ? "border-[#00FF66] bg-[#00FF66]/5 shadow-[0_0_20px_rgba(0,255,102,0.06)]" 
+                              ? "border-purple-500 bg-purple-500/5 shadow-[0_0_20px_rgba(168,85,247,0.06)]" 
                               : "border-white/10 hover:border-white/25 hover:bg-white/5"
                           }`}
                         >
-                          <div className={`h-11 w-11 rounded-xl flex items-center justify-center mb-4 transition ${mode === "individual" ? "bg-[#00FF66] text-black" : "bg-white/5 text-white/60"}`}>
+                          <div className={`h-11 w-11 rounded-xl flex items-center justify-center mb-4 transition ${mode === "individual" ? "bg-purple-500 text-black" : "bg-white/5 text-white/60"}`}>
                             <User size={18} />
                           </div>
                           <span className="text-sm font-bold text-white uppercase tracking-wider">Individual</span>
@@ -318,11 +318,11 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           onClick={() => setMode("team")}
                           className={`glass-brutalist flex flex-col items-center text-center p-6 rounded-2xl border transition-all duration-300 ${
                             mode === "team" 
-                              ? "border-[#00FF66] bg-[#00FF66]/5 shadow-[0_0_20px_rgba(0,255,102,0.06)]" 
+                              ? "border-purple-500 bg-purple-500/5 shadow-[0_0_20px_rgba(168,85,247,0.06)]" 
                               : "border-white/10 hover:border-white/25 hover:bg-white/5"
                           }`}
                         >
-                          <div className={`h-11 w-11 rounded-xl flex items-center justify-center mb-4 transition ${mode === "team" ? "bg-[#00FF66] text-black" : "bg-white/5 text-white/60"}`}>
+                          <div className={`h-11 w-11 rounded-xl flex items-center justify-center mb-4 transition ${mode === "team" ? "bg-purple-500 text-black" : "bg-white/5 text-white/60"}`}>
                             <Users size={18} />
                           </div>
                           <span className="text-sm font-bold text-white uppercase tracking-wider">Team Squad</span>
@@ -330,7 +330,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-3 p-4 rounded-xl border border-[#00FF66]/20 bg-[#00FF66]/5 text-[#00FF66]">
+                      <div className="flex items-center gap-3 p-4 rounded-xl border border-purple-500/20 bg-purple-500/5 text-purple-400">
                         <Users size={16} />
                         <span className="text-xs font-semibold uppercase tracking-wider">LOCKED MODE: {participationMode.toUpperCase()} ONLY</span>
                       </div>
@@ -345,7 +345,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                             onChange={(e) => setTeamName(e.target.value)}
                             placeholder="e.g. ALPHA CRADLE"
                             required
-                            className="mt-2 w-full rounded-xl border border-white/10 bg-black/45 px-3.5 py-3.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#00FF66]/50 transition-all font-mono"
+                            className="mt-2 w-full rounded-xl border border-white/10 bg-black/45 px-3.5 py-3.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-purple-500/50 transition-all font-mono"
                           />
                         </label>
 
@@ -353,7 +353,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           <div className="pt-2">
                             <div className="flex items-center justify-between text-[10px] font-black tracking-widest text-white/40 uppercase">
                               <span>TEAM SQUAD SIZE</span>
-                              <span className="text-[#00FF66] font-mono">{teamSize} MEMBERS</span>
+                              <span className="text-purple-400 font-mono">{teamSize} MEMBERS</span>
                             </div>
                             <div className="mt-3 flex items-center gap-3">
                               <input 
@@ -365,7 +365,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                                   const size = Number(e.target.value);
                                   setTeamSize(size);
                                 }}
-                                className="flex-grow accent-[#00FF66] h-1.5 rounded-lg bg-black cursor-pointer"
+                                className="flex-grow accent-[rgba(168, 85, 247, 1)] h-1.5 rounded-lg bg-black cursor-pointer"
                               />
                             </div>
                             <span className="text-[9px] text-white/25 mt-1 block">Includes team leader + {teamSize - 1} secondary members. Limit: {maxTeamSize}.</span>
@@ -412,15 +412,15 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                                 className={`w-full rounded-xl border bg-black/45 pl-10 pr-9 py-3 text-xs text-white placeholder:text-white/20 outline-none transition-all ${
                                   val 
                                     ? isValid 
-                                      ? "border-[#00FF66]/30 focus:border-[#00FF66]" 
+                                      ? "border-purple-500/30 focus:border-purple-500" 
                                       : "border-red-500/30 focus:border-red-500" 
-                                    : "border-white/10 focus:border-emerald-500/50"
+                                    : "border-white/10 focus:border-purple-500/50"
                                 }`}
                               />
                               {val && (
                                 <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
                                   {isValid ? (
-                                    <Check size={13} className="text-[#00FF66]" />
+                                    <Check size={13} className="text-purple-400" />
                                   ) : (
                                     <AlertCircle size={13} className="text-rose-400 animate-pulse" />
                                   )}
@@ -444,7 +444,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
                     {/* Member Horizontal Tabs */}
                     <div className="flex items-center gap-2 border-b border-white/5 pb-2 overflow-x-auto scrollbar-none">
-                      <div className="inline-flex items-center gap-1 rounded-lg border border-[#00FF66]/10 bg-[#00FF66]/5 px-2.5 py-1 text-[9px] font-bold text-[#00FF66] select-none opacity-60">
+                      <div className="inline-flex items-center gap-1 rounded-lg border border-purple-500/10 bg-purple-500/5 px-2.5 py-1 text-[9px] font-bold text-purple-400 select-none opacity-60">
                         <Check size={10} /> LEADER
                       </div>
                       {Array.from({ length: activeMemberCount }).map((_, idx) => {
@@ -466,7 +466,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                             <span>MEMBER {idx + 2}</span>
                             {hasContent ? (
                               isValid ? (
-                                <span className="h-1.5 w-1.5 rounded-full bg-[#00FF66]" />
+                                <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
                               ) : (
                                 <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
                               )
@@ -483,7 +483,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                       <div className="flex items-center justify-between text-[10px] font-mono font-bold text-white/40">
                         <span>CONFIGURING MEMBER {activeTab + 2} SQUADSLOT</span>
                         {isMemberValid(activeTab) && (
-                          <span className="text-[#00FF66] flex items-center gap-1"><Check size={11} /> READY</span>
+                          <span className="text-purple-400 flex items-center gap-1"><Check size={11} /> READY</span>
                         )}
                       </div>
 
@@ -515,15 +515,15 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                                   className={`w-full rounded-xl border bg-black/45 pl-10 pr-9 py-3 text-xs text-white placeholder:text-white/20 outline-none transition-all ${
                                     val 
                                       ? isValid 
-                                        ? "border-[#00FF66]/30 focus:border-[#00FF66]" 
+                                        ? "border-purple-500/30 focus:border-purple-500" 
                                         : "border-red-500/30 focus:border-red-500" 
-                                      : "border-white/10 focus:border-emerald-500/50"
+                                      : "border-white/10 focus:border-purple-500/50"
                                   }`}
                                 />
                                 {val && (
                                   <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
                                     {isValid ? (
-                                      <Check size={13} className="text-[#00FF66]" />
+                                      <Check size={13} className="text-purple-400" />
                                     ) : (
                                       <AlertCircle size={13} className="text-rose-400 animate-pulse" />
                                     )}
@@ -549,13 +549,13 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     <div className="glass-brutalist rounded-2xl p-4 md:p-6 border border-white/5 bg-black/20 space-y-4 max-h-[290px] overflow-y-auto scrollbar-thin">
                       {mode === "team" && (
                         <div className="border-b border-white/5 pb-3">
-                          <p className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest font-black">TEAM ALIAS</p>
+                          <p className="text-[9px] font-mono text-purple-400 uppercase tracking-widest font-black">TEAM ALIAS</p>
                           <p className="text-sm font-bold text-white mt-1 font-mono">{teamName}</p>
                         </div>
                       )}
 
                       <div className="space-y-1.5">
-                        <p className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest font-black">
+                        <p className="text-[9px] font-mono text-purple-400 uppercase tracking-widest font-black">
                           {mode === "team" ? "TEAM LEADER" : "CANDIDATE"}
                         </p>
                         <div className="bg-black/35 rounded-xl p-3 text-xs space-y-1">
@@ -567,7 +567,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
                       {mode === "team" && (
                         <div className="space-y-3 pt-3 border-t border-white/5">
-                          <p className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest font-black">SQUAD MEMBERS</p>
+                          <p className="text-[9px] font-mono text-purple-400 uppercase tracking-widest font-black">SQUAD MEMBERS</p>
                           {members.slice(0, activeMemberCount).map((member, i) => (
                             <div key={i} className="bg-black/35 rounded-xl p-3 text-xs space-y-1">
                               <p className="text-white font-semibold">Member {i + 2}: {member.name || "N/A"}</p>
@@ -596,14 +596,14 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     className="flex flex-col items-center justify-center text-center py-6 space-y-6"
                   >
                     <div className="relative">
-                      <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl animate-pulse" />
-                      <div className="h-16 w-16 rounded-full bg-emerald-500/10 border-2 border-[#00FF66] flex items-center justify-center text-[#00FF66] relative z-10">
+                      <div className="absolute inset-0 rounded-full bg-purple-500/20 blur-xl animate-pulse" />
+                      <div className="h-16 w-16 rounded-full bg-purple-500/10 border-2 border-purple-500 flex items-center justify-center text-purple-400 relative z-10">
                         <Check size={32} className="animate-bounce" />
                       </div>
                     </div>
 
                     <div>
-                      <span className="inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-[9px] font-black tracking-widest text-[#00FF66] uppercase">
+                      <span className="inline-flex rounded-full border border-purple-500/20 bg-purple-500/5 px-3 py-1 text-[9px] font-black tracking-widest text-purple-400 uppercase">
                         {status === "waitlisted" ? "WAITLISTED REGISTRATION" : "CONFIRMED REGISTRATION"}
                       </span>
                       <h3 className="text-2xl font-black text-white mt-3">Welcome to the Arena.</h3>
@@ -617,10 +617,10 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
                     {/* Technical Mock Ticket Card */}
                     <div className="w-full max-w-[380px] rounded-2xl border border-white/10 bg-black/60 p-5 text-left relative overflow-hidden select-none">
-                      <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-br from-[#00FF66]/10 to-transparent pointer-events-none" />
+                      <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-br from-[rgba(168, 85, 247, 1)]/10 to-transparent pointer-events-none" />
                       <div className="flex items-center justify-between border-b border-white/5 pb-3">
                         <div>
-                          <p className="text-[7.5px] font-mono text-emerald-400 uppercase tracking-widest font-black">MEMBER ALIAS</p>
+                          <p className="text-[7.5px] font-mono text-purple-400 uppercase tracking-widest font-black">MEMBER ALIAS</p>
                           <p className="text-sm font-black text-white mt-1 uppercase truncate max-w-[170px]">{leader.name}</p>
                         </div>
                         <div className="text-right">
@@ -659,7 +659,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     <button 
                       type="button" 
                       onClick={() => setIsOpen(false)}
-                      className="brutalist-btn-green w-full max-w-[200px] flex items-center justify-center gap-1.5 rounded-xl py-3 text-xs tracking-wider font-extrabold uppercase"
+                      className="brutalist-btn-purple w-full max-w-[200px] flex items-center justify-center gap-1.5 rounded-xl py-3 text-xs tracking-wider font-extrabold uppercase"
                     >
                       <span>Close Desk</span>
                     </button>
@@ -697,7 +697,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         type="button"
                         disabled={loading || !isFormValid}
                         onClick={submitRegistration}
-                        className="brutalist-btn-green flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
+                        className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
                       >
                         {loading ? (
                           <span>Compiling...</span>
@@ -713,7 +713,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         type="button"
                         disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 ? !allMembersValid : false}
                         onClick={() => setStep(prev => prev + 1)}
-                        className="brutalist-btn-green flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
+                        className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
                       >
                         <span>Continue</span>
                         <ArrowRight size={13} />

@@ -48,7 +48,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
         </Link>
 
         <div className="glass-brutalist relative mt-5 overflow-hidden rounded-[2.2rem] p-5 md:mt-8 md:rounded-[2.8rem] md:p-9 relative z-10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(0,255,102,0.05),transparent_45%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(168,85,247,0.05),transparent_45%)] pointer-events-none" />
           <div className="relative grid items-center gap-8 lg:grid-cols-[.86fr_1.14fr]">
             <div className="max-w-3xl">
               {event.certEventLogo ? (
@@ -56,7 +56,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
                   <img src={optimizeCloudinaryUrl(event.certEventLogo, 120)} alt="" className="h-full w-full object-contain" />
                 </div>
               ) : null}
-              <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-[#00FF66] px-4 py-1.5 text-[10px] font-bold tracking-[.24em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+              <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-purple-500 px-4 py-1.5 text-[10px] font-bold tracking-[.24em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
                 <Sparkles size={12} />
                 {(event.category || "EVENT").toUpperCase()}
               </span>
@@ -64,17 +64,17 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
               <p className="mt-5 max-w-2xl text-base leading-8 text-white/58 md:mt-6 md:text-lg md:leading-8">{event.description || "No description has been added yet."}</p>
               <div className="mt-7 grid gap-3 sm:grid-cols-3">
                 <div className="glass-brutalist px-4 py-4 rounded-xl">
-                  <Calendar className="text-[#00FF66]" size={16} />
+                  <Calendar className="text-purple-400" size={16} />
                   <p className="mt-3 text-xs uppercase tracking-[.16em] text-white/35 font-bold">Date</p>
                   <p className="mt-1 text-sm font-semibold text-white/80">{dateText(event.startAt)}</p>
                 </div>
                 <div className="glass-brutalist px-4 py-4 rounded-xl">
-                  <Clock className="text-[#00FF66]" size={16} />
+                  <Clock className="text-purple-400" size={16} />
                   <p className="mt-3 text-xs uppercase tracking-[.16em] text-white/35 font-bold">Time</p>
                   <p className="mt-1 text-sm font-semibold text-white/80">{timeText(event.startAt)}</p>
                 </div>
                 <div className="glass-brutalist px-4 py-4 rounded-xl">
-                  <Users className="text-[#00FF66]" size={16} />
+                  <Users className="text-purple-400" size={16} />
                   <p className="mt-3 text-xs uppercase tracking-[.16em] text-white/35 font-bold">Mode</p>
                   <p className="mt-1 text-sm font-semibold text-white/80">{modeLabel}</p>
                 </div>
@@ -92,7 +92,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
 
         <div className="mt-6 grid gap-5 md:mt-8 lg:grid-cols-[1fr_390px] lg:items-start relative z-10">
           <div className="glass-brutalist rounded-[2rem] p-6 md:p-8">
-            <p className="text-[10px] font-bold uppercase tracking-[.24em] text-emerald-400">Brief</p>
+            <p className="text-[10px] font-bold uppercase tracking-[.24em] text-purple-400">Brief</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-[-.045em] text-white">About the event</h2>
             <p className="mt-5 whitespace-pre-line text-sm leading-7 text-white/50 md:text-base md:leading-8">
               {event.description || "Details will appear once an admin updates this event."}
@@ -104,7 +104,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {event.rules.map((rule: string) => (
                     <p className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/70" key={rule}>
-                      <Check size={14} className="text-[#00FF66]" />
+                      <Check size={14} className="text-purple-400" />
                       {rule}
                     </p>
                   ))}
@@ -127,8 +127,8 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           <aside className="glass-brutalist rounded-[2rem] p-5 md:p-6 lg:sticky lg:top-28 lg:self-start">
             <h3 className="text-xl font-bold tracking-[-.035em] text-white">Registration</h3>
             <div className="mt-5 space-y-3 text-sm text-white/54">
-              <p className="flex gap-3 rounded-xl border border-white/10 bg-black/40 p-4"><MapPin size={16} className="text-[#00FF66]" />{event.venue || "Venue TBA"}</p>
-              <p className="flex gap-3 rounded-xl border border-white/10 bg-black/40 p-4"><Users size={16} className="text-[#00FF66]" />{event.registrations} / {event.capacity || "unlimited"} seats claimed</p>
+              <p className="flex gap-3 rounded-xl border border-white/10 bg-black/40 p-4"><MapPin size={16} className="text-purple-400" />{event.venue || "Venue TBA"}</p>
+              <p className="flex gap-3 rounded-xl border border-white/10 bg-black/40 p-4"><Users size={16} className="text-purple-400" />{event.registrations} / {event.capacity || "unlimited"} seats claimed</p>
             </div>
 
             <p className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4 text-xs leading-5 text-white/60">

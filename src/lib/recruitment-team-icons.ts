@@ -17,7 +17,7 @@ export const recruitmentTeamIcons: Record<string, { emoji: string; Icon: LucideI
   technical: { emoji: "💻", Icon: Code2, accent: "from-violet-400/25 to-indigo-300/10 text-violet-100" },
   design: { emoji: "🎨", Icon: Palette, accent: "from-fuchsia-400/25 to-pink-300/10 text-fuchsia-100" },
   marketing: { emoji: "📢", Icon: Megaphone, accent: "from-amber-400/25 to-yellow-300/10 text-amber-100" },
-  sponsorship: { emoji: "🤝", Icon: Handshake, accent: "from-emerald-400/25 to-teal-300/10 text-emerald-100" },
+  sponsorship: { emoji: "🤝", Icon: Handshake, accent: "from-purple-400/25 to-teal-300/10 text-purple-100" },
   content: { emoji: "✍️", Icon: PenLine, accent: "from-lime-400/25 to-green-300/10 text-lime-100" },
   "event-management": { emoji: "🎭", Icon: CalendarDays, accent: "from-orange-400/25 to-amber-300/10 text-orange-100" },
   "human-resources": { emoji: "👥", Icon: Users, accent: "from-blue-400/25 to-indigo-300/10 text-blue-100" }

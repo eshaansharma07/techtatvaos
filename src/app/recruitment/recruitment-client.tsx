@@ -173,11 +173,11 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
 
   return (
     <section className="relative mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44 spatial-grid-bg">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(0,255,102,0.06),transparent_45%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(168,85,247,0.06),transparent_45%)] pointer-events-none" />
       <div className="relative grid gap-8 lg:grid-cols-[.72fr_1fr] lg:items-start">
         <aside className="lg:sticky lg:top-28">
           <div className="glass-brutalist rounded-[2rem] p-6 md:p-8">
-            <span className="inline-flex rounded-xl border-2 border-black bg-[#00FF66] px-4 py-1.5 text-[10px] font-bold tracking-[.25em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] uppercase">
+            <span className="inline-flex rounded-xl border-2 border-black bg-purple-500 px-4 py-1.5 text-[10px] font-bold tracking-[.25em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] uppercase">
               {statusCopy[data.settings.status] || "Recruitment"}
             </span>
             <h1 className="mt-6 text-[3.8rem] font-extrabold leading-[.88] tracking-[-.075em] md:text-7xl">Build what people remember.</h1>
@@ -195,7 +195,7 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
             <div className="flex flex-col gap-2 md:hidden">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-400">Step {Math.min(step + 1, steps.length)} of {steps.length}</p>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-400">Step {Math.min(step + 1, steps.length)} of {steps.length}</p>
                   <h3 className="text-sm font-semibold text-white mt-0.5">{steps[step] || "Review"}</h3>
                 </div>
                 <span className="text-[10px] font-mono text-white/45">{Math.round(success ? 100 : progress)}%</span>
@@ -206,16 +206,16 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
             <div className="hidden md:flex flex-col gap-3">
               <div className="flex items-center justify-between gap-3 border-b border-white/[0.04] pb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-400">Step {Math.min(step + 1, steps.length)} of {steps.length}</span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-400">Step {Math.min(step + 1, steps.length)} of {steps.length}</span>
                   <span className="text-white/20">|</span>
                   <span className="text-xs font-semibold text-white/80">{steps[step] || "Review"}</span>
                 </div>
                 <span className="text-[10px] font-mono text-white/45">{Math.round(success ? 100 : progress)}% completed</span>
               </div>
-              <div className="flex flex-wrap gap-2">{steps.map((label, index) => <button type="button" onClick={() => index <= step ? setStep(index) : null} className={`rounded-xl px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.14em] transition ${index === step ? "bg-[#00FF66] text-black border border-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)]" : index < step ? "bg-emerald-400/10 text-emerald-400" : "bg-white/[.05] text-white/32"}`} key={label}>{label}</button>)}</div>
+              <div className="flex flex-wrap gap-2">{steps.map((label, index) => <button type="button" onClick={() => index <= step ? setStep(index) : null} className={`rounded-xl px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.14em] transition ${index === step ? "bg-purple-500 text-black border border-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)]" : index < step ? "bg-purple-400/10 text-purple-400" : "bg-white/[.05] text-white/32"}`} key={label}>{label}</button>)}</div>
             </div>
             
-            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[.06]"><div className="h-full rounded-full bg-[#00FF66] transition-all" style={{ width: `${success ? 100 : progress}%` }} /></div>
+            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[.06]"><div className="h-full rounded-full bg-purple-500 transition-all" style={{ width: `${success ? 100 : progress}%` }} /></div>
           </div>
  
            {error ? <p className="mt-4 rounded-2xl border border-rose-300/20 bg-rose-400/[.08] p-4 text-sm text-rose-100">{error}</p> : null}
@@ -244,7 +244,7 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
  
           {step < steps.length ? <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/[.07] pt-5">
             <button type="button" onClick={() => setStep((value) => Math.max(value - 1, 0))} className="brutalist-btn-dark inline-flex min-h-12 items-center gap-2 rounded-xl px-5 text-sm disabled:opacity-40" disabled={step === 0}><ArrowLeft size={16} /> Back</button>
-            {step === steps.length - 1 ? <button type="submit" disabled={busy || !canContinue()} className="brutalist-btn-green inline-flex min-h-12 items-center gap-2 rounded-xl px-6 text-sm font-semibold disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />} Submit application</button> : <button type="button" onClick={next} disabled={!canContinue()} className="brutalist-btn-green inline-flex min-h-12 items-center gap-2 rounded-xl px-6 text-sm font-semibold disabled:opacity-60">Continue <ArrowRight size={16} /></button>}
+            {step === steps.length - 1 ? <button type="submit" disabled={busy || !canContinue()} className="brutalist-btn-purple inline-flex min-h-12 items-center gap-2 rounded-xl px-6 text-sm font-semibold disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />} Submit application</button> : <button type="button" onClick={next} disabled={!canContinue()} className="brutalist-btn-purple inline-flex min-h-12 items-center gap-2 rounded-xl px-6 text-sm font-semibold disabled:opacity-60">Continue <ArrowRight size={16} /></button>}
           </div> : null}
         </form>
       </div>
@@ -253,30 +253,30 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
 }
 
 function LandingPanel({ open, status, closingDate }: { open: boolean; status: string; closingDate?: string }) {
-  return <div className="grid gap-4 md:grid-cols-2"><div className="glass-brutalist rounded-[1.5rem] p-6"><Sparkles className="text-emerald-400" /><h2 className="mt-6 text-3xl font-bold tracking-[-.04em] text-white">A sharper way to join.</h2><p className="mt-3 text-sm leading-7 text-white/50">No endless form. Each step asks for what helps teams understand your fit, craft, and intent.</p></div><div className="glass-brutalist rounded-[1.5rem] p-6"><Users className="text-[#00FF66]" /><h3 className="mt-6 text-2xl font-bold tracking-[-.04em] text-white">{open ? "Start when ready." : statusCopy[status]}</h3><p className="mt-3 text-sm leading-7 text-white/48">{open ? `Applications are live${closingDate ? ` until ${new Date(closingDate).toLocaleDateString("en-IN")}` : ""}.` : "The form is currently unavailable. You can still explore the teams and return when recruitment opens."}</p></div></div>;
+  return <div className="grid gap-4 md:grid-cols-2"><div className="glass-brutalist rounded-[1.5rem] p-6"><Sparkles className="text-purple-400" /><h2 className="mt-6 text-3xl font-bold tracking-[-.04em] text-white">A sharper way to join.</h2><p className="mt-3 text-sm leading-7 text-white/50">No endless form. Each step asks for what helps teams understand your fit, craft, and intent.</p></div><div className="glass-brutalist rounded-[1.5rem] p-6"><Users className="text-purple-400" /><h3 className="mt-6 text-2xl font-bold tracking-[-.04em] text-white">{open ? "Start when ready." : statusCopy[status]}</h3><p className="mt-3 text-sm leading-7 text-white/48">{open ? `Applications are live${closingDate ? ` until ${new Date(closingDate).toLocaleDateString("en-IN")}` : ""}.` : "The form is currently unavailable. You can still explore the teams and return when recruitment opens."}</p></div></div>;
 }
 
 function PersonalPanel({ form, update }: { form: Record<string, any>; update: (name: string, value: any) => void }) {
   return <div><h2 className="text-3xl font-bold tracking-[-.04em] text-white">Your signal.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{personalFields.map(([name, label, type]) => {
     const optionalLink = ["linkedin", "github", "portfolio"].includes(name);
-    return <label className="block text-[10px] font-semibold uppercase tracking-[.18em] text-white/35" key={name}>{label}{optionalLink ? <span className="ml-1 text-white/25">(Optional)</span> : null}<input value={form[name] || ""} onChange={(event) => update(name, event.target.value)} onBlur={() => optionalLink ? update(name, normalizeOptionalUrl(form[name])) : null} type={optionalLink ? "text" : type} inputMode={optionalLink ? "url" : undefined} required={!optionalLink} className="mt-2 w-full rounded-2xl border border-white/10 bg-black/45 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none focus:border-emerald-500/50" /></label>;
+    return <label className="block text-[10px] font-semibold uppercase tracking-[.18em] text-white/35" key={name}>{label}{optionalLink ? <span className="ml-1 text-white/25">(Optional)</span> : null}<input value={form[name] || ""} onChange={(event) => update(name, event.target.value)} onBlur={() => optionalLink ? update(name, normalizeOptionalUrl(form[name])) : null} type={optionalLink ? "text" : type} inputMode={optionalLink ? "url" : undefined} required={!optionalLink} className="mt-2 w-full rounded-2xl border border-white/10 bg-black/45 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none focus:border-purple-500/50" /></label>;
   })}</div></div>;
 }
 
 function UploadBox({ label, uploadFile, file, uploading }: { label: string; uploadFile: (label: string, file?: File) => void; file?: FileAsset; uploading: boolean }) {
-  return <label className="block rounded-2xl border border-white/10 bg-black/45 p-4 text-xs text-white/45 transition hover:border-emerald-500/50"><span className="flex items-center gap-2 text-white/70">{uploading ? <Loader2 size={15} className="animate-spin" /> : <FileUp size={15} />} {label}</span><input type="file" accept="application/pdf,image/*,video/mp4,video/webm" className="mt-3 block w-full text-[10px] file:mr-2 file:rounded-xl file:border-0 file:bg-white file:px-3 file:py-2 file:text-[10px] file:font-semibold file:text-black" onChange={(event) => uploadFile(label, event.target.files?.[0])} />{file ? <span className="mt-2 block truncate text-emerald-200">Uploaded</span> : null}</label>;
+  return <label className="block rounded-2xl border border-white/10 bg-black/45 p-4 text-xs text-white/45 transition hover:border-purple-500/50"><span className="flex items-center gap-2 text-white/70">{uploading ? <Loader2 size={15} className="animate-spin" /> : <FileUp size={15} />} {label}</span><input type="file" accept="application/pdf,image/*,video/mp4,video/webm" className="mt-3 block w-full text-[10px] file:mr-2 file:rounded-xl file:border-0 file:bg-white file:px-3 file:py-2 file:text-[10px] file:font-semibold file:text-black" onChange={(event) => uploadFile(label, event.target.files?.[0])} />{file ? <span className="mt-2 block truncate text-purple-200">Uploaded</span> : null}</label>;
 }
 
 function TeamPanel({ teams, selected, onSelect }: { teams: Team[]; selected: string; onSelect: (id: string) => void }) {
   return <div><h2 className="text-3xl font-bold tracking-[-.04em] text-white">Choose one team.</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{teams.map((team) => {
     const visual = getRecruitmentTeamIcon(team.slug, team.icon);
     const Icon = visual.Icon;
-    return <button type="button" onClick={() => onSelect(team.id)} className={`group rounded-[1.4rem] border p-5 text-left transition hover:-translate-y-1 ${selected === team.id ? "border-emerald-500 bg-emerald-500/10 shadow-[4px_4px_0px_0px_#00FF66] border-2" : "border-white/[.08] bg-white/[.03] hover:border-emerald-500/50"}`} key={team.id}><span className={`grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br ${visual.accent} ring-1 ring-white/10 transition group-hover:scale-105`}><Icon size={22} strokeWidth={1.8} /><span className="sr-only">{visual.emoji}</span></span><div className="mt-5 flex items-center gap-2"><span className="text-lg">{visual.emoji}</span><h3 className="text-xl font-bold text-white">{team.name}</h3></div><p className="mt-2 text-sm leading-6 text-white/45">{team.description || "Create meaningful work with this team."}</p></button>;
+    return <button type="button" onClick={() => onSelect(team.id)} className={`group rounded-[1.4rem] border p-5 text-left transition hover:-translate-y-1 ${selected === team.id ? "border-purple-500 bg-purple-500/10 shadow-[4px_4px_0px_0px_rgba(168, 85, 247, 1)] border-2" : "border-white/[.08] bg-white/[.03] hover:border-purple-500/50"}`} key={team.id}><span className={`grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br ${visual.accent} ring-1 ring-white/10 transition group-hover:scale-105`}><Icon size={22} strokeWidth={1.8} /><span className="sr-only">{visual.emoji}</span></span><div className="mt-5 flex items-center gap-2"><span className="text-lg">{visual.emoji}</span><h3 className="text-xl font-bold text-white">{team.name}</h3></div><p className="mt-2 text-sm leading-6 text-white/45">{team.description || "Create meaningful work with this team."}</p></button>;
   })}</div>{!teams.length ? <p className="rounded-2xl border border-white/[.08] bg-white/[.03] p-6 text-white/45">No recruitment teams are active yet.</p> : null}</div>;
 }
 
 function RolePanel({ roles, selected, onSelect, team }: { roles: Role[]; selected: string; onSelect: (id: string) => void; team?: Team }) {
-  return <div><h2 className="text-3xl font-bold tracking-[-.04em] text-white">{team ? `Pick a ${team.name} role.` : "Pick a role."}</h2><div className="mt-5 grid gap-3 md:grid-cols-2">{roles.map((role) => <button type="button" onClick={() => onSelect(role.id)} className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${selected === role.id ? "border-emerald-500 bg-emerald-500/10 border-2 shadow-[2px_2px_0px_0px_rgba(0,255,102,0.5)]" : "border-white/[.08] bg-white/[.03] hover:border-emerald-500/30"}`} key={role.id}><p className="font-bold text-white">{role.name}</p><p className="mt-2 text-xs leading-5 text-white/42">{role.description || "Tell us why this path fits you."}</p></button>)}</div>{!roles.length ? <p className="rounded-2xl border border-white/[.08] bg-white/[.03] p-6 text-white/45">No active roles are configured for this team yet.</p> : null}</div>;
+  return <div><h2 className="text-3xl font-bold tracking-[-.04em] text-white">{team ? `Pick a ${team.name} role.` : "Pick a role."}</h2><div className="mt-5 grid gap-3 md:grid-cols-2">{roles.map((role) => <button type="button" onClick={() => onSelect(role.id)} className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${selected === role.id ? "border-purple-500 bg-purple-500/10 border-2 shadow-[2px_2px_0px_0px_rgba(168,85,247,0.5)]" : "border-white/[.08] bg-white/[.03] hover:border-purple-500/30"}`} key={role.id}><p className="font-bold text-white">{role.name}</p><p className="mt-2 text-xs leading-5 text-white/42">{role.description || "Tell us why this path fits you."}</p></button>)}</div>{!roles.length ? <p className="rounded-2xl border border-white/[.08] bg-white/[.03] p-6 text-white/45">No active roles are configured for this team yet.</p> : null}</div>;
 }
 
 function QuestionPanel({ questions, answers, setAnswers, uploadFile, files, uploading }: any) {
@@ -284,11 +284,11 @@ function QuestionPanel({ questions, answers, setAnswers, uploadFile, files, uplo
 }
 
 function QuestionInput({ question, value, onChange, uploadFile, files, uploading }: any) {
-  const inputClass = "mt-3 w-full rounded-2xl border border-white/10 bg-black/45 px-4 py-3 text-sm text-white outline-none focus:border-emerald-500/50";
+  const inputClass = "mt-3 w-full rounded-2xl border border-white/10 bg-black/45 px-4 py-3 text-sm text-white outline-none focus:border-purple-500/50";
   if (question.type === "long_text") return <textarea value={value || ""} onChange={(event) => onChange(event.target.value)} rows={5} className={inputClass} />;
   if (question.type === "dropdown") return <select value={value || ""} onChange={(event) => onChange(event.target.value)} className={inputClass}><option value="">Choose one</option>{question.options.map((option: string) => <option key={option} value={option}>{option}</option>)}</select>;
-  if (question.type === "multiple_choice") return <div className="mt-3 grid gap-2 md:grid-cols-2">{question.options.map((option: string) => <button type="button" onClick={() => onChange(option)} className={`rounded-xl border px-4 py-3 text-left text-xs ${value === option ? "border-emerald-500 bg-emerald-500/10 border-2" : "border-white/[.08] bg-black/20"}`} key={option}>{option}</button>)}</div>;
-  if (question.type === "checkbox") return <div className="mt-3 grid gap-2 md:grid-cols-2">{question.options.map((option: string) => { const list = Array.isArray(value) ? value : []; return <button type="button" onClick={() => onChange(list.includes(option) ? list.filter((item: string) => item !== option) : [...list, option])} className={`rounded-xl border px-4 py-3 text-left text-xs ${list.includes(option) ? "border-emerald-500 bg-emerald-500/10 border-2" : "border-white/[.08] bg-black/20"}`} key={option}>{option}</button>; })}</div>;
+  if (question.type === "multiple_choice") return <div className="mt-3 grid gap-2 md:grid-cols-2">{question.options.map((option: string) => <button type="button" onClick={() => onChange(option)} className={`rounded-xl border px-4 py-3 text-left text-xs ${value === option ? "border-purple-500 bg-purple-500/10 border-2" : "border-white/[.08] bg-black/20"}`} key={option}>{option}</button>)}</div>;
+  if (question.type === "checkbox") return <div className="mt-3 grid gap-2 md:grid-cols-2">{question.options.map((option: string) => { const list = Array.isArray(value) ? value : []; return <button type="button" onClick={() => onChange(list.includes(option) ? list.filter((item: string) => item !== option) : [...list, option])} className={`rounded-xl border px-4 py-3 text-left text-xs ${list.includes(option) ? "border-purple-500 bg-purple-500/10 border-2" : "border-white/[.08] bg-black/20"}`} key={option}>{option}</button>; })}</div>;
   if (question.type === "rating") return <input type="range" min="1" max="10" value={value || 5} onChange={(event) => onChange(event.target.value)} className="mt-4 w-full" />;
   if (question.type === "file_upload") return <UploadBox label={question.label} uploadFile={uploadFile} file={files.find((item: FileAsset) => item.label === question.label)} uploading={uploading === question.label} />;
   return <input value={value || ""} onChange={(event) => onChange(event.target.value)} type={question.type === "number" ? "number" : question.type === "url" ? "url" : "text"} className={inputClass} />;
@@ -315,7 +315,7 @@ function GithubPanel({ form, update, error, setError }: { form: Record<string, a
             onChange={handleChange}
             placeholder="https://github.com/your-username"
             type="text"
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-black/45 px-4 py-3 text-sm text-white outline-none focus:border-emerald-500/50"
+            className="mt-2 w-full rounded-2xl border border-white/10 bg-black/45 px-4 py-3 text-sm text-white outline-none focus:border-purple-500/50"
             required
           />
         </label>
@@ -328,21 +328,21 @@ function ClosedRecruitmentView({ data }: { data: RecruitmentData }) {
   const copy = closedCopy[data.settings.status] || closedCopy.closed;
   return (
     <section className="relative mx-auto max-w-5xl px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44 spatial-grid-bg">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(0,255,102,0.06),transparent_45%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(168,85,247,0.06),transparent_45%)] pointer-events-none" />
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="relative glass-brutalist rounded-[2rem] p-8 text-center md:p-14">
-        <span className="mx-auto grid h-24 w-24 place-items-center rounded-xl border-2 border-black bg-[#00FF66] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+        <span className="mx-auto grid h-24 w-24 place-items-center rounded-xl border-2 border-black bg-purple-500 text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
           {data.settings.status === "opening_soon" ? <Clock3 size={40} /> : <Lock size={40} />}
         </span>
-        <p className="mt-8 text-[10px] font-bold uppercase tracking-[.22em] text-[#00FF66]">{statusCopy[data.settings.status] || "Recruitment"}</p>
+        <p className="mt-8 text-[10px] font-bold uppercase tracking-[.22em] text-purple-400">{statusCopy[data.settings.status] || "Recruitment"}</p>
         <h1 className="mt-4 text-4xl font-bold tracking-[-.05em] text-white md:text-6xl">{copy.title}</h1>
         <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-white/52">{copy.body}</p>
         {data.settings.openingDate && data.settings.status === "opening_soon" ? (
-          <p className="mt-4 text-sm font-semibold text-emerald-400">Opens {new Date(data.settings.openingDate).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
+          <p className="mt-4 text-sm font-semibold text-purple-400">Opens {new Date(data.settings.openingDate).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
         ) : null}
         {data.settings.announcementBanner ? <p className="mx-auto mt-6 max-w-xl rounded-2xl border border-amber-200/20 bg-amber-300/[.06] p-4 text-xs leading-6 text-amber-50/75">{data.settings.announcementBanner}</p> : null}
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link href="/" className="brutalist-btn-dark inline-flex min-h-12 items-center rounded-xl px-6 text-sm">Return home</Link>
-          <Link href="/join" className="brutalist-btn-green inline-flex min-h-12 items-center rounded-xl px-6 text-sm font-bold text-black">Join the Club</Link>
+          <Link href="/join" className="brutalist-btn-purple inline-flex min-h-12 items-center rounded-xl px-6 text-sm font-bold text-black">Join the Club</Link>
           <Link href="/teams" className="brutalist-btn-dark inline-flex min-h-12 items-center rounded-xl px-6 text-sm">Explore teams</Link>
         </div>
       </motion.div>
@@ -364,7 +364,7 @@ function SuccessPanel({ message, whatsappLink }: { message: string; whatsappLink
           initial={{ scale: 0.6, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 180, damping: 16 }}
-          className="mx-auto grid h-24 w-24 place-items-center rounded-xl border-2 border-black bg-[#00FF66] text-black shadow-[4px_4px_0px_0px_rgba(255,255,255,0.8)] mb-8"
+          className="mx-auto grid h-24 w-24 place-items-center rounded-xl border-2 border-black bg-purple-500 text-black shadow-[4px_4px_0px_0px_rgba(255,255,255,0.8)] mb-8"
         >
           <CheckCircle2 size={46} strokeWidth={1.8} className="text-black" />
         </motion.span>
@@ -395,9 +395,9 @@ function SuccessPanel({ message, whatsappLink }: { message: string; whatsappLink
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.28 }}
-            className="mt-8 rounded-2xl border-2 border-black bg-[#00FF66]/10 p-5 shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]"
+            className="mt-8 rounded-2xl border-2 border-black bg-purple-500/10 p-5 shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]"
           >
-            <p className="text-[10px] font-bold uppercase tracking-[.25em] text-[#00FF66]">CRITICAL NEXT STEP</p>
+            <p className="text-[10px] font-bold uppercase tracking-[.25em] text-purple-400">CRITICAL NEXT STEP</p>
             <p className="mt-2 text-xs leading-5 text-white/50">
               You must join the official Tech Tatva recruitment group to get updates on interviews and selection tasks.
             </p>
@@ -405,7 +405,7 @@ function SuccessPanel({ message, whatsappLink }: { message: string; whatsappLink
               href={whatsappLink}
               target="_blank"
               rel="noreferrer"
-              className="mt-4 brutalist-btn-green inline-flex min-h-[3.25rem] w-full items-center justify-center gap-3 rounded-xl px-6 text-sm font-bold text-black"
+              className="mt-4 brutalist-btn-purple inline-flex min-h-[3.25rem] w-full items-center justify-center gap-3 rounded-xl px-6 text-sm font-bold text-black"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />

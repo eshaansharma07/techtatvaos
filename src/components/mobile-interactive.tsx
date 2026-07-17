@@ -32,14 +32,14 @@ function SwipeCarousel({ children, label }: { children: React.ReactNode[]; label
     <div className="relative">
       {label && (
         <div className="flex items-center justify-between px-5 mb-4">
-          <span className="text-[9px] font-bold tracking-[.3em] text-[#00FF66] uppercase">{label}</span>
+          <span className="text-[9px] font-bold tracking-[.3em] text-purple-400 uppercase">{label}</span>
           <div className="flex gap-1.5">
             {Array.from({ length: total }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => scrollTo(i)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === active ? "w-5 bg-[#00FF66]" : "w-1.5 bg-white/15"
+                  i === active ? "w-5 bg-purple-500" : "w-1.5 bg-white/15"
                 }`}
               />
             ))}
@@ -70,7 +70,7 @@ function TeamCard({ name, description, members, color }: { name: string; descrip
   return (
     <div
       className={`relative rounded-2xl glass-brutalist p-5 backdrop-blur-md transition-all duration-200 overflow-hidden ${
-        pressed ? "scale-[0.97] border-[#00FF66]/50" : ""
+        pressed ? "scale-[0.97] border-purple-500/50" : ""
       }`}
       onTouchStart={() => setPressed(true)}
       onTouchEnd={() => setPressed(false)}
@@ -78,7 +78,7 @@ function TeamCard({ name, description, members, color }: { name: string; descrip
     >
       <div className="relative z-10">
         <div className="flex items-center justify-between">
-          <Orbit size={16} className="text-[#00FF66]" />
+          <Orbit size={16} className="text-purple-400" />
           <span className="flex items-center gap-1 brutalist-btn-dark rounded-xl px-2.5 py-1 text-[10px] font-bold text-white/80">
             <Users size={10} /> {members}
           </span>
@@ -130,7 +130,7 @@ function ScrollCounter({ value, label, icon }: { value: number; label: string; i
 
   return (
     <div ref={ref} className="flex flex-col items-center gap-2 py-4">
-      <div className="grid h-10 w-10 place-items-center rounded-xl border-2 border-black bg-[#00FF66] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+      <div className="grid h-10 w-10 place-items-center rounded-xl border-2 border-black bg-purple-500 text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
         {icon}
       </div>
       <p className="text-2xl font-extrabold tracking-tight text-white">{visible ? count : 0}</p>
@@ -151,7 +151,7 @@ function PerkCard({ emoji, title, desc }: { emoji: string; title: string; desc: 
   return (
     <div
       className={`rounded-2xl glass-brutalist p-6 transition-all duration-200 ${
-        pressed ? "scale-[0.97] border-[#00FF66]/50 bg-black/50" : ""
+        pressed ? "scale-[0.97] border-purple-500/50 bg-black/50" : ""
       }`}
       onTouchStart={() => setPressed(true)}
       onTouchEnd={() => setPressed(false)}
@@ -204,7 +204,7 @@ export function MobileInteractiveSections({
                 <div className="flex items-center justify-between">
                   <span className={`rounded-xl px-2.5 py-1 text-[9px] font-bold tracking-wider uppercase border border-black ${
                     e.registrationOpen
-                      ? "bg-[#00FF66] text-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)]"
+                      ? "bg-purple-500 text-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)]"
                       : "brutalist-btn-dark text-white"
                   }`}>
                     {e.registrationOpen ? "Open" : "Live"}
@@ -214,19 +214,19 @@ export function MobileInteractiveSections({
                 <h3 className="mt-4 text-[16px] font-bold text-white leading-tight">{e.title}</h3>
                 <p className="mt-2 text-[11px] leading-[1.6] text-white/35 line-clamp-2">{e.description}</p>
                 {e.venue && (
-                  <p className="mt-3 text-[10px] font-bold text-[#00FF66] uppercase tracking-wider">📍 {e.venue}</p>
+                  <p className="mt-3 text-[10px] font-bold text-purple-400 uppercase tracking-wider">📍 {e.venue}</p>
                 )}
               </Link>
             ))}
           </SwipeCarousel>
         ) : (
           <div className="px-5">
-            <p className="text-[9px] font-bold tracking-[.3em] text-[#00FF66] uppercase mb-4">Events</p>
+            <p className="text-[9px] font-bold tracking-[.3em] text-purple-400 uppercase mb-4">Events</p>
             <div className="relative rounded-2xl glass-brutalist p-8 text-center overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent" />
               <div className="relative z-10">
-                <div className="mx-auto h-12 w-12 rounded-full bg-emerald-500/10 grid place-items-center mb-4">
-                  <Sparkles size={20} className="text-[#00FF66] animate-pulse" />
+                <div className="mx-auto h-12 w-12 rounded-full bg-purple-500/10 grid place-items-center mb-4">
+                  <Sparkles size={20} className="text-purple-400 animate-pulse" />
                 </div>
                 <p className="text-sm font-bold text-white/80">Events launching soon</p>
                 <p className="mt-2 text-[11px] text-white/30">Stay tuned for workshops, hackathons & more</p>
@@ -265,7 +265,7 @@ export function MobileInteractiveSections({
       {driveStatus && driveStatus.status !== "closed" && (
         <section className="py-10 border-t border-white/[0.04]">
           <div className="px-5 mb-6">
-            <p className="text-[9px] font-bold tracking-[.3em] text-[#00FF66] uppercase mb-3">Membership Drive</p>
+            <p className="text-[9px] font-bold tracking-[.3em] text-purple-400 uppercase mb-3">Membership Drive</p>
             <h2 className="text-[22px] font-extrabold tracking-tight text-white leading-[1.2]">Join the club.</h2>
           </div>
           <SwipeCarousel>
@@ -277,7 +277,7 @@ export function MobileInteractiveSections({
             <div className="px-5 mt-6">
               <Link
                 href="/join"
-                className="brutalist-btn-green flex h-[50px] items-center justify-center gap-2 rounded-xl text-[14px] font-bold text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]"
+                className="brutalist-btn-purple flex h-[50px] items-center justify-center gap-2 rounded-xl text-[14px] font-bold text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]"
               >
                 Register now <ArrowRight size={15} />
               </Link>
@@ -295,7 +295,7 @@ export function MobileInteractiveSections({
                 key={item._id}
                 className="rounded-2xl glass-brutalist p-5"
               >
-                <p className="text-[9px] font-bold tracking-[.2em] text-[#00FF66] uppercase">{item.kind || "Achievement"}</p>
+                <p className="text-[9px] font-bold tracking-[.2em] text-purple-400 uppercase">{item.kind || "Achievement"}</p>
                 <h3 className="mt-3 text-[15px] font-bold text-white">{item.title}</h3>
                 <p className="mt-2 text-[11px] leading-[1.6] text-white/35">{item.description}</p>
               </div>

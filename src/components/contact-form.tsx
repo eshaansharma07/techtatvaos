@@ -51,7 +51,7 @@ export function ContactForm() {
             name={name}
             type={type}
             placeholder={placeholder}
-            className="mt-2.5 min-h-[3.75rem] w-full rounded-2xl border border-white/10 bg-white/[0.015] px-5 py-3 text-sm text-white placeholder-white/20 outline-none transition duration-200 focus:border-emerald-500/50 focus:bg-emerald-500/[0.03] focus:ring-1 focus:ring-emerald-500/20"
+            className="mt-2.5 min-h-[3.75rem] w-full rounded-2xl border border-white/10 bg-white/[0.015] px-5 py-3 text-sm text-white placeholder-white/20 outline-none transition duration-200 focus:border-purple-500/50 focus:bg-purple-500/[0.03] focus:ring-1 focus:ring-purple-500/20"
           />
         </label>
       ))}
@@ -63,13 +63,13 @@ export function ContactForm() {
           name="message"
           rows={6}
           placeholder="Write your message details here..."
-          className="mt-2.5 w-full rounded-2xl border border-white/10 bg-white/[0.015] px-5 py-4 text-sm text-white placeholder-white/20 outline-none transition duration-200 focus:border-emerald-500/50 focus:bg-emerald-500/[0.03] focus:ring-1 focus:ring-emerald-500/20"
+          className="mt-2.5 w-full rounded-2xl border border-white/10 bg-white/[0.015] px-5 py-4 text-sm text-white placeholder-white/20 outline-none transition duration-200 focus:border-purple-500/50 focus:bg-purple-500/[0.03] focus:ring-1 focus:ring-purple-500/20"
         />
       </label>
  
       <button
         disabled={loading}
-        className="brutalist-btn-green flex min-h-[3.75rem] items-center justify-center gap-2.5 rounded-2xl text-sm font-semibold text-black active:scale-[0.98] disabled:opacity-60 md:col-span-2"
+        className="brutalist-btn-purple flex min-h-[3.75rem] items-center justify-center gap-2.5 rounded-2xl text-sm font-semibold text-black active:scale-[0.98] disabled:opacity-60 md:col-span-2"
       >
         {loading ? (
           "Sending message..."
@@ -81,7 +81,7 @@ export function ContactForm() {
       </button>
  
       {status && (
-        <p className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center text-xs font-semibold text-emerald-300 md:col-span-2">
+        <p className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4 text-center text-xs font-semibold text-purple-300 md:col-span-2">
           {status}
         </p>
       )}
