@@ -725,10 +725,10 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
 
               {/* Membership Badge Card */}
               <Reveal delay={0.2}>
-                <div className="flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-center w-full max-w-full overflow-hidden sm:overflow-visible pt-4 sm:pt-0">
 
                   {/* Floating card wrapper with glow */}
-                  <div className="relative" style={{ animation: 'cardFloat 6s ease-in-out infinite' }}>
+                  <div className="relative origin-top scale-[0.85] sm:scale-100 -mb-10 sm:mb-0" style={{ animation: 'cardFloat 6s ease-in-out infinite' }}>
                     {/* Outer glow ring */}
                     <div 
                       className="absolute -inset-3 rounded-[28px] pointer-events-none"
@@ -748,7 +748,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                         setTiltCoords({ x: 0, y: 0 });
                       }}
                       style={{ transform: cardTransform, transition: "transform 0.15s ease-out" }}
-                      className="membership-card-shimmer relative w-[380px] max-w-full rounded-[18px] overflow-hidden cursor-pointer"
+                      className="membership-card-shimmer relative w-[380px] rounded-[18px] overflow-hidden cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                     >
                       {/* Fixed aspect ratio */}
                       <div className="relative w-full" style={{ paddingBottom: "63%" }}>
