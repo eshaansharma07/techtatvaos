@@ -87,6 +87,20 @@ function ctxt(page: PDFPage, text: string, y: number, font: PDFFont, size: numbe
   page.drawText(text, { x: Math.max((W - tw) / 2, 10), y, size, font, color, opacity });
 }
 
+function imageBox(image: any, x: number, y: number, maxW: number, maxH: number) {
+  const iw = image?.width || maxW;
+  const ih = image?.height || maxH;
+  const scale = Math.min(maxW / iw, maxH / ih);
+  const width = iw * scale;
+  const height = ih * scale;
+  return {
+    x: x + (maxW - width) / 2,
+    y: y + (maxH - height) / 2,
+    width,
+    height
+  };
+}
+
 // ═══════════════════════════════════════════════════
 //  DECORATIVE DRAWING PRIMITIVES
 // ═══════════════════════════════════════════════════
@@ -394,21 +408,22 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
   // ╔═══════════════════════════════════════════════════════╗
   // ║  HEADER SECTION (positioned to avoid corner ornaments)║
   // ╚═══════════════════════════════════════════════════════╝
-  const headY = H - 70;
+  const headY = H - 76;
 
-  // Tech Tatva Logo + name (top left, pushed inward to clear corner ornaments)
-  if (ttLogo) page.drawImage(ttLogo, { x: 90, y: headY + 2, width: 30, height: 30 });
-  page.drawText("TechTatva", { x: 126, y: headY + 20, size: 11, font: helvB, color: C.ink });
-  page.drawText("CHANDIGARH UNIVERSITY", { x: 126, y: headY + 8, size: 6.5, font: helv, color: C.inkMuted });
+  // Premium header lockups: balanced, aspect-safe, and kept clear of ornamental corners.
+  const ttLogoBox = { x: 64, y: headY - 2, width: 36, height: 36 };
+  if (ttLogo) page.drawImage(ttLogo, imageBox(ttLogo, ttLogoBox.x, ttLogoBox.y, ttLogoBox.width, ttLogoBox.height));
+  page.drawText("TechTatva", { x: 108, y: headY + 22, size: 12, font: helvB, color: C.ink });
+  page.drawText("CHANDIGARH UNIVERSITY", { x: 108, y: headY + 8, size: 7, font: helvB, color: C.inkMuted, opacity: 0.88 });
 
-  // CU Logo (top right, scaled down to avoid overlapping)
-  if (cuLogo) page.drawImage(cuLogo, { x: W - 150, y: headY + 6, width: 70, height: 22 });
+  const cuBox = { x: W - 212, y: headY + 4, width: 142, height: 36 };
+  if (cuLogo) page.drawImage(cuLogo, imageBox(cuLogo, cuBox.x, cuBox.y, cuBox.width, cuBox.height));
 
-  // Event Logo (far right, smaller)
-  if (eventLogo) page.drawImage(eventLogo, { x: W - 72, y: headY + 2, width: 28, height: 28 });
+  // Optional event logo sits as a secondary mark between the university lockup and the corner.
+  if (eventLogo) page.drawImage(eventLogo, imageBox(eventLogo, W - 62, headY + 3, 24, 24));
 
   // Header divider
-  drawDivider(page, headY - 14, W - 180, C.gold, 0.5);
+  drawDivider(page, headY - 18, W - 200, C.gold, 0.5);
 
   // ╔═══════════════════════════════════════════════════════╗
   // ║  TITLE: "CERTIFICATE"  (large, spaced out)            ║
@@ -515,8 +530,8 @@ async function buildCertificatePdf(kind: CertificateKind, config: CertificateCon
     });
   };
 
-  drawSig(sCol1, config.hod || "", ["Faculty Coordinator"]);
-  drawSig(sCol3, config.facultyAdvisor || "", ["Head of Department", "AIT-CSE, Chandigarh University"]);
+  drawSig(sCol1, config.facultyAdvisor || "", ["Faculty Coordinator"]);
+  drawSig(sCol3, config.hod || "", ["Head of Department", "AIT-CSE, Chandigarh University"]);
 
   // ╔═══════════════════════════════════════════════════════╗
   // ║  CENTER SEAL (elaborate multi-ring with scallops)      ║

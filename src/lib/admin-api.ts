@@ -126,7 +126,7 @@ function normalizeEventStatus(value: any, fallback = "published") {
 function normalizeEventBody(input: Record<string, any>, create = false) {
   const body = clean(input);
   const normalized: Record<string, any> = { ...body };
-  if (body.slug || body.title) normalized.slug = body.slug || slugify(body.title);
+  if (body.slug || body.title) normalized.slug = slugify(String(body.slug || body.title));
   if (body.capacity !== undefined) normalized.capacity = Number(body.capacity);
   if (body.maxTeamSize !== undefined) normalized.maxTeamSize = Math.max(1, Number(body.maxTeamSize) || 1);
   if (body.team !== undefined) normalized.team = refId(body.team);

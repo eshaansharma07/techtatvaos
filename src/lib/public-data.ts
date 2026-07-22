@@ -31,6 +31,8 @@ import { computeRecruitmentStatus } from "@/lib/recruitment";
 
 const serialize = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const publicEventSlug = (event: any) => slugify(String(event?.slug || event?.title || event?._id || ""));
+const publicEventStatusQuery = { status: { $in: ["published", "active", "completed"] } };
 
 export type PublicEvent = {
   id: string;
@@ -94,7 +96,7 @@ export async function getLatestPublicAnnouncement() {
 
 export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   await connectDB();
-  const events = await Event.find({ status: { $in: ["published", "active", "completed"] } })
+  const events = await Event.find(publicEventStatusQuery)
     .sort({ startAt: 1 })
     .limit(limit || 0)
     .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen startAt endAt team")
@@ -108,7 +110,7 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   return serialize(
     events.map((event) => ({
       id: String(event._id),
-      slug: event.slug,
+      slug: publicEventSlug(event),
       title: event.title,
       description: event.description,
       banner: event.banner,
@@ -129,18 +131,39 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
 
 export async function getPublicEvent(slug: string) {
   await connectDB();
-  const event = await Event.findOne({ slug, status: { $in: ["published", "active", "completed"] } })
+  const rawSlug = decodeURIComponent(String(slug || "")).trim();
+  const canonicalSlug = slugify(rawSlug);
+  const slugMatches: Record<string, any>[] = [];
+  if (rawSlug) slugMatches.push({ slug: rawSlug });
+  if (canonicalSlug && canonicalSlug !== rawSlug) slugMatches.push({ slug: canonicalSlug });
+  if (Types.ObjectId.isValid(rawSlug)) slugMatches.push({ _id: rawSlug });
+  let event = await Event.findOne({
+    ...publicEventStatusQuery,
+    ...(slugMatches.length ? { $or: slugMatches } : {})
+  })
     .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
     .populate("team", "name")
     .populate("leads", "name email")
     .populate("sponsors", "name logo website level")
     .lean();
+  if (!event && canonicalSlug) {
+    const candidates = await Event.find(publicEventStatusQuery)
+      .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
+      .populate("team", "name")
+      .populate("leads", "name email")
+      .populate("sponsors", "name logo website level")
+      .lean();
+    event = candidates.find((candidate: any) => (
+      publicEventSlug(candidate) === canonicalSlug ||
+      slugify(String(candidate.title || "")) === canonicalSlug
+    )) || null;
+  }
   if (!event) return null;
   const record: any = event;
   const registrations = await EventRegistration.countDocuments({ event: record._id, status: "confirmed" });
   return serialize({
     id: String(record._id),
-    slug: record.slug,
+    slug: publicEventSlug(record),
     title: record.title,
     description: record.description,
     banner: record.banner,

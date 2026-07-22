@@ -6,10 +6,12 @@ import { PublicShell } from "@/components/public-shell";
 import { Reveal } from "@/components/reveal";
 import { getPublicHomeData, getMembershipDriveStatus } from "@/lib/public-data";
 import { AnimatedCounter } from "@/components/animated-counter";
-import { InteractiveHero3D } from "@/components/interactive-hero-3d";
-import { CommunityShowcase } from "@/components/community-showcase";
-import { InstagramFeed } from "@/components/instagram-feed";
 import { MobileInteractiveSections } from "@/components/mobile-interactive";
+import {
+  DeferredCommunityShowcase,
+  DeferredHero3D,
+  DeferredInstagramFeed
+} from "@/components/deferred-public-widgets";
 
 export const revalidate = 10;
 
@@ -98,7 +100,7 @@ export default async function Home() {
       <div className="absolute inset-0 grid-bg opacity-[.06]"/>
 
       {/* Interactive Hologram 3D Core */}
-      <InteractiveHero3D />
+      <DeferredHero3D />
 
       <div className="relative mx-auto grid min-h-[790px] max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] items-center gap-8 px-6 py-16 lg:grid-cols-[1.05fr_.75fr]">
         <Reveal>
@@ -110,9 +112,7 @@ export default async function Home() {
             <p className="mt-8 max-w-2xl text-lg leading-9 text-white/62">
               Discover real club events, register as a candidate, explore teams, and follow the work Tech Tatva publishes for students.
             </p>
- 
 
- 
             <div className="mt-10 flex flex-wrap gap-4">
               {driveStatus && driveStatus.registrationEnabled ? (
                 <>
@@ -211,8 +211,6 @@ export default async function Home() {
             </Link>
           </div>
         </Reveal>
-
-
       </div>
 
 
@@ -229,7 +227,7 @@ export default async function Home() {
     <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 py-20 md:px-6 md:py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="brutalist-btn-dark mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
 
     {/* Dedicated Instagram posts feed */}
-    <InstagramFeed
+    <DeferredInstagramFeed
       handle={clubInfo?.instagramHandle}
       profileUrl={clubInfo?.instagramUrl}
       post1_image={clubInfo?.instagramPost1_image}
@@ -312,9 +310,8 @@ export default async function Home() {
     )}
 
     {achievements.length ? <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-20"><div className="grid gap-4 md:grid-cols-3">{achievements.slice(0,3).map((item:any)=><div className="glass-brutalist rounded-[22px] p-6" key={item._id}><p className="text-[10px] tracking-[.2em] text-orange-400 font-bold">{item.kind || "ACHIEVEMENT"}</p><p className="mt-4 text-lg font-bold text-white">{item.title}</p><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p></div>)}</div></section> : null}
-    
     {/* Real Human Presence: Community Showcase Grid */}
-    <CommunityShowcase galleryData={gallery} />
+    <DeferredCommunityShowcase galleryData={gallery} />
  
 
   </PublicShell>;

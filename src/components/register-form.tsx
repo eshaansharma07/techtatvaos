@@ -65,21 +65,24 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      document.body.classList.add("force-native-cursor");
     } else {
       document.body.style.overflow = "unset";
+      document.body.classList.remove("force-native-cursor");
     }
     return () => {
       document.body.style.overflow = "unset";
+      document.body.classList.remove("force-native-cursor");
     };
   }, [isOpen]);
 
   // Form field specifications
   const fields = [
-    { name: "name", label: "Full Name", type: "text", placeholder: "Eshaan Sharma", icon: User },
-    { name: "email", label: "University Email", type: "email", placeholder: "eshaan@university.edu", icon: Mail },
-    { name: "uid", label: "University UID", type: "text", placeholder: "24BAI70387", icon: FileText },
-    { name: "program", label: "Degree Program", type: "text", placeholder: "B.E. CSE AI/ML", icon: Layers },
-    { name: "semester", label: "Current Semester", type: "number", placeholder: "4", icon: Sparkles }
+    { name: "name", label: "Full Name", type: "text", icon: User },
+    { name: "email", label: "University Email", type: "email", icon: Mail },
+    { name: "uid", label: "University UID", type: "text", icon: FileText },
+    { name: "program", label: "Degree Program", type: "text", icon: Layers },
+    { name: "semester", label: "Current Semester", type: "number", icon: Sparkles }
   ] as const;
 
   // Validation functions
@@ -339,11 +342,10 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     {mode === "team" && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pt-4 border-t border-white/5">
                         <label className="block text-[10px] font-black tracking-widest text-white/40 uppercase">
-                          TEAM SQUAD ALIAS
+                          TEAM NAME
                           <input 
                             value={teamName}
                             onChange={(e) => setTeamName(e.target.value)}
-                            placeholder="e.g. ALPHA CRADLE"
                             required
                             className="mt-2 w-full rounded-xl border border-white/10 bg-black/45 px-3.5 py-3.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-purple-500/50 transition-all font-mono"
                           />
@@ -385,7 +387,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {fields.map(({ name, label, type, placeholder, icon: Icon }) => {
+                      {fields.map(({ name, label, type, icon: Icon }) => {
                         const val = leader[name];
                         let isValid = false;
                         if (name === "name") isValid = isNameValid(val);
@@ -407,7 +409,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                                 type={type} 
                                 value={val}
                                 onChange={(e) => handleInputChange(name, e.target.value)}
-                                placeholder={placeholder}
                                 required
                                 className={`w-full rounded-xl border bg-black/45 pl-10 pr-9 py-3 text-xs text-white placeholder:text-white/20 outline-none transition-all ${
                                   val 
@@ -488,7 +489,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                       </div>
 
                       <div className="grid gap-3 sm:grid-cols-2">
-                        {fields.map(({ name, label, type, placeholder, icon: Icon }) => {
+                        {fields.map(({ name, label, type, icon: Icon }) => {
                           const val = members[activeTab]?.[name] || "";
                           let isValid = false;
                           if (name === "name") isValid = isNameValid(val);
@@ -510,7 +511,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                                   type={type} 
                                   value={val}
                                   onChange={(e) => handleMemberChange(activeTab, name, e.target.value)}
-                                  placeholder={placeholder}
                                   required
                                   className={`w-full rounded-xl border bg-black/45 pl-10 pr-9 py-3 text-xs text-white placeholder:text-white/20 outline-none transition-all ${
                                     val 
