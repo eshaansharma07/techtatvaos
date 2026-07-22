@@ -61,7 +61,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     await connectDB();
     const { id } = await params;
     const event = await Event.findById(id);
-    if (!event?.registrationOpen || !["published", "active"].includes(event.status)) {
+    if (!event?.registrationOpen || event.status === "archived") {
       return NextResponse.json({ error: "Registration is closed" }, { status: 409 });
     }
 
