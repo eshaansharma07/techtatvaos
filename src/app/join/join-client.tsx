@@ -575,8 +575,8 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
             <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-center">
               
               {/* Form Side */}
-              <Reveal delay={0.1}>
-                <div className="glass-brutalist rounded-3xl p-6 sm:p-8">
+              <Reveal delay={0.1} className="min-w-0">
+                <div className="glass-brutalist rounded-3xl p-6 sm:p-8 min-w-0">
                   
                   <AnimatePresence mode="wait">
                     {step === 5 && success ? (
@@ -629,17 +629,17 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                     ) : (
                       <div key="wizard-steps">
                         {/* Professional Wizard Header */}
-                        <div className="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-6">
-                          <div className="flex items-center gap-2.5">
+                        <div className="flex flex-wrap items-center justify-between gap-y-3 border-b border-white/[0.06] pb-4 mb-6">
+                          <div className="flex flex-wrap items-center gap-2.5">
                             <span className="font-sans text-xs font-bold text-white uppercase tracking-wider">
                               {stepsContent[step].title}
                             </span>
-                            <span className="h-3 w-px bg-white/[0.12]" />
+                            <span className="hidden sm:block h-3 w-px bg-white/[0.12]" />
                             <span className="font-sans text-[10px] text-white/40 font-semibold uppercase tracking-wider">
                               Step {step + 1} of 5
                             </span>
                           </div>
-                          <span className="font-sans text-[9px] font-bold tracking-wider text-purple-400">
+                          <span className="font-sans text-[9px] font-bold tracking-wider text-purple-400 mt-1 sm:mt-0">
                             {source.toUpperCase()} STATUS
                           </span>
                         </div>
