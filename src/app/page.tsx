@@ -44,7 +44,7 @@ export default async function Home() {
         MOBILE HERO — Center-aligned, dramatic, minimal (md:hidden)
         Height accounts for the h-20 (5rem) spacer in public-shell.
     ═══════════════════════════════════════════════════════════════════ */}
-    <section className="relative flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center px-6 py-12 overflow-hidden md:hidden spatial-grid-bg">
+    <section className="relative flex flex-col items-center justify-center px-6 py-24 sm:py-32 overflow-hidden md:hidden spatial-grid-bg">
       {/* Cinematic background */}
       <Image src="/tech-tatva-hero-v2.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_30%] opacity-40 mix-blend-overlay"/>
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black"/>
