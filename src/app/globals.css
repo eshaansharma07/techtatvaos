@@ -20,7 +20,7 @@
   --tt-mint: #a855f7;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { /* Removed smooth scrolling due to rubber-banding issues */ }
 body {
   margin: 0;
   background: #000000;
