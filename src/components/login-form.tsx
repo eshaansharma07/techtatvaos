@@ -115,7 +115,7 @@ export function LoginForm() {
 
           <button
             disabled={loading}
-            className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-4 text-sm font-semibold text-black transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-70"
+            className="brutalist-btn-purple relative flex w-full min-h-[3.75rem] items-center justify-center gap-2 rounded-2xl text-[14px] font-extrabold text-black border-2 border-white/40 shadow-[0_0_30px_rgba(168,85,247,0.5)] transition active:scale-95 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed group"
           >
             {loading ? <Loader2 className="animate-spin" size={16} /> : <ShieldCheck size={16} />}
             Enter internal portal
