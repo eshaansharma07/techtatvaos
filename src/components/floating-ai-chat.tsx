@@ -90,16 +90,16 @@ export function FloatingAIChat() {
       {/* Floating Chat Bubble Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 text-white shadow-[0_0_30px_rgba(139,92,246,0.45)] hover:scale-110 active:scale-95 transition-all duration-300 group"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex h-13 w-13 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 text-white shadow-[0_0_30px_rgba(139,92,246,0.45)] hover:scale-110 active:scale-95 transition-all duration-300 group"
       >
         <span className="absolute -inset-1 rounded-full bg-violet-400/20 blur opacity-40 group-hover:opacity-75 transition-opacity" />
         <span className="absolute -inset-0.5 rounded-full border border-white/20 animate-pulse" />
-        {isOpen ? <X size={20} className="relative transition duration-300 rotate-90" /> : <MessageSquare size={20} className="relative transition duration-300" />}
+        {isOpen ? <X size={20} className="relative transition duration-300 rotate-90" /> : <MessageSquare size={19} className="relative transition duration-300" />}
       </button>
 
       {/* Interactive Chat Window */}
       <div
-        className={`fixed bottom-24 right-6 z-50 flex w-[335px] h-[480px] xs:w-[360px] sm:w-[380px] flex-col justify-between overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#0c0512]/92 backdrop-blur-2xl shadow-[0_30px_80px_rgba(20,8,26,0.65)] transition-all duration-300 transform origin-bottom-right ${
+        className={`fixed bottom-18 right-4 sm:bottom-24 sm:right-6 z-[70] flex w-[calc(100vw-2rem)] sm:w-[380px] h-[480px] max-h-[75vh] sm:max-h-[480px] flex-col justify-between overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#0c0512]/92 backdrop-blur-2xl shadow-[0_30px_80px_rgba(20,8,26,0.65)] transition-all duration-300 transform origin-bottom-right ${
           isOpen ? "scale-100 opacity-100 translate-y-0" : "scale-75 opacity-0 translate-y-10 pointer-events-none"
         }`}
       >

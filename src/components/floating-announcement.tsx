@@ -88,7 +88,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
 
   return (
     <div
-      className={`fixed bottom-6 left-1/2 z-[60] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 transition-all duration-500 ease-out ${
+      className={`fixed bottom-20 sm:bottom-6 left-1/2 z-[55] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 transition-all duration-500 ease-out ${
         visible
           ? "translate-y-0 opacity-100 scale-100"
           : "translate-y-8 opacity-0 scale-95"
@@ -110,29 +110,29 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
             hasDetails ? "cursor-pointer select-none hover:bg-white/[0.02]" : ""
           }`}
         >
-          <div className="relative flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5">
+          <div className="relative flex items-center gap-2 sm:gap-3 px-3 py-2.5 sm:px-5 sm:py-3.5">
             {/* Pulsing dot + icon */}
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <span className={`h-2 w-2 rounded-full ${cfg.dot} animate-pulse`} />
-              <Icon size={15} className="text-purple-400" />
+              <Icon size={14} className="text-purple-400" />
             </div>
 
             {/* Text content */}
             <div className="min-w-0 flex-1">
-              <p className="text-[12px] sm:text-[13px] font-bold text-white/80 leading-snug truncate">
+              <p className="text-[11px] sm:text-[13px] font-bold text-white/90 leading-snug truncate">
                 {data.announcementText}
               </p>
             </div>
 
             {/* Action link */}
             {data.announcementLink && (
-              <div onClick={(e) => e.stopPropagation()}>
+              <div onClick={(e) => e.stopPropagation()} className="shrink-0">
                 <Link
                   href={data.announcementLink}
-                  className="brutalist-btn-purple flex shrink-0 items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] sm:text-[11px] font-bold text-black border border-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)]"
+                  className="brutalist-btn-purple flex items-center gap-1 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-[10px] sm:text-[11px] font-bold text-black border border-black shadow-[1px_1px_0px_0px_rgba(255,255,255,0.8)] whitespace-nowrap"
                 >
                   {data.announcementLinkText || "View"}
-                  <ArrowRight size={11} className="transition group-hover:translate-x-0.5" />
+                  <ArrowRight size={10} className="transition group-hover:translate-x-0.5" />
                 </Link>
               </div>
             )}
@@ -140,7 +140,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
             {/* Chevron toggle indicator if details present */}
             {hasDetails && (
               <ChevronDown
-                size={16}
+                size={15}
                 className={`text-white/40 transition-transform duration-300 shrink-0 ${
                   expanded ? "rotate-180 text-white/70" : ""
                 }`}
@@ -148,10 +148,10 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
             )}
 
             {/* Dismiss */}
-            <div onClick={(e) => e.stopPropagation()}>
+            <div onClick={(e) => e.stopPropagation()} className="shrink-0">
               <button
                 onClick={handleDismiss}
-                className="flex shrink-0 items-center justify-center rounded-full p-1.5 text-white/25 transition hover:bg-white/[0.08] hover:text-white/60"
+                className="flex items-center justify-center rounded-full p-1 text-white/30 transition hover:bg-white/[0.08] hover:text-white/70"
                 aria-label="Dismiss announcement"
               >
                 <X size={14} />
