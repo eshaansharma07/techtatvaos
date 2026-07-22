@@ -6,12 +6,10 @@ import { PublicShell } from "@/components/public-shell";
 import { Reveal } from "@/components/reveal";
 import { getPublicHomeData, getMembershipDriveStatus } from "@/lib/public-data";
 import { AnimatedCounter } from "@/components/animated-counter";
+import { InteractiveHero3D } from "@/components/interactive-hero-3d";
+import { CommunityShowcase } from "@/components/community-showcase";
+import { InstagramFeed } from "@/components/instagram-feed";
 import { MobileInteractiveSections } from "@/components/mobile-interactive";
-import {
-  DeferredCommunityShowcase,
-  DeferredHero3D,
-  DeferredInstagramFeed
-} from "@/components/deferred-public-widgets";
 
 export const revalidate = 10;
 
@@ -46,45 +44,63 @@ export default async function Home() {
         MOBILE HERO — Center-aligned, dramatic, minimal (md:hidden)
         Height accounts for the h-20 (5rem) spacer in public-shell.
     ═══════════════════════════════════════════════════════════════════ */}
-    <section className="relative flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center overflow-hidden md:hidden spatial-grid-bg">
+    <section className="relative flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center px-4 py-8 overflow-hidden md:hidden spatial-grid-bg">
       {/* Cinematic background */}
-      <Image src="/tech-tatva-hero-v2.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_25%] opacity-20"/>
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black"/>
+      <Image src="/tech-tatva-hero-v2.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_25%] opacity-25"/>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/80 to-black"/>
 
-      {/* Center-aligned content */}
-      <div className="absolute top-1/4 z-10 flex w-full justify-center opacity-0 animate-in slide-in-from-bottom-5 fade-in duration-1000 fill-mode-forwards" style={{ animationDelay: "150ms" }}>
-        <div className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-blue-500 px-4 py-1.5 text-xs font-bold text-white shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
+      {/* Radiant Glass Hero Card */}
+      <div className="relative z-20 flex w-full max-w-sm flex-col items-center justify-center rounded-[2.25rem] border-2 border-purple-500/40 bg-[#0d071a]/92 p-7 text-center backdrop-blur-2xl shadow-[0_0_50px_rgba(139,92,246,0.3)] pointer-events-auto">
+        {/* Ambient top glow */}
+        <div className="absolute -top-12 left-1/2 h-28 w-48 -translate-x-1/2 rounded-full bg-purple-500/25 blur-3xl pointer-events-none" />
+
+        {/* Active Session Badge */}
+        <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/40 bg-purple-500/20 px-3.5 py-1 text-[11px] font-bold text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-400"></span>
           </span>
           ACTIVE SESSION
         </div>
-      </div>   {/* Main headline */}
-        <h1 className="mt-7 text-[13vw] font-extrabold leading-[1] tracking-[-0.05em] text-white">
-          Enter the<br/>next room.
+
+        {/* Main headline */}
+        <h1 className="mt-5 text-4xl font-extrabold leading-[1.08] tracking-[-0.03em] text-white">
+          Enter the<br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300">
+            next room.
+          </span>
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-5 max-w-[280px] text-[14px] leading-[1.65] text-white/50">
+        <p className="mt-3 max-w-[270px] text-[13px] leading-[1.6] text-white/70">
           Where students build, compete, and create what comes next.
         </p>
 
-        {/* Primary CTA */}
-        <div className="mt-8 flex w-full max-w-[280px] flex-col gap-3">
+        {/* Primary CTA Buttons */}
+        <div className="mt-6 flex w-full flex-col gap-3">
           {driveStatus && driveStatus.registrationEnabled ? (
-            <Link href="/join" className="brutalist-btn-purple group h-[52px] rounded-xl text-[15px] font-bold">
-              Join the club <ArrowRight size={16} className="transition group-active:translate-x-1"/>
+            <Link
+              href="/join"
+              className="brutalist-btn-purple relative z-30 flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[14px] font-extrabold text-white border-2 border-white/30 shadow-[0_0_25px_rgba(168,85,247,0.45)] transition active:scale-95"
+            >
+              Join the club <ArrowRight size={16} className="transition group-active:translate-x-1" />
             </Link>
           ) : (
-            <Link href="/events" className="brutalist-btn-cyan group h-[52px] rounded-xl text-[15px] font-bold">
-              Explore events <ArrowRight size={16} className="transition group-active:translate-x-1"/>
+            <Link
+              href="/events"
+              className="brutalist-btn-cyan relative z-30 flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[14px] font-extrabold text-white border-2 border-white/30 shadow-[0_0_25px_rgba(6,182,212,0.45)] transition active:scale-95"
+            >
+              Explore events <ArrowRight size={16} className="transition group-active:translate-x-1" />
             </Link>
           )}
-          <Link href="/teams" className="brutalist-btn-purple h-[44px] rounded-xl text-[13px] font-bold">
-            Meet the teams <ChevronRight size={14}/>
+          <Link
+            href="/teams"
+            className="relative z-30 flex h-[44px] w-full items-center justify-center gap-1.5 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-[13px] border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition active:scale-95"
+          >
+            Meet the teams <ChevronRight size={14} />
           </Link>
         </div>
+      </div>
 
       {/* Bottom edge fade-out line */}
       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500/20"/>
@@ -100,7 +116,7 @@ export default async function Home() {
       <div className="absolute inset-0 grid-bg opacity-[.06]"/>
 
       {/* Interactive Hologram 3D Core */}
-      <DeferredHero3D />
+      <InteractiveHero3D />
 
       <div className="relative mx-auto grid min-h-[790px] max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] items-center gap-8 px-6 py-16 lg:grid-cols-[1.05fr_.75fr]">
         <Reveal>
@@ -112,7 +128,9 @@ export default async function Home() {
             <p className="mt-8 max-w-2xl text-lg leading-9 text-white/62">
               Discover real club events, register as a candidate, explore teams, and follow the work Tech Tatva publishes for students.
             </p>
+ 
 
+ 
             <div className="mt-10 flex flex-wrap gap-4">
               {driveStatus && driveStatus.registrationEnabled ? (
                 <>
@@ -211,6 +229,8 @@ export default async function Home() {
             </Link>
           </div>
         </Reveal>
+
+
       </div>
 
 
@@ -227,7 +247,7 @@ export default async function Home() {
     <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 py-20 md:px-6 md:py-28"><Reveal><SectionTitle eyebrow="LIVE SIGNAL" title="A calendar built for momentum." copy="Public events appear here when registrations are open or event details are published."/></Reveal>{events.length?<><div className="grid gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-4">{events.map((e,i)=><Reveal key={e.slug} delay={i*.08}><EventCard event={e} index={i}/></Reveal>)}</div><Link href="/events" className="brutalist-btn-dark mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold">View the complete calendar <ArrowUpRight size={15}/></Link></>:<EmptyState title="No public events yet." copy="Check back soon for upcoming sessions, workshops, and registrations."/>}</section>
 
     {/* Dedicated Instagram posts feed */}
-    <DeferredInstagramFeed
+    <InstagramFeed
       handle={clubInfo?.instagramHandle}
       profileUrl={clubInfo?.instagramUrl}
       post1_image={clubInfo?.instagramPost1_image}
@@ -310,8 +330,9 @@ export default async function Home() {
     )}
 
     {achievements.length ? <section className="hidden md:block mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-6 py-20"><div className="grid gap-4 md:grid-cols-3">{achievements.slice(0,3).map((item:any)=><div className="glass-brutalist rounded-[22px] p-6" key={item._id}><p className="text-[10px] tracking-[.2em] text-orange-400 font-bold">{item.kind || "ACHIEVEMENT"}</p><p className="mt-4 text-lg font-bold text-white">{item.title}</p><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p></div>)}</div></section> : null}
+    
     {/* Real Human Presence: Community Showcase Grid */}
-    <DeferredCommunityShowcase galleryData={gallery} />
+    <CommunityShowcase galleryData={gallery} />
  
 
   </PublicShell>;

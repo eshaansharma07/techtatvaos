@@ -48,7 +48,6 @@ export function CustomCursor({}: CustomCursorProps) {
   const pos = useRef({ x: -100, y: -100 });
   const scale = useRef(1);
   const targetScale = useRef(1);
-  const hoverTypeRef = useRef<typeof hoverType>("default");
 
   useEffect(() => {
     setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
@@ -82,13 +81,6 @@ export function CustomCursor({}: CustomCursorProps) {
     const handleMouseMove = (e: MouseEvent) => {
       mouseCoords.current = { x: e.clientX, y: e.clientY };
 
-      if (document.body.classList.contains("force-native-cursor")) {
-        if (cursorRef.current) cursorRef.current.style.opacity = "0";
-        if (glowRef.current) glowRef.current.style.opacity = "0";
-        document.body.classList.remove("has-custom-cursor");
-        return;
-      }
-
       const target = e.target as HTMLElement;
       if (!target) return;
 
@@ -109,12 +101,22 @@ export function CustomCursor({}: CustomCursorProps) {
       const hoverCrd = target.closest(".glass, .premium-card, .event-card");
       const hoverImg = target.closest("img, video, [role='img']");
 
-      const nextHoverType = hoverBtn ? "button" : hoverImg ? "image" : hoverCrd ? "card" : hoverLnk ? "link" : "default";
-      if (hoverTypeRef.current !== nextHoverType) {
-        hoverTypeRef.current = nextHoverType;
-        setHoverType(nextHoverType);
+      if (hoverBtn) {
+        setHoverType("button");
+        targetScale.current = 1.0;
+      } else if (hoverImg) {
+        setHoverType("image");
+        targetScale.current = 1.35;
+      } else if (hoverCrd) {
+        setHoverType("card");
+        targetScale.current = 1.25;
+      } else if (hoverLnk) {
+        setHoverType("link");
+        targetScale.current = 1.15;
+      } else {
+        setHoverType("default");
+        targetScale.current = 1.0;
       }
-      targetScale.current = nextHoverType === "image" ? 1.35 : nextHoverType === "card" ? 1.25 : nextHoverType === "link" ? 1.15 : 1.0;
     };
 
     const handleMouseLeave = () => {
@@ -128,8 +130,7 @@ export function CustomCursor({}: CustomCursorProps) {
     };
 
     const handleMouseUp = () => {
-      const currentHoverType = hoverTypeRef.current;
-      targetScale.current = currentHoverType === "image" ? 1.35 : (currentHoverType === "card" ? 1.25 : currentHoverType === "link" ? 1.15 : 1.0);
+      targetScale.current = hoverType === "image" ? 1.35 : (hoverType === "card" ? 1.25 : 1.0);
     };
 
     const updatePhysics = () => {
@@ -165,7 +166,7 @@ export function CustomCursor({}: CustomCursorProps) {
       window.removeEventListener("mouseup", handleMouseUp);
       cancelAnimationFrame(rafId);
     };
-  }, [isTouchDevice, prefersReducedMotion]);
+  }, [isTouchDevice, prefersReducedMotion, hoverType]);
 
   if (isTouchDevice || prefersReducedMotion) return null;
 
@@ -175,12 +176,6 @@ export function CustomCursor({}: CustomCursorProps) {
         @media (pointer: fine) {
           body.has-custom-cursor {
             cursor: none !important;
-          }
-          body.force-native-cursor,
-          body.force-native-cursor *,
-          body.has-custom-cursor.force-native-cursor,
-          body.has-custom-cursor.force-native-cursor * {
-            cursor: auto !important;
           }
           body.has-custom-cursor a,
           body.has-custom-cursor button,
@@ -196,11 +191,6 @@ export function CustomCursor({}: CustomCursorProps) {
           body.has-custom-cursor [contenteditable="true"] {
             cursor: text !important;
           }
-          body.force-native-cursor input,
-          body.force-native-cursor textarea,
-          body.force-native-cursor [contenteditable="true"] {
-            cursor: text !important;
-          }
         }
         
         .custom-cursor-container {
@@ -212,11 +202,6 @@ export function CustomCursor({}: CustomCursorProps) {
           pointer-events: none;
           z-index: 99999;
           will-change: transform;
-        }
-
-        body.force-native-cursor .custom-cursor-container,
-        body.force-native-cursor .custom-cursor-glow {
-          opacity: 0 !important;
         }
 
         .custom-cursor-glow {

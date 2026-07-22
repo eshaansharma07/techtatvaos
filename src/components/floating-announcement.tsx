@@ -88,7 +88,7 @@ export function FloatingAnnouncement({ data }: { data: AnnouncementData }) {
 
   return (
     <div
-      className={`fixed bottom-20 sm:bottom-6 left-1/2 z-[55] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 transition-all duration-500 ease-out ${
+      className={`fixed bottom-4 sm:bottom-6 left-1/2 z-[55] w-[calc(100%-1.5rem)] sm:w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 transition-all duration-500 ease-out ${
         visible
           ? "translate-y-0 opacity-100 scale-100"
           : "translate-y-8 opacity-0 scale-95"

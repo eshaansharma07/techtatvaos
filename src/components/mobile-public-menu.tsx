@@ -49,14 +49,11 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      document.body.classList.add("force-native-cursor");
     } else {
       document.body.style.overflow = "";
-      document.body.classList.remove("force-native-cursor");
     }
     return () => {
       document.body.style.overflow = "";
-      document.body.classList.remove("force-native-cursor");
     };
   }, [isOpen]);
 
@@ -158,3 +155,4 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
     </div>
   );
 }
+

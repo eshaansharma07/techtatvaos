@@ -6,7 +6,6 @@ export function PremiumBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [canAnimateCanvas, setCanAnimateCanvas] = useState(false);
 
   const mouseCoords = useRef({ x: 0, y: 0 });
   const targetCoords = useRef({ x: 0, y: 0 });
@@ -20,19 +19,7 @@ export function PremiumBackground() {
   }, []);
 
   useEffect(() => {
-    const query = window.matchMedia("(min-width: 768px)");
-    const update = () => setCanAnimateCanvas(query.matches && document.visibilityState === "visible");
-    update();
-    query.addEventListener("change", update);
-    document.addEventListener("visibilitychange", update);
-    return () => {
-      query.removeEventListener("change", update);
-      document.removeEventListener("visibilitychange", update);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (prefersReducedMotion || !canAnimateCanvas) return;
+    if (prefersReducedMotion) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -42,7 +29,7 @@ export function PremiumBackground() {
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [prefersReducedMotion, canAnimateCanvas]);
+  }, [prefersReducedMotion]);
 
   const speedMultiplier = useRef(1);
 
@@ -120,13 +107,18 @@ export function PremiumBackground() {
       }
     }
 
-    const particleCount = Math.min(24, Math.floor((canvas.width * canvas.height) / 65000));
+    const particleCount = Math.min(32, Math.floor((canvas.width * canvas.height) / 40000));
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle());
     }
 
     const tick = () => {
+      if (window.innerWidth < 768 || document.visibilityState === "hidden") {
+        animationId = requestAnimationFrame(tick);
+        return;
+      }
+
       mouseCoords.current.x += (targetCoords.current.x - mouseCoords.current.x) * 0.045;
       mouseCoords.current.y += (targetCoords.current.y - mouseCoords.current.y) * 0.045;
 
@@ -147,13 +139,13 @@ export function PremiumBackground() {
       animationId = requestAnimationFrame(tick);
     };
 
-    if (!prefersReducedMotion && canAnimateCanvas) tick();
+    tick();
 
     return () => {
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationId);
     };
-  }, [prefersReducedMotion, canAnimateCanvas]);
+  }, [prefersReducedMotion]);
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[-2] overflow-hidden bg-ink">

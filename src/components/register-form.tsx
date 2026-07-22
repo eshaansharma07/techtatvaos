@@ -65,24 +65,21 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      document.body.classList.add("force-native-cursor");
     } else {
       document.body.style.overflow = "unset";
-      document.body.classList.remove("force-native-cursor");
     }
     return () => {
       document.body.style.overflow = "unset";
-      document.body.classList.remove("force-native-cursor");
     };
   }, [isOpen]);
 
   // Form field specifications
   const fields = [
-    { name: "name", label: "Full Name", type: "text", icon: User },
-    { name: "email", label: "University Email", type: "email", icon: Mail },
-    { name: "uid", label: "University UID", type: "text", icon: FileText },
-    { name: "program", label: "Degree Program", type: "text", icon: Layers },
-    { name: "semester", label: "Current Semester", type: "number", icon: Sparkles }
+    { name: "name", label: "Full Name", type: "text", placeholder: "Eshaan Sharma", icon: User },
+    { name: "email", label: "University Email", type: "email", placeholder: "eshaan@university.edu", icon: Mail },
+    { name: "uid", label: "University UID", type: "text", placeholder: "24BAI70387", icon: FileText },
+    { name: "program", label: "Degree Program", type: "text", placeholder: "B.E. CSE AI/ML", icon: Layers },
+    { name: "semester", label: "Current Semester", type: "number", placeholder: "4", icon: Sparkles }
   ] as const;
 
   // Validation functions
@@ -136,14 +133,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   }, [isStep1Valid, isLeaderValid, allMembersValid]);
 
   const activeMemberCount = teamSize - 1;
-
-  const validMemberCount = useMemo(() => {
-    let count = 0;
-    for (let i = 0; i < activeMemberCount; i++) {
-      if (isMemberValid(i)) count++;
-    }
-    return count;
-  }, [activeMemberCount, members]);
 
   async function submitRegistration(e: React.FormEvent) {
     e.preventDefault();
@@ -350,10 +339,11 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     {mode === "team" && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pt-4 border-t border-white/5">
                         <label className="block text-[10px] font-black tracking-widest text-white/40 uppercase">
-                          TEAM NAME
+                          TEAM SQUAD ALIAS
                           <input 
                             value={teamName}
                             onChange={(e) => setTeamName(e.target.value)}
+                            placeholder="e.g. ALPHA CRADLE"
                             required
                             className="mt-2 w-full rounded-xl border border-white/10 bg-black/45 px-3.5 py-3.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-purple-500/50 transition-all font-mono"
                           />
@@ -395,7 +385,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {fields.map(({ name, label, type, icon: Icon }) => {
+                      {fields.map(({ name, label, type, placeholder, icon: Icon }) => {
                         const val = leader[name];
                         let isValid = false;
                         if (name === "name") isValid = isNameValid(val);
@@ -417,6 +407,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                                 type={type} 
                                 value={val}
                                 onChange={(e) => handleInputChange(name, e.target.value)}
+                                placeholder={placeholder}
                                 required
                                 className={`w-full rounded-xl border bg-black/45 pl-10 pr-9 py-3 text-xs text-white placeholder:text-white/20 outline-none transition-all ${
                                   val 
@@ -451,67 +442,53 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                       <p className="text-xs text-white/50 mt-1 leading-relaxed">Provide details for your {activeMemberCount} squad members. Select tabs to fill them individually.</p>
                     </div>
 
-                    {/* Member Selection Instructions & Tabs */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-[10px] font-mono tracking-wider text-purple-300/80 uppercase">
-                        <span>SELECT TEAM MEMBER TO FILL:</span>
-                        <span className="text-white/40">Step {activeTab + 1} of {activeMemberCount}</span>
+                    {/* Member Horizontal Tabs */}
+                    <div className="flex items-center gap-2 border-b border-white/5 pb-2 overflow-x-auto scrollbar-none">
+                      <div className="inline-flex items-center gap-1 rounded-lg border border-purple-500/10 bg-purple-500/5 px-2.5 py-1 text-[9px] font-bold text-purple-400 select-none opacity-60">
+                        <Check size={10} /> LEADER
                       </div>
-
-                      <div className="flex items-center gap-2 border-b border-white/10 pb-3 overflow-x-auto scrollbar-none">
-                        <div className="inline-flex items-center gap-1 rounded-xl border border-purple-500/20 bg-purple-500/10 px-3 py-2 text-[10px] font-bold text-purple-300 select-none shrink-0">
-                          <Check size={11} /> LEADER (FILLED)
-                        </div>
-                        {Array.from({ length: activeMemberCount }).map((_, idx) => {
-                          const mIndex = idx;
-                          const isSelected = activeTab === mIndex;
-                          const isValid = isMemberValid(mIndex);
-                          const hasContent = members[mIndex] && Object.values(members[mIndex]).some(v => v !== "");
-                          return (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => setActiveTab(mIndex)}
-                              className={`rounded-xl px-3.5 py-2 text-[10px] font-mono font-bold tracking-wider uppercase transition flex items-center gap-2 shrink-0 cursor-pointer ${
-                                isSelected 
-                                  ? "bg-purple-500/20 border-2 border-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)] scale-[1.02]" 
-                                  : isValid
-                                    ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20"
-                                    : hasContent
-                                      ? "bg-rose-500/10 border border-rose-500/30 text-rose-300 hover:bg-rose-500/20"
-                                      : "bg-black/50 border border-white/10 text-white/50 hover:text-white hover:border-white/20"
-                              }`}
-                            >
-                              <span>MEMBER {idx + 2}</span>
-                              {isValid ? (
-                                <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-emerald-500 text-black text-[8px]">✓</span>
-                              ) : hasContent ? (
-                                <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" />
+                      {Array.from({ length: activeMemberCount }).map((_, idx) => {
+                        const mIndex = idx;
+                        const isSelected = activeTab === mIndex;
+                        const isValid = isMemberValid(mIndex);
+                        const hasContent = members[mIndex] && Object.values(members[mIndex]).some(v => v !== "");
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setActiveTab(mIndex)}
+                            className={`rounded-lg px-3 py-1.5 text-[9px] font-mono font-bold tracking-wider uppercase transition flex items-center gap-1.5 shrink-0 ${
+                              isSelected 
+                                ? "bg-white/10 border border-white/20 text-white" 
+                                : "bg-black/30 border border-white/5 text-white/40 hover:text-white/70"
+                            }`}
+                          >
+                            <span>MEMBER {idx + 2}</span>
+                            {hasContent ? (
+                              isValid ? (
+                                <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
                               ) : (
-                                <span className="text-[9px] text-white/30">(Empty)</span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
+                                <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+                              )
+                            ) : (
+                              <span className="h-1.5 w-1.5 rounded-full bg-white/10" />
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
 
                     {/* Active Member Panel Inputs */}
-                    <div className="glass-brutalist rounded-2xl p-4 md:p-6 border border-white/10 bg-black/30 space-y-4 relative">
-                      <div className="flex items-center justify-between text-[10px] font-mono font-bold text-white/60 border-b border-white/5 pb-2">
-                        <span className="flex items-center gap-2 text-purple-400">
-                          <Users size={13} />
-                          FILLING MEMBER {activeTab + 2} DETAILS
-                        </span>
-                        {isMemberValid(activeTab) ? (
-                          <span className="text-emerald-400 flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20"><Check size={11} /> VALID</span>
-                        ) : (
-                          <span className="text-amber-400/80 text-[9px]">Fill all fields below</span>
+                    <div className="glass-brutalist rounded-2xl p-4 md:p-6 border border-white/5 bg-black/20 space-y-4">
+                      <div className="flex items-center justify-between text-[10px] font-mono font-bold text-white/40">
+                        <span>CONFIGURING MEMBER {activeTab + 2} SQUADSLOT</span>
+                        {isMemberValid(activeTab) && (
+                          <span className="text-purple-400 flex items-center gap-1"><Check size={11} /> READY</span>
                         )}
                       </div>
 
                       <div className="grid gap-3 sm:grid-cols-2">
-                        {fields.map(({ name, label, type, icon: Icon }) => {
+                        {fields.map(({ name, label, type, placeholder, icon: Icon }) => {
                           const val = members[activeTab]?.[name] || "";
                           let isValid = false;
                           if (name === "name") isValid = isNameValid(val);
@@ -533,11 +510,12 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                                   type={type} 
                                   value={val}
                                   onChange={(e) => handleMemberChange(activeTab, name, e.target.value)}
+                                  placeholder={placeholder}
                                   required
                                   className={`w-full rounded-xl border bg-black/45 pl-10 pr-9 py-3 text-xs text-white placeholder:text-white/20 outline-none transition-all ${
                                     val 
                                       ? isValid 
-                                        ? "border-emerald-500/30 focus:border-emerald-500" 
+                                        ? "border-purple-500/30 focus:border-purple-500" 
                                         : "border-red-500/30 focus:border-red-500" 
                                       : "border-white/10 focus:border-purple-500/50"
                                   }`}
@@ -545,7 +523,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                                 {val && (
                                   <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
                                     {isValid ? (
-                                      <Check size={13} className="text-emerald-400" />
+                                      <Check size={13} className="text-purple-400" />
                                     ) : (
                                       <AlertCircle size={13} className="text-rose-400 animate-pulse" />
                                     )}
@@ -555,36 +533,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                             </div>
                           );
                         })}
-                      </div>
-
-                      {/* In-card Action Button to easily jump to next member */}
-                      <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-3">
-                        <span className="text-[10px] text-white/40 font-mono">
-                          {isMemberValid(activeTab) 
-                            ? `Member ${activeTab + 2} complete!` 
-                            : `Fill out details above`}
-                        </span>
-                        
-                        {activeTab < activeMemberCount - 1 ? (
-                          <button
-                            type="button"
-                            onClick={() => setActiveTab(activeTab + 1)}
-                            disabled={!isMemberValid(activeTab)}
-                            className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-purple-600 hover:bg-purple-500 text-white flex items-center gap-1.5 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-purple-600/20"
-                          >
-                            <span>Save & Next Member (Member {activeTab + 3})</span>
-                            <ArrowRight size={12} />
-                          </button>
-                        ) : allMembersValid ? (
-                          <button
-                            type="button"
-                            onClick={() => setStep(4)}
-                            className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 transition cursor-pointer shadow-lg shadow-emerald-600/20"
-                          >
-                            <span>All Members Ready — Go to Review</span>
-                            <Check size={12} />
-                          </button>
-                        ) : null}
                       </div>
                     </div>
                   </motion.div>
@@ -761,22 +709,15 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         )}
                       </button>
                     ) : (
-                      <div className="flex items-center gap-3">
-                        {step === 3 && mode === "team" && !allMembersValid && (
-                          <span className="text-amber-400 text-[10px] font-semibold hidden md:block">
-                            {validMemberCount}/{activeMemberCount} members
-                          </span>
-                        )}
-                        <button
-                          type="button"
-                          disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 ? !allMembersValid : false}
-                          onClick={() => setStep(prev => prev + 1)}
-                          className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-30 disabled:cursor-not-allowed"
-                        >
-                          <span>Continue</span>
-                          <ArrowRight size={13} />
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 ? !allMembersValid : false}
+                        onClick={() => setStep(prev => prev + 1)}
+                        className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
+                      >
+                        <span>Continue</span>
+                        <ArrowRight size={13} />
+                      </button>
                     )}
                   </div>
                 </div>
