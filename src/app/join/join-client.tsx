@@ -725,7 +725,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
 
               {/* Membership Badge Card */}
               <Reveal delay={0.2}>
-                <div className="flex flex-col items-center justify-center w-full max-w-full overflow-hidden sm:overflow-visible pt-4 sm:pt-0">
+                <div className="flex flex-col items-center justify-center w-full max-w-full pt-4 sm:pt-0">
 
                   {/* Floating card wrapper with glow */}
                   <div className="relative origin-top scale-[0.85] sm:scale-100 -mb-10 sm:mb-0" style={{ animation: 'cardFloat 6s ease-in-out infinite' }}>
