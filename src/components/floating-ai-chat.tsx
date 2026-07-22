@@ -90,7 +90,7 @@ export function FloatingAIChat() {
       {/* Floating Chat Bubble Button — Laptop/Desktop only */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="hidden md:flex fixed bottom-6 right-6 z-[90] h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 text-white shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 group pointer-events-auto"
+        className="hidden lg:flex fixed bottom-6 right-6 z-[90] h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 text-white shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 group pointer-events-auto"
         aria-label="Open AI Assistant"
       >
         <span className="absolute -inset-1 rounded-full bg-violet-400/20 blur opacity-40 group-hover:opacity-75 transition-opacity" />
@@ -100,7 +100,7 @@ export function FloatingAIChat() {
 
       {/* Interactive Chat Window — Laptop/Desktop only */}
       <div
-        className={`hidden md:flex fixed bottom-24 right-6 z-[100] w-[380px] h-[500px] flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-purple-500/30 bg-[#0c0512]/96 backdrop-blur-2xl shadow-[0_30px_90px_rgba(0,0,0,0.8)] transition-all duration-300 transform origin-bottom-right ${
+        className={`hidden lg:flex fixed bottom-24 right-6 z-[100] w-[380px] h-[500px] flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-purple-500/30 bg-[#0c0512]/96 backdrop-blur-2xl shadow-[0_30px_90px_rgba(0,0,0,0.8)] transition-all duration-300 transform origin-bottom-right ${
           isOpen ? "scale-100 opacity-100 translate-y-0 pointer-events-auto" : "scale-75 opacity-0 translate-y-10 pointer-events-none"
         }`}
       >

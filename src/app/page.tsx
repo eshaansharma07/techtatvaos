@@ -50,15 +50,15 @@ export default async function Home() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/80 to-black"/>
 
       {/* Radiant Glass Hero Card */}
-      <div className="relative z-20 flex w-full max-w-sm flex-col items-center justify-center rounded-[2.25rem] border-2 border-purple-500/40 bg-[#0d071a]/92 p-7 text-center backdrop-blur-2xl shadow-[0_0_50px_rgba(139,92,246,0.3)] pointer-events-auto">
+      <div className="relative z-50 flex w-full max-w-sm flex-col items-center justify-center rounded-[2.25rem] border-2 border-purple-400/60 bg-[#120524]/95 p-7 text-center backdrop-blur-3xl shadow-[0_0_60px_rgba(168,85,247,0.45)]">
         {/* Ambient top glow */}
-        <div className="absolute -top-12 left-1/2 h-28 w-48 -translate-x-1/2 rounded-full bg-purple-500/25 blur-3xl pointer-events-none" />
+        <div className="absolute -top-12 left-1/2 h-28 w-48 -translate-x-1/2 rounded-full bg-purple-400/30 blur-3xl pointer-events-none" />
 
         {/* Active Session Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/40 bg-purple-500/20 px-3.5 py-1 text-[11px] font-bold text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+        <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/60 bg-purple-500/25 px-3.5 py-1 text-[11px] font-bold text-purple-100 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-400"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-300 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-300"></span>
           </span>
           ACTIVE SESSION
         </div>
@@ -72,30 +72,30 @@ export default async function Home() {
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-3 max-w-[270px] text-[13px] leading-[1.6] text-white/70">
+        <p className="mt-3 max-w-[270px] text-[13px] leading-[1.6] text-white/80">
           Where students build, compete, and create what comes next.
         </p>
 
         {/* Primary CTA Buttons */}
-        <div className="mt-6 flex w-full flex-col gap-3">
+        <div className="mt-6 flex w-full flex-col gap-3 relative z-50">
           {driveStatus && driveStatus.registrationEnabled ? (
             <Link
               href="/join"
-              className="brutalist-btn-purple relative z-30 flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[14px] font-extrabold text-white border-2 border-white/30 shadow-[0_0_25px_rgba(168,85,247,0.45)] transition active:scale-95"
+              className="brutalist-btn-purple relative flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[14px] font-extrabold text-white border-2 border-white/40 shadow-[0_0_30px_rgba(168,85,247,0.5)] transition active:scale-95 cursor-pointer"
             >
               Join the club <ArrowRight size={16} className="transition group-active:translate-x-1" />
             </Link>
           ) : (
             <Link
               href="/events"
-              className="brutalist-btn-cyan relative z-30 flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[14px] font-extrabold text-white border-2 border-white/30 shadow-[0_0_25px_rgba(6,182,212,0.45)] transition active:scale-95"
+              className="brutalist-btn-cyan relative flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[14px] font-extrabold text-white border-2 border-white/40 shadow-[0_0_30px_rgba(6,182,212,0.5)] transition active:scale-95 cursor-pointer"
             >
               Explore events <ArrowRight size={16} className="transition group-active:translate-x-1" />
             </Link>
           )}
           <Link
             href="/teams"
-            className="relative z-30 flex h-[44px] w-full items-center justify-center gap-1.5 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-[13px] border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition active:scale-95"
+            className="relative flex h-[44px] w-full items-center justify-center gap-1.5 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-[13px] border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition active:scale-95 cursor-pointer"
           >
             Meet the teams <ChevronRight size={14} />
           </Link>
