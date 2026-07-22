@@ -137,6 +137,14 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
   const activeMemberCount = teamSize - 1;
 
+  const validMemberCount = useMemo(() => {
+    let count = 0;
+    for (let i = 0; i < activeMemberCount; i++) {
+      if (isMemberValid(i)) count++;
+    }
+    return count;
+  }, [activeMemberCount, members]);
+
   async function submitRegistration(e: React.FormEvent) {
     e.preventDefault();
     if (!isFormValid) {
@@ -479,6 +487,12 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                       })}
                     </div>
 
+                    {/* Progress counter */}
+                    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-mono font-bold tracking-wider ${allMembersValid ? 'bg-purple-500/10 border border-purple-500/20 text-purple-400' : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'}`}>
+                      <span>{validMemberCount} / {activeMemberCount} MEMBERS CONFIGURED</span>
+                      {!allMembersValid && <span className="text-white/30">— Fill all members to continue</span>}
+                    </div>
+
                     {/* Active Member Panel Inputs */}
                     <div className="glass-brutalist rounded-2xl p-4 md:p-6 border border-white/5 bg-black/20 space-y-4">
                       <div className="flex items-center justify-between text-[10px] font-mono font-bold text-white/40">
@@ -709,15 +723,22 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         )}
                       </button>
                     ) : (
-                      <button
-                        type="button"
-                        disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 ? !allMembersValid : false}
-                        onClick={() => setStep(prev => prev + 1)}
-                        className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
-                      >
-                        <span>Continue</span>
-                        <ArrowRight size={13} />
-                      </button>
+                      <div className="flex items-center gap-3">
+                        {step === 3 && mode === "team" && !allMembersValid && (
+                          <span className="text-amber-400 text-[10px] font-semibold hidden md:block">
+                            {validMemberCount}/{activeMemberCount} members
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 ? !allMembersValid : false}
+                          onClick={() => setStep(prev => prev + 1)}
+                          className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <span>Continue</span>
+                          <ArrowRight size={13} />
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
