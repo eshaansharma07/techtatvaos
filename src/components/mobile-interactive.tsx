@@ -6,58 +6,72 @@ import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, Orbit, Sparkles, U
 /* ─── Horizontal Swipe Carousel ─── */
 function SwipeCarousel({ children, label }: { children: React.ReactNode[]; label?: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
   const total = children.length;
+
+  // For loop effect, duplicate children if more than 1
+  const displayChildren = total > 1 ? [...children, ...children] : children;
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const handler = () => {
-      const scrollLeft = el.scrollLeft;
-      const cardWidth = el.offsetWidth * 0.78;
-      setActive(Math.round(scrollLeft / cardWidth));
-    };
-    el.addEventListener("scroll", handler, { passive: true });
-    return () => el.removeEventListener("scroll", handler);
-  }, []);
+    if (!el || total <= 1) return;
+    
+    let isInteracting = false;
+    let animationId: number;
 
-  const scrollTo = (i: number) => {
-    const el = ref.current;
-    if (!el) return;
-    const cardWidth = el.offsetWidth * 0.78;
-    el.scrollTo({ left: cardWidth * i, behavior: "smooth" });
-  };
+    const setInteracting = () => { isInteracting = true; };
+    const clearInteracting = () => { isInteracting = false; };
+
+    el.addEventListener('touchstart', setInteracting, { passive: true });
+    el.addEventListener('touchend', clearInteracting, { passive: true });
+    el.addEventListener('mousedown', setInteracting);
+    el.addEventListener('mouseup', clearInteracting);
+    el.addEventListener('mouseleave', clearInteracting);
+
+    const step = () => {
+      if (!isInteracting) {
+        el.scrollLeft += 0.75; // speed of the loop
+        
+        const halfWidth = el.scrollWidth / 2;
+        if (el.scrollLeft >= halfWidth) {
+           el.scrollLeft -= halfWidth;
+        }
+      }
+      animationId = requestAnimationFrame(step);
+    };
+    
+    animationId = requestAnimationFrame(step);
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+      el.removeEventListener('touchstart', setInteracting);
+      el.removeEventListener('touchend', clearInteracting);
+      el.removeEventListener('mousedown', setInteracting);
+      el.removeEventListener('mouseup', clearInteracting);
+      el.removeEventListener('mouseleave', clearInteracting);
+    };
+  }, [total]);
+
+  const containerClass = total === 1 
+    ? "flex gap-4 overflow-x-auto px-5 pb-2 scrollbar-hide justify-center"
+    : "flex gap-4 overflow-x-auto px-5 pb-2 scrollbar-hide";
 
   return (
     <div className="relative">
       {label && (
         <div className="flex items-center justify-between px-5 mb-4">
           <span className="text-[9px] font-bold tracking-[.3em] text-purple-400 uppercase">{label}</span>
-          <div className="flex gap-1.5">
-            {Array.from({ length: total }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => scrollTo(i)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === active ? "w-5 bg-purple-500" : "w-1.5 bg-white/15"
-                }`}
-              />
-            ))}
-          </div>
         </div>
       )}
       <div
         ref={ref}
-        className="flex gap-4 overflow-x-auto px-5 pb-2 snap-x snap-mandatory scrollbar-hide"
+        className={containerClass}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
       >
-        {children.map((child, i) => (
-          <div key={i} className="w-[78%] flex-shrink-0 snap-start">
+        {displayChildren.map((child, i) => (
+          <div key={i} className={total === 1 ? "w-full max-w-[320px] flex-shrink-0" : "w-[78%] flex-shrink-0"}>
             {child}
           </div>
         ))}
-        {/* End spacer for last card visibility */}
-        <div className="w-[22%] flex-shrink-0" />
       </div>
     </div>
   );
