@@ -43,10 +43,10 @@ export function InviteAcceptForm() {
         <label className="block text-[10px] font-semibold tracking-[.18em] text-white/35">PASSWORD<input value={password} onChange={(event)=>setPassword(event.target.value)} type="password" className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.045] px-4 py-4 text-sm text-white outline-none focus:border-violet-300/60"/></label>
       </div>
       {error ? <div className="mt-4 rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-xs leading-5 text-rose-100">{error}</div> : null}
-      <button disabled={loading} className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-4 text-sm font-semibold text-black transition hover:bg-violet-100 disabled:opacity-70">
+      <button disabled={loading} className="brutalist-btn-purple relative mt-6 flex w-full min-h-[3.75rem] items-center justify-center gap-2 rounded-2xl text-[14px] font-extrabold text-black border-2 border-white/40 shadow-[0_0_30px_rgba(168,85,247,0.5)] transition active:scale-95 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed group">
         {loading ? <Loader2 className="animate-spin" size={16} /> : <ShieldCheck size={16} />}
         Activate portal account
-        <ArrowRight size={16} />
+        <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
       </button>
     </form>
   );

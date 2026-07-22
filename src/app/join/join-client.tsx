@@ -575,8 +575,8 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
             <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-center">
               
               {/* Form Side */}
-              <Reveal delay={0.1}>
-                <div className="glass-brutalist rounded-3xl p-6 sm:p-8">
+              <Reveal delay={0.1} className="min-w-0">
+                <div className="glass-brutalist rounded-3xl p-6 sm:p-8 min-w-0">
                   
                   <AnimatePresence mode="wait">
                     {step === 5 && success ? (
@@ -629,17 +629,17 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                     ) : (
                       <div key="wizard-steps">
                         {/* Professional Wizard Header */}
-                        <div className="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-6">
-                          <div className="flex items-center gap-2.5">
+                        <div className="flex flex-wrap items-center justify-between gap-y-3 border-b border-white/[0.06] pb-4 mb-6">
+                          <div className="flex flex-wrap items-center gap-2.5">
                             <span className="font-sans text-xs font-bold text-white uppercase tracking-wider">
                               {stepsContent[step].title}
                             </span>
-                            <span className="h-3 w-px bg-white/[0.12]" />
+                            <span className="hidden sm:block h-3 w-px bg-white/[0.12]" />
                             <span className="font-sans text-[10px] text-white/40 font-semibold uppercase tracking-wider">
                               Step {step + 1} of 5
                             </span>
                           </div>
-                          <span className="font-sans text-[9px] font-bold tracking-wider text-purple-400">
+                          <span className="font-sans text-[9px] font-bold tracking-wider text-purple-400 mt-1 sm:mt-0">
                             {source.toUpperCase()} STATUS
                           </span>
                         </div>
@@ -724,11 +724,11 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
               </Reveal>
 
               {/* Membership Badge Card */}
-              <Reveal delay={0.2}>
-                <div className="flex flex-col items-center justify-center">
+              <Reveal delay={0.2} className="min-w-0">
+                <div className="flex flex-col items-center justify-center w-full max-w-full pt-4 sm:pt-0">
 
                   {/* Floating card wrapper with glow */}
-                  <div className="relative" style={{ animation: 'cardFloat 6s ease-in-out infinite' }}>
+                  <div className="relative origin-top scale-[0.85] sm:scale-100 -mb-10 sm:mb-0" style={{ animation: 'cardFloat 6s ease-in-out infinite' }}>
                     {/* Outer glow ring */}
                     <div 
                       className="absolute -inset-3 rounded-[28px] pointer-events-none"
@@ -748,7 +748,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
                         setTiltCoords({ x: 0, y: 0 });
                       }}
                       style={{ transform: cardTransform, transition: "transform 0.15s ease-out" }}
-                      className="membership-card-shimmer relative w-[380px] max-w-full rounded-[18px] overflow-hidden cursor-pointer"
+                      className="membership-card-shimmer relative w-[380px] rounded-[18px] overflow-hidden cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                     >
                       {/* Fixed aspect ratio */}
                       <div className="relative w-full" style={{ paddingBottom: "63%" }}>

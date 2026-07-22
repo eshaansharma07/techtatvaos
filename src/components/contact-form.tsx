@@ -32,7 +32,7 @@ export function ContactForm() {
   return (
     <form
       action={submit}
-      className="glass-brutalist grid gap-5 rounded-[2.5rem] p-6 md:grid-cols-2 md:p-10"
+      className="glass-brutalist grid gap-5 rounded-[2.5rem] p-6 md:grid-cols-2 md:p-10 min-w-0"
     >
       {[
         ["name", "Full Name", "text", "Eshaan Sharma"],

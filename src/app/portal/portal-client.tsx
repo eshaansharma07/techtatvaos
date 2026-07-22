@@ -2474,7 +2474,6 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [downloadingKey, setDownloadingKey] = useState("");
 
   const [settings, setSettings] = useState({
     certEventName: "",
@@ -2579,7 +2578,7 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
           }));
         }
         if (!silent) setPanel("Certificate configuration saved successfully.");
-        return json;
+        return true;
       } else {
         setPanel(json.error || "Failed to save configurations.");
       }
@@ -2590,102 +2589,6 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
       setSaving(false);
     }
     return false;
-  }
-
-  function candidateKey(candidate: any) {
-    return candidate.id || candidate.user || `${candidate.recipientName || "candidate"}-${candidate.email || candidate.uid || ""}`;
-  }
-
-  function findCandidateIndex(candidate: any) {
-    const key = candidateKey(candidate);
-    return candidates.findIndex((item) => candidateKey(item) === key);
-  }
-
-  function certificateDownloadUrl(candidate: any) {
-    const params = new URLSearchParams({
-      event: selected,
-      format: "pdf"
-    });
-    if (candidate.id) params.set("certificateId", candidate.id);
-    if (candidate.user) params.set("candidate", candidate.user);
-    return `/api/certificates/export?${params.toString()}`;
-  }
-
-  function triggerDownload(url: string, filename = "") {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-
-  async function downloadSingleCertificate(candidate: any) {
-    if (!selected) {
-      setPanel("Select an event before downloading a certificate.");
-      return;
-    }
-
-    const index = findCandidateIndex(candidate);
-    if (index < 0) {
-      setPanel("Candidate row not found. Refresh the certificate desk and try again.");
-      return;
-    }
-
-    const current = candidates[index];
-    if (!current.recipientName?.trim()) {
-      setPanel("Add the candidate name before downloading a certificate.");
-      return;
-    }
-
-    const key = candidateKey(current);
-    setDownloadingKey(key);
-    setPanel(`${current.certNumber ? "Downloading" : "Generating"} certificate for ${current.recipientName}...`);
-
-    try {
-      let downloadable = current;
-
-      if (!current.id || !current.certNumber) {
-        const preparedCandidates = candidates.map((item, itemIndex) => (
-          itemIndex === index ? { ...item, generateCertNum: !item.certNumber } : item
-        ));
-        const saved = await saveSettingsAndRanks(preparedCandidates, true);
-        if (!saved) return;
-
-        const savedCert = saved.certificates?.find((cert: any) => {
-          const certUser = cert.user ? String(cert.user) : "";
-          return (current.user && certUser === String(current.user)) ||
-            (cert.recipientName === current.recipientName && cert.email === current.email);
-        });
-
-        if (!savedCert) {
-          setPanel("Certificate saved, but the generated record was not returned. Refresh and try again.");
-          return;
-        }
-
-        downloadable = {
-          ...current,
-          id: idOf(savedCert),
-          certNumber: savedCert.certNumber || current.certNumber,
-          isGenerated: !!savedCert.certNumber
-        };
-
-        setCandidates(prev => prev.map((item, itemIndex) => itemIndex === index ? downloadable : item));
-      }
-
-      if (!downloadable.id && !downloadable.user) {
-        setPanel("This candidate needs to be saved before downloading.");
-        return;
-      }
-
-      triggerDownload(certificateDownloadUrl(downloadable));
-      setPanel(`Downloading certificate for ${downloadable.recipientName}.`);
-    } catch (e: any) {
-      console.error(e);
-      setPanel(e.message || "Failed to download certificate.");
-    } finally {
-      setDownloadingKey("");
-    }
   }
 
   // Generate ZIP of all certificates
@@ -2861,9 +2764,6 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
   const totalCount = candidates.length;
   const generatedCount = candidates.filter(c => c.isGenerated).length;
   const winnerCounts = candidates.filter(c => ["1st Place", "2nd Place", "3rd Place"].includes(c.rank)).length;
-  const firstPlace = candidates.find(c => c.rank === "1st Place");
-  const secondPlace = candidates.find(c => c.rank === "2nd Place");
-  const thirdPlace = candidates.find(c => c.rank === "3rd Place");
 
   return (
     <div className="mt-7 grid gap-5 xl:grid-cols-[1fr_.42fr] animate-in fade-in duration-200">
@@ -3034,16 +2934,11 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
                         
                         {/* Action buttons */}
                         <div className="flex items-center justify-end gap-2 pr-2">
-                          <button
-                            type="button"
-                            title={row.certNumber ? "Download PDF certificate" : "Generate and download PDF certificate"}
-                            onClick={() => downloadSingleCertificate(row)}
-                            disabled={saving || generating || downloadingKey === candidateKey(row)}
-                            className="portal-mini-button flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-bold text-emerald-200 hover:bg-emerald-500/10 hover:text-emerald-100 disabled:cursor-wait disabled:opacity-45"
-                          >
-                            <Download size={13} />
-                            <span className="hidden lg:inline">{downloadingKey === candidateKey(row) ? "Preparing" : row.certNumber ? "Download" : "Generate"}</span>
-                          </button>
+                          {row.isGenerated && row.certNumber ? (
+                            <a download title="Download PDF certificate" className="portal-mini-button p-2 text-white/60 hover:text-white" href={`/api/certificates/export?event=${selected}&candidate=${row.user || ""}&certificateId=${row.id || ""}&format=pdf`}>
+                              <Download size={13} />
+                            </a>
+                          ) : null}
                           <button type="button" title="Remove candidate" onClick={() => handleDeleteCandidate(idx, row.id)} className="portal-mini-button p-2 text-red-400/50 hover:bg-red-500/10 hover:text-red-300">
                             <Trash2 size={13} />
                           </button>
@@ -3093,18 +2988,13 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
                     <div className="min-w-0 flex-1 pr-2">
                       <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider block">🥇 1st Place Winner</span>
                       <span className="text-xs font-semibold text-white/80 truncate block mt-0.5">
-                        {firstPlace?.recipientName || "Not assigned"}
+                        {candidates.find(c => c.rank === "1st Place")?.recipientName || "Not assigned"}
                       </span>
                     </div>
-                    {firstPlace ? (
-                      <button
-                        type="button"
-                        onClick={() => downloadSingleCertificate(firstPlace)}
-                        disabled={saving || generating || downloadingKey === candidateKey(firstPlace)}
-                        className="portal-mini-button flex items-center gap-1 rounded-lg bg-amber-500/20 border border-amber-500/30 px-2.5 py-1.5 text-[10px] font-bold text-amber-200 hover:bg-amber-500/30 transition disabled:cursor-wait disabled:opacity-45"
-                      >
-                        <Download size={11} /> {downloadingKey === candidateKey(firstPlace) ? "Preparing" : firstPlace.certNumber ? "Download" : "Generate"}
-                      </button>
+                    {candidates.find(c => c.rank === "1st Place" && c.isGenerated && c.certNumber) ? (
+                      <a download className="portal-mini-button flex items-center gap-1 rounded-lg bg-amber-500/20 border border-amber-500/30 px-2.5 py-1.5 text-[10px] font-bold text-amber-200 hover:bg-amber-500/30 transition" href={`/api/certificates/export?event=${selected}&candidate=${candidates.find(c => c.rank === "1st Place")?.user || ""}&certificateId=${candidates.find(c => c.rank === "1st Place")?.id || ""}&format=pdf`}>
+                        <Download size={11} /> Download
+                      </a>
                     ) : (
                       <span className="text-[9px] text-white/20 uppercase tracking-wider">Pending</span>
                     )}
@@ -3115,18 +3005,13 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
                     <div className="min-w-0 flex-1 pr-2">
                       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block">🥈 2nd Place Winner</span>
                       <span className="text-xs font-semibold text-white/80 truncate block mt-0.5">
-                        {secondPlace?.recipientName || "Not assigned"}
+                        {candidates.find(c => c.rank === "2nd Place")?.recipientName || "Not assigned"}
                       </span>
                     </div>
-                    {secondPlace ? (
-                      <button
-                        type="button"
-                        onClick={() => downloadSingleCertificate(secondPlace)}
-                        disabled={saving || generating || downloadingKey === candidateKey(secondPlace)}
-                        className="portal-mini-button flex items-center gap-1 rounded-lg bg-slate-400/20 border border-slate-400/30 px-2.5 py-1.5 text-[10px] font-bold text-slate-200 hover:bg-slate-400/30 transition disabled:cursor-wait disabled:opacity-45"
-                      >
-                        <Download size={11} /> {downloadingKey === candidateKey(secondPlace) ? "Preparing" : secondPlace.certNumber ? "Download" : "Generate"}
-                      </button>
+                    {candidates.find(c => c.rank === "2nd Place" && c.isGenerated && c.certNumber) ? (
+                      <a download className="portal-mini-button flex items-center gap-1 rounded-lg bg-slate-400/20 border border-slate-400/30 px-2.5 py-1.5 text-[10px] font-bold text-slate-200 hover:bg-slate-400/30 transition" href={`/api/certificates/export?event=${selected}&candidate=${candidates.find(c => c.rank === "2nd Place")?.user || ""}&certificateId=${candidates.find(c => c.rank === "2nd Place")?.id || ""}&format=pdf`}>
+                        <Download size={11} /> Download
+                      </a>
                     ) : (
                       <span className="text-[9px] text-white/20 uppercase tracking-wider">Pending</span>
                     )}
@@ -3137,18 +3022,13 @@ function CertificatesDesk({ data, setPanel, open }: { data: Data; setPanel: (val
                     <div className="min-w-0 flex-1 pr-2">
                       <span className="text-[10px] font-bold text-amber-600/90 uppercase tracking-wider block">🥉 3rd Place Winner</span>
                       <span className="text-xs font-semibold text-white/80 truncate block mt-0.5">
-                        {thirdPlace?.recipientName || "Not assigned"}
+                        {candidates.find(c => c.rank === "3rd Place")?.recipientName || "Not assigned"}
                       </span>
                     </div>
-                    {thirdPlace ? (
-                      <button
-                        type="button"
-                        onClick={() => downloadSingleCertificate(thirdPlace)}
-                        disabled={saving || generating || downloadingKey === candidateKey(thirdPlace)}
-                        className="portal-mini-button flex items-center gap-1 rounded-lg bg-amber-800/20 border border-amber-800/30 px-2.5 py-1.5 text-[10px] font-bold text-amber-300 hover:bg-amber-800/30 transition disabled:cursor-wait disabled:opacity-45"
-                      >
-                        <Download size={11} /> {downloadingKey === candidateKey(thirdPlace) ? "Preparing" : thirdPlace.certNumber ? "Download" : "Generate"}
-                      </button>
+                    {candidates.find(c => c.rank === "3rd Place" && c.isGenerated && c.certNumber) ? (
+                      <a download className="portal-mini-button flex items-center gap-1 rounded-lg bg-amber-800/20 border border-amber-800/30 px-2.5 py-1.5 text-[10px] font-bold text-amber-300 hover:bg-amber-800/30 transition" href={`/api/certificates/export?event=${selected}&candidate=${candidates.find(c => c.rank === "3rd Place")?.user || ""}&certificateId=${candidates.find(c => c.rank === "3rd Place")?.id || ""}&format=pdf`}>
+                        <Download size={11} /> Download
+                      </a>
                     ) : (
                       <span className="text-[9px] text-white/20 uppercase tracking-wider">Pending</span>
                     )}
@@ -4634,3 +4514,5 @@ function MatrixRainCanvas() {
 
   return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />;
 }
+
+

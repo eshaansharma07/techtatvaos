@@ -96,7 +96,7 @@ export async function getLatestPublicAnnouncement() {
 
 export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   await connectDB();
-  const events = await Event.find(publicEventStatusQuery)
+  const events = await Event.find({ status: { $in: ["published", "active", "completed"] } })
     .sort({ startAt: 1 })
     .limit(limit || 0)
     .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen startAt endAt team")
@@ -110,7 +110,7 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   return serialize(
     events.map((event) => ({
       id: String(event._id),
-      slug: publicEventSlug(event),
+      slug: event.slug,
       title: event.title,
       description: event.description,
       banner: event.banner,
@@ -207,7 +207,7 @@ export async function getPublicEvent(slug: string) {
   const registrations = await EventRegistration.countDocuments({ event: record._id, status: "confirmed" });
   return serialize({
     id: String(record._id),
-    slug: publicEventSlug(record),
+    slug: record.slug,
     title: record.title,
     description: record.description,
     banner: record.banner,

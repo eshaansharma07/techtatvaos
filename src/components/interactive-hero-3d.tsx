@@ -90,7 +90,7 @@ export function InteractiveHero3D() {
     const tick = () => {
       if (!canvas || !ctx) return;
 
-      if (window.innerWidth < 768 || document.visibilityState === "hidden") {
+      if (document.visibilityState === "hidden") {
         animationId = requestAnimationFrame(tick);
         return;
       }

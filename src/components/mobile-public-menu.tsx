@@ -49,14 +49,11 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      document.body.classList.add("force-native-cursor");
     } else {
       document.body.style.overflow = "";
-      document.body.classList.remove("force-native-cursor");
     }
     return () => {
       document.body.style.overflow = "";
-      document.body.classList.remove("force-native-cursor");
     };
   }, [isOpen]);
 
@@ -143,7 +140,7 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
                   <Link
                     href="/contact"
                     onClick={toggleMenu}
-                    className="brutalist-btn-purple flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-xl text-xs font-bold uppercase tracking-[0.14em] text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] transition active:scale-[0.98] duration-300"
+                    className="brutalist-btn-purple relative flex w-full min-h-[3.25rem] items-center justify-center gap-2 rounded-xl text-xs font-bold uppercase tracking-[0.14em] text-white border-2 border-white/40 shadow-[0_0_30px_rgba(168,85,247,0.5)] transition active:scale-95 duration-300"
                   >
                     <span>Connect with us</span>
                     <ArrowUpRight size={14} />
@@ -158,3 +155,4 @@ export function MobilePublicMenu({ logo }: { logo?: string }) {
     </div>
   );
 }
+
