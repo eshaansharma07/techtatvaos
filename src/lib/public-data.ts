@@ -96,7 +96,7 @@ export async function getLatestPublicAnnouncement() {
 
 export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   await connectDB();
-  const events = await Event.find({ status: { $in: ["published", "active", "completed"] } })
+  const events = await Event.find(publicEventStatusQuery)
     .sort({ startAt: 1 })
     .limit(limit || 0)
     .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen startAt endAt team")
@@ -110,7 +110,7 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   return serialize(
     events.map((event) => ({
       id: String(event._id),
-      slug: event.slug,
+      slug: publicEventSlug(event),
       title: event.title,
       description: event.description,
       banner: event.banner,
@@ -151,7 +151,7 @@ export async function getPublicEvent(slug: string) {
   }
 
   let event = await Event.findOne({
-    status: { $ne: "archived" },
+    ...publicEventStatusQuery,
     ...(slugMatches.length ? { $or: slugMatches } : {})
   })
     .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
@@ -161,7 +161,7 @@ export async function getPublicEvent(slug: string) {
     .lean();
 
   if (!event) {
-    const candidates = await Event.find({ status: { $ne: "archived" } })
+    const candidates = await Event.find(publicEventStatusQuery)
       .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
       .populate("team", "name")
       .populate("leads", "name email")
@@ -207,7 +207,7 @@ export async function getPublicEvent(slug: string) {
   const registrations = await EventRegistration.countDocuments({ event: record._id, status: "confirmed" });
   return serialize({
     id: String(record._id),
-    slug: record.slug,
+    slug: publicEventSlug(record),
     title: record.title,
     description: record.description,
     banner: record.banner,
