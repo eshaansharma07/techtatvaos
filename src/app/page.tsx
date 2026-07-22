@@ -49,9 +49,14 @@ export default async function Home() {
       <Image src="/tech-tatva-hero-v2.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_30%] opacity-40 mix-blend-overlay"/>
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black"/>
 
-      <div className="relative z-50 flex w-full max-w-sm flex-col items-center text-center">
+      {/* 3D Hologram added to mobile! */}
+      <div className="absolute inset-0 z-0 opacity-70">
+        <InteractiveHero3D />
+      </div>
+
+      <div className="relative z-50 flex w-full max-w-sm flex-col items-center text-center mt-8">
         {/* Active Session Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/40 bg-purple-500/20 px-4 py-1.5 text-[11px] font-bold text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.3)] mb-8">
+        <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/40 bg-purple-500/20 px-4 py-1.5 text-[11px] font-bold text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.3)] mb-6 backdrop-blur-md">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-400"></span>
@@ -59,39 +64,39 @@ export default async function Home() {
           ACTIVE SESSION
         </div>
 
-        {/* Main headline */}
-        <h1 className="text-[2.75rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-white drop-shadow-md">
+        {/* Main headline - Fixed text disappearing in iOS Safari */}
+        <h1 className="text-[3rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-white drop-shadow-md">
           Enter the <br />
-          <span className="inline-block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400">
+          <span className="inline-block mt-1 text-purple-400 shadow-purple-500/20">
             next room.
           </span>
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-5 max-w-[280px] text-[15px] leading-relaxed text-white/70">
+        <p className="mt-6 max-w-[280px] text-[15px] leading-relaxed text-white/70 backdrop-blur-sm rounded-xl px-2 py-1">
           Where students build, compete, and create what comes next.
         </p>
 
         {/* Primary CTA Buttons */}
-        <div className="mt-10 flex w-full flex-col gap-3.5 relative z-50">
+        <div className="mt-12 flex w-full flex-col gap-4 relative z-50">
           {driveStatus && driveStatus.registrationEnabled ? (
             <Link
               href="/join"
-              className="brutalist-btn-purple relative flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-[15px] font-extrabold text-white border-2 border-white/40 shadow-[0_0_30px_rgba(168,85,247,0.5)] transition active:scale-95 cursor-pointer"
+              className="brutalist-btn-purple relative flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-[15px] font-extrabold text-black shadow-[0_0_30px_rgba(168,85,247,0.5)] transition active:scale-95 cursor-pointer"
             >
               Join the club <ArrowRight size={18} className="transition group-active:translate-x-1" />
             </Link>
           ) : (
             <Link
               href="/events"
-              className="brutalist-btn-cyan relative flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-[15px] font-extrabold text-white border-2 border-white/40 shadow-[0_0_30px_rgba(6,182,212,0.5)] transition active:scale-95 cursor-pointer"
+              className="brutalist-btn-cyan relative flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-[15px] font-extrabold text-black shadow-[0_0_30px_rgba(6,182,212,0.5)] transition active:scale-95 cursor-pointer"
             >
               Explore events <ArrowRight size={18} className="transition group-active:translate-x-1" />
             </Link>
           )}
           <Link
             href="/teams"
-            className="relative flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-sm border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition active:scale-95 cursor-pointer backdrop-blur-md"
+            className="brutalist-btn-dark relative flex h-14 w-full items-center justify-center gap-2 rounded-2xl transition active:scale-95 cursor-pointer"
           >
             Meet the teams <ChevronRight size={16} />
           </Link>
