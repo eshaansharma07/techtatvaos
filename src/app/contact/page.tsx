@@ -14,7 +14,7 @@ export default async function Contact() {
         {/* Ambient atmospheric glowing lights behind the contact panel */}
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_30%_40%,rgba(168,85,247,0.05),transparent_45%)]" />
         
-        <div className="glass-brutalist flex flex-col justify-between rounded-[2rem] p-6 md:rounded-[2.6rem] md:p-12">
+        <div className="glass-brutalist flex flex-col justify-between rounded-[2rem] p-6 md:rounded-[2.6rem] md:p-12 min-w-0">
           <div>
             <span className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-purple-500 px-4 py-1.5 text-xs font-bold text-white shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
               <span className="relative flex h-2 w-2">
@@ -23,9 +23,9 @@ export default async function Contact() {
               </span>
               REACH OUT
             </span>
-            <h1 className="mt-7 max-w-2xl text-6xl font-extrabold leading-[1] tracking-[-0.04em] text-white md:text-8xl">
+            <h1 className="mt-7 max-w-2xl text-5xl xs:text-6xl font-extrabold leading-[1] tracking-[-0.04em] text-white md:text-7xl lg:text-8xl break-words">
               Start the <br />
-              <span className="text-purple-400">conversation.</span>
+              <span className="text-purple-400 break-words">conversation.</span>
             </h1>
             <p className="mt-6 max-w-lg text-[15px] leading-8 text-white/50 md:text-base">
               Have a suggestion, partnership proposal, event idea, or need support? Reach out and we will respond shortly.
