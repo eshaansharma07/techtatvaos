@@ -4523,8 +4523,14 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
   const [selectedEventId, setSelectedEventId] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({});
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
 
   const selectedEvent = events.find((e: any) => idOf(e) === selectedEventId);
+
+  useEffect(() => {
+    setPage(0);
+  }, [selectedEventId, search]);
 
   const filteredRegistrations = useMemo(() => {
     let list = data.registrations || [];
@@ -4562,14 +4568,20 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
     return acc + 1 + (r.mode === "team" && Array.isArray(r.teamMembers) ? r.teamMembers.length : 0);
   }, 0);
 
+  const pageCount = Math.ceil(filteredRegistrations.length / pageSize) || 1;
+  const paginatedRegistrations = useMemo(() => {
+    const start = page * pageSize;
+    return filteredRegistrations.slice(start, start + pageSize);
+  }, [filteredRegistrations, page, pageSize]);
+
   const toggleTeam = (key: string) => {
     setExpandedTeams((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
     <div className="mt-7 grid gap-5 xl:grid-cols-[1fr_.38fr] animate-in fade-in duration-200">
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.02] via-transparent to-blue-500/[0.02]" />
+      <div className="relative rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.02] via-transparent to-blue-500/[0.02] pointer-events-none rounded-[2rem]" />
 
         <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] pb-5 mb-6">
           <div>
@@ -4620,9 +4632,9 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
           </div>
         </div>
 
-        <div className="max-h-[calc(100vh-280px)] min-h-[400px] overflow-y-auto overscroll-contain pr-2 space-y-4 scrollbar-thin">
-          {filteredRegistrations.map((reg: any) => {
-            const regId = idOf(reg);
+        <div className="space-y-4">
+          {paginatedRegistrations.map((reg: any, index: number) => {
+            const regId = idOf(reg) || String(reg.qrToken || reg.registeredAt || index);
             const isTeam = reg.mode === "team";
             const leader = reg.user || {};
             const squadMembers = reg.teamMembers || [];
@@ -4633,7 +4645,10 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
 
             return (
               <div key={regId} className="rounded-2xl border border-white/[.08] bg-black/40 p-5 space-y-4 transition hover:border-purple-500/30">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+                <div 
+                  onClick={() => isTeam && toggleTeam(regId)}
+                  className={`flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3 ${isTeam ? "cursor-pointer select-none" : ""}`}
+                >
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono font-bold text-purple-400 uppercase tracking-wider">{eventName}</span>
@@ -4654,8 +4669,13 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
                     </span>
                     {isTeam && (
                       <button 
-                        onClick={() => toggleTeam(regId)} 
-                        className="text-[10px] font-mono text-white/50 hover:text-white border border-white/10 rounded-lg px-2.5 py-1 transition"
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleTeam(regId);
+                        }} 
+                        className="text-[10px] font-mono text-white/70 hover:text-white border border-white/15 hover:border-purple-400/50 bg-white/[0.04] hover:bg-purple-500/10 rounded-lg px-3 py-1.5 transition cursor-pointer relative z-20"
                       >
                         {isExpanded ? "Collapse Squad ▲" : `View Squad (${1 + squadMembers.length}) ▼`}
                       </button>
@@ -4727,6 +4747,36 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
             </p>
           )}
         </div>
+
+        {/* Pagination Bar */}
+        {pageCount > 1 && (
+          <div className="mt-6 flex items-center justify-between border-t border-white/5 pt-4 text-xs">
+            <span className="text-white/40 text-[11px]">
+              Showing {page * pageSize + 1}–{Math.min((page + 1) * pageSize, filteredRegistrations.length)} of {filteredRegistrations.length} registrations
+            </span>
+            <div className="flex items-center gap-2">
+              <button 
+                type="button" 
+                disabled={page === 0} 
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                className="rounded-xl border border-white/10 bg-black/40 px-3 py-1.5 font-bold text-white/70 hover:text-white disabled:opacity-40 transition"
+              >
+                Previous
+              </button>
+              <span className="font-mono text-purple-300 px-2 text-xs">
+                {page + 1} / {pageCount}
+              </span>
+              <button 
+                type="button" 
+                disabled={page >= pageCount - 1} 
+                onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+                className="rounded-xl border border-white/10 bg-black/40 px-3 py-1.5 font-bold text-white/70 hover:text-white disabled:opacity-40 transition"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-5 self-start">

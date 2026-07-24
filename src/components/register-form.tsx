@@ -35,7 +35,8 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"individual" | "team">(participationMode === "team" ? "team" : "individual");
   const [teamName, setTeamName] = useState("");
-  const [teamSize, setTeamSize] = useState(Math.max(2, Math.min(maxTeamSize, 2)));
+  const defaultTeamSize = Math.max(4, Math.min(maxTeamSize, 4));
+  const [teamSize, setTeamSize] = useState(defaultTeamSize);
 
   const [whatsappLink, setWhatsappLink] = useState("");
 
@@ -51,7 +52,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
   // Team members details
   const [members, setMembers] = useState<Array<{ name: string; email: string; phone: string; uid: string; program: string; semester: string }>>(() =>
-    Array.from({ length: Math.max(1, maxTeamSize - 1) }).map(() => ({
+    Array.from({ length: Math.max(3, maxTeamSize - 1) }).map(() => ({
       name: "",
       email: "",
       phone: "",
@@ -381,7 +382,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                             <div className="mt-3 flex items-center gap-3">
                               <input 
                                 type="range" 
-                                min={2} 
+                                min={Math.min(4, maxTeamSize)} 
                                 max={maxTeamSize} 
                                 value={teamSize}
                                 onChange={(e) => {
