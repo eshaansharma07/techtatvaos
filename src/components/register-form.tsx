@@ -152,6 +152,9 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
     return count;
   }, [activeMemberCount, members]);
 
+  const isLastMemberTab = activeTab >= activeMemberCount - 1;
+  const canContinueFromMembers = activeMemberCount > 0 && isMemberValid(activeTab);
+
   function handleInputChange(field: string, value: string) {
     setLeader((prev) => ({ ...prev, [field]: value }));
   }
@@ -464,7 +467,10 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                   <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
                     <div>
                       <h3 className="text-xl font-extrabold tracking-tight text-white">Assemble Team Squad</h3>
-                      <p className="text-xs text-white/50 mt-1 leading-relaxed">Provide details for your {activeMemberCount} squad members. Select tabs to fill them individually.</p>
+                      <p className="text-xs text-white/50 mt-1 leading-relaxed">Fill the current member, then use Next member. You can also select any tab to edit it.</p>
+                      <p className="mt-2 text-[10px] font-mono font-bold uppercase tracking-wider text-purple-300/80">
+                        {validMemberCount} of {activeMemberCount} members ready
+                      </p>
                     </div>
 
                     {/* Member Horizontal Tabs */}
@@ -713,11 +719,18 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     {step > 1 && (
                       <button
                         type="button"
-                        onClick={() => setStep(prev => prev - 1)}
+                        onClick={() => {
+                          if (step === 3 && mode === "team" && activeTab > 0) {
+                            setActiveTab((prev) => prev - 1);
+                            setStatus("");
+                            return;
+                          }
+                          setStep(prev => prev - 1);
+                        }}
                         className="brutalist-btn-dark flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs tracking-wider font-extrabold uppercase transition"
                       >
                         <ArrowLeft size={13} />
-                        <span>Back</span>
+                        <span>{step === 3 && mode === "team" && activeTab > 0 ? "Previous member" : "Back"}</span>
                       </button>
                     )}
                   </div>
@@ -750,11 +763,24 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     ) : (
                       <button
                         type="button"
-                        disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 ? !allMembersValid : false}
-                        onClick={() => setStep(prev => prev + 1)}
+                        disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 && mode === "team" ? !canContinueFromMembers : false}
+                        onClick={() => {
+                          if (step === 3 && mode === "team") {
+                            if (!isLastMemberTab) {
+                              setActiveTab((prev) => Math.min(prev + 1, activeMemberCount - 1));
+                              setStatus("");
+                              return;
+                            }
+                            if (!allMembersValid) {
+                              setStatus(`${activeMemberCount - validMemberCount} team member slot${activeMemberCount - validMemberCount === 1 ? "" : "s"} still need valid details.`);
+                              return;
+                            }
+                          }
+                          setStep(prev => prev + 1);
+                        }}
                         className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
                       >
-                        <span>Continue</span>
+                        <span>{step === 3 && mode === "team" && !isLastMemberTab ? "Next member" : "Continue"}</span>
                         <ArrowRight size={13} />
                       </button>
                     )}
