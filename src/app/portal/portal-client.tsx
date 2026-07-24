@@ -4620,7 +4620,7 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
           </div>
         </div>
 
-        <div className="space-y-4 max-h-[580px] overflow-y-auto pr-1">
+        <div className="max-h-[calc(100vh-280px)] min-h-[400px] overflow-y-auto overscroll-contain pr-2 space-y-4 scrollbar-thin">
           {filteredRegistrations.map((reg: any) => {
             const regId = idOf(reg);
             const isTeam = reg.mode === "team";
