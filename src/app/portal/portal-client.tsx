@@ -214,6 +214,14 @@ function downloadTextFile(filename:string, contents:string, type="text/csv;chars
   link.remove();
   URL.revokeObjectURL(url);
 }
+async function responseErrorMessage(res: Response) {
+  try {
+    const payload = await res.json();
+    return payload?.error || payload?.message || res.statusText;
+  } catch {
+    return res.statusText || `Request failed with status ${res.status}`;
+  }
+}
 function csvCell(value:any){return `"${String(value ?? "").replace(/"/g,'""')}"`}
 function exportDashboardSummary(data:Data){
   const rows=[
@@ -327,8 +335,8 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
       body: JSON.stringify(body)
     });
     setBusy(false);
-    if(!res.ok){setPanel(`Action failed: ${(await res.json()).error || res.statusText}`);return}
-    const data=await res.json();
+    if(!res.ok){setPanel(`Action failed: ${await responseErrorMessage(res)}`);return}
+    const data=await res.json().catch(()=>({}));
     setDrawer(null);
     setPanel(drawer.resource==="invites"?`Invite created: ${data.inviteUrl}`:`${drawer.title} saved.`);
     await refresh();
@@ -4807,5 +4815,4 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
     </div>
   );
 }
-
 

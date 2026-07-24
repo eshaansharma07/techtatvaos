@@ -4,14 +4,18 @@ import { connectDB } from "@/lib/db";
 import { audit, requirePortal } from "@/lib/portal";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ resource: string; id: string }> }) {
-  const blocked = await requirePortal(req);
-  if (blocked) return blocked;
-  const { resource, id } = await params;
-  if (!adminResources.includes(resource as AdminResource)) return NextResponse.json({ error: "Unknown resource" }, { status: 404 });
-  await connectDB();
-  const result = await updateResource(resource as AdminResource, id, await req.json());
-  await audit(req, `portal.${resource}.update`, { entityType: resource, entityId: id });
-  return NextResponse.json(result);
+  try {
+    const blocked = await requirePortal(req);
+    if (blocked) return blocked;
+    const { resource, id } = await params;
+    if (!adminResources.includes(resource as AdminResource)) return NextResponse.json({ error: "Unknown resource" }, { status: 404 });
+    await connectDB();
+    const result = await updateResource(resource as AdminResource, id, await req.json());
+    await audit(req, `portal.${resource}.update`, { entityType: resource, entityId: id });
+    return NextResponse.json(result);
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || "Failed to update record" }, { status: 400 });
+  }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ resource: string; id: string }> }) {
