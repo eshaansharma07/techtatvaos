@@ -6,6 +6,7 @@ import {
   ClubInfo,
   ContactMessage,
   Attendance,
+  Certificate,
   Event,
   EventRegistration,
   Gallery,
@@ -50,6 +51,7 @@ export const adminResources = [
   "gallery",
   "hallOfFame",
   "contacts",
+  "eventRegistrations",
   "settings",
   "recruitmentSettings",
   "recruitmentTeams",
@@ -428,6 +430,24 @@ export async function deleteResource(resource: AdminResource, id: string) {
   if (resource === "events") {
     await Promise.all([EventRegistration.deleteMany({ event: id }), Attendance.deleteMany({ event: id })]);
     return Event.findByIdAndDelete(id);
+  }
+  if (resource === "eventRegistrations") {
+    const registration = await EventRegistration.findById(id).lean() as any;
+    if (!registration) return null;
+    const participantIds = [
+      registration.user,
+      ...((registration.teamMembers || []).map((member: any) => member.user).filter(Boolean))
+    ].filter(Boolean);
+    await Promise.all([
+      Attendance.deleteMany({
+        $or: [
+          { registration: registration._id },
+          { event: registration.event, user: { $in: participantIds } }
+        ]
+      }),
+      Certificate.deleteMany({ event: registration.event, user: { $in: participantIds } })
+    ]);
+    return EventRegistration.findByIdAndDelete(id);
   }
   if (resource === "meetings") return Meeting.findByIdAndUpdate(id, { status: "archived" }, { new: true });
   if (resource === "tasks") return Task.findByIdAndDelete(id);

@@ -543,7 +543,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
           {nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold ${active===label?"border-violet-200/35 bg-violet-500/18 text-white":"border-white/[.08] bg-white/[.035] text-white/50"}`}><Icon size={14}/>{label}</button>)}
         </div>
         <Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>
-        {active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Event Participants"?<EventParticipants data={data} setPanel={setPanel}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
+        {active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Event Participants"?<EventParticipants data={data} setPanel={setPanel} refresh={refresh}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
         <div className="portal-action mt-4 rounded-2xl p-5 border border-violet-500/10">
           <p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p>
           <p className="mt-3 text-sm leading-6 text-white/65">{panel}</p>
@@ -4526,11 +4526,12 @@ function MatrixRainCanvas() {
   return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />;
 }
 
-function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: string) => void }) {
+function EventParticipants({ data, setPanel, refresh }: { data: Data; setPanel: (value: string) => void; refresh: () => Promise<void> }) {
   const events = data.events || [];
   const [selectedEventId, setSelectedEventId] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({});
+  const [deletingId, setDeletingId] = useState("");
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
@@ -4585,6 +4586,27 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
   const toggleTeam = (key: string) => {
     setExpandedTeams((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  async function deleteRegistration(reg: any) {
+    const regId = idOf(reg);
+    if (!regId) {
+      setPanel("Could not identify that registration. Refresh and try again.");
+      return;
+    }
+    const label = reg.mode === "team" ? `team "${reg.teamName || "Unnamed Squad"}"` : `registration for ${reg.user?.name || "this candidate"}`;
+    if (!window.confirm(`Delete ${label}? This removes the registration, attendance rows, and generated certificate records for its participants. Student accounts stay untouched.`)) return;
+
+    setDeletingId(regId);
+    setPanel(`Deleting ${label}...`);
+    const res = await fetch(`/api/admin/eventRegistrations/${regId}`, { method: "DELETE" });
+    setDeletingId("");
+    if (!res.ok) {
+      setPanel(`Delete failed: ${await responseErrorMessage(res)}`);
+      return;
+    }
+    setPanel(`${reg.mode === "team" ? "Team registration" : "Registration"} deleted.`);
+    await refresh();
+  }
 
   return (
     <div className="mt-7 grid gap-5 xl:grid-cols-[1fr_.38fr] animate-in fade-in duration-200">
@@ -4653,10 +4675,11 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
 
             return (
               <div key={regId} className="rounded-2xl border border-white/[.08] bg-black/40 p-5 space-y-4 transition hover:border-purple-500/30">
-                <div 
-                  onClick={() => isTeam && toggleTeam(regId)}
-                  className={`flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3 ${isTeam ? "cursor-pointer select-none" : ""}`}
-                >
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+                  <div
+                    onClick={() => isTeam && toggleTeam(regId)}
+                    className={isTeam ? "cursor-pointer select-none" : ""}
+                  >
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono font-bold text-purple-400 uppercase tracking-wider">{eventName}</span>
@@ -4670,11 +4693,26 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
                       </h4>
                     )}
                   </div>
+                  </div>
 
                   <div className="flex items-center gap-3">
                     <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider border ${reg.status === "waitlisted" ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"}`}>
                       {reg.status || "CONFIRMED"}
                     </span>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        deleteRegistration(reg);
+                      }}
+                      disabled={deletingId === regId}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/25 bg-rose-500/10 px-3 py-1.5 text-[10px] font-bold text-rose-200 transition hover:border-rose-400/50 hover:bg-rose-500/20 disabled:cursor-wait disabled:opacity-50"
+                      title={isTeam ? "Delete registered team" : "Delete registration"}
+                    >
+                      <Trash2 size={12} />
+                      {deletingId === regId ? "Deleting" : isTeam ? "Delete Team" : "Delete"}
+                    </button>
                     {isTeam && (
                       <button 
                         type="button"
@@ -4815,4 +4853,3 @@ function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: s
     </div>
   );
 }
-
