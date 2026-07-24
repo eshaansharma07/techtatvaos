@@ -20,8 +20,14 @@ const semesterOf = (value: unknown) => {
   return Number.isFinite(number) && number > 0 ? number : undefined;
 };
 
+const isValidPhone = (value: unknown) => clean(value).replace(/\D/g, "").length >= 8;
+
 function isValidParticipant(input: PublicParticipant) {
-  return clean(input.name).length >= 2 && clean(input.email).includes("@") && clean(input.uid).length >= 2 && clean(input.program).length >= 1;
+  return clean(input.name).length >= 2
+    && clean(input.email).includes("@")
+    && isValidPhone(input.phone)
+    && clean(input.uid).length >= 2
+    && clean(input.program).length >= 1;
 }
 
 async function upsertParticipant(input: PublicParticipant) {
@@ -42,7 +48,7 @@ async function upsertParticipant(input: PublicParticipant) {
     semester: semesterOf(input.semester),
     status: "active"
   };
-  if (phone) set.phone = phone;
+  set.phone = phone;
 
   return User.findOneAndUpdate(
     query,
@@ -80,7 +86,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (!userId) {
       const leaderInput: PublicParticipant = payload;
-      if (!isValidParticipant(leaderInput)) return NextResponse.json({ error: "Valid candidate details are required." }, { status: 400 });
+      if (!isValidParticipant(leaderInput)) return NextResponse.json({ error: "Name, email, WhatsApp number, UID, program, and semester are required." }, { status: 400 });
 
       const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
       const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => clean(member?.name) || clean(member?.email) || clean(member?.uid)) : [];
@@ -89,7 +95,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
       if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
       if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
-        return NextResponse.json({ error: "Every team member needs name, email, UID, program, and semester." }, { status: 400 });
+        return NextResponse.json({ error: "Every team member needs name, email, WhatsApp number, UID, program, and semester." }, { status: 400 });
       }
 
       leader = await upsertParticipant(leaderInput);

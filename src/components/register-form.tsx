@@ -92,7 +92,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   // Validation functions
   const isEmailValid = (email: string) => email.includes("@") && email.length >= 5;
   const isNameValid = (name: string) => name.trim().length >= 2;
-  const isPhoneValid = (phone: string) => phone.trim().length >= 8;
+  const isPhoneValid = (phone: string) => phone.replace(/\D/g, "").length >= 8;
   const isUidValid = (uid: string) => uid.trim().length >= 2;
   const isProgramValid = (prog: string) => prog.trim().length >= 1;
   const isSemesterValid = (sem: string) => {
@@ -425,7 +425,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         return (
                           <div key={name} className={name === "name" || name === "email" ? "sm:col-span-2" : ""}>
                             <label className="block text-[9px] font-black tracking-widest text-white/40 uppercase mb-2">
-                              {label}
+                              {label}{name === "phone" ? " *" : ""}
                             </label>
                             <div className="relative">
                               <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30">
@@ -532,7 +532,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           return (
                             <div key={name} className={name === "name" || name === "email" ? "sm:col-span-2" : ""}>
                               <label className="block text-[9px] font-black tracking-widest text-white/40 uppercase mb-2">
-                                {label}
+                                {label}{name === "phone" ? " *" : ""}
                               </label>
                               <div className="relative">
                                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30">
