@@ -8,6 +8,7 @@ import { registrationInput } from "@/lib/validations/event";
 type PublicParticipant = {
   name?: string;
   email?: string;
+  phone?: string;
   uid?: string;
   program?: string;
   semester?: string | number;
@@ -26,6 +27,7 @@ function isValidParticipant(input: PublicParticipant) {
 async function upsertParticipant(input: PublicParticipant) {
   const email = clean(input.email).toLowerCase();
   const uid = clean(input.uid);
+  const phone = clean(input.phone);
   const query = {
     $or: [
       { email },
@@ -40,6 +42,8 @@ async function upsertParticipant(input: PublicParticipant) {
     semester: semesterOf(input.semester),
     status: "active"
   };
+  if (phone) set.phone = phone;
+
   return User.findOneAndUpdate(
     query,
     {
@@ -95,6 +99,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         user: member._id,
         name: member.name,
         email: member.email,
+        phone: member.phone || clean(memberInputs[index]?.phone),
         uid: member.uid,
         program: member.program,
         semester: member.semester ?? semesterOf(memberInputs[index]?.semester)
@@ -120,7 +125,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       )
     );
 
-    return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode }, { status: 201 });
+    return NextResponse.json({
+      id: String(record._id),
+      status: record.status,
+      mode: record.mode,
+      whatsappGroupLink: event.whatsappGroupLink || ""
+    }, { status: 201 });
   } catch (error: any) {
     if (error?.code === 11000) {
       return NextResponse.json({ error: "A candidate with this email or UID is already registered. Use the same details or update the existing candidate." }, { status: 409 });

@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, Area, AreaChart, YAxis, CartesianGrid } from "recharts";
 
-type Module = "Overview" | "Members" | "Teams" | "Events" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Hall of Fame" | "Contact Messages" | "Settings";
+type Module = "Overview" | "Members" | "Teams" | "Events" | "Event Participants" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Hall of Fame" | "Contact Messages" | "Settings";
 type Resource = "users" | "teams" | "events" | "meetings" | "tasks" | "announcements" | "sponsors" | "achievements" | "gallery" | "hallOfFame" | "contacts" | "settings" | "invites" | "recruitmentSettings" | "recruitmentTeams" | "recruitmentRoles" | "recruitmentQuestions" | "recruitmentApplications" | "studentMembers" | "membershipDriveSettings";
 type Data = Record<string, any>;
 type Field = [string, string, string?];
@@ -57,6 +57,7 @@ const nav = [
   [Users, "Members"],
   [Workflow, "Teams"],
   [CalendarDays, "Events"],
+  [Users, "Event Participants"],
   [BriefcaseBusiness, "Recruitment"],
   [UserPlus, "Membership Drive"],
   [CheckCircle2, "Attendance"],
@@ -71,10 +72,10 @@ const nav = [
   [Settings2, "Settings"]
 ] as const;
 
-const config: Record<Exclude<Module, "Overview" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
+const config: Record<Exclude<Module, "Overview" | "Event Participants" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
   Members: { key: "users", resource: "users", fields: [["name","Name"],["email","Email","email"],["teams","Teams","team-multi-select"],["image","Profile photo","upload:image"],["uid","UID"],["department","Department"],["program","Program"],["semester","Semester","number"],["phone","Phone"]] },
   Teams: { key: "teams", resource: "teams", fields: [["name","Team name"],["slug","Slug"],["description","Description"],["lead","Team lead","member-select"],["coLeads","Co-leads","member-multi-select"],["jointSecretaryLane","Reports under joint secretary","lane-select"],["order","Display order","number"],["active","Active","boolean-select"]] },
-  Events: { key: "events", resource: "events", fields: [["title","Title"],["slug","Slug"],["description","Description"],["venue","Venue"],["capacity","Capacity","number"],["category","Category"],["team","Team","team-select"],["leads","Event leads","member-multi-select"],["participationMode","Participation type","participation-select"],["maxTeamSize","Maximum team size","number"],["winnerFirst","1st place winner","winner-select"],["winnerSecond","2nd place winner","winner-select"],["winnerThird","3rd place winner","winner-select"],["status","Public status","status-select"],["registrationOpen","Registration open","boolean-select"],["registrationStart","Registration start","datetime-local"],["registrationEnd","Registration end","datetime-local"],["startAt","Event start date/time","datetime-local"],["endAt","Event end date/time","datetime-local"],["banner","Event banner","upload:image"],["certEventLogo","Event logo","upload:image"]] },
+  Events: { key: "events", resource: "events", fields: [["title","Title"],["slug","Slug"],["description","Description"],["venue","Venue"],["capacity","Capacity","number"],["category","Category"],["team","Team","team-select"],["leads","Event leads","member-multi-select"],["participationMode","Participation type","participation-select"],["maxTeamSize","Maximum team size","number"],["winnerFirst","1st place winner","winner-select"],["winnerSecond","2nd place winner","winner-select"],["winnerThird","3rd place winner","winner-select"],["status","Public status","status-select"],["registrationOpen","Registration open","boolean-select"],["registrationStart","Registration start","datetime-local"],["registrationEnd","Registration end","datetime-local"],["startAt","Event start date/time","datetime-local"],["endAt","Event end date/time","datetime-local"],["banner","Event banner","upload:image"],["certEventLogo","Event logo","upload:image"],["whatsappGroupLink","WhatsApp group link"]] },
   Meetings: { key: "meetings", resource: "meetings", fields: [["title","Meeting title"],["date","Date","date"],["time","Time"],["venue","Venue"],["meetingType","Meeting type","meeting-type-select"],["organizer","Organizer","member-select"],["attendees","Attendees","member-multi-select"],["agenda","Agenda"],["discussionPoints","Discussion points"],["decisionsTaken","Decisions taken"],["actionItems","Action items (one per line: Task | Assigned To | Deadline | Status)"],["nextMeeting","Next meeting details"],["status","Status","meeting-status-select"]] },
   Tasks: { key: "tasks", resource: "tasks", fields: [["title","Title"],["description","Description"],["team","Team","team-select"],["dueAt","Due date","datetime-local"],["status","Status","task-status-select"],["priority","Priority","task-priority-select"]] },
   Announcements: { key: "announcements", resource: "announcements", fields: [["title","Title"],["body","Body"],["status","Status","announcement-status-select"],["audience","Audience","announcement-audience-select"],["publishAt","Publish at","datetime-local"]] },
@@ -534,7 +535,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
           {nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold ${active===label?"border-violet-200/35 bg-violet-500/18 text-white":"border-white/[.08] bg-white/[.035] text-white/50"}`}><Icon size={14}/>{label}</button>)}
         </div>
         <Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>
-        {active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
+        {active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Event Participants"?<EventParticipants data={data} setPanel={setPanel}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
         <div className="portal-action mt-4 rounded-2xl p-5 border border-violet-500/10">
           <p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p>
           <p className="mt-3 text-sm leading-6 text-white/65">{panel}</p>
@@ -548,11 +549,13 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
 
 function Header({active,data,open,setPanel}:{active:Module;data:Data;open:(drawer:any)=>void;setPanel:(text:string)=>void}){
   const singular=active==="Hall of Fame"?"Hall entry":active==="Membership Drive"?"Student member":active.slice(0,-1);
-  const action=active==="Overview"?"Export summary":active==="Recruitment"?"Recruitment settings":active==="Membership Drive"?"Drive settings":active==="Attendance"?"Generate attendance":active==="Certificates"?"Certificate tools":active==="Settings"?"Update branding":active==="AI"?"Ask AI":active==="Contact Messages"?"Open messages":`Add ${singular}`;
+  const action=active==="Overview"?"Export summary":active==="Event Participants"?"Export participant Excel":active==="Recruitment"?"Recruitment settings":active==="Membership Drive"?"Drive settings":active==="Attendance"?"Generate attendance":active==="Certificates"?"Certificate tools":active==="Settings"?"Update branding":active==="AI"?"Ask AI":active==="Contact Messages"?"Open messages":`Add ${singular}`;
   const description=active==="Membership Drive"
     ? "Manage student registrations, verify student members, analyze departmental signups, and update online drive configurations."
+    : active==="Event Participants"
+    ? "View all event registrations organized team-wise with team leader & squad member details, WhatsApp contact numbers, and one-click Excel exports."
     : "Live operational controls for members, teams, events, attendance, recruitment, media, documents, and public club content.";
-  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-5 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-[2.65rem] font-semibold leading-[.92] tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active==="AI"?"AI Desk":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">{description}</p></div><button type="button" onClick={()=>{if(active==="Overview"){exportDashboardSummary(data);setPanel("Dashboard summary CSV downloaded.");}else if(active==="Recruitment"){open({resource:"recruitmentSettings",title:"Recruitment settings",fields:extraFields.recruitmentSettings,item:data.recruitmentSettings?.[0],defaults:{status:"open",registrationEnabled:"true",autoCloseAfterDeadline:"true"}})}else if(active==="Membership Drive"){open({resource:"membershipDriveSettings",title:"Membership drive settings",fields:extraFields.membershipDriveSettings,item:data.membershipDriveSettings?.[0],defaults:{status:"closed",registrationEnabled:"false",autoCloseAfterDeadline:"true"}})}else if(active==="Attendance"){window.dispatchEvent(new Event("portal-download-attendance"));setPanel("Generating attendance sheet for the selected event...");}else if(active==="Certificates"){setPanel("Choose an event below, select winners from Events if needed, then export PDF certificates as ZIP files.");}else if(active==="AI"){setPanel("Use the AI Desk below to generate reports, MOMs, and secretary answers from real MongoDB data.");}else if(active==="Contact Messages"){setPanel("Open a message row to read all sender details and update its status.");}else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields,item:data.clubInfo});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${singular}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:active==="Meetings"?{status:"completed"}:active==="Hall of Fame"?{category:"top_contributor",active:"true"}:{}})}}} className="portal-command-button flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-xs font-semibold transition hover:-translate-y-0.5 sm:w-auto sm:self-end">{active==="Overview"||active==="Attendance"?<Download size={14}/>:active==="Certificates"?<Award size={14}/>:active==="AI"?<Brain size={14}/>:active==="Contact Messages"?<MessageSquare size={14}/>:active==="Membership Drive"?<SlidersHorizontal size={14}/>:<Plus size={14}/>}<span>{action}</span></button></div>
+  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-5 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-[2.65rem] font-semibold leading-[.92] tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active==="AI"?"AI Desk":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">{description}</p></div><button type="button" onClick={()=>{if(active==="Overview"){exportDashboardSummary(data);setPanel("Dashboard summary CSV downloaded.");}else if(active==="Event Participants"){window.location.href="/api/admin/participants/export";setPanel("Downloading full Event Participants roster Excel sheet...");}else if(active==="Recruitment"){open({resource:"recruitmentSettings",title:"Recruitment settings",fields:extraFields.recruitmentSettings,item:data.recruitmentSettings?.[0],defaults:{status:"open",registrationEnabled:"true",autoCloseAfterDeadline:"true"}})}else if(active==="Membership Drive"){open({resource:"membershipDriveSettings",title:"Membership drive settings",fields:extraFields.membershipDriveSettings,item:data.membershipDriveSettings?.[0],defaults:{status:"closed",registrationEnabled:"false",autoCloseAfterDeadline:"true"}})}else if(active==="Attendance"){window.dispatchEvent(new Event("portal-download-attendance"));setPanel("Generating attendance sheet for the selected event...");}else if(active==="Certificates"){setPanel("Choose an event below, select winners from Events if needed, then export PDF certificates as ZIP files.");}else if(active==="AI"){setPanel("Use the AI Desk below to generate reports, MOMs, and secretary answers from real MongoDB data.");}else if(active==="Contact Messages"){setPanel("Open a message row to read all sender details and update its status.");}else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields,item:data.clubInfo});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${singular}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:active==="Meetings"?{status:"completed"}:active==="Hall of Fame"?{category:"top_contributor",active:"true"}:{}})}}} className="portal-command-button flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-xs font-semibold transition hover:-translate-y-0.5 sm:w-auto sm:self-end">{active==="Overview"||active==="Attendance"||active==="Event Participants"?<Download size={14}/>:active==="Certificates"?<Award size={14}/>:active==="AI"?<Brain size={14}/>:active==="Contact Messages"?<MessageSquare size={14}/>:active==="Membership Drive"?<SlidersHorizontal size={14}/>:<Plus size={14}/>}<span>{action}</span></button></div>
 }
 
 
@@ -4513,6 +4516,246 @@ function MatrixRainCanvas() {
   }, []);
 
   return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />;
+}
+
+function EventParticipants({ data, setPanel }: { data: Data; setPanel: (value: string) => void }) {
+  const events = data.events || [];
+  const [selectedEventId, setSelectedEventId] = useState<string>("all");
+  const [search, setSearch] = useState("");
+  const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({});
+
+  const selectedEvent = events.find((e: any) => idOf(e) === selectedEventId);
+
+  const filteredRegistrations = useMemo(() => {
+    let list = data.registrations || [];
+    if (selectedEventId && selectedEventId !== "all") {
+      list = list.filter((reg: any) => idOf(reg.event) === selectedEventId);
+    }
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+
+    return list.filter((reg: any) => {
+      const leader = reg.user || {};
+      const members = reg.teamMembers || [];
+      const textToSearch = [
+        reg.teamName,
+        reg.mode,
+        reg.status,
+        leader.name,
+        leader.email,
+        leader.phone,
+        leader.uid,
+        leader.program,
+        ...members.map((m: any) => [m.name, m.email, m.phone, m.uid, m.program].filter(Boolean).join(" "))
+      ].filter(Boolean).join(" ").toLowerCase();
+
+      return textToSearch.includes(q);
+    });
+  }, [data.registrations, selectedEventId, search]);
+
+  const totalRegistrations = filteredRegistrations.length;
+  const totalTeams = filteredRegistrations.filter((r: any) => r.mode === "team").length;
+  const totalIndividuals = totalRegistrations - totalTeams;
+  const totalConfirmed = filteredRegistrations.filter((r: any) => r.status === "confirmed").length;
+
+  const totalHeadcount = filteredRegistrations.reduce((acc: number, r: any) => {
+    return acc + 1 + (r.mode === "team" && Array.isArray(r.teamMembers) ? r.teamMembers.length : 0);
+  }, 0);
+
+  const toggleTeam = (key: string) => {
+    setExpandedTeams((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  return (
+    <div className="mt-7 grid gap-5 xl:grid-cols-[1fr_.38fr] animate-in fade-in duration-200">
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.02] via-transparent to-blue-500/[0.02]" />
+
+        <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] pb-5 mb-6">
+          <div>
+            <h3 className="text-base font-bold text-white tracking-tight">Event Participants Directory</h3>
+            <p className="mt-1 text-xs text-white/38">View team-wise registrations, leader & member contact details, and status.</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative flex min-w-[220px] items-center gap-2 rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-white/45 focus-within:border-violet-400/40 transition">
+              <Search size={14} />
+              <input 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)} 
+                placeholder="Search team, name, UID, phone..." 
+                className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/28" 
+              />
+            </div>
+
+            <select 
+              value={selectedEventId} 
+              onChange={(e) => setSelectedEventId(e.target.value)} 
+              className="rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-xs text-white outline-none focus:border-violet-400/40 transition"
+            >
+              <option value="all">All Events ({data.registrations?.length || 0})</option>
+              {events.map((e: any) => (
+                <option value={idOf(e)} key={idOf(e)}>{e.title}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4 mb-6 relative z-10">
+          <div className="rounded-2xl border border-white/[.06] bg-white/[.02] p-4">
+            <p className="text-[9px] uppercase tracking-[.18em] text-white/35">Total Teams / Regs</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-white">{totalRegistrations}</p>
+          </div>
+          <div className="rounded-2xl border border-violet-500/15 bg-violet-500/[0.04] p-4">
+            <p className="text-[9px] uppercase tracking-[.18em] text-violet-300/60">Total Headcount</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-violet-300">{totalHeadcount}</p>
+          </div>
+          <div className="rounded-2xl border border-blue-500/15 bg-blue-500/[0.04] p-4">
+            <p className="text-[9px] uppercase tracking-[.18em] text-blue-300/60">Teams vs Indiv.</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-blue-300">{totalTeams} / {totalIndividuals}</p>
+          </div>
+          <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4">
+            <p className="text-[9px] uppercase tracking-[.18em] text-emerald-300/60">Confirmed</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-emerald-300">{totalConfirmed}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4 max-h-[580px] overflow-y-auto pr-1">
+          {filteredRegistrations.map((reg: any) => {
+            const regId = idOf(reg);
+            const isTeam = reg.mode === "team";
+            const leader = reg.user || {};
+            const squadMembers = reg.teamMembers || [];
+            const isExpanded = expandedTeams[regId] !== false;
+
+            const eventObj = events.find((e: any) => idOf(e) === idOf(reg.event));
+            const eventName = eventObj?.title || valueOf(reg, "event") || "Event";
+
+            return (
+              <div key={regId} className="rounded-2xl border border-white/[.08] bg-black/40 p-5 space-y-4 transition hover:border-purple-500/30">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-purple-400 uppercase tracking-wider">{eventName}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider border ${isTeam ? "bg-purple-500/10 border-purple-500/20 text-purple-300" : "bg-blue-500/10 border-blue-500/20 text-blue-300"}`}>
+                        {isTeam ? "TEAM REGISTRATION" : "INDIVIDUAL"}
+                      </span>
+                    </div>
+                    {isTeam && (
+                      <h4 className="text-base font-extrabold text-white mt-1 font-mono tracking-tight">
+                        {reg.teamName || "Unnamed Squad"}
+                      </h4>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider border ${reg.status === "waitlisted" ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"}`}>
+                      {reg.status || "CONFIRMED"}
+                    </span>
+                    {isTeam && (
+                      <button 
+                        onClick={() => toggleTeam(regId)} 
+                        className="text-[10px] font-mono text-white/50 hover:text-white border border-white/10 rounded-lg px-2.5 py-1 transition"
+                      >
+                        {isExpanded ? "Collapse Squad ▲" : `View Squad (${1 + squadMembers.length}) ▼`}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div className="space-y-2.5 pt-1">
+                    <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-3 text-xs grid gap-3 sm:grid-cols-4 items-center">
+                      <div>
+                        <span className="text-[8px] font-mono font-bold text-purple-400 uppercase tracking-widest block">
+                          {isTeam ? "TEAM LEADER" : "CANDIDATE"}
+                        </span>
+                        <p className="font-bold text-white mt-0.5">{leader.name || "N/A"}</p>
+                      </div>
+                      <div>
+                        <span className="text-[8px] font-mono text-white/35 uppercase tracking-widest block">UNIVERSITY UID</span>
+                        <p className="text-white/80 font-mono mt-0.5">{leader.uid || "N/A"}</p>
+                      </div>
+                      <div>
+                        <span className="text-[8px] font-mono text-white/35 uppercase tracking-widest block">CONTACT & EMAIL</span>
+                        <p className="text-white/80 mt-0.5">{leader.phone || "No WhatsApp"}</p>
+                        <p className="text-[10px] text-white/40 truncate">{leader.email || "N/A"}</p>
+                      </div>
+                      <div>
+                        <span className="text-[8px] font-mono text-white/35 uppercase tracking-widest block">PROGRAM / SEM</span>
+                        <p className="text-white/80 mt-0.5">{leader.program || "N/A"}</p>
+                        <p className="text-[10px] text-white/40">Sem {leader.semester || "N/A"}</p>
+                      </div>
+                    </div>
+
+                    {isTeam && squadMembers.map((m: any, idx: number) => {
+                      const u = m.user || m;
+                      return (
+                        <div key={idx} className="rounded-xl border border-white/5 bg-black/20 p-3 text-xs grid gap-3 sm:grid-cols-4 items-center">
+                          <div>
+                            <span className="text-[8px] font-mono font-bold text-white/40 uppercase tracking-widest block">
+                              SQUAD MEMBER {idx + 2}
+                            </span>
+                            <p className="font-bold text-white/90 mt-0.5">{m.name || u.name || "N/A"}</p>
+                          </div>
+                          <div>
+                            <span className="text-[8px] font-mono text-white/35 uppercase tracking-widest block">UNIVERSITY UID</span>
+                            <p className="text-white/70 font-mono mt-0.5">{m.uid || u.uid || "N/A"}</p>
+                          </div>
+                          <div>
+                            <span className="text-[8px] font-mono text-white/35 uppercase tracking-widest block">CONTACT & EMAIL</span>
+                            <p className="text-white/70 mt-0.5">{m.phone || u.phone || "No WhatsApp"}</p>
+                            <p className="text-[10px] text-white/40 truncate">{m.email || u.email || "N/A"}</p>
+                          </div>
+                          <div>
+                            <span className="text-[8px] font-mono text-white/35 uppercase tracking-widest block">PROGRAM / SEM</span>
+                            <p className="text-white/70 mt-0.5">{m.program || u.program || "N/A"}</p>
+                            <p className="text-[10px] text-white/40">Sem {m.semester ?? u.semester ?? "N/A"}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {!filteredRegistrations.length && (
+            <p className="rounded-2xl border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium">
+              No participant registrations match query &ldquo;{search}&rdquo;.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid gap-5 self-start">
+        <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.03] via-transparent to-transparent" />
+          <div className="relative">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Export Roster</h3>
+            <p className="text-xs leading-relaxed text-white/40 mb-5">
+              Download the complete team-wise participant roster including leader & member WhatsApp numbers, UIDs, and programs as Excel.
+            </p>
+
+            <a 
+              className="portal-command-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-center text-xs font-semibold hover:-translate-y-0.5 transition w-full"
+              href={`/api/admin/participants/export${selectedEventId && selectedEventId !== "all" ? `?event=${selectedEventId}` : ""}`}
+            >
+              <Download size={14} /> Export Excel Roster (.xlsx)
+            </a>
+
+            <p className="mt-5 text-[10px] text-white/32 uppercase tracking-wider font-semibold border-t border-white/[0.06] pt-4">Roster Summary</p>
+            <div className="mt-3 rounded-2xl bg-black/35 border border-white/[0.05] p-4 text-xs space-y-2 text-white/50">
+              <div className="flex justify-between"><span>Selected Event:</span><span className="font-semibold text-white truncate max-w-[140px]">{selectedEvent?.title || "All Events"}</span></div>
+              <div className="flex justify-between"><span>Registrations Count:</span><span className="font-semibold text-white">{totalRegistrations}</span></div>
+              <div className="flex justify-between"><span>Total Participant Headcount:</span><span className="font-semibold text-purple-300">{totalHeadcount}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 

@@ -52,6 +52,7 @@ export type PublicEvent = {
   team?: string;
   registrations: number;
   certEventLogo?: string;
+  whatsappGroupLink?: string;
 };
 
 export type PublicTeam = {
@@ -154,7 +155,7 @@ export async function getPublicEvent(slug: string) {
     ...publicEventStatusQuery,
     ...(slugMatches.length ? { $or: slugMatches } : {})
   })
-    .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
+    .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo whatsappGroupLink")
     .populate("team", "name")
     .populate("leads", "name email")
     .populate("sponsors", "name logo website level")
@@ -162,7 +163,7 @@ export async function getPublicEvent(slug: string) {
 
   if (!event) {
     const candidates = await Event.find(publicEventStatusQuery)
-      .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
+      .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo whatsappGroupLink")
       .populate("team", "name")
       .populate("leads", "name email")
       .populate("sponsors", "name logo website level")
@@ -179,7 +180,7 @@ export async function getPublicEvent(slug: string) {
     let fallback = await Event.findOne({
       ...(slugMatches.length ? { $or: slugMatches } : {})
     })
-      .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
+      .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo whatsappGroupLink")
       .populate("team", "name")
       .populate("leads", "name email")
       .populate("sponsors", "name logo website level")
@@ -187,7 +188,7 @@ export async function getPublicEvent(slug: string) {
 
     if (!fallback) {
       const allEvents = await Event.find({})
-        .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
+        .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo whatsappGroupLink")
         .populate("team", "name")
         .populate("leads", "name email")
         .populate("sponsors", "name logo website level")
@@ -234,6 +235,7 @@ export async function getPublicEvent(slug: string) {
       level: sponsor.level
     })),
     certEventLogo: record.certEventLogo || "",
+    whatsappGroupLink: record.whatsappGroupLink || "",
     registrations
   });
 }

@@ -11,6 +11,7 @@ import {
   X, 
   User, 
   Mail, 
+  Phone,
   FileText, 
   Layers, 
   AlertCircle, 
@@ -36,20 +37,24 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   const [teamName, setTeamName] = useState("");
   const [teamSize, setTeamSize] = useState(Math.max(2, Math.min(maxTeamSize, 2)));
 
+  const [whatsappLink, setWhatsappLink] = useState("");
+
   // Team Leader or Individual details
   const [leader, setLeader] = useState({
     name: "",
     email: "",
+    phone: "",
     uid: "",
     program: "",
     semester: ""
   });
 
   // Team members details
-  const [members, setMembers] = useState<Array<{ name: string; email: string; uid: string; program: string; semester: string }>>(() =>
+  const [members, setMembers] = useState<Array<{ name: string; email: string; phone: string; uid: string; program: string; semester: string }>>(() =>
     Array.from({ length: Math.max(1, maxTeamSize - 1) }).map(() => ({
       name: "",
       email: "",
+      phone: "",
       uid: "",
       program: "",
       semester: ""
@@ -77,6 +82,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   const fields = [
     { name: "name", label: "Full Name", type: "text", placeholder: "Eshaan Sharma", icon: User },
     { name: "email", label: "University Email", type: "email", placeholder: "eshaan@university.edu", icon: Mail },
+    { name: "phone", label: "WhatsApp Number", type: "tel", placeholder: "+91 9876543210", icon: Phone },
     { name: "uid", label: "University UID", type: "text", placeholder: "24BAI70387", icon: FileText },
     { name: "program", label: "Degree Program", type: "text", placeholder: "B.E. CSE AI/ML", icon: Layers },
     { name: "semester", label: "Current Semester", type: "number", placeholder: "4", icon: Sparkles }
@@ -85,6 +91,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   // Validation functions
   const isEmailValid = (email: string) => email.includes("@") && email.length >= 5;
   const isNameValid = (name: string) => name.trim().length >= 2;
+  const isPhoneValid = (phone: string) => phone.trim().length >= 8;
   const isUidValid = (uid: string) => uid.trim().length >= 2;
   const isProgramValid = (prog: string) => prog.trim().length >= 1;
   const isSemesterValid = (sem: string) => {
@@ -96,6 +103,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
     return (
       isNameValid(leader.name) &&
       isEmailValid(leader.email) &&
+      isPhoneValid(leader.phone) &&
       isUidValid(leader.uid) &&
       isProgramValid(leader.program) &&
       isSemesterValid(leader.semester)
@@ -108,6 +116,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
     return (
       isNameValid(member.name) &&
       isEmailValid(member.email) &&
+      isPhoneValid(member.phone) &&
       isUidValid(member.uid) &&
       isProgramValid(member.program) &&
       isSemesterValid(member.semester)
@@ -134,6 +143,29 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
   const activeMemberCount = teamSize - 1;
 
+  const validMemberCount = useMemo(() => {
+    let count = 0;
+    for (let i = 0; i < activeMemberCount; i++) {
+      if (isMemberValid(i)) count++;
+    }
+    return count;
+  }, [activeMemberCount, members]);
+
+  function handleInputChange(field: string, value: string) {
+    setLeader((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function handleMemberChange(index: number, field: string, value: string) {
+    setMembers((prev) => {
+      const next = [...prev];
+      if (!next[index]) {
+        next[index] = { name: "", email: "", phone: "", uid: "", program: "", semester: "" };
+      }
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  }
+
   async function submitRegistration(e: React.FormEvent) {
     e.preventDefault();
     if (!isFormValid) {
@@ -147,6 +179,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
     const body: Record<string, any> = {
       name: leader.name,
       email: leader.email,
+      phone: leader.phone,
       uid: leader.uid,
       program: leader.program,
       semester: Number(leader.semester),
@@ -158,6 +191,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
       body.members = members.slice(0, activeMemberCount).map(m => ({
         name: m.name,
         email: m.email,
+        phone: m.phone,
         uid: m.uid,
         program: m.program,
         semester: Number(m.semester)
@@ -174,29 +208,18 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
       if (res.ok) {
         setStep(5);
         setStatus(data.status || "confirmed");
+        if (data.whatsappGroupLink) {
+          setWhatsappLink(data.whatsappGroupLink);
+        }
       } else {
         setStatus(data.error || "Registration failed. Please check the inputs.");
       }
     } catch {
-      setStatus("Network connection timed out. Please try again.");
+      setStatus("Network error during registration.");
     } finally {
       setLoading(false);
     }
   }
-
-  const handleInputChange = (field: keyof typeof leader, value: string) => {
-    setLeader(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleMemberChange = (index: number, field: string, value: string) => {
-    setMembers(prev => {
-      const copy = [...prev];
-      if (copy[index]) {
-        copy[index] = { ...copy[index], [field]: value };
-      }
-      return copy;
-    });
-  };
 
   const stepsList = [
     { num: 1, label: "Mode Selection" },
@@ -390,6 +413,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         let isValid = false;
                         if (name === "name") isValid = isNameValid(val);
                         else if (name === "email") isValid = isEmailValid(val);
+                        else if (name === "phone") isValid = isPhoneValid(val);
                         else if (name === "uid") isValid = isUidValid(val);
                         else if (name === "program") isValid = isProgramValid(val);
                         else if (name === "semester") isValid = isSemesterValid(val);
@@ -493,6 +517,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           let isValid = false;
                           if (name === "name") isValid = isNameValid(val);
                           else if (name === "email") isValid = isEmailValid(val);
+                          else if (name === "phone") isValid = isPhoneValid(val);
                           else if (name === "uid") isValid = isUidValid(val);
                           else if (name === "program") isValid = isProgramValid(val);
                           else if (name === "semester") isValid = isSemesterValid(val);
@@ -655,6 +680,19 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         </div>
                       </div>
                     </div>
+
+                    {whatsappLink && (
+                      <a
+                        href={whatsappLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full max-w-[380px] flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs py-3.5 px-4 tracking-wider uppercase transition shadow-lg shadow-emerald-950/50"
+                      >
+                        <Phone size={15} />
+                        <span>Join Official WhatsApp Group</span>
+                        <ArrowUpRight size={14} />
+                      </a>
+                    )}
 
                     <button 
                       type="button" 
