@@ -21,8 +21,25 @@ export async function POST(req: NextRequest) {
 
     const parsed = studentMemberRegistrationSchema.safeParse(body);
     if (!parsed.success) {
-      const firstIssue = parsed.error.issues[0]?.message || "Please check the highlighted fields.";
-      return NextResponse.json({ error: firstIssue, issues: parsed.error.flatten() }, { status: 400 });
+      const issue = parsed.error.issues[0];
+      const field = issue?.path[0];
+      const fieldLabels: Record<string, string> = {
+        fullName: "Full name",
+        uid: "University UID",
+        department: "Department",
+        year: "Academic year",
+        section: "Section",
+        email: "Email address",
+        phone: "Phone number",
+        gender: "Gender",
+        interests: "Interests",
+        source: "Registration source"
+      };
+      const message = issue?.message || "Please check the highlighted fields.";
+      const error = typeof field === "string" && !message.toLowerCase().startsWith(fieldLabels[field]?.toLowerCase())
+        ? `${fieldLabels[field] || field}: ${message}`
+        : message;
+      return NextResponse.json({ error, field, issues: parsed.error.flatten() }, { status: 400 });
     }
     const input = parsed.data;
 
