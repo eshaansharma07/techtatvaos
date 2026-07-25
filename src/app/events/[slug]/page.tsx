@@ -57,12 +57,12 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
                   <Image width={1200} height={1200} src={optimizeCloudinaryUrl(event.certEventLogo, 120)} alt="" className="h-full w-full object-contain" />
                 </div>
               ) : null}
-              <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-purple-500 px-4 py-1.5 text-[10px] font-bold tracking-[.24em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+              <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-purple-500 px-3 py-1 md:px-4 md:py-1.5 text-[9px] md:text-[10px] font-bold tracking-[.24em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
                 <Sparkles size={12} />
                 {(event.category || "EVENT").toUpperCase()}
               </span>
-              <h1 className="mt-6 text-[3.45rem] font-extrabold leading-[.88] tracking-[-.075em] text-white md:mt-8 md:text-8xl">{event.title}</h1>
-              <p className="mt-5 max-w-2xl text-base leading-8 text-white/58 md:mt-6 md:text-lg md:leading-8">{event.description || "No description has been added yet."}</p>
+              <h1 className="mt-5 text-[2.5rem] font-extrabold leading-[1.05] tracking-[-.05em] text-white md:mt-8 md:text-7xl lg:text-8xl">{event.title}</h1>
+              <p className="mt-4 max-w-2xl text-[13px] leading-relaxed text-white/60 md:mt-6 md:text-lg md:leading-8">{event.description || "No description has been added yet."}</p>
               <div className="mt-7 grid gap-3 sm:grid-cols-3">
                 <div className="glass-brutalist px-4 py-4 rounded-xl">
                   <Calendar className="text-purple-400" size={16} />

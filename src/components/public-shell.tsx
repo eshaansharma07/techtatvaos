@@ -39,7 +39,11 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
   const pastEvents = events.filter(e => e.startAt && new Date(e.startAt) <= now);
 
   const latestEvent = pastEvents[pastEvents.length - 1] || events[0] || null;
-  const upcomingWorkshop = upcomingEvents.find(e => e.category?.toLowerCase().includes("workshop") || e.title?.toLowerCase().includes("workshop")) || upcomingEvents[0] || null;
+  const upcomingWorkshop = upcomingEvents.find(e => {
+    const cat = (e.category || "").toLowerCase();
+    const title = (e.title || "").toLowerCase();
+    return cat.includes("workshop") || cat.includes("bootcamp") || title.includes("workshop") || title.includes("bootcamp");
+  }) || null;
 
   return <main className="site-canvas min-h-screen overflow-hidden bg-ink">
     <SiteLoader logo={info.logo}/>

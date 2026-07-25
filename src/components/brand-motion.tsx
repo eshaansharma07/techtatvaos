@@ -11,13 +11,7 @@ export function MotionLogo({ logo }: { logo?: string }) {
       <span className="brand-orb" aria-hidden="true" />
       <span className="brand-mark-wrap">
         <span className="brand-mark-aura" />
-        {logo ? (
-          <Image src={logo} alt="" className="brand-mark" width={100} height={100} />
-        ) : (
-          <span className="brand-mark-fallback">
-            <Hexagon size={28} />
-          </span>
-        )}
+        <Image src="/logo-colour.png" alt="Tech Tatva Logo" className="brand-mark" width={100} height={100} />
         <span className="brand-scan" />
       </span>
       <span className="brand-title" data-text="Tech Tatva">
