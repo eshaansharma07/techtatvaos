@@ -17,18 +17,14 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ resource: string }> }) {
-  try {
-    const blocked = await requirePortal(req);
-    if (blocked) return blocked;
-    const session = await auth();
-    if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    const { resource } = await params;
-    if (!adminResources.includes(resource as AdminResource)) return NextResponse.json({ error: "Unknown resource" }, { status: 404 });
-    await connectDB();
-    const result = await createResource(resource as AdminResource, await req.json(), (session.user as { id?: string }).id);
-    await audit(req, `portal.${resource}.create`, { entityType: resource, entityId: (result as any)?._id });
-    return NextResponse.json(result, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Failed to create record" }, { status: 400 });
-  }
+  const blocked = await requirePortal(req);
+  if (blocked) return blocked;
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { resource } = await params;
+  if (!adminResources.includes(resource as AdminResource)) return NextResponse.json({ error: "Unknown resource" }, { status: 404 });
+  await connectDB();
+  const result = await createResource(resource as AdminResource, await req.json(), (session.user as { id?: string }).id);
+  await audit(req, `portal.${resource}.create`, { entityType: resource, entityId: (result as any)?._id });
+  return NextResponse.json(result, { status: 201 });
 }

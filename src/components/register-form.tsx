@@ -11,7 +11,6 @@ import {
   X, 
   User, 
   Mail, 
-  Phone,
   FileText, 
   Layers, 
   AlertCircle, 
@@ -35,27 +34,22 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"individual" | "team">(participationMode === "team" ? "team" : "individual");
   const [teamName, setTeamName] = useState("");
-  const defaultTeamSize = Math.max(4, Math.min(maxTeamSize, 4));
-  const [teamSize, setTeamSize] = useState(defaultTeamSize);
-
-  const [whatsappLink, setWhatsappLink] = useState("");
+  const [teamSize, setTeamSize] = useState(Math.max(2, Math.min(maxTeamSize, 2)));
 
   // Team Leader or Individual details
   const [leader, setLeader] = useState({
     name: "",
     email: "",
-    phone: "",
     uid: "",
     program: "",
     semester: ""
   });
 
   // Team members details
-  const [members, setMembers] = useState<Array<{ name: string; email: string; phone: string; uid: string; program: string; semester: string }>>(() =>
-    Array.from({ length: Math.max(3, maxTeamSize - 1) }).map(() => ({
+  const [members, setMembers] = useState<Array<{ name: string; email: string; uid: string; program: string; semester: string }>>(() =>
+    Array.from({ length: Math.max(1, maxTeamSize - 1) }).map(() => ({
       name: "",
       email: "",
-      phone: "",
       uid: "",
       program: "",
       semester: ""
@@ -83,7 +77,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   const fields = [
     { name: "name", label: "Full Name", type: "text", placeholder: "Eshaan Sharma", icon: User },
     { name: "email", label: "University Email", type: "email", placeholder: "eshaan@university.edu", icon: Mail },
-    { name: "phone", label: "WhatsApp Number", type: "tel", placeholder: "+91 9876543210", icon: Phone },
     { name: "uid", label: "University UID", type: "text", placeholder: "24BAI70387", icon: FileText },
     { name: "program", label: "Degree Program", type: "text", placeholder: "B.E. CSE AI/ML", icon: Layers },
     { name: "semester", label: "Current Semester", type: "number", placeholder: "4", icon: Sparkles }
@@ -92,7 +85,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   // Validation functions
   const isEmailValid = (email: string) => email.includes("@") && email.length >= 5;
   const isNameValid = (name: string) => name.trim().length >= 2;
-  const isPhoneValid = (phone: string) => phone.replace(/\D/g, "").length >= 8;
   const isUidValid = (uid: string) => uid.trim().length >= 2;
   const isProgramValid = (prog: string) => prog.trim().length >= 1;
   const isSemesterValid = (sem: string) => {
@@ -104,7 +96,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
     return (
       isNameValid(leader.name) &&
       isEmailValid(leader.email) &&
-      isPhoneValid(leader.phone) &&
       isUidValid(leader.uid) &&
       isProgramValid(leader.program) &&
       isSemesterValid(leader.semester)
@@ -117,7 +108,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
     return (
       isNameValid(member.name) &&
       isEmailValid(member.email) &&
-      isPhoneValid(member.phone) &&
       isUidValid(member.uid) &&
       isProgramValid(member.program) &&
       isSemesterValid(member.semester)
@@ -144,32 +134,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
   const activeMemberCount = teamSize - 1;
 
-  const validMemberCount = useMemo(() => {
-    let count = 0;
-    for (let i = 0; i < activeMemberCount; i++) {
-      if (isMemberValid(i)) count++;
-    }
-    return count;
-  }, [activeMemberCount, members]);
-
-  const isLastMemberTab = activeTab >= activeMemberCount - 1;
-  const canContinueFromMembers = activeMemberCount > 0 && isMemberValid(activeTab);
-
-  function handleInputChange(field: string, value: string) {
-    setLeader((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function handleMemberChange(index: number, field: string, value: string) {
-    setMembers((prev) => {
-      const next = [...prev];
-      if (!next[index]) {
-        next[index] = { name: "", email: "", phone: "", uid: "", program: "", semester: "" };
-      }
-      next[index] = { ...next[index], [field]: value };
-      return next;
-    });
-  }
-
   async function submitRegistration(e: React.FormEvent) {
     e.preventDefault();
     if (!isFormValid) {
@@ -183,7 +147,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
     const body: Record<string, any> = {
       name: leader.name,
       email: leader.email,
-      phone: leader.phone,
       uid: leader.uid,
       program: leader.program,
       semester: Number(leader.semester),
@@ -195,7 +158,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
       body.members = members.slice(0, activeMemberCount).map(m => ({
         name: m.name,
         email: m.email,
-        phone: m.phone,
         uid: m.uid,
         program: m.program,
         semester: Number(m.semester)
@@ -212,18 +174,29 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
       if (res.ok) {
         setStep(5);
         setStatus(data.status || "confirmed");
-        if (data.whatsappGroupLink) {
-          setWhatsappLink(data.whatsappGroupLink);
-        }
       } else {
         setStatus(data.error || "Registration failed. Please check the inputs.");
       }
     } catch {
-      setStatus("Network error during registration.");
+      setStatus("Network connection timed out. Please try again.");
     } finally {
       setLoading(false);
     }
   }
+
+  const handleInputChange = (field: keyof typeof leader, value: string) => {
+    setLeader(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleMemberChange = (index: number, field: string, value: string) => {
+    setMembers(prev => {
+      const copy = [...prev];
+      if (copy[index]) {
+        copy[index] = { ...copy[index], [field]: value };
+      }
+      return copy;
+    });
+  };
 
   const stepsList = [
     { num: 1, label: "Mode Selection" },
@@ -385,7 +358,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                             <div className="mt-3 flex items-center gap-3">
                               <input 
                                 type="range" 
-                                min={Math.min(4, maxTeamSize)} 
+                                min={2} 
                                 max={maxTeamSize} 
                                 value={teamSize}
                                 onChange={(e) => {
@@ -417,7 +390,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         let isValid = false;
                         if (name === "name") isValid = isNameValid(val);
                         else if (name === "email") isValid = isEmailValid(val);
-                        else if (name === "phone") isValid = isPhoneValid(val);
                         else if (name === "uid") isValid = isUidValid(val);
                         else if (name === "program") isValid = isProgramValid(val);
                         else if (name === "semester") isValid = isSemesterValid(val);
@@ -425,7 +397,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         return (
                           <div key={name} className={name === "name" || name === "email" ? "sm:col-span-2" : ""}>
                             <label className="block text-[9px] font-black tracking-widest text-white/40 uppercase mb-2">
-                              {label}{name === "phone" ? " *" : ""}
+                              {label}
                             </label>
                             <div className="relative">
                               <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30">
@@ -467,10 +439,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                   <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
                     <div>
                       <h3 className="text-xl font-extrabold tracking-tight text-white">Assemble Team Squad</h3>
-                      <p className="text-xs text-white/50 mt-1 leading-relaxed">Fill the current member, then use Next member. You can also select any tab to edit it.</p>
-                      <p className="mt-2 text-[10px] font-mono font-bold uppercase tracking-wider text-purple-300/80">
-                        {validMemberCount} of {activeMemberCount} members ready
-                      </p>
+                      <p className="text-xs text-white/50 mt-1 leading-relaxed">Provide details for your {activeMemberCount} squad members. Select tabs to fill them individually.</p>
                     </div>
 
                     {/* Member Horizontal Tabs */}
@@ -524,7 +493,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           let isValid = false;
                           if (name === "name") isValid = isNameValid(val);
                           else if (name === "email") isValid = isEmailValid(val);
-                          else if (name === "phone") isValid = isPhoneValid(val);
                           else if (name === "uid") isValid = isUidValid(val);
                           else if (name === "program") isValid = isProgramValid(val);
                           else if (name === "semester") isValid = isSemesterValid(val);
@@ -532,7 +500,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           return (
                             <div key={name} className={name === "name" || name === "email" ? "sm:col-span-2" : ""}>
                               <label className="block text-[9px] font-black tracking-widest text-white/40 uppercase mb-2">
-                                {label}{name === "phone" ? " *" : ""}
+                                {label}
                               </label>
                               <div className="relative">
                                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30">
@@ -688,19 +656,6 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                       </div>
                     </div>
 
-                    {whatsappLink && (
-                      <a
-                        href={whatsappLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full max-w-[380px] flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs py-3.5 px-4 tracking-wider uppercase transition shadow-lg shadow-emerald-950/50"
-                      >
-                        <Phone size={15} />
-                        <span>Join Official WhatsApp Group</span>
-                        <ArrowUpRight size={14} />
-                      </a>
-                    )}
-
                     <button 
                       type="button" 
                       onClick={() => setIsOpen(false)}
@@ -719,18 +674,11 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     {step > 1 && (
                       <button
                         type="button"
-                        onClick={() => {
-                          if (step === 3 && mode === "team" && activeTab > 0) {
-                            setActiveTab((prev) => prev - 1);
-                            setStatus("");
-                            return;
-                          }
-                          setStep(prev => prev - 1);
-                        }}
+                        onClick={() => setStep(prev => prev - 1)}
                         className="brutalist-btn-dark flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs tracking-wider font-extrabold uppercase transition"
                       >
                         <ArrowLeft size={13} />
-                        <span>{step === 3 && mode === "team" && activeTab > 0 ? "Previous member" : "Back"}</span>
+                        <span>Back</span>
                       </button>
                     )}
                   </div>
@@ -763,24 +711,11 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                     ) : (
                       <button
                         type="button"
-                        disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 && mode === "team" ? !canContinueFromMembers : false}
-                        onClick={() => {
-                          if (step === 3 && mode === "team") {
-                            if (!isLastMemberTab) {
-                              setActiveTab((prev) => Math.min(prev + 1, activeMemberCount - 1));
-                              setStatus("");
-                              return;
-                            }
-                            if (!allMembersValid) {
-                              setStatus(`${activeMemberCount - validMemberCount} team member slot${activeMemberCount - validMemberCount === 1 ? "" : "s"} still need valid details.`);
-                              return;
-                            }
-                          }
-                          setStep(prev => prev + 1);
-                        }}
+                        disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 ? !allMembersValid : false}
+                        onClick={() => setStep(prev => prev + 1)}
                         className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
                       >
-                        <span>{step === 3 && mode === "team" && !isLastMemberTab ? "Next member" : "Continue"}</span>
+                        <span>Continue</span>
                         <ArrowRight size={13} />
                       </button>
                     )}

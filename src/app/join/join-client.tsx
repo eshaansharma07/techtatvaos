@@ -521,7 +521,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
         </div>
       )}
 
-      <div className="relative min-h-[90vh] py-16 px-5 flex flex-col items-center justify-center spatial-grid-bg">
+      <div className="relative min-h-[90vh] pt-16 pb-32 md:pb-36 px-5 flex flex-col items-center justify-center spatial-grid-bg">
         {/* Background Gradients */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(168,85,247,0.08),transparent_45%)] pointer-events-none" />
         <div className="absolute inset-0 grid-bg opacity-[0.06] pointer-events-none" />

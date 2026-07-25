@@ -43,7 +43,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
 
   return (
     <PublicShell>
-      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-20 pt-32 md:px-6 md:pb-28 md:pt-44 spatial-grid-bg">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-32 pt-32 md:px-6 md:pb-36 md:pt-44 spatial-grid-bg">
         <Link href="/events" className="brutalist-btn-dark inline-flex min-h-11 items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold uppercase tracking-[.18em] text-white transition">
           <ArrowLeft size={14} /> BACK TO EVENTS
         </Link>

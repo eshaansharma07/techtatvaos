@@ -31,8 +31,6 @@ import { computeRecruitmentStatus } from "@/lib/recruitment";
 
 const serialize = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-const publicEventSlug = (event: any) => slugify(String(event?.slug || event?.title || event?._id || ""));
-const publicEventStatusQuery = { status: { $ne: "archived" } };
 
 export type PublicEvent = {
   id: string;
@@ -52,7 +50,6 @@ export type PublicEvent = {
   team?: string;
   registrations: number;
   certEventLogo?: string;
-  whatsappGroupLink?: string;
 };
 
 export type PublicTeam = {
@@ -97,7 +94,7 @@ export async function getLatestPublicAnnouncement() {
 
 export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   await connectDB();
-  const events = await Event.find(publicEventStatusQuery)
+  const events = await Event.find({ status: { $in: ["published", "active", "completed"] } })
     .sort({ startAt: 1 })
     .limit(limit || 0)
     .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen startAt endAt team")
@@ -111,7 +108,7 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   return serialize(
     events.map((event) => ({
       id: String(event._id),
-      slug: publicEventSlug(event),
+      slug: event.slug,
       title: event.title,
       description: event.description,
       banner: event.banner,
@@ -121,7 +118,7 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
       status: event.status,
       participationMode: (event as any).participationMode || "individual",
       maxTeamSize: (event as any).maxTeamSize || 1,
-      registrationOpen: Boolean(event.registrationOpen),
+      registrationOpen: event.registrationOpen,
       startAt: event.startAt?.toISOString(),
       endAt: event.endAt?.toISOString(),
       team: (event.team as unknown as { name?: string })?.name,
@@ -132,83 +129,18 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
 
 export async function getPublicEvent(slug: string) {
   await connectDB();
-  const rawSlug = decodeURIComponent(String(slug || "")).trim();
-  const canonicalSlug = slugify(rawSlug);
-  if (!rawSlug && !canonicalSlug) return null;
-
-  const slugMatches: Record<string, any>[] = [];
-  if (rawSlug) {
-    slugMatches.push({ slug: rawSlug });
-    slugMatches.push({ slug: new RegExp(`^${rawSlug.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}$`, "i") });
-  }
-  if (canonicalSlug && canonicalSlug !== rawSlug) {
-    slugMatches.push({ slug: canonicalSlug });
-  }
-  if (rawSlug) {
-    slugMatches.push({ title: new RegExp(`^${rawSlug.replace(/[-_]/g, "\\s*")}$`, "i") });
-  }
-  if (Types.ObjectId.isValid(rawSlug)) {
-    slugMatches.push({ _id: rawSlug });
-  }
-
-  let event = await Event.findOne({
-    ...publicEventStatusQuery,
-    ...(slugMatches.length ? { $or: slugMatches } : {})
-  })
-    .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo whatsappGroupLink")
+  const event = await Event.findOne({ slug, status: { $in: ["published", "active", "completed"] } })
+    .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
     .populate("team", "name")
     .populate("leads", "name email")
     .populate("sponsors", "name logo website level")
     .lean();
-
-  if (!event) {
-    const candidates = await Event.find(publicEventStatusQuery)
-      .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo whatsappGroupLink")
-      .populate("team", "name")
-      .populate("leads", "name email")
-      .populate("sponsors", "name logo website level")
-      .lean();
-    event = candidates.find((candidate: any) => (
-      publicEventSlug(candidate) === canonicalSlug ||
-      slugify(String(candidate.title || "")) === canonicalSlug ||
-      slugify(String(candidate.slug || "")) === canonicalSlug ||
-      String(candidate._id) === rawSlug
-    )) || null;
-  }
-
-  if (!event) {
-    let fallback = await Event.findOne({
-      ...(slugMatches.length ? { $or: slugMatches } : {})
-    })
-      .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo whatsappGroupLink")
-      .populate("team", "name")
-      .populate("leads", "name email")
-      .populate("sponsors", "name logo website level")
-      .lean();
-
-    if (!fallback) {
-      const allEvents = await Event.find({})
-        .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo whatsappGroupLink")
-        .populate("team", "name")
-        .populate("leads", "name email")
-        .populate("sponsors", "name logo website level")
-        .lean();
-      fallback = allEvents.find((candidate: any) => (
-        publicEventSlug(candidate) === canonicalSlug ||
-        slugify(String(candidate.title || "")) === canonicalSlug ||
-        slugify(String(candidate.slug || "")) === canonicalSlug ||
-        String(candidate._id) === rawSlug
-      )) || null;
-    }
-    event = fallback;
-  }
-
   if (!event) return null;
   const record: any = event;
   const registrations = await EventRegistration.countDocuments({ event: record._id, status: "confirmed" });
   return serialize({
     id: String(record._id),
-    slug: publicEventSlug(record),
+    slug: record.slug,
     title: record.title,
     description: record.description,
     banner: record.banner,
@@ -218,7 +150,7 @@ export async function getPublicEvent(slug: string) {
     status: record.status,
     participationMode: record.participationMode || "individual",
     maxTeamSize: record.maxTeamSize || 1,
-    registrationOpen: Boolean(record.registrationOpen),
+    registrationOpen: record.registrationOpen,
     registrationStart: record.registrationStart?.toISOString(),
     registrationEnd: record.registrationEnd?.toISOString(),
     startAt: record.startAt?.toISOString(),
@@ -235,7 +167,6 @@ export async function getPublicEvent(slug: string) {
       level: sponsor.level
     })),
     certEventLogo: record.certEventLogo || "",
-    whatsappGroupLink: record.whatsappGroupLink || "",
     registrations
   });
 }

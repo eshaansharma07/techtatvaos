@@ -70,7 +70,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     <div className="h-20 md:hidden" />
     {children}
     
-    <footer className="public-footer px-5 py-10 md:px-6 md:py-16">
+    <footer className="public-footer px-5 pt-10 pb-24 md:px-6 md:pt-16 md:pb-20">
       <div className="glass-brutalist mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] rounded-[2rem] p-6 md:p-8">
         
         {/* RICH FOOTER INFORMATION CARDS */}

@@ -6,7 +6,6 @@ import {
   ClubInfo,
   ContactMessage,
   Attendance,
-  Certificate,
   Event,
   EventRegistration,
   Gallery,
@@ -51,7 +50,6 @@ export const adminResources = [
   "gallery",
   "hallOfFame",
   "contacts",
-  "eventRegistrations",
   "settings",
   "recruitmentSettings",
   "recruitmentTeams",
@@ -125,19 +123,12 @@ function normalizeEventStatus(value: any, fallback = "published") {
   return fallback;
 }
 
-function optionalPositiveNumber(value: any, field: string) {
-  if (value === undefined || value === null || value === "") return undefined;
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed < 0) throw new Error(`${field} must be a valid number.`);
-  return parsed;
-}
-
 function normalizeEventBody(input: Record<string, any>, create = false) {
   const body = clean(input);
   const normalized: Record<string, any> = { ...body };
-  if (body.slug || body.title) normalized.slug = slugify(String(body.slug || body.title));
-  if (body.capacity !== undefined) normalized.capacity = optionalPositiveNumber(body.capacity, "Capacity");
-  if (body.maxTeamSize !== undefined) normalized.maxTeamSize = Math.max(1, optionalPositiveNumber(body.maxTeamSize, "Maximum team size") || 1);
+  if (body.slug || body.title) normalized.slug = body.slug || slugify(body.title);
+  if (body.capacity !== undefined) normalized.capacity = Number(body.capacity);
+  if (body.maxTeamSize !== undefined) normalized.maxTeamSize = Math.max(1, Number(body.maxTeamSize) || 1);
   if (body.team !== undefined) normalized.team = refId(body.team);
   if (body.participationMode !== undefined || create) normalized.participationMode = participationModes.has(String(body.participationMode)) ? body.participationMode : "individual";
   if (create || body.status !== undefined) normalized.status = normalizeEventStatus(body.status, "published");
@@ -430,24 +421,6 @@ export async function deleteResource(resource: AdminResource, id: string) {
   if (resource === "events") {
     await Promise.all([EventRegistration.deleteMany({ event: id }), Attendance.deleteMany({ event: id })]);
     return Event.findByIdAndDelete(id);
-  }
-  if (resource === "eventRegistrations") {
-    const registration = await EventRegistration.findById(id).lean() as any;
-    if (!registration) return null;
-    const participantIds = [
-      registration.user,
-      ...((registration.teamMembers || []).map((member: any) => member.user).filter(Boolean))
-    ].filter(Boolean);
-    await Promise.all([
-      Attendance.deleteMany({
-        $or: [
-          { registration: registration._id },
-          { event: registration.event, user: { $in: participantIds } }
-        ]
-      }),
-      Certificate.deleteMany({ event: registration.event, user: { $in: participantIds } })
-    ]);
-    return EventRegistration.findByIdAndDelete(id);
   }
   if (resource === "meetings") return Meeting.findByIdAndUpdate(id, { status: "archived" }, { new: true });
   if (resource === "tasks") return Task.findByIdAndDelete(id);
