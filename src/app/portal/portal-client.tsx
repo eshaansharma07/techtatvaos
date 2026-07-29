@@ -2577,6 +2577,20 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
   }, [filtered]);
 
+  const groupedWithTeams = useMemo(() => {
+    return grouped.map(([eventId, rows]) => {
+      const event = events.find((e: any) => idOf(e) === eventId);
+      const when = event?.startAt ? new Date(event.startAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "";
+      const teamMap = new Map<string, typeof rows>();
+      rows.forEach((row) => {
+        const key = row.teamName;
+        if (!teamMap.has(key)) teamMap.set(key, []);
+        teamMap.get(key)!.push(row);
+      });
+      return { eventId, rows, when, teams: Array.from(teamMap.entries()) };
+    });
+  }, [grouped, events]);
+
   const toggleEvent = (eventId: string) => {
     setExpandedEvents((prev) => ({ ...prev, [eventId]: !prev[eventId] }));
   };
@@ -2584,13 +2598,18 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
   const confirmDelete = async (registrationId: string, name: string) => {
     if (!window.confirm(`Remove ${name || "this participant"} from this event? This will delete their attendance records too.`)) return;
     setPanel(`Removing ${name || "participant"}...`);
-    const res = await fetch(`/api/admin/registrations/${registrationId}`, { method: "DELETE" });
-    if (!res.ok) {
-      setPanel("Failed to remove participant.");
-      return;
+    try {
+      const res = await fetch(`/api/admin/registrations/${encodeURIComponent(registrationId)}`, { method: "DELETE" });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setPanel(result.error || "Failed to remove participant.");
+        return;
+      }
+      await refresh();
+      setPanel(`${name || "Participant"} removed.`);
+    } catch (error) {
+      setPanel("Network error while removing participant.");
     }
-    await refresh();
-    setPanel(`${name || "Participant"} removed.`);
   };
 
   const exportExcel = () => {
@@ -2645,21 +2664,10 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
           </div>
         </div>
 
-        {grouped.length ? (
+        {groupedWithTeams.length ? (
           <div className="grid gap-4">
-            {grouped.map(([eventId, rows]) => {
-              const event = events.find((e: any) => idOf(e) === eventId);
-              const when = event?.startAt ? new Date(event.startAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "";
+            {groupedWithTeams.map(({ eventId, rows, when, teams }) => {
               const isExpanded = expandedEvents[eventId] !== false;
-              const teams = useMemo(() => {
-                const map = new Map<string, typeof rows>();
-                rows.forEach((row) => {
-                  const key = row.teamName;
-                  if (!map.has(key)) map.set(key, []);
-                  map.get(key)!.push(row);
-                });
-                return Array.from(map.entries());
-              }, [rows]);
 
               return (
                 <div key={eventId} className="rounded-[1.7rem] border border-white/[.06] bg-black/20">
@@ -2728,7 +2736,7 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
                 </div>
               );
             })}
-            {!grouped.length ? (
+            {!groupedWithTeams.length ? (
               <p className="rounded-[1.7rem] border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium">No participants match your filters.</p>
             ) : null}
           </div>
