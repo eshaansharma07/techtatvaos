@@ -80,6 +80,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const allowed = eventMode === "both" || eventMode === mode;
     if (!allowed) return NextResponse.json({ error: `This event accepts ${eventMode} registrations only.` }, { status: 400 });
 
+    let whatsappGroupLink = event.whatsappGroupLink || "";
+
     let userId = legacy.success ? legacy.data.userId : null;
     let leader: any = null;
     let teamMembers: any[] = [];
@@ -132,7 +134,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     );
 
     const settings = await RecruitmentSettings.findOne({ key: "default" }).lean();
-    const whatsappGroupLink = (settings as any)?.whatsappGroupLink || "";
+    if (!whatsappGroupLink) {
+      whatsappGroupLink = (settings as any)?.whatsappGroupLink || "";
+    }
 
     return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode, whatsappGroupLink }, { status: 201 });
   } catch (error: any) {
