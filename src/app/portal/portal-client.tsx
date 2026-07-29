@@ -241,6 +241,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
   const [notifications,setNotifications]=useState(false);
   const [uploads,setUploads]=useState<Record<string,{url:string;publicId:string;resourceType:string}>>({});
   const [uploading,setUploading]=useState<Record<string,boolean>>({});
+  const [eventsTab,setEventsTab]=useState<"events"|"participants">("events");
 
   // Command Palette & Cyber Mode States
   const [showPalette, setShowPalette] = useState(false);
@@ -534,7 +535,23 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
           {nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold ${active===label?"border-violet-200/35 bg-violet-500/18 text-white":"border-white/[.08] bg-white/[.035] text-white/50"}`}><Icon size={14}/>{label}</button>)}
         </div>
         <Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>
-        {active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
+        {active === "Events" ? (
+          <div>
+            <div className="mb-4 flex gap-2">
+              <button onClick={() => setEventsTab("events")} className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${eventsTab === "events" ? "border-violet-200/35 bg-violet-500/18 text-white" : "border-white/[.08] bg-white/[.035] text-white/50 hover:text-white"}`}>
+                <CalendarDays size={14} /> Events
+              </button>
+              <button onClick={() => setEventsTab("participants")} className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${eventsTab === "participants" ? "border-violet-200/35 bg-violet-500/18 text-white" : "border-white/[.08] bg-white/[.035] text-white/50 hover:text-white"}`}>
+                <Users size={14} /> Participants
+              </button>
+            </div>
+            {eventsTab === "events" ? (
+              <Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent} />
+            ) : (
+              <EventParticipantsDesk data={data} setPanel={setPanel} refresh={refresh} />
+            )}
+          </div>
+        ) : active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
         <div className="portal-action mt-4 rounded-2xl p-5 border border-violet-500/10">
           <p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p>
           <p className="mt-3 text-sm leading-6 text-white/65">{panel}</p>
@@ -2454,6 +2471,287 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
             <button onClick={() => setPanel("Each registration is expanded into its components (leader + active team members) so that you can verify ID cards and mark attendance individually.")} className="portal-mini-button mt-5 w-full rounded-xl py-2.5 text-center text-xs text-amber-200/70 border border-amber-500/15 bg-amber-500/[0.02] hover:-translate-y-0.5 hover:bg-amber-500/[0.05] hover:text-amber-200 transition">
               Read Detailed Flow
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPanel: (value: string) => void; refresh: () => Promise<void> }) {
+  const events = data.events || [];
+  const registrations = data.registrations || [];
+  const eventMap = useMemo(() => new Map((events || []).map((e: any) => [idOf(e), e.title || "Untitled Event"])), [events]);
+
+  const [query, setQuery] = useState("");
+  const [modeFilter, setModeFilter] = useState("all");
+  const [eventFilter, setEventFilter] = useState("all");
+  const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});
+
+  const participants = useMemo(() => {
+    const list: Array<{
+      registrationId: string;
+      eventId: string;
+      eventTitle: string;
+      mode: string;
+      teamName: string;
+      role: string;
+      name: string;
+      email: string;
+      phone: string;
+      uid: string;
+      program: string;
+      semester: string;
+      status: string;
+      registeredAt: string;
+    }> = [];
+
+    (registrations as any[]).forEach((reg: any) => {
+      const eventId = String(idOf(reg.event));
+      const eventTitle = String(eventMap.get(eventId) || "Unknown Event");
+      const mode = reg.mode === "team" ? "Team" : "Individual";
+      const teamName = String(reg.teamName || (reg.mode === "team" ? "Unnamed Team" : "N/A"));
+      const regDate = reg.registeredAt ? new Date(reg.registeredAt).toLocaleString("en-IN") : "";
+      const leaderUser = reg.user;
+
+      list.push({
+        registrationId: String(idOf(reg)),
+        eventId,
+        eventTitle,
+        mode,
+        teamName,
+        role: reg.mode === "team" ? "Team Leader" : "Candidate",
+        name: String(leaderUser?.name || "N/A"),
+        email: String(leaderUser?.email || "N/A"),
+        phone: String(leaderUser?.phone || "N/A"),
+        uid: String(leaderUser?.uid || "N/A"),
+        program: String(leaderUser?.program || "N/A"),
+        semester: String(leaderUser?.semester ?? "N/A"),
+        status: String(reg.status || "confirmed"),
+        registeredAt: regDate
+      });
+
+      if (reg.mode === "team" && Array.isArray(reg.teamMembers)) {
+        reg.teamMembers.forEach((member: any, index: number) => {
+          const u = member.user || member;
+          list.push({
+            registrationId: String(idOf(reg)),
+            eventId,
+            eventTitle,
+            mode,
+            teamName,
+            role: `Squad Member ${index + 2}`,
+            name: String(member.name || u.name || "N/A"),
+            email: String(member.email || u.email || "N/A"),
+            phone: String(member.phone || u.phone || "N/A"),
+            uid: String(member.uid || u.uid || "N/A"),
+            program: String(member.program || u.program || "N/A"),
+            semester: String(member.semester ?? u.semester ?? "N/A"),
+            status: String(reg.status || "confirmed"),
+            registeredAt: regDate
+          });
+        });
+      }
+    });
+
+    return list;
+  }, [registrations, eventMap]);
+
+  const filtered = useMemo(() => {
+    return participants.filter((row) => {
+      const hay = `${row.eventTitle} ${row.teamName} ${row.name} ${row.email} ${row.uid} ${row.program} ${row.phone}`.toLowerCase();
+      if (query && !hay.includes(query.toLowerCase())) return false;
+      if (modeFilter !== "all" && row.mode.toLowerCase() !== modeFilter.toLowerCase()) return false;
+      if (eventFilter !== "all" && row.eventId !== eventFilter) return false;
+      return true;
+    });
+  }, [participants, query, modeFilter, eventFilter]);
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, typeof filtered>();
+    filtered.forEach((row) => {
+      const key = row.eventId;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(row);
+    });
+    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [filtered]);
+
+  const toggleEvent = (eventId: string) => {
+    setExpandedEvents((prev) => ({ ...prev, [eventId]: !prev[eventId] }));
+  };
+
+  const exportExcel = () => {
+    window.open("/api/admin/participants/export", "_blank");
+    setPanel("Exporting all event participants to Excel...");
+  };
+
+  return (
+    <div className="mt-7 grid gap-5 xl:grid-cols-[1fr_.42fr] animate-in fade-in duration-200">
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.02] via-transparent to-blue-500/[0.02]" />
+
+        <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] pb-5 mb-6">
+          <div>
+            <h3 className="text-base font-bold text-white tracking-tight">Event Participants</h3>
+            <p className="mt-1 text-xs text-white/38">All registered candidates grouped by event and team.</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative flex min-w-[200px] items-center gap-2 rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-white/45 focus-within:border-violet-400/40 transition">
+              <Search size={14} />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, UID, email..." className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/28" />
+            </div>
+
+            <select value={eventFilter} onChange={(event) => setEventFilter(event.target.value)} className="rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-xs text-white outline-none focus:border-violet-400/40 transition">
+              <option value="all">All Events</option>
+              {events.map((e: any) => <option value={idOf(e)} key={idOf(e)}>{e.title}</option>)}
+            </select>
+
+            <select value={modeFilter} onChange={(event) => setModeFilter(event.target.value)} className="rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-xs text-white outline-none focus:border-violet-400/40 transition">
+              <option value="all">All Modes</option>
+              <option value="individual">Individual</option>
+              <option value="team">Team</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid gap-3 grid-cols-3 mb-6 relative z-10">
+          <div className="rounded-2xl border border-white/[.06] bg-white/[.02] p-4 transition duration-200 hover:-translate-y-0.5">
+            <p className="text-[9px] uppercase tracking-[.18em] text-white/35">Total Participants</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-white">{participants.length}</p>
+          </div>
+          <div className="rounded-2xl border border-violet-500/15 bg-violet-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
+            <p className="text-[9px] uppercase tracking-[.18em] text-violet-300/60">Events</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-violet-300">{new Set(participants.map((p) => p.eventId)).size}</p>
+          </div>
+          <div className="rounded-2xl border border-blue-500/15 bg-blue-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
+            <p className="text-[9px] uppercase tracking-[.18em] text-blue-300/60">Teams</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight text-blue-300">{new Set(participants.filter((p) => p.mode === "Team").map((p) => `${p.eventId}-${p.teamName}`)).size}</p>
+          </div>
+        </div>
+
+        {grouped.length ? (
+          <div className="relative overflow-hidden rounded-2xl border border-white/[.06]">
+            <div className="hidden grid-cols-[1fr_1fr_1fr_1.1fr_1.3fr_1fr] gap-3 bg-white/[.04] px-5 py-3.5 text-[10px] font-bold uppercase tracking-wider text-white/40 border-b border-white/[0.06] md:grid">
+              <span>Event</span>
+              <span>Team / Role</span>
+              <span>Participant</span>
+              <span>UID</span>
+              <span>Contact</span>
+              <span className="text-right pr-4">Status</span>
+            </div>
+
+            <div className="max-h-[520px] overflow-y-auto overscroll-contain divide-y divide-white/[0.04] mobile-tabs">
+              {grouped.map(([eventId, rows]) => {
+                const isExpanded = expandedEvents[eventId] !== false;
+                return (
+                  <div key={eventId} className="bg-black/10">
+                    <button
+                      type="button"
+                      onClick={() => toggleEvent(eventId)}
+                      className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left hover:bg-white/[0.01] transition"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[9px] font-bold uppercase tracking-widest text-white/40`}>{isExpanded ? "Hide" : "Show"}</span>
+                        <span className="text-sm font-bold text-white">{rows[0]?.eventTitle || "Unknown Event"}</span>
+                      </div>
+                      <span className="rounded-full border border-white/[.06] bg-white/[.02] px-2.5 py-1 text-[10px] font-semibold text-white/50">{rows.length} participant{rows.length === 1 ? "" : "s"}</span>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="divide-y divide-white/[0.04]">
+                        {rows.map((row, idx) => (
+                          <div className="grid grid-cols-1 gap-3 px-5 py-4 text-sm hover:bg-white/[0.01] transition md:grid md:text-xs md:grid-cols-[1fr_1fr_1fr_1.1fr_1.3fr_1fr] md:items-center md:py-3.5" key={`${row.registrationId}-${row.role}-${idx}`}>
+                            <div>
+                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">Event</span>
+                              <span className="text-white/70">{row.eventTitle}</span>
+                              <span className="ml-2 rounded-full border border-white/[.06] bg-white/[.02] px-2 py-0.5 text-[9px] font-semibold text-white/40 capitalize md:hidden">{row.mode.toLowerCase()}</span>
+                            </div>
+                            <div>
+                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">Team / Role</span>
+                              <span className="text-white/80 font-medium">{row.teamName}</span>
+                              <span className="block text-[9px] text-white/35 md:hidden">{row.role}</span>
+                            </div>
+                            <div>
+                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">Participant</span>
+                              <span className="text-white/90 font-semibold">{row.name}</span>
+                              <span className="block text-[10px] text-white/35 md:hidden">{row.email}</span>
+                            </div>
+                            <div>
+                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">UID</span>
+                              <span className="rounded-2xl border border-white/[.06] bg-white/[.02] px-3 py-2 text-white/48 md:border-0 md:bg-transparent md:px-0 md:py-0 font-mono text-[11px]">{row.uid}</span>
+                            </div>
+                            <div>
+                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">Contact</span>
+                              <span className="rounded-2xl border border-white/[.06] bg-white/[.02] px-3 py-2 text-white/48 md:border-0 md:bg-transparent md:px-0 md:py-0">{row.email}</span>
+                              <span className="block text-[10px] text-white/35 mt-1 md:hidden">{row.phone}</span>
+                            </div>
+                            <div className="flex items-center justify-between md:justify-end md:pr-4">
+                              <div className="flex items-center gap-2">
+                                <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider border ${row.status === "confirmed" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300" : row.status === "waitlisted" ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-white/[0.04] border-white/[0.06] text-white/40"}`}>
+                                  {row.status}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-white/30 font-mono hidden md:inline">{row.phone}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {!grouped.length ? (
+                <p className="bg-black/15 px-5 py-8 text-sm text-white/35 text-center">No participants match your filters.</p>
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <p className="rounded-2xl border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium">No registrations yet.</p>
+        )}
+      </div>
+
+      <div className="grid gap-5 self-start">
+        <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.03] via-transparent to-transparent" />
+
+          <div className="relative">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Export Data</h3>
+            <p className="text-xs leading-relaxed text-white/40 mb-5">
+              Download the complete event participants roster with all candidate details, team assignments, and registration status.
+            </p>
+
+            <div className="grid gap-3 relative z-10">
+              <a
+                href="/api/admin/participants/export"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="portal-command-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-center text-xs font-semibold hover:-translate-y-0.5 transition"
+              >
+                <Download size={13} /> Export Excel Sheet
+              </a>
+              <button onClick={exportExcel} className="flex items-center justify-center gap-2 rounded-2xl border border-white/[.08] bg-white/[.035] px-4 py-3.5 text-center text-xs font-semibold text-white/70 hover:bg-white/[.06] hover:-translate-y-0.5 hover:text-white transition">
+                <Download size={13} /> Refresh & Export
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.03] via-transparent to-transparent" />
+          
+          <div className="relative">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Roster Summary</h3>
+            <div className="rounded-2xl bg-black/35 border border-white/[0.05] p-4 text-xs space-y-2 text-white/50">
+              <div className="flex justify-between"><span>Total registrations:</span><span className="font-semibold text-white">{participants.length}</span></div>
+              <div className="flex justify-between"><span>Events with registrations:</span><span className="font-semibold text-white">{new Set(participants.map((p) => p.eventId)).size}</span></div>
+              <div className="flex justify-between"><span>Individual registrations:</span><span className="font-semibold text-white">{participants.filter((p) => p.mode === "Individual").length}</span></div>
+              <div className="flex justify-between"><span>Team registrations:</span><span className="font-semibold text-white">{participants.filter((p) => p.mode === "Team" && p.role === "Team Leader").length}</span></div>
+              <div className="flex justify-between"><span>Team members:</span><span className="font-semibold text-white">{participants.filter((p) => p.role.startsWith("Squad Member")).length}</span></div>
+              <div className="flex justify-between"><span>Confirmed:</span><span className="font-semibold text-emerald-300">{participants.filter((p) => p.status === "confirmed").length}</span></div>
+              <div className="flex justify-between"><span>Waitlisted:</span><span className="font-semibold text-amber-300">{participants.filter((p) => p.status === "waitlisted").length}</span></div>
+            </div>
           </div>
         </div>
       </div>
