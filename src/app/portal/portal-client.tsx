@@ -2484,8 +2484,8 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
   const eventMap = useMemo(() => new Map((events || []).map((e: any) => [idOf(e), e.title || "Untitled Event"])), [events]);
 
   const [query, setQuery] = useState("");
-  const [modeFilter, setModeFilter] = useState("all");
   const [eventFilter, setEventFilter] = useState("all");
+  const [modeFilter, setModeFilter] = useState("all");
   const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});
 
   const participants = useMemo(() => {
@@ -2581,6 +2581,18 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
     setExpandedEvents((prev) => ({ ...prev, [eventId]: !prev[eventId] }));
   };
 
+  const confirmDelete = async (registrationId: string, name: string) => {
+    if (!window.confirm(`Remove ${name || "this participant"} from this event? This will delete their attendance records too.`)) return;
+    setPanel(`Removing ${name || "participant"}...`);
+    const res = await fetch(`/api/admin/registrations/${registrationId}`, { method: "DELETE" });
+    if (!res.ok) {
+      setPanel("Failed to remove participant.");
+      return;
+    }
+    await refresh();
+    setPanel(`${name || "Participant"} removed.`);
+  };
+
   const exportExcel = () => {
     window.open("/api/admin/participants/export", "_blank");
     setPanel("Exporting all event participants to Excel...");
@@ -2591,18 +2603,20 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
       <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.02] via-transparent to-blue-500/[0.02]" />
 
-        <div className="relative flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] pb-5 mb-6">
-          <div>
-            <h3 className="text-base font-bold text-white tracking-tight">Event Participants</h3>
-            <p className="mt-1 text-xs text-white/38">All registered candidates grouped by event and team.</p>
-          </div>
+        <div className="relative flex flex-col gap-4 border-b border-white/[0.06] pb-5 mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base font-bold text-white tracking-tight">Event Participants</h3>
+              <p className="mt-1 text-xs text-white/38">Browse registered candidates grouped by event.</p>
+            </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative flex min-w-[200px] items-center gap-2 rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-white/45 focus-within:border-violet-400/40 transition">
+            <div className="relative flex min-w-[220px] items-center gap-2 rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-white/45 focus-within:border-violet-400/40 transition">
               <Search size={14} />
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, UID, email..." className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/28" />
             </div>
+          </div>
 
+          <div className="flex flex-wrap items-center gap-3">
             <select value={eventFilter} onChange={(event) => setEventFilter(event.target.value)} className="rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-xs text-white outline-none focus:border-violet-400/40 transition">
               <option value="all">All Events</option>
               {events.map((e: any) => <option value={idOf(e)} key={idOf(e)}>{e.title}</option>)}
@@ -2616,99 +2630,110 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
           </div>
         </div>
 
-        <div className="grid gap-3 grid-cols-3 mb-6 relative z-10">
-          <div className="rounded-2xl border border-white/[.06] bg-white/[.02] p-4 transition duration-200 hover:-translate-y-0.5">
-            <p className="text-[9px] uppercase tracking-[.18em] text-white/35">Total Participants</p>
+        <div className="grid gap-3 sm:grid-cols-3 mb-6 relative z-10">
+          <div className="rounded-2xl border border-white/[.06] bg-white/[.02] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-white/35">Participants</p>
             <p className="mt-2 text-2xl font-bold tracking-tight text-white">{participants.length}</p>
           </div>
-          <div className="rounded-2xl border border-violet-500/15 bg-violet-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
-            <p className="text-[9px] uppercase tracking-[.18em] text-violet-300/60">Events</p>
+          <div className="rounded-2xl border border-violet-500/15 bg-violet-500/[0.04] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-violet-300/60">Events</p>
             <p className="mt-2 text-2xl font-bold tracking-tight text-violet-300">{new Set(participants.map((p) => p.eventId)).size}</p>
           </div>
-          <div className="rounded-2xl border border-blue-500/15 bg-blue-500/[0.04] p-4 transition duration-200 hover:-translate-y-0.5">
-            <p className="text-[9px] uppercase tracking-[.18em] text-blue-300/60">Teams</p>
+          <div className="rounded-2xl border border-blue-500/15 bg-blue-500/[0.04] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-blue-300/60">Teams</p>
             <p className="mt-2 text-2xl font-bold tracking-tight text-blue-300">{new Set(participants.filter((p) => p.mode === "Team").map((p) => `${p.eventId}-${p.teamName}`)).size}</p>
           </div>
         </div>
 
         {grouped.length ? (
-          <div className="relative overflow-hidden rounded-2xl border border-white/[.06]">
-            <div className="hidden grid-cols-[1fr_1fr_1fr_1.1fr_1.3fr_1fr] gap-3 bg-white/[.04] px-5 py-3.5 text-[10px] font-bold uppercase tracking-wider text-white/40 border-b border-white/[0.06] md:grid">
-              <span>Event</span>
-              <span>Team / Role</span>
-              <span>Participant</span>
-              <span>UID</span>
-              <span>Contact</span>
-              <span className="text-right pr-4">Status</span>
-            </div>
+          <div className="grid gap-4">
+            {grouped.map(([eventId, rows]) => {
+              const event = events.find((e: any) => idOf(e) === eventId);
+              const when = event?.startAt ? new Date(event.startAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "";
+              const isExpanded = expandedEvents[eventId] !== false;
+              const teams = useMemo(() => {
+                const map = new Map<string, typeof rows>();
+                rows.forEach((row) => {
+                  const key = row.teamName;
+                  if (!map.has(key)) map.set(key, []);
+                  map.get(key)!.push(row);
+                });
+                return Array.from(map.entries());
+              }, [rows]);
 
-            <div className="max-h-[520px] overflow-y-auto overscroll-contain divide-y divide-white/[0.04] mobile-tabs">
-              {grouped.map(([eventId, rows]) => {
-                const isExpanded = expandedEvents[eventId] !== false;
-                return (
-                  <div key={eventId} className="bg-black/10">
-                    <button
-                      type="button"
-                      onClick={() => toggleEvent(eventId)}
-                      className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left hover:bg-white/[0.01] transition"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-bold uppercase tracking-widest text-white/40`}>{isExpanded ? "Hide" : "Show"}</span>
-                        <span className="text-sm font-bold text-white">{rows[0]?.eventTitle || "Unknown Event"}</span>
+              return (
+                <div key={eventId} className="rounded-[1.7rem] border border-white/[.06] bg-black/20">
+                  <button
+                    type="button"
+                    onClick={() => toggleEvent(eventId)}
+                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-white/[0.015] transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-full border border-white/[.08] bg-white/[.025] text-[10px] font-bold text-white/55`}>{isExpanded ? "Hide" : "Show"}</span>
+                      <div>
+                        <p className="text-sm font-bold text-white">{rows[0]?.eventTitle || "Unknown Event"}</p>
+                        <p className="text-[10px] text-white/40 mt-0.5">{when ? `Starts ${when}` : `${rows.length} registration${rows.length === 1 ? "" : "s"}`}</p>
                       </div>
-                      <span className="rounded-full border border-white/[.06] bg-white/[.02] px-2.5 py-1 text-[10px] font-semibold text-white/50">{rows.length} participant{rows.length === 1 ? "" : "s"}</span>
-                    </button>
+                    </div>
+                    <span className="rounded-full border border-white/[.06] bg-white/[.02] px-3 py-1 text-[10px] font-semibold text-white/55">{rows.length} participant{rows.length === 1 ? "" : "s"}</span>
+                  </button>
 
-                    {isExpanded && (
-                      <div className="divide-y divide-white/[0.04]">
-                        {rows.map((row, idx) => (
-                          <div className="grid grid-cols-1 gap-3 px-5 py-4 text-sm hover:bg-white/[0.01] transition md:grid md:text-xs md:grid-cols-[1fr_1fr_1fr_1.1fr_1.3fr_1fr] md:items-center md:py-3.5" key={`${row.registrationId}-${row.role}-${idx}`}>
-                            <div>
-                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">Event</span>
-                              <span className="text-white/70">{row.eventTitle}</span>
-                              <span className="ml-2 rounded-full border border-white/[.06] bg-white/[.02] px-2 py-0.5 text-[9px] font-semibold text-white/40 capitalize md:hidden">{row.mode.toLowerCase()}</span>
+                  {isExpanded && (
+                    <div className="border-t border-white/[0.04] px-4 pb-4">
+                      {teams.map(([teamName, teamRows]) => (
+                        <div key={teamName} className="mt-4 rounded-[1.5rem] border border-white/[.05] bg-black/15">
+                          <div className="flex items-center justify-between gap-3 px-5 py-3">
+                            <div className="flex items-center gap-2">
+                              <span className="rounded-full border border-white/[.06] bg-white/[.025] px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white/45">{teamRows[0]?.mode || "Individual"}</span>
+                              <span className="text-xs font-semibold text-white">{teamName}</span>
                             </div>
-                            <div>
-                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">Team / Role</span>
-                              <span className="text-white/80 font-medium">{row.teamName}</span>
-                              <span className="block text-[9px] text-white/35 md:hidden">{row.role}</span>
-                            </div>
-                            <div>
-                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">Participant</span>
-                              <span className="text-white/90 font-semibold">{row.name}</span>
-                              <span className="block text-[10px] text-white/35 md:hidden">{row.email}</span>
-                            </div>
-                            <div>
-                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">UID</span>
-                              <span className="rounded-2xl border border-white/[.06] bg-white/[.02] px-3 py-2 text-white/48 md:border-0 md:bg-transparent md:px-0 md:py-0 font-mono text-[11px]">{row.uid}</span>
-                            </div>
-                            <div>
-                              <span className="mb-1 block text-[9px] uppercase tracking-[.18em] text-white/28 md:hidden">Contact</span>
-                              <span className="rounded-2xl border border-white/[.06] bg-white/[.02] px-3 py-2 text-white/48 md:border-0 md:bg-transparent md:px-0 md:py-0">{row.email}</span>
-                              <span className="block text-[10px] text-white/35 mt-1 md:hidden">{row.phone}</span>
-                            </div>
-                            <div className="flex items-center justify-between md:justify-end md:pr-4">
-                              <div className="flex items-center gap-2">
-                                <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider border ${row.status === "confirmed" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300" : row.status === "waitlisted" ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-white/[0.04] border-white/[0.06] text-white/40"}`}>
-                                  {row.status}
-                                </span>
-                              </div>
-                              <span className="text-[10px] text-white/30 font-mono hidden md:inline">{row.phone}</span>
-                            </div>
+                            <span className="text-[10px] text-white/35">{teamRows.length} entr{teamRows.length === 1 ? "y" : "ies"}</span>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              {!grouped.length ? (
-                <p className="bg-black/15 px-5 py-8 text-sm text-white/35 text-center">No participants match your filters.</p>
-              ) : null}
-            </div>
+
+                          <div className="divide-y divide-white/[0.04]">
+                            {teamRows.map((row) => (
+                              <div key={`${row.registrationId}-${row.role}`} className="px-5 py-3.5 text-xs hover:bg-white/[0.01] transition">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                  <div className="flex flex-col gap-1.5">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-white/80 font-semibold">{row.name}</span>
+                                      <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider border ${row.status === "confirmed" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300" : row.status === "waitlisted" ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-white/[0.03] border-white/[0.05] text-white/45"}`}>{row.status}</span>
+                                      <span className="text-[9px] font-semibold text-white/35">{row.role}</span>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/45">
+                                      <span>UID: <span className="font-mono text-white/55">{row.uid}</span></span>
+                                      <span>{row.email}</span>
+                                      <span className="hidden sm:inline">Phone: <span className="text-white/55">{row.phone}</span></span>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-3 text-white/35">
+                                      <span>{row.program}</span>
+                                      <span>Sem {row.semester}</span>
+                                      <span className="hidden sm:inline text-white/28">{row.registeredAt}</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex shrink-0 items-center gap-2">
+                                    <button type="button" onClick={() => confirmDelete(row.registrationId, row.name)} className="flex items-center gap-1.5 rounded-full border border-rose-500/25 bg-rose-500/10 px-3 py-1.5 text-[10px] font-bold text-rose-200 transition hover:bg-rose-500/15 active:scale-95">
+                                      <Trash2 size={12} /> Remove
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {!grouped.length ? (
+              <p className="rounded-[1.7rem] border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium">No participants match your filters.</p>
+            ) : null}
           </div>
         ) : (
-          <p className="rounded-2xl border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium">No registrations yet.</p>
+          <p className="rounded-[1.7rem] border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium">No registrations yet.</p>
         )}
       </div>
 
@@ -2717,10 +2742,8 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.03] via-transparent to-transparent" />
 
           <div className="relative">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Export Data</h3>
-            <p className="text-xs leading-relaxed text-white/40 mb-5">
-              Download the complete event participants roster with all candidate details, team assignments, and registration status.
-            </p>
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Export Roster</h3>
+            <p className="text-xs leading-relaxed text-white/40 mb-5">Export all participants with team info and registration status.</p>
 
             <div className="grid gap-3 relative z-10">
               <a
@@ -2729,10 +2752,10 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
                 rel="noopener noreferrer"
                 className="portal-command-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-center text-xs font-semibold hover:-translate-y-0.5 transition"
               >
-                <Download size={13} /> Export Excel Sheet
+                <Download size={13} /> Download Excel
               </a>
               <button onClick={exportExcel} className="flex items-center justify-center gap-2 rounded-2xl border border-white/[.08] bg-white/[.035] px-4 py-3.5 text-center text-xs font-semibold text-white/70 hover:bg-white/[.06] hover:-translate-y-0.5 hover:text-white transition">
-                <Download size={13} /> Refresh & Export
+                <RefreshCw size={13} /> Refresh First
               </button>
             </div>
           </div>
@@ -2743,11 +2766,11 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
           
           <div className="relative">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Roster Summary</h3>
-            <div className="rounded-2xl bg-black/35 border border-white/[0.05] p-4 text-xs space-y-2 text-white/50">
+            <div className="rounded-2xl bg-black/35 border border-white/[0.05] p-4 text-xs space-y-2.5 text-white/50">
               <div className="flex justify-between"><span>Total registrations:</span><span className="font-semibold text-white">{participants.length}</span></div>
               <div className="flex justify-between"><span>Events with registrations:</span><span className="font-semibold text-white">{new Set(participants.map((p) => p.eventId)).size}</span></div>
               <div className="flex justify-between"><span>Individual registrations:</span><span className="font-semibold text-white">{participants.filter((p) => p.mode === "Individual").length}</span></div>
-              <div className="flex justify-between"><span>Team registrations:</span><span className="font-semibold text-white">{participants.filter((p) => p.mode === "Team" && p.role === "Team Leader").length}</span></div>
+              <div className="flex justify-between"><span>Team leaders:</span><span className="font-semibold text-white">{participants.filter((p) => p.mode === "Team" && p.role === "Team Leader").length}</span></div>
               <div className="flex justify-between"><span>Team members:</span><span className="font-semibold text-white">{participants.filter((p) => p.role.startsWith("Squad Member")).length}</span></div>
               <div className="flex justify-between"><span>Confirmed:</span><span className="font-semibold text-emerald-300">{participants.filter((p) => p.status === "confirmed").length}</span></div>
               <div className="flex justify-between"><span>Waitlisted:</span><span className="font-semibold text-amber-300">{participants.filter((p) => p.status === "waitlisted").length}</span></div>
