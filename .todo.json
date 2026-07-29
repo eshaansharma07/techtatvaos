@@ -1,0 +1,17 @@
+[
+  {
+    "content": "Inspect Escape the Room registration flow",
+    "active_form": "Inspecting Escape the Room registration flow",
+    "status": "in_progress"
+  },
+  {
+    "content": "Add visible WhatsApp and group-link controls",
+    "active_form": "Adding WhatsApp and group-link controls",
+    "status": "pending"
+  },
+  {
+    "content": "Verify registration behavior and typecheck",
+    "active_form": "Verifying registration behavior and typecheck",
+    "status": "pending"
+  }
+]

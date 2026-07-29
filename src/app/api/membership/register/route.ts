@@ -75,7 +75,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         id: String(member._id),
-        message: settings?.customSuccessMessage || "Your registration has been received! Welcome to the Tech Tatva club."
+        message: settings?.customSuccessMessage || "Your registration has been received! Welcome to the Tech Tatva club.",
+        whatsappGroupLink: settings?.whatsappGroupLink || ""
       },
       { status: 201 }
     );

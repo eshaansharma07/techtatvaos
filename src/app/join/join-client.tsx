@@ -114,7 +114,8 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
     }
     if (step === 1) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(form.email) && form.phone.trim().length >= 7;
+      const phoneDigits = form.phone.replace(/\D/g, "").length;
+      return emailRegex.test(form.email) && phoneDigits >= 8;
     }
     if (step === 2) {
       return form.department !== "" && form.year !== "";
@@ -179,6 +180,9 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
 
       setSuccess(result.message || "Registration Successful!");
       setStep(5); // Success step
+      if (result.whatsappGroupLink) {
+        setWhatsappLink(result.whatsappGroupLink);
+      }
     } catch (err: any) {
       setError(err.message || "Could not register. Please try again.");
     } finally {
@@ -410,7 +414,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1.5">Phone Number (WhatsApp)</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1.5">WhatsApp Number *</label>
             <input
               type="tel"
               placeholder="e.g. 9876543210"
