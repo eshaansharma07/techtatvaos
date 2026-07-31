@@ -129,7 +129,10 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
 
 export async function getPublicEvent(slug: string) {
   await connectDB();
-  const event = await Event.findOne({ slug, status: { $in: ["published", "active", "completed"] } })
+  const event = await Event.findOne({ 
+    slug: { $regex: `^${slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }, 
+    status: { $in: ["published", "active", "completed"] } 
+  })
     .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
     .populate("team", "name")
     .populate("leads", "name email")
