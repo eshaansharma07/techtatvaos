@@ -37,8 +37,7 @@ interface JoinClientProps {
 
 export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }: JoinClientProps) {
   const searchParams = useSearchParams();
-  const sourceParam = searchParams.get("source");
-  const source = sourceParam === "qr" ? "qr" : "online";
+  const source = searchParams.get("source") || "online";
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
@@ -114,8 +113,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
     }
     if (step === 1) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const phoneDigits = form.phone.replace(/\D/g, "").length;
-      return emailRegex.test(form.email) && phoneDigits >= 8;
+      return emailRegex.test(form.email) && form.phone.trim().length >= 7;
     }
     if (step === 2) {
       return form.department !== "" && form.year !== "";
@@ -158,31 +156,13 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
         })
       });
 
-      const result = await response.json().catch(() => ({}));
+      const result = await response.json();
       if (!response.ok) {
-        if (result.field) {
-          const fieldStep: Record<string, number> = {
-            fullName: 0,
-            uid: 0,
-            gender: 0,
-            email: 1,
-            phone: 1,
-            section: 1,
-            department: 2,
-            year: 2,
-            interests: 3
-          };
-          const invalidStep = fieldStep[result.field];
-          if (invalidStep !== undefined) setStep(invalidStep);
-        }
         throw new Error(result.error || "Something went wrong.");
       }
 
       setSuccess(result.message || "Registration Successful!");
       setStep(5); // Success step
-      if (result.whatsappGroupLink) {
-        setWhatsappLink(result.whatsappGroupLink);
-      }
     } catch (err: any) {
       setError(err.message || "Could not register. Please try again.");
     } finally {
@@ -414,7 +394,7 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1.5">WhatsApp Number *</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1.5">Phone Number (WhatsApp)</label>
             <input
               type="tel"
               placeholder="e.g. 9876543210"
@@ -431,11 +411,8 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
               placeholder="e.g. CSE-801-A"
               value={form.section}
               onChange={(e) => update("section", e.target.value)}
-              maxLength={40}
-              aria-describedby="section-help"
               className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-purple-500/50 rounded-xl p-3.5 text-white text-xs outline-none transition"
             />
-            <p id="section-help" className="mt-1.5 text-[9px] text-white/30">Up to 40 characters</p>
           </div>
         </div>
       )
@@ -519,7 +496,6 @@ export function JoinClient({ initialStatus, logoBase64 = "", cuLogoBase64 = "" }
           <div><span className="text-purple-400 font-bold">UID:</span> {form.uid || "N/A"}</div>
           <div><span className="text-purple-400 font-bold">EMAIL:</span> {form.email || "N/A"}</div>
           <div><span className="text-purple-400 font-bold">PHONE:</span> {form.phone || "N/A"}</div>
-          {form.section ? <div><span className="text-purple-400 font-bold">SECTION:</span> {form.section}</div> : null}
           <div><span className="text-purple-400 font-bold">DEPT:</span> {form.department || "N/A"}</div>
           <div><span className="text-purple-400 font-bold">YEAR:</span> {form.year ? `${form.year} Year` : "N/A"}</div>
           <div>

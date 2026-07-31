@@ -129,7 +129,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
             <h3 className="text-xl font-bold tracking-[-.035em] text-white">Registration</h3>
             <div className="mt-5 space-y-3 text-sm text-white/54">
               <p className="flex gap-3 rounded-xl border border-white/10 bg-black/40 p-4"><MapPin size={16} className="text-purple-400" />{event.venue || "Venue TBA"}</p>
-              <p className="flex gap-3 rounded-xl border border-white/10 bg-black/40 p-4"><Users size={16} className="text-purple-400" />{event.registrations} / {event.capacity || "unlimited"} {event.participationMode === "team" ? "teams registered" : "seats claimed"}</p>
+              <p className="flex gap-3 rounded-xl border border-white/10 bg-black/40 p-4"><Users size={16} className="text-purple-400" />{event.registrations} / {event.capacity || "unlimited"} {event.participationMode === "team" ? "participants registered" : "seats claimed"}</p>
             </div>
 
             <p className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4 text-xs leading-5 text-white/60">

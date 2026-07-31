@@ -1,14 +1,13 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { Attendance, Event, EventRegistration, RecruitmentSettings, User } from "@/lib/models";
+import { Attendance, Event, EventRegistration, User } from "@/lib/models";
 import { rateLimit } from "@/lib/rate-limit";
 import { registrationInput } from "@/lib/validations/event";
 
 type PublicParticipant = {
   name?: string;
   email?: string;
-  phone?: string;
   uid?: string;
   program?: string;
   semester?: string | number;
@@ -20,21 +19,13 @@ const semesterOf = (value: unknown) => {
   return Number.isFinite(number) && number > 0 ? number : undefined;
 };
 
-const isValidPhone = (value: unknown) => clean(value).replace(/\D/g, "").length >= 8;
-
 function isValidParticipant(input: PublicParticipant) {
-  return clean(input.name).length >= 2
-    && clean(input.email).includes("@")
-    && isValidPhone(input.phone)
-    && clean(input.uid).length >= 2
-    && clean(input.program).length >= 1
-    && semesterOf(input.semester) !== undefined;
+  return clean(input.name).length >= 2 && clean(input.email).includes("@") && clean(input.uid).length >= 2 && clean(input.program).length >= 1;
 }
 
 async function upsertParticipant(input: PublicParticipant) {
   const email = clean(input.email).toLowerCase();
   const uid = clean(input.uid);
-  const phone = clean(input.phone);
   const query = {
     $or: [
       { email },
@@ -44,7 +35,6 @@ async function upsertParticipant(input: PublicParticipant) {
   const set: Record<string, unknown> = {
     name: clean(input.name),
     email,
-    phone,
     uid,
     program: clean(input.program),
     semester: semesterOf(input.semester),
@@ -80,24 +70,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const allowed = eventMode === "both" || eventMode === mode;
     if (!allowed) return NextResponse.json({ error: `This event accepts ${eventMode} registrations only.` }, { status: 400 });
 
-    let whatsappGroupLink = event.whatsappGroupLink || "";
-
     let userId = legacy.success ? legacy.data.userId : null;
     let leader: any = null;
     let teamMembers: any[] = [];
 
     if (!userId) {
       const leaderInput: PublicParticipant = payload;
-      if (!isValidParticipant(leaderInput)) return NextResponse.json({ error: "Name, email, WhatsApp number, UID, program, and semester are required." }, { status: 400 });
+      if (!isValidParticipant(leaderInput)) return NextResponse.json({ error: "Valid candidate details are required." }, { status: 400 });
 
       const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
-      const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => clean(member?.name) || clean(member?.email) || clean(member?.phone) || clean(member?.uid)) : [];
+      const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => clean(member?.name) || clean(member?.email) || clean(member?.uid)) : [];
       const totalSize = 1 + memberInputs.length;
       const maxTeamSize = Math.max(1, Number(event.maxTeamSize || 1));
       if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
       if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
       if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
-        return NextResponse.json({ error: "Every team member needs name, email, WhatsApp number, UID, program, and semester." }, { status: 400 });
+        return NextResponse.json({ error: "Every team member needs name, email, UID, program, and semester." }, { status: 400 });
       }
 
       leader = await upsertParticipant(leaderInput);
@@ -107,7 +95,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         user: member._id,
         name: member.name,
         email: member.email,
-        phone: member.phone || clean(memberInputs[index]?.phone),
         uid: member.uid,
         program: member.program,
         semester: member.semester ?? semesterOf(memberInputs[index]?.semester)
@@ -133,12 +120,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       )
     );
 
-    const settings = await RecruitmentSettings.findOne({ key: "default" }).lean();
-    if (!whatsappGroupLink) {
-      whatsappGroupLink = (settings as any)?.whatsappGroupLink || "";
-    }
-
-    return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode, whatsappGroupLink }, { status: 201 });
+    return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode }, { status: 201 });
   } catch (error: any) {
     if (error?.code === 11000) {
       return NextResponse.json({ error: "A candidate with this email or UID is already registered. Use the same details or update the existing candidate." }, { status: 409 });

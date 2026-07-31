@@ -137,7 +137,19 @@ export async function getPublicEvent(slug: string) {
     .lean();
   if (!event) return null;
   const record: any = event;
-  const registrations = await EventRegistration.countDocuments({ event: record._id, status: "confirmed" });
+  let participantCount = 0;
+  if (record.participationMode === "team" || record.participationMode === "both") {
+    const regs = await EventRegistration.find({ event: record._id, status: "confirmed" }).select("mode teamMembers");
+    participantCount = regs.reduce((acc, r) => {
+      if (r.mode === "team" && Array.isArray(r.teamMembers)) {
+        return acc + 1 + r.teamMembers.length;
+      }
+      return acc + 1;
+    }, 0);
+  } else {
+    participantCount = await EventRegistration.countDocuments({ event: record._id, status: "confirmed" });
+  }
+
   return serialize({
     id: String(record._id),
     slug: record.slug,
@@ -167,7 +179,7 @@ export async function getPublicEvent(slug: string) {
       level: sponsor.level
     })),
     certEventLogo: record.certEventLogo || "",
-    registrations
+    registrations: participantCount
   });
 }
 
