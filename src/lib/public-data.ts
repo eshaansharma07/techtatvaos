@@ -129,8 +129,10 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
 
 export async function getPublicEvent(slug: string) {
   await connectDB();
-  const event = await Event.findOne({ 
-    slug: { $regex: `^${slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }, 
+  const decodedSlug = decodeURIComponent(slug);
+  const regex = new RegExp(`^${decodedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+  let event = await Event.findOne({ 
+    slug: { $regex: regex, $options: 'i' }, 
     status: { $in: ["published", "active", "completed"] } 
   })
     .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
@@ -138,6 +140,19 @@ export async function getPublicEvent(slug: string) {
     .populate("leads", "name email")
     .populate("sponsors", "name logo website level")
     .lean();
+  
+  if (!event) {
+    event = await Event.findOne({ 
+      title: { $regex: regex, $options: 'i' }, 
+      status: { $in: ["published", "active", "completed"] } 
+    })
+      .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
+      .populate("team", "name")
+      .populate("leads", "name email")
+      .populate("sponsors", "name logo website level")
+      .lean();
+  }
+  
   if (!event) return null;
   const record: any = event;
   let participantCount = 0;

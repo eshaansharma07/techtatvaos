@@ -16,7 +16,7 @@ const timeText = (value?: string) =>
 
 export default async function EventDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const event = await getPublicEvent(slug);
+  const event = await getPublicEvent(decodeURIComponent(slug));
 
   if (!event) {
     return (
@@ -27,7 +27,9 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           </Link>
           <div className="glass-brutalist mt-10 rounded-2xl p-10">
             <h1 className="text-4xl font-bold text-white">Event not found.</h1>
-            <p className="mt-4 text-sm leading-6 text-white/45">This event is not published, active, or does not exist.</p>
+            <p className="mt-4 text-sm leading-6 text-white/45">
+              This event is not published, active, or does not exist. If you just published it from the admin portal, wait a minute for the cache to refresh, or contact the club tech team.
+            </p>
           </div>
         </section>
       </PublicShell>
