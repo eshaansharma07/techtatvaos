@@ -14,6 +14,29 @@ const dateText = (value?: string) =>
 const timeText = (value?: string) =>
   value ? new Intl.DateTimeFormat("en-IN", { timeStyle: "short" }).format(new Date(value)) : "Time TBA";
 
+const normalizeDescription = (value?: string) =>
+  (value || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\s+(?=(?:Event Flow|Phase\s+\d+|Venue:|Organized By:))/gi, "\n\n")
+    .trim();
+
+const eventSummary = (value: string, limit = 300) => {
+  const compact = value.replace(/\s+/g, " ").trim();
+  if (!compact) return "Details will appear once an admin updates this event.";
+  if (compact.length <= limit) return compact;
+  const clipped = compact.slice(0, limit);
+  const sentenceEnd = Math.max(clipped.lastIndexOf("."), clipped.lastIndexOf("!"), clipped.lastIndexOf("?"));
+  const wordEnd = clipped.lastIndexOf(" ");
+  const end = sentenceEnd > limit * 0.55 ? sentenceEnd + 1 : wordEnd;
+  return `${clipped.slice(0, end > 0 ? end : limit).trim()}...`;
+};
+
+const eventDescriptionBlocks = (value: string) =>
+  value
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
 export default async function EventDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const event = await getPublicEvent(slug);
@@ -42,18 +65,21 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
       : event.participationMode === "team"
         ? "Team based"
         : "Individual";
+  const description = normalizeDescription(event.description);
+  const summary = eventSummary(description);
+  const descriptionBlocks = eventDescriptionBlocks(description);
 
   return (
     <PublicShell>
-      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-32 pt-32 md:px-6 md:pb-36 md:pt-44 spatial-grid-bg">
+      <section className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pb-36 pt-32 md:px-6 md:pb-40 md:pt-44 spatial-grid-bg">
         <Link href="/events" className="brutalist-btn-dark inline-flex min-h-11 items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold uppercase tracking-[.18em] text-white transition">
           <ArrowLeft size={14} /> BACK TO EVENTS
         </Link>
 
         <div className="glass-brutalist relative mt-5 overflow-hidden rounded-[2.2rem] p-5 md:mt-8 md:rounded-[2.8rem] md:p-9 relative z-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(168,85,247,0.05),transparent_45%)] pointer-events-none" />
-          <div className="relative grid items-center gap-8 lg:grid-cols-[.86fr_1.14fr]">
-            <div className="max-w-3xl">
+          <div className="relative grid items-start gap-8 lg:grid-cols-[minmax(0,.92fr)_minmax(340px,.78fr)]">
+            <div className="max-w-4xl">
               {event.certEventLogo ? (
                 <div className="mb-5 inline-flex items-center justify-center rounded-2xl bg-black/40 border border-white/10 p-3 h-14 w-14 backdrop-blur-md">
                   <Image width={1200} height={1200} src={optimizeCloudinaryUrl(event.certEventLogo, 120)} alt="" className="h-full w-full object-contain" />
@@ -63,8 +89,8 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
                 <Sparkles size={12} />
                 {(event.category || "EVENT").toUpperCase()}
               </span>
-              <h1 className="mt-5 text-[2.5rem] font-extrabold leading-[1.05] tracking-[-.05em] text-white md:mt-8 md:text-7xl lg:text-8xl">{event.title}</h1>
-              <p className="mt-4 max-w-2xl text-[13px] leading-relaxed text-white/60 md:mt-6 md:text-lg md:leading-8">{event.description || "No description has been added yet."}</p>
+              <h1 className="mt-5 max-w-4xl text-[2.5rem] font-extrabold leading-[1.05] tracking-[-.05em] text-white md:mt-7 md:text-6xl lg:text-7xl xl:text-8xl">{event.title}</h1>
+              <p className="mt-4 line-clamp-4 max-w-3xl text-[13px] leading-relaxed text-white/62 md:mt-6 md:text-lg md:leading-8">{summary}</p>
               <div className="mt-7 grid gap-3 sm:grid-cols-3">
                 <div className="glass-brutalist px-4 py-4 rounded-xl">
                   <Calendar className="text-purple-400" size={16} />
@@ -97,9 +123,23 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           <div className="glass-brutalist rounded-[2rem] p-6 md:p-8">
             <p className="text-[10px] font-bold uppercase tracking-[.24em] text-purple-400">Brief</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-[-.045em] text-white">About the event</h2>
-            <p className="mt-5 whitespace-pre-line text-sm leading-7 text-white/50 md:text-base md:leading-8">
-              {event.description || "Details will appear once an admin updates this event."}
-            </p>
+            <div className="mt-5 max-h-[58vh] space-y-5 overflow-y-auto pr-2 text-sm leading-7 text-white/54 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/15 md:text-base md:leading-8">
+              {descriptionBlocks.length ? (
+                descriptionBlocks.map((block) => {
+                  const isSectionTitle = /^(Event Flow|Phase\s+\d+|Venue:|Organized By:)/i.test(block);
+                  return (
+                    <p
+                      className={isSectionTitle ? "font-semibold text-white/70" : "whitespace-pre-line"}
+                      key={block}
+                    >
+                      {block}
+                    </p>
+                  );
+                })
+              ) : (
+                <p>Details will appear once an admin updates this event.</p>
+              )}
+            </div>
 
             {event.rules.length ? (
               <>
