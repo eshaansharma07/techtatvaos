@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Calendar, GraduationCap, Instagram, Github, Linkedin } from "lucide-react";
 import { getClubInfo, getPublicEvents, getLatestPublicAnnouncement } from "@/lib/public-data";
+import { eventHref } from "@/lib/event-links";
 import { MotionLogo, SiteLoader } from "@/components/brand-motion";
 import { MobilePublicMenu } from "@/components/mobile-public-menu";
 import { PremiumBackground } from "@/components/premium-background";
@@ -88,7 +89,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
                 <p className="mt-1 text-[10px] text-white/40 line-clamp-2 leading-relaxed">
                   {latestEvent.description || "Explore and register for Tech Tatva club events."}
                 </p>
-                <Link href={`/events/${latestEvent.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-blue-400 hover:underline transition">
+                <Link href={eventHref(latestEvent.slug)} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-blue-400 hover:underline transition">
                   View details <ArrowUpRight size={10} />
                 </Link>
               </div>
@@ -111,7 +112,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
                 <p className="mt-1 text-[10px] text-white/40 line-clamp-2 leading-relaxed">
                   {upcomingWorkshop.description || "Bootcamps and workshops led by seniors."}
                 </p>
-                <Link href={`/events/${upcomingWorkshop.slug}`} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-blue-400 hover:underline transition">
+                <Link href={eventHref(upcomingWorkshop.slug)} className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-blue-400 hover:underline transition">
                   Register now <ArrowUpRight size={10} />
                 </Link>
               </div>

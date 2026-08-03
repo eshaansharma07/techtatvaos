@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
+import { eventHref } from "@/lib/event-links";
 import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, Orbit, Sparkles, Users, Zap } from "lucide-react";
 
 /* ─── Horizontal Swipe Carousel ─── */
@@ -211,7 +212,7 @@ export function MobileInteractiveSections({
           <SwipeCarousel label="Upcoming Events">
             {events.map((e) => (
               <Link
-                href={`/events/${e.slug}`}
+                href={eventHref(e.slug)}
                 key={e.slug}
                 className="block rounded-2xl glass-brutalist p-5 backdrop-blur-md active:scale-[0.97] transition-transform"
               >

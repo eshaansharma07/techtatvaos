@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import type { PublicEvent } from "@/lib/public-data";
+import { eventHref } from "@/lib/event-links";
 
 const gradients = [
   "from-[#0b0c0e] to-[#121316]",
@@ -19,7 +20,7 @@ const formatTime = (value?: string) =>
 
 export function EventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
   const gradient = gradients[index % gradients.length];
-  return <Link href={`/events/${event.slug}`} className="event-card glass-brutalist group block overflow-hidden rounded-[1.75rem] transition duration-500 active:scale-[.99] md:rounded-3xl md:hover:-translate-y-1.5 md:hover:border-purple-500/50">
+  return <Link href={eventHref(event.slug)} className="event-card glass-brutalist group block overflow-hidden rounded-[1.75rem] transition duration-500 active:scale-[.99] md:rounded-3xl md:hover:-translate-y-1.5 md:hover:border-purple-500/50">
     <div className={`event-card-media relative h-60 overflow-hidden bg-gradient-to-br ${gradient} p-5 md:h-52`}>
       {event.banner ? <div className="absolute inset-0 grid place-items-center overflow-hidden bg-black/10 p-5"><Image width={1200} height={1200} src={event.banner} alt="" className="h-full w-full object-contain opacity-95 drop-shadow-[0_22px_46px_rgba(0,0,0,.38)] transition duration-700 group-hover:scale-[1.035]" /></div> : null}
       <div className="absolute inset-0 grid-bg opacity-25"/>

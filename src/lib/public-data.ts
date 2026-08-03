@@ -31,6 +31,11 @@ import { computeRecruitmentStatus } from "@/lib/recruitment";
 
 const serialize = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const slugRegex = (value: string) => ({ $regex: `^${escapeRegex(value)}$`, $options: "i" });
+const publishedStatuses = ["published", "active", "completed"] as const;
+const publicEventSelect =
+  "slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo";
 
 export type PublicEvent = {
   id: string;
@@ -127,32 +132,34 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   );
 }
 
-export async function getPublicEvent(slug: string) {
-  await connectDB();
-  const decodedSlug = decodeURIComponent(slug);
-  const regex = new RegExp(`^${decodedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
-  let event = await Event.findOne({ 
-    slug: { $regex: regex, $options: 'i' }, 
-    status: { $in: ["published", "active", "completed"] } 
-  })
-    .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
+async function findPublishedEvent(query: Record<string, unknown>) {
+  return Event.findOne({ ...query, status: { $in: publishedStatuses } })
+    .select(publicEventSelect)
     .populate("team", "name")
     .populate("leads", "name email")
     .populate("sponsors", "name logo website level")
     .lean();
-  
-  if (!event) {
-    event = await Event.findOne({ 
-      title: { $regex: regex, $options: 'i' }, 
-      status: { $in: ["published", "active", "completed"] } 
-    })
-      .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo")
-      .populate("team", "name")
-      .populate("leads", "name email")
-      .populate("sponsors", "name logo website level")
-      .lean();
+}
+
+export async function getPublicEvent(slug: string) {
+  await connectDB();
+  const decodedSlug = decodeURIComponent(slug).trim();
+  if (!decodedSlug) return null;
+
+  const slugified = slugify(decodedSlug);
+  const lookups = [
+    { slug: slugRegex(decodedSlug) },
+    { title: slugRegex(decodedSlug) },
+    ...(slugified ? [{ slug: slugified }, { slug: slugRegex(slugified) }] : []),
+    { title: { $regex: `^${escapeRegex(decodedSlug)}`, $options: "i" } }
+  ];
+
+  let event = null;
+  for (const lookup of lookups) {
+    event = await findPublishedEvent(lookup);
+    if (event) break;
   }
-  
+
   if (!event) return null;
   const record: any = event;
   let participantCount = 0;

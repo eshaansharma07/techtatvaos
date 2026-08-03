@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Terminal, Shield, Sparkles, Wifi, Image as ImageIcon, Calendar, ArrowUpRight, Database } from "lucide-react";
 import Link from "next/link";
+import { eventHref } from "@/lib/event-links";
 
 interface LogLine {
   text: string;
@@ -189,7 +190,7 @@ export function InteractiveTerminal({ stats, instagram, event }: InteractiveTerm
                   <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-2">
                     <span className="text-[9px] text-violet-300 font-mono">VENUE: {event.venue || "TBA"}</span>
                     <Link 
-                      href={`/events/${event.slug}`} 
+                      href={eventHref(event.slug)} 
                       className="inline-flex items-center gap-1 rounded bg-violet-500/20 px-2 py-0.5 text-[9px] font-semibold text-violet-200 hover:bg-violet-500/35 transition"
                     >
                       Register Now

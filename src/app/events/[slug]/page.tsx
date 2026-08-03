@@ -16,7 +16,7 @@ const timeText = (value?: string) =>
 
 export default async function EventDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const event = await getPublicEvent(decodeURIComponent(slug));
+  const event = await getPublicEvent(slug);
 
   if (!event) {
     return (

@@ -5,6 +5,7 @@ import { EventCard } from "@/components/event-card";
 import { PublicShell } from "@/components/public-shell";
 import { Reveal } from "@/components/reveal";
 import { getPublicHomeData, getMembershipDriveStatus } from "@/lib/public-data";
+import { eventHref } from "@/lib/event-links";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { InteractiveHero3D } from "@/components/interactive-hero-3d";
 import { CommunityShowcase } from "@/components/community-showcase";
@@ -181,7 +182,7 @@ export default async function Home() {
                     <span className="text-white/80 block mt-1 capitalize">{nextEvent?.participationMode || "Open"}</span>
                   </div>
                 </div>
-                <Link href={nextEvent ? `/events/${nextEvent.slug}` : "/events"} className="brutalist-btn flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold text-black border-2 border-black w-full">
+                <Link href={nextEvent ? eventHref(nextEvent.slug) : "/events"} className="brutalist-btn flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold text-black border-2 border-black w-full">
                   {nextEvent ? "Open event page" : "View events"} <ArrowUpRight size={14}/>
                 </Link>
               </div>
