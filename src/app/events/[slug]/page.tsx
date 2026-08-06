@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Calendar, Check, Clock, MapPin, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Calendar, Check, Clock, MapPin, Sparkles, Trophy, Users } from "lucide-react";
 import { PublicShell } from "@/components/public-shell";
 import { getPublicEvent } from "@/lib/public-data";
 import { RegisterForm } from "@/components/register-form";
@@ -187,6 +187,100 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
             <p className="mt-3 flex items-center justify-center gap-1 text-center text-[10px] text-white/30">Secure registration <ArrowUpRight size={11} /></p>
           </aside>
         </div>
+
+        {/* Leaderboard Section */}
+        {event.leaderboardVisible && event.leaderboard && event.leaderboard.length > 0 && (
+          <div className="glass-brutalist relative mt-6 overflow-hidden rounded-[2.2rem] p-6 md:mt-8 md:p-9 relative z-10">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(168,85,247,0.06),transparent_50%)] pointer-events-none" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20">
+                  <Trophy size={18} className="text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[.24em] text-purple-400">Rankings</p>
+                  <h2 className="text-2xl font-extrabold tracking-[-.045em] text-white">Leaderboard</h2>
+                </div>
+              </div>
+
+              {/* Podium Top 3 */}
+              {event.leaderboard.length >= 3 && (
+                <div className="mb-8 grid grid-cols-3 gap-3 max-w-2xl mx-auto">
+                  {/* 2nd Place */}
+                  <div className="flex flex-col items-center justify-end">
+                    <div className="mt-4 w-full rounded-2xl border border-gray-400/20 bg-gradient-to-b from-gray-400/10 to-transparent p-4 text-center">
+                      <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-400/20 border-2 border-gray-400/40 text-gray-300 font-black text-lg">2</div>
+                      <p className="text-sm font-bold text-white/90 truncate">{event.leaderboard[1].teamName}</p>
+                      <p className="mt-1 text-lg font-black text-gray-300">{event.leaderboard[1].totalScore}<span className="text-[10px] text-white/30 ml-0.5">pts</span></p>
+                    </div>
+                  </div>
+                  {/* 1st Place */}
+                  <div className="flex flex-col items-center justify-end">
+                    <div className="w-full rounded-2xl border-2 border-yellow-500/30 bg-gradient-to-b from-yellow-500/15 to-transparent p-5 text-center shadow-[0_0_40px_rgba(234,179,8,0.08)]">
+                      <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-500/20 border-2 border-yellow-500/40 text-yellow-300 font-black text-xl">1</div>
+                      <p className="text-base font-bold text-white truncate">{event.leaderboard[0].teamName}</p>
+                      <p className="mt-1 text-2xl font-black text-yellow-300">{event.leaderboard[0].totalScore}<span className="text-[10px] text-white/30 ml-0.5">pts</span></p>
+                    </div>
+                  </div>
+                  {/* 3rd Place */}
+                  <div className="flex flex-col items-center justify-end">
+                    <div className="mt-6 w-full rounded-2xl border border-amber-700/20 bg-gradient-to-b from-amber-700/10 to-transparent p-4 text-center">
+                      <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-amber-700/20 border-2 border-amber-700/40 text-amber-400 font-black text-lg">3</div>
+                      <p className="text-sm font-bold text-white/90 truncate">{event.leaderboard[2].teamName}</p>
+                      <p className="mt-1 text-lg font-black text-amber-400">{event.leaderboard[2].totalScore}<span className="text-[10px] text-white/30 ml-0.5">pts</span></p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Full Table */}
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-black/30">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="py-3 px-4 text-[10px] font-mono text-white/40 uppercase tracking-wider">Rank</th>
+                      <th className="py-3 px-4 text-[10px] font-mono text-white/40 uppercase tracking-wider">Team</th>
+                      <th className="py-3 px-4 text-[10px] font-mono text-white/40 uppercase tracking-wider">Score Breakdown</th>
+                      <th className="py-3 px-4 text-[10px] font-mono text-white/40 uppercase tracking-wider text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {event.leaderboard.map((entry: any, i: number) => (
+                      <tr key={entry.id || i} className={`border-b border-white/5 ${i < 3 ? "bg-gradient-to-r from-purple-500/[.04] to-transparent" : ""}`}>
+                        <td className="py-3 px-4">
+                          <span className={`inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-black ${
+                            i === 0 ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30" :
+                            i === 1 ? "bg-gray-400/20 text-gray-300 border border-gray-400/30" :
+                            i === 2 ? "bg-amber-700/20 text-amber-400 border border-amber-700/30" :
+                            "bg-white/5 text-white/40 border border-white/10"
+                          }`}>
+                            {entry.rank || i + 1}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-sm font-semibold text-white/90">{entry.teamName}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-wrap gap-1">
+                            {(entry.scores || []).map((s: any, si: number) => (
+                              <span key={si} className="rounded-md bg-white/5 border border-white/10 px-2 py-0.5 text-[10px] text-white/50">
+                                {s.category}: {(s.baseScore || 0) + (s.timeBonus || 0) - (s.hintPenalty || 0)}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <span className="text-sm font-black text-purple-300">{entry.totalScore || 0}</span>
+                          <span className="text-[10px] text-white/30 ml-1">pts</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <p className="mt-4 text-center text-[10px] text-white/25 tracking-wider">FINAL SCORE = BASE SCORE + TIME BONUS − HINT PENALTIES</p>
+            </div>
+          </div>
+        )}
       </section>
     </PublicShell>
   );

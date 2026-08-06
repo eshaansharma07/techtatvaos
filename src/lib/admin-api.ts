@@ -21,7 +21,8 @@ import {
   RecruitmentSettings,
   RecruitmentTeam,
   StudentMember,
-  MembershipDriveSettings
+  MembershipDriveSettings,
+  LeaderboardEntry
 } from "@/lib/models";
 
 function parseLocalDate(val: any): Date | undefined {
@@ -57,7 +58,8 @@ export const adminResources = [
   "recruitmentQuestions",
   "recruitmentApplications",
   "studentMembers",
-  "membershipDriveSettings"
+  "membershipDriveSettings",
+  "leaderboard"
 ] as const;
 
 export type AdminResource = (typeof adminResources)[number];
@@ -340,6 +342,11 @@ export async function createResource(resource: AdminResource, input: Record<stri
   if (resource === "recruitmentApplications") return RecruitmentApplication.create(body);
   if (resource === "studentMembers") return StudentMember.create(body);
   if (resource === "membershipDriveSettings") return MembershipDriveSettings.findOneAndUpdate({ key: "default" }, normalizeMembershipDriveSettings(body), { upsert: true, new: true, setDefaultsOnInsert: true });
+  if (resource === "leaderboard") {
+    const scores = Array.isArray(body.scores) ? body.scores : (body.scores ? JSON.parse(body.scores) : []);
+    const totalScore = scores.reduce((sum: number, s: any) => sum + (Number(s.baseScore) || 0) + (Number(s.timeBonus) || 0) - (Number(s.hintPenalty) || 0), 0);
+    return LeaderboardEntry.create({ event: refId(body.event), teamName: body.teamName, registration: refId(body.registration), scores, totalScore, rank: Number(body.rank) || 0 });
+  }
 }
 
 export async function updateResource(resource: AdminResource, id: string, input: Record<string, any>) {
@@ -402,6 +409,16 @@ export async function updateResource(resource: AdminResource, id: string, input:
     }
     return application;
   }
+  if (resource === "leaderboard") {
+    const scores = Array.isArray(body.scores) ? body.scores : (body.scores ? JSON.parse(body.scores) : undefined);
+    const update: Record<string, any> = { ...body };
+    if (scores) {
+      update.scores = scores;
+      update.totalScore = scores.reduce((sum: number, s: any) => sum + (Number(s.baseScore) || 0) + (Number(s.timeBonus) || 0) - (Number(s.hintPenalty) || 0), 0);
+    }
+    if (body.rank !== undefined) update.rank = Number(body.rank);
+    return LeaderboardEntry.findByIdAndUpdate(id, update, { new: true, runValidators: true });
+  }
 }
 
 export async function deleteResource(resource: AdminResource, id: string) {
@@ -435,4 +452,5 @@ export async function deleteResource(resource: AdminResource, id: string) {
   if (resource === "recruitmentQuestions") return RecruitmentQuestion.findByIdAndUpdate(id, { active: false }, { new: true });
   if (resource === "recruitmentApplications") return RecruitmentApplication.findByIdAndDelete(id);
   if (resource === "studentMembers") return StudentMember.findByIdAndDelete(id);
+  if (resource === "leaderboard") return LeaderboardEntry.findByIdAndDelete(id);
 }

@@ -24,7 +24,8 @@ import {
   Team,
   User,
   StudentMember,
-  MembershipDriveSettings
+  MembershipDriveSettings,
+  LeaderboardEntry
 } from "@/lib/models";
 import { Types } from "mongoose";
 import { computeRecruitmentStatus } from "@/lib/recruitment";
@@ -175,6 +176,11 @@ export async function getPublicEvent(slug: string) {
     participantCount = await EventRegistration.countDocuments({ event: record._id, status: "confirmed" });
   }
 
+  let leaderboard: any[] = [];
+  if (record.leaderboardVisible) {
+    leaderboard = await LeaderboardEntry.find({ event: record._id }).sort({ rank: 1, totalScore: -1 }).lean();
+  }
+
   return serialize({
     id: String(record._id),
     slug: record.slug,
@@ -204,7 +210,15 @@ export async function getPublicEvent(slug: string) {
       level: sponsor.level
     })),
     certEventLogo: record.certEventLogo || "",
-    registrations: participantCount
+    registrations: participantCount,
+    leaderboardVisible: !!record.leaderboardVisible,
+    leaderboard: leaderboard.map((entry: any) => ({
+      id: String(entry._id),
+      teamName: entry.teamName,
+      scores: entry.scores || [],
+      totalScore: entry.totalScore || 0,
+      rank: entry.rank || 0
+    }))
   });
 }
 
@@ -556,7 +570,8 @@ export async function getAdminDashboardData() {
     recruitmentQuestions,
     recruitmentApplications,
     studentMembers,
-    membershipDriveSettings
+    membershipDriveSettings,
+    leaderboardEntries
   ] = await Promise.all([
     User.find(clubMemberQuery).sort({ createdAt: -1 }).limit(300).populate("role", "name slug").populate("team", "name").populate("teams", "name").lean(),
     Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").populate("coLeads", "name").lean(),
@@ -581,7 +596,8 @@ export async function getAdminDashboardData() {
     RecruitmentQuestion.find({}).sort({ order: 1, createdAt: 1 }).populate("team", "name").populate("role", "name").lean(),
     RecruitmentApplication.find({}).sort({ submittedAt: -1 }).limit(1000).populate("team", "name").populate("role", "name").lean(),
     StudentMember.find({}).sort({ registeredAt: -1 }).limit(1000).lean(),
-    MembershipDriveSettings.find({}).sort({ createdAt: -1 }).lean()
+    MembershipDriveSettings.find({}).sort({ createdAt: -1 }).lean(),
+    LeaderboardEntry.find({}).populate("event","title").sort({event:1,rank:1}).lean()
   ]);
   return serialize({
     users,
@@ -607,6 +623,7 @@ export async function getAdminDashboardData() {
     recruitmentQuestions,
     recruitmentApplications,
     studentMembers,
-    membershipDriveSettings
+    membershipDriveSettings,
+    leaderboardEntries
   });
 }

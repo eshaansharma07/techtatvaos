@@ -22,6 +22,7 @@ import {
   Settings2,
   ArrowUpDown,
   Trash2,
+  Trophy,
   Users,
   Workflow,
   Hexagon,
@@ -47,8 +48,8 @@ import {
 } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, Area, AreaChart, YAxis, CartesianGrid } from "recharts";
 
-type Module = "Overview" | "Members" | "Teams" | "Events" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Hall of Fame" | "Contact Messages" | "Settings";
-type Resource = "users" | "teams" | "events" | "meetings" | "tasks" | "announcements" | "sponsors" | "achievements" | "gallery" | "hallOfFame" | "contacts" | "settings" | "invites" | "recruitmentSettings" | "recruitmentTeams" | "recruitmentRoles" | "recruitmentQuestions" | "recruitmentApplications" | "studentMembers" | "membershipDriveSettings";
+type Module = "Overview" | "Members" | "Teams" | "Events" | "Leaderboard" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Hall of Fame" | "Contact Messages" | "Settings";
+type Resource = "users" | "teams" | "events" | "leaderboard" | "meetings" | "tasks" | "announcements" | "sponsors" | "achievements" | "gallery" | "hallOfFame" | "contacts" | "settings" | "invites" | "recruitmentSettings" | "recruitmentTeams" | "recruitmentRoles" | "recruitmentQuestions" | "recruitmentApplications" | "studentMembers" | "membershipDriveSettings";
 type Data = Record<string, any>;
 type Field = [string, string, string?];
 
@@ -57,6 +58,7 @@ const nav = [
   [Users, "Members"],
   [Workflow, "Teams"],
   [CalendarDays, "Events"],
+  [Trophy, "Leaderboard"],
   [BriefcaseBusiness, "Recruitment"],
   [UserPlus, "Membership Drive"],
   [CheckCircle2, "Attendance"],
@@ -71,10 +73,10 @@ const nav = [
   [Settings2, "Settings"]
 ] as const;
 
-const config: Record<Exclude<Module, "Overview" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
+const config: Record<Exclude<Module, "Overview" | "Leaderboard" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
   Members: { key: "users", resource: "users", fields: [["name","Name"],["email","Email","email"],["teams","Teams","team-multi-select"],["image","Profile photo","upload:image"],["uid","UID"],["department","Department"],["program","Program"],["semester","Semester","number"],["phone","Phone"]] },
   Teams: { key: "teams", resource: "teams", fields: [["name","Team name"],["slug","Slug"],["description","Description"],["lead","Team lead","member-select"],["coLeads","Co-leads","member-multi-select"],["jointSecretaryLane","Reports under joint secretary","lane-select"],["order","Display order","number"],["active","Active","boolean-select"]] },
-  Events: { key: "events", resource: "events", fields: [["title","Title"],["slug","Slug"],["description","Description"],["venue","Venue"],["capacity","Capacity","number"],["category","Category"],["team","Team","team-select"],["leads","Event leads","member-multi-select"],["participationMode","Participation type","participation-select"],["maxTeamSize","Maximum team size","number"],["winnerFirst","1st place winner","winner-select"],["winnerSecond","2nd place winner","winner-select"],["winnerThird","3rd place winner","winner-select"],["status","Public status","status-select"],["registrationOpen","Registration open","boolean-select"],["registrationStart","Registration start","datetime-local"],["registrationEnd","Registration end","datetime-local"],["startAt","Event start date/time","datetime-local"],["endAt","Event end date/time","datetime-local"],["banner","Event banner","upload:image"],["certEventLogo","Event logo","upload:image"],["whatsappGroupLink","WhatsApp group link"]] },
+  Events: { key: "events", resource: "events", fields: [["title","Title"],["slug","Slug"],["description","Description"],["venue","Venue"],["capacity","Capacity","number"],["category","Category"],["team","Team","team-select"],["leads","Event leads","member-multi-select"],["participationMode","Participation type","participation-select"],["maxTeamSize","Maximum team size","number"],["winnerFirst","1st place winner","winner-select"],["winnerSecond","2nd place winner","winner-select"],["winnerThird","3rd place winner","winner-select"],["status","Public status","status-select"],["registrationOpen","Registration open","boolean-select"],["registrationStart","Registration start","datetime-local"],["registrationEnd","Registration end","datetime-local"],["startAt","Event start date/time","datetime-local"],["endAt","Event end date/time","datetime-local"],["banner","Event banner","upload:image"],["certEventLogo","Event logo","upload:image"],["whatsappGroupLink","WhatsApp group link"],["leaderboardVisible","Show leaderboard publicly","boolean-select"]] },
   Meetings: { key: "meetings", resource: "meetings", fields: [["title","Meeting title"],["date","Date","date"],["time","Time"],["venue","Venue"],["meetingType","Meeting type","meeting-type-select"],["organizer","Organizer","member-select"],["attendees","Attendees","member-multi-select"],["agenda","Agenda"],["discussionPoints","Discussion points"],["decisionsTaken","Decisions taken"],["actionItems","Action items (one per line: Task | Assigned To | Deadline | Status)"],["nextMeeting","Next meeting details"],["status","Status","meeting-status-select"]] },
   Tasks: { key: "tasks", resource: "tasks", fields: [["title","Title"],["description","Description"],["team","Team","team-select"],["dueAt","Due date","datetime-local"],["status","Status","task-status-select"],["priority","Priority","task-priority-select"]] },
   Announcements: { key: "announcements", resource: "announcements", fields: [["title","Title"],["body","Body"],["status","Status","announcement-status-select"],["audience","Audience","announcement-audience-select"],["publishAt","Publish at","datetime-local"]] },
@@ -103,7 +105,8 @@ const extraFields: Record<Resource, Field[]> = {
   recruitmentQuestions: [["team","Recruitment team","recruitment-team-select"],["role","Role-specific question","recruitment-role-select"],["label","Question"],["helpText","Help text"],["type","Question type","question-type-select"],["options","Options, one per line"],["required","Required","boolean-select"],["order","Display order","number"],["active","Active","boolean-select"]],
   recruitmentApplications: [["status","Status","application-status-select"],["adminNotes","Admin notes"]],
   studentMembers: [["status","Status","membership-member-status-select"],["adminRemarks","Remarks"]],
-  membershipDriveSettings: [["status","Status","membership-status-select"],["registrationEnabled","Registration enabled","boolean-select"],["openingDate","Opening date","datetime-local"],["closingDate","Closing date","datetime-local"],["announcementBanner","Announcement banner"],["customSuccessMessage","Custom success message"],["whatsappGroupLink","WhatsApp group link"],["autoCloseAfterDeadline","Auto close after deadline","boolean-select"],["manualOverride","Manual override","boolean-select"]]
+  membershipDriveSettings: [["status","Status","membership-status-select"],["registrationEnabled","Registration enabled","boolean-select"],["openingDate","Opening date","datetime-local"],["closingDate","Closing date","datetime-local"],["announcementBanner","Announcement banner"],["customSuccessMessage","Custom success message"],["whatsappGroupLink","WhatsApp group link"],["autoCloseAfterDeadline","Auto close after deadline","boolean-select"],["manualOverride","Manual override","boolean-select"]],
+  leaderboard: [["teamName","Team name"],["event","Event","event-select"],["rank","Rank","number"]]
 };
 
 const settingsFields: Field[] = [
@@ -198,6 +201,7 @@ function normalizePortalData(input:Data):Data{
     recruitmentApplications:asArray(data.recruitmentApplications),
     studentMembers:asArray(data.studentMembers),
     membershipDriveSettings:asArray(data.membershipDriveSettings),
+    leaderboardEntries:asArray(data.leaderboardEntries),
     clubInfo:data.clubInfo || {}
   };
 }
@@ -391,6 +395,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
       { category: "Navigation", label: "Jump to Events Desk", action: () => { setActive("Events"); setPanel("Navigated to Events Desk."); } },
       { category: "Navigation", label: "Jump to Recruitment Panel", action: () => { setActive("Recruitment"); setPanel("Navigated to Recruitment Desk."); } },
       { category: "Navigation", label: "Jump to Membership Drive", action: () => { setActive("Membership Drive"); setPanel("Navigated to Membership Drive Desk."); } },
+      { category: "Navigation", label: "Jump to Leaderboard", action: () => { setActive("Leaderboard"); setPanel("Navigated to Leaderboard Manager."); } },
       { category: "Navigation", label: "Jump to Attendance sheet", action: () => { setActive("Attendance"); setPanel("Navigated to Attendance sheet."); } },
       { category: "Navigation", label: "Jump to Certificates Generator", action: () => { setActive("Certificates"); setPanel("Navigated to Certificates Desk."); } },
       { category: "Navigation", label: "Jump to Meetings Logger", action: () => { setActive("Meetings"); setPanel("Navigated to Meetings Logger."); } },
@@ -551,7 +556,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
               <EventParticipantsDesk data={data} setPanel={setPanel} refresh={refresh} />
             )}
           </div>
-        ) : active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
+        ) : active==="Leaderboard"?<LeaderboardDesk data={data} setPanel={setPanel} refresh={refresh}/>:active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
         <div className="portal-action mt-4 rounded-2xl p-5 border border-violet-500/10">
           <p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p>
           <p className="mt-3 text-sm leading-6 text-white/65">{panel}</p>
@@ -564,12 +569,14 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
 }
 
 function Header({active,data,open,setPanel}:{active:Module;data:Data;open:(drawer:any)=>void;setPanel:(text:string)=>void}){
-  const singular=active==="Hall of Fame"?"Hall entry":active==="Membership Drive"?"Student member":active.slice(0,-1);
-  const action=active==="Overview"?"Export summary":active==="Recruitment"?"Recruitment settings":active==="Membership Drive"?"Drive settings":active==="Attendance"?"Generate attendance":active==="Certificates"?"Certificate tools":active==="Settings"?"Update branding":active==="AI"?"Ask AI":active==="Contact Messages"?"Open messages":`Add ${singular}`;
+  const singular=active==="Hall of Fame"?"Hall entry":active==="Membership Drive"?"Student member":active==="Leaderboard"?"Leaderboard":active.slice(0,-1);
+  const action=active==="Overview"?"Export summary":active==="Leaderboard"?"Manage scores":active==="Recruitment"?"Recruitment settings":active==="Membership Drive"?"Drive settings":active==="Attendance"?"Generate attendance":active==="Certificates"?"Certificate tools":active==="Settings"?"Update branding":active==="AI"?"Ask AI":active==="Contact Messages"?"Open messages":`Add ${singular}`;
   const description=active==="Membership Drive"
     ? "Manage student registrations, verify student members, analyze departmental signups, and update online drive configurations."
+    : active==="Leaderboard"
+    ? "Manage team scores, time bonuses, hint penalties, and public visibility for the event leaderboard."
     : "Live operational controls for members, teams, events, attendance, recruitment, media, documents, and public club content.";
-  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-5 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-[2.65rem] font-semibold leading-[.92] tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active==="AI"?"AI Desk":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">{description}</p></div><button type="button" onClick={()=>{if(active==="Overview"){exportDashboardSummary(data);setPanel("Dashboard summary CSV downloaded.");}else if(active==="Recruitment"){open({resource:"recruitmentSettings",title:"Recruitment settings",fields:extraFields.recruitmentSettings,item:data.recruitmentSettings?.[0],defaults:{status:"open",registrationEnabled:"true",autoCloseAfterDeadline:"true"}})}else if(active==="Membership Drive"){open({resource:"membershipDriveSettings",title:"Membership drive settings",fields:extraFields.membershipDriveSettings,item:data.membershipDriveSettings?.[0],defaults:{status:"closed",registrationEnabled:"false",autoCloseAfterDeadline:"true"}})}else if(active==="Attendance"){window.dispatchEvent(new Event("portal-download-attendance"));setPanel("Generating attendance sheet for the selected event...");}else if(active==="Certificates"){setPanel("Choose an event below, select winners from Events if needed, then export PDF certificates as ZIP files.");}else if(active==="AI"){setPanel("Use the AI Desk below to generate reports, MOMs, and secretary answers from real MongoDB data.");}else if(active==="Contact Messages"){setPanel("Open a message row to read all sender details and update its status.");}else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields,item:data.clubInfo});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${singular}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:active==="Meetings"?{status:"completed"}:active==="Hall of Fame"?{category:"top_contributor",active:"true"}:{}})}}} className="portal-command-button flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-xs font-semibold transition hover:-translate-y-0.5 sm:w-auto sm:self-end">{active==="Overview"||active==="Attendance"?<Download size={14}/>:active==="Certificates"?<Award size={14}/>:active==="AI"?<Brain size={14}/>:active==="Contact Messages"?<MessageSquare size={14}/>:active==="Membership Drive"?<SlidersHorizontal size={14}/>:<Plus size={14}/>}<span>{action}</span></button></div>
+  return <div className="portal-hero flex flex-wrap items-center justify-between gap-5 rounded-[1.75rem] p-5 md:p-8"><div><p className="text-[10px] font-semibold tracking-[.28em] text-violet-200/75">COMMAND CENTER / {active.toUpperCase()}</p><h2 className="mt-3 text-[2.65rem] font-semibold leading-[.92] tracking-[-.055em] md:text-5xl">{active==="Overview"?"Club intelligence":active==="AI"?"AI Desk":active}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/48">{description}</p></div><button type="button" onClick={()=>{if(active==="Overview"){exportDashboardSummary(data);setPanel("Dashboard summary CSV downloaded.");}else if(active==="Recruitment"){open({resource:"recruitmentSettings",title:"Recruitment settings",fields:extraFields.recruitmentSettings,item:data.recruitmentSettings?.[0],defaults:{status:"open",registrationEnabled:"true",autoCloseAfterDeadline:"true"}})}else if(active==="Membership Drive"){open({resource:"membershipDriveSettings",title:"Membership drive settings",fields:extraFields.membershipDriveSettings,item:data.membershipDriveSettings?.[0],defaults:{status:"closed",registrationEnabled:"false",autoCloseAfterDeadline:"true"}})}else if(active==="Leaderboard"){setPanel("Use the Leaderboard Manager below to add scores, manage teams, and toggle visibility.")}else if(active==="Attendance"){window.dispatchEvent(new Event("portal-download-attendance"));setPanel("Generating attendance sheet for the selected event...");}else if(active==="Certificates"){setPanel("Choose an event below, select winners from Events if needed, then export PDF certificates as ZIP files.");}else if(active==="AI"){setPanel("Use the AI Desk below to generate reports, MOMs, and secretary answers from real MongoDB data.");}else if(active==="Contact Messages"){setPanel("Open a message row to read all sender details and update its status.");}else if(active==="Settings")open({resource:"settings",title:"Update club branding, faculty, and office bearers",fields:settingsFields,item:data.clubInfo});else{const c=config[active as keyof typeof config];open({resource:c.resource,title:`Add ${singular}`,fields:c.fields,defaults:active==="Events"?{status:"published",registrationOpen:"true"}:active==="Meetings"?{status:"completed"}:active==="Hall of Fame"?{category:"top_contributor",active:"true"}:{}})}}} className="portal-command-button flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-xs font-semibold transition hover:-translate-y-0.5 sm:w-auto sm:self-end">{active==="Leaderboard"?<Trophy size={14}/>:active==="Overview"||active==="Attendance"?<Download size={14}/>:active==="Certificates"?<Award size={14}/>:active==="AI"?<Brain size={14}/>:active==="Contact Messages"?<MessageSquare size={14}/>:active==="Membership Drive"?<SlidersHorizontal size={14}/>:<Plus size={14}/>}<span>{action}</span></button></div>
 }
 
 
@@ -4841,4 +4848,371 @@ function MatrixRainCanvas() {
   return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />;
 }
 
+function LeaderboardDesk({ data, setPanel, refresh }: { data: Data; setPanel: (v: string) => void; refresh: () => Promise<void> }) {
+  const events = data.events || [];
+  const registrations = data.registrations || [];
+  const entries: any[] = data.leaderboardEntries || [];
+  const [selectedEvent, setSelectedEvent] = useState("");
+  const [busy, setBusy] = useState(false);
 
+  // Add/Edit form state
+  const [editing, setEditing] = useState<any>(null); // null = add mode, object = edit mode
+  const [teamName, setTeamName] = useState("");
+  const [registrationId, setRegistrationId] = useState("");
+  const [rank, setRank] = useState(0);
+  const [scores, setScores] = useState<Array<{ category: string; baseScore: number; timeBonus: number; hintPenalty: number; notes: string }>>([]);
+
+  const eventEntries = useMemo(() => entries.filter((e: any) => {
+    const eid = typeof e.event === "string" ? e.event : e.event?._id || e.event?.id || "";
+    return String(eid) === selectedEvent;
+  }).sort((a: any, b: any) => (a.rank || 999) - (b.rank || 999)), [entries, selectedEvent]);
+
+  const eventRegs = useMemo(() => registrations.filter((r: any) => {
+    const eid = typeof r.event === "string" ? r.event : r.event?._id || r.event?.id || "";
+    return String(eid) === selectedEvent && r.mode === "team";
+  }), [registrations, selectedEvent]);
+
+  const selectedEventData = events.find((e: any) => idOf(e) === selectedEvent);
+  const isVisible = selectedEventData?.leaderboardVisible === true;
+
+  const totalScore = scores.reduce((sum, s) => sum + (s.baseScore || 0) + (s.timeBonus || 0) - (s.hintPenalty || 0), 0);
+
+  function addScoreRow() {
+    setScores(prev => [...prev, { category: "", baseScore: 0, timeBonus: 0, hintPenalty: 0, notes: "" }]);
+  }
+
+  function updateScore(idx: number, field: string, value: any) {
+    setScores(prev => prev.map((s, i) => i === idx ? { ...s, [field]: field === "category" || field === "notes" ? value : Number(value) || 0 } : s));
+  }
+
+  function removeScoreRow(idx: number) {
+    setScores(prev => prev.filter((_, i) => i !== idx));
+  }
+
+  function startEdit(entry: any) {
+    setEditing(entry);
+    setTeamName(entry.teamName || "");
+    setRank(entry.rank || 0);
+    setScores((entry.scores || []).map((s: any) => ({
+      category: s.category || "",
+      baseScore: Number(s.baseScore) || 0,
+      timeBonus: Number(s.timeBonus) || 0,
+      hintPenalty: Number(s.hintPenalty) || 0,
+      notes: s.notes || ""
+    })));
+  }
+
+  function resetForm() {
+    setEditing(null);
+    setTeamName("");
+    setRegistrationId("");
+    setRank(0);
+    setScores([]);
+  }
+
+  async function handleSave() {
+    if (!selectedEvent || !teamName.trim()) {
+      setPanel("Please select an event and enter a team name.");
+      return;
+    }
+    setBusy(true);
+    const body = {
+      event: selectedEvent,
+      teamName: teamName.trim(),
+      registration: registrationId || undefined,
+      rank,
+      scores
+    };
+    const isEdit = editing && editing._id;
+    const url = isEdit ? `/api/admin/leaderboard/${editing._id}` : "/api/admin/leaderboard";
+    const method = isEdit ? "PATCH" : "POST";
+    const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    setBusy(false);
+    if (res.ok) {
+      setPanel(isEdit ? "Leaderboard entry updated." : "Leaderboard entry created.");
+      resetForm();
+      await refresh();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      setPanel(`Failed: ${err.error || res.statusText}`);
+    }
+  }
+
+  async function handleDelete(entry: any) {
+    if (!confirm(`Delete ${entry.teamName} from leaderboard?`)) return;
+    setBusy(true);
+    const res = await fetch(`/api/admin/leaderboard/${idOf(entry)}`, { method: "DELETE" });
+    setBusy(false);
+    if (res.ok) {
+      setPanel("Entry deleted.");
+      await refresh();
+    } else {
+      setPanel("Delete failed.");
+    }
+  }
+
+  async function toggleVisibility() {
+    if (!selectedEvent) return;
+    setBusy(true);
+    const res = await fetch(`/api/admin/events/${selectedEvent}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leaderboardVisible: !isVisible })
+    });
+    setBusy(false);
+    if (res.ok) {
+      setPanel(isVisible ? "Leaderboard hidden from public page." : "Leaderboard is now visible on the public event page!");
+      await refresh();
+    } else {
+      setPanel("Toggle failed.");
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Event Selector */}
+      <div className="glass-brutalist rounded-2xl p-5">
+        <p className="text-[10px] font-bold uppercase tracking-[.24em] text-violet-300/70 mb-3">Select Event</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selectedEvent}
+            onChange={(e) => { setSelectedEvent(e.target.value); resetForm(); }}
+            className="flex-1 min-w-[240px] rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-violet-500/50 focus:outline-none"
+          >
+            <option value="">— Choose an event —</option>
+            {events.map((ev: any) => (
+              <option key={idOf(ev)} value={idOf(ev)}>{ev.title}</option>
+            ))}
+          </select>
+          {selectedEvent && (
+            <button
+              type="button"
+              onClick={toggleVisibility}
+              disabled={busy}
+              className={`flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold uppercase tracking-wider transition ${
+                isVisible
+                  ? "border-2 border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+                  : "border-2 border-orange-500/40 bg-orange-500/10 text-orange-300 hover:bg-orange-500/20"
+              }`}
+            >
+              <Eye size={14} />
+              {isVisible ? "Visible on Public Page" : "Hidden from Public Page"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {selectedEvent && (
+        <>
+          {/* Add/Edit Entry Form */}
+          <div className="glass-brutalist rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-violet-300/70">
+                {editing ? "Edit Entry" : "Add Team Entry"}
+              </p>
+              {editing && (
+                <button type="button" onClick={resetForm} className="text-xs text-violet-400 hover:text-violet-300 underline">
+                  Cancel Edit
+                </button>
+              )}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              {/* Team selector */}
+              <div>
+                <label className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-1 block">Team Name</label>
+                <input
+                  type="text"
+                  value={teamName}
+                  onChange={(e) => setTeamName(e.target.value)}
+                  placeholder="Enter team name"
+                  className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-violet-500/50 focus:outline-none"
+                />
+                {eventRegs.length > 0 && (
+                  <select
+                    value={registrationId}
+                    onChange={(e) => {
+                      setRegistrationId(e.target.value);
+                      const reg = eventRegs.find((r: any) => idOf(r) === e.target.value);
+                      if (reg?.teamName) setTeamName(reg.teamName);
+                    }}
+                    className="w-full mt-2 rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-xs text-white/60 focus:border-violet-500/50 focus:outline-none"
+                  >
+                    <option value="">Or pick from registered teams...</option>
+                    {eventRegs.map((r: any) => (
+                      <option key={idOf(r)} value={idOf(r)}>{r.teamName || "Unnamed Team"}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              {/* Rank */}
+              <div>
+                <label className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-1 block">Rank</label>
+                <input
+                  type="number"
+                  value={rank}
+                  onChange={(e) => setRank(Number(e.target.value) || 0)}
+                  min={0}
+                  className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-violet-500/50 focus:outline-none"
+                />
+              </div>
+              {/* Total Score Preview */}
+              <div>
+                <label className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-1 block">Total Score (Auto)</label>
+                <div className="w-full rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-3 text-sm font-bold text-violet-300">
+                  {totalScore} pts
+                </div>
+              </div>
+            </div>
+
+            {/* Score Categories */}
+            <div className="mt-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-mono text-white/40 uppercase tracking-wider">Score Breakdown</p>
+                <button type="button" onClick={addScoreRow} className="flex items-center gap-1.5 rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-[10px] font-bold text-violet-300 hover:bg-violet-500/20 transition">
+                  <PlusCircle size={12} /> Add Category
+                </button>
+              </div>
+              {scores.length === 0 && (
+                <p className="text-xs text-white/30 italic py-3">No score categories added. Click &quot;Add Category&quot; to start.</p>
+              )}
+              <div className="space-y-3">
+                {scores.map((score, idx) => (
+                  <div key={idx} className="rounded-xl border border-white/5 bg-black/30 p-4">
+                    <div className="grid gap-3 sm:grid-cols-5">
+                      <div className="sm:col-span-2">
+                        <label className="text-[9px] font-mono text-white/30 uppercase">Category</label>
+                        <input
+                          type="text"
+                          value={score.category}
+                          onChange={(e) => updateScore(idx, "category", e.target.value)}
+                          placeholder="e.g. Stage 1 (Crossword)"
+                          className="w-full mt-1 rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs text-white focus:border-violet-500/50 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-mono text-white/30 uppercase">Base Score</label>
+                        <input type="number" value={score.baseScore} onChange={(e) => updateScore(idx, "baseScore", e.target.value)} className="w-full mt-1 rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs text-white focus:border-violet-500/50 focus:outline-none" />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-mono text-emerald-400/60 uppercase">Time Bonus</label>
+                        <input type="number" value={score.timeBonus} onChange={(e) => updateScore(idx, "timeBonus", e.target.value)} className="w-full mt-1 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-300 focus:border-emerald-500/50 focus:outline-none" />
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <label className="text-[9px] font-mono text-rose-400/60 uppercase">Hint Penalty</label>
+                          <input type="number" value={score.hintPenalty} onChange={(e) => updateScore(idx, "hintPenalty", e.target.value)} className="w-full mt-1 rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2 text-xs text-rose-300 focus:border-rose-500/50 focus:outline-none" />
+                        </div>
+                        <button type="button" onClick={() => removeScoreRow(idx)} className="self-end mb-0.5 rounded-lg p-2 text-rose-400/50 hover:text-rose-400 hover:bg-rose-500/10 transition">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <input
+                        type="text"
+                        value={score.notes}
+                        onChange={(e) => updateScore(idx, "notes", e.target.value)}
+                        placeholder="Notes (optional)"
+                        className="flex-1 rounded-lg border border-white/5 bg-transparent px-3 py-1.5 text-[10px] text-white/40 focus:border-violet-500/30 focus:outline-none"
+                      />
+                      <span className="ml-3 text-xs font-mono font-bold text-white/60">
+                        = {(score.baseScore || 0) + (score.timeBonus || 0) - (score.hintPenalty || 0)} pts
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Formula Reference */}
+            <div className="mt-4 rounded-xl border border-violet-500/10 bg-violet-500/5 p-4 text-xs text-violet-300/70">
+              <p className="font-bold text-violet-300 mb-1">Scoring Formula</p>
+              <p>Final Score = Base Score + Time Bonus − Hint Penalties</p>
+              <p className="mt-1 text-[10px] text-white/30">Time Bonus: +1 pt/second remaining · Hint Penalty: −50 pts/hint used</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={busy || !teamName.trim()}
+              className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-40 px-6 py-3.5 text-sm font-bold text-white uppercase tracking-wider transition"
+            >
+              {busy ? "Saving..." : editing ? "Update Entry" : "Add to Leaderboard"}
+            </button>
+          </div>
+
+          {/* Leaderboard Table */}
+          <div className="glass-brutalist rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[10px] font-bold uppercase tracking-[.24em] text-violet-300/70">
+                Leaderboard — {selectedEventData?.title || ""}
+              </p>
+              <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${isVisible ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-orange-500/30 bg-orange-500/10 text-orange-400"}`}>
+                {isVisible ? "PUBLIC" : "HIDDEN"}
+              </span>
+            </div>
+
+            {eventEntries.length === 0 ? (
+              <p className="text-sm text-white/30 py-8 text-center">No leaderboard entries yet. Use the form above to add teams.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="py-3 px-3 text-[10px] font-mono text-white/40 uppercase tracking-wider">Rank</th>
+                      <th className="py-3 px-3 text-[10px] font-mono text-white/40 uppercase tracking-wider">Team</th>
+                      <th className="py-3 px-3 text-[10px] font-mono text-white/40 uppercase tracking-wider">Categories</th>
+                      <th className="py-3 px-3 text-[10px] font-mono text-white/40 uppercase tracking-wider text-right">Total Score</th>
+                      <th className="py-3 px-3 text-[10px] font-mono text-white/40 uppercase tracking-wider text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {eventEntries.map((entry: any, i: number) => (
+                      <tr key={idOf(entry)} className={`border-b border-white/5 hover:bg-white/[.02] transition ${i < 3 ? "bg-gradient-to-r from-violet-500/[.03] to-transparent" : ""}`}>
+                        <td className="py-3 px-3">
+                          <span className={`inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-black ${
+                            i === 0 ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30" :
+                            i === 1 ? "bg-gray-400/20 text-gray-300 border border-gray-400/30" :
+                            i === 2 ? "bg-amber-700/20 text-amber-400 border border-amber-700/30" :
+                            "bg-white/5 text-white/40 border border-white/10"
+                          }`}>
+                            {entry.rank || i + 1}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-sm font-semibold text-white/90">{entry.teamName}</td>
+                        <td className="py-3 px-3">
+                          <div className="flex flex-wrap gap-1">
+                            {(entry.scores || []).map((s: any, si: number) => (
+                              <span key={si} className="rounded-md bg-white/5 border border-white/10 px-2 py-0.5 text-[10px] text-white/50">
+                                {s.category}: {(s.baseScore || 0) + (s.timeBonus || 0) - (s.hintPenalty || 0)}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <span className="text-sm font-black text-violet-300">{entry.totalScore || 0}</span>
+                          <span className="text-[10px] text-white/30 ml-1">pts</span>
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button type="button" onClick={() => startEdit(entry)} className="rounded-lg p-1.5 text-violet-400/50 hover:text-violet-400 hover:bg-violet-500/10 transition">
+                              <SlidersHorizontal size={14} />
+                            </button>
+                            <button type="button" onClick={() => handleDelete(entry)} className="rounded-lg p-1.5 text-rose-400/50 hover:text-rose-400 hover:bg-rose-500/10 transition">
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
