@@ -34,14 +34,6 @@ export default async function LeaderboardPage() {
                 Official real-time rankings, stage breakdown scores, and team totals for Tech Tatva competitive events.
               </p>
             </div>
-            
-            <div className="glass-brutalist shrink-0 rounded-2xl p-5 border border-purple-500/20 text-center max-w-[240px]">
-              <p className="text-[10px] font-bold text-purple-300 uppercase tracking-widest">SCORING ENGINE</p>
-              <p className="mt-2 text-xs text-white/70 font-semibold">Final Score = Base Score + Time Bonus − Hint Penalties</p>
-              <div className="mt-3 inline-flex items-center gap-1.5 text-[10px] text-white/40">
-                <Sparkles size={12} className="text-purple-400" /> Managed live by club admins
-              </div>
-            </div>
           </div>
         </div>
 

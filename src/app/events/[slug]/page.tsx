@@ -276,8 +276,6 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
                   </tbody>
                 </table>
               </div>
-
-              <p className="mt-4 text-center text-[10px] text-white/25 tracking-wider">FINAL SCORE = BASE SCORE + TIME BONUS − HINT PENALTIES</p>
             </div>
           </div>
         )}

@@ -250,10 +250,6 @@ export function LeaderboardClient({ events }: { events: LeaderboardEvent[] }) {
             </table>
           </div>
         )}
-
-        <div className="mt-6 text-center text-[10px] text-white/30 tracking-widest uppercase">
-          ⚡ Scoring Criteria: Final Score = Base Score + Time Bonus (−1 pt/sec remaining) − Hint Penalties (−50 pts/hint)
-        </div>
       </div>
     </div>
   );
