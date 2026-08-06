@@ -23,8 +23,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ res
   if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const { resource } = await params;
   if (!adminResources.includes(resource as AdminResource)) return NextResponse.json({ error: "Unknown resource" }, { status: 404 });
-  await connectDB();
-  const result = await createResource(resource as AdminResource, await req.json(), (session.user as { id?: string }).id);
-  await audit(req, `portal.${resource}.create`, { entityType: resource, entityId: (result as any)?._id });
-  return NextResponse.json(result, { status: 201 });
+  try {
+    await connectDB();
+    const result = await createResource(resource as AdminResource, await req.json(), (session.user as { id?: string }).id);
+    await audit(req, `portal.${resource}.create`, { entityType: resource, entityId: (result as any)?._id });
+    return NextResponse.json(result, { status: 201 });
+  } catch (err: any) {
+    console.error("Admin POST error:", err);
+    return NextResponse.json({ error: err?.message || "Failed to create resource" }, { status: 400 });
+  }
 }

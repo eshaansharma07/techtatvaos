@@ -343,9 +343,27 @@ export async function createResource(resource: AdminResource, input: Record<stri
   if (resource === "studentMembers") return StudentMember.create(body);
   if (resource === "membershipDriveSettings") return MembershipDriveSettings.findOneAndUpdate({ key: "default" }, normalizeMembershipDriveSettings(body), { upsert: true, new: true, setDefaultsOnInsert: true });
   if (resource === "leaderboard") {
-    const scores = Array.isArray(body.scores) ? body.scores : (body.scores ? JSON.parse(body.scores) : []);
-    const totalScore = scores.reduce((sum: number, s: any) => sum + (Number(s.baseScore) || 0) + (Number(s.timeBonus) || 0) - (Number(s.hintPenalty) || 0), 0);
-    return LeaderboardEntry.create({ event: refId(body.event), teamName: body.teamName, registration: refId(body.registration), scores, totalScore, rank: Number(body.rank) || 0 });
+    const eventId = refId(input.event);
+    if (!eventId || !Types.ObjectId.isValid(eventId)) {
+      throw new Error("Please select an event before saving.");
+    }
+    const teamName = String(input.teamName || "").trim();
+    if (!teamName) {
+      throw new Error("Please enter a team name before saving.");
+    }
+    const scores = Array.isArray(input.scores) ? input.scores : (input.scores ? JSON.parse(input.scores) : []);
+    const calculatedTotal = scores.reduce((sum: number, s: any) => sum + (Number(s.baseScore) || 0) + (Number(s.timeBonus) || 0) - (Number(s.hintPenalty) || 0), 0);
+    const manualTotal = input.totalScore !== undefined && input.totalScore !== "" ? Number(input.totalScore) : undefined;
+    const totalScore = (manualTotal !== undefined && !isNaN(manualTotal)) ? manualTotal : calculatedTotal;
+    const regId = refId(input.registration);
+    return LeaderboardEntry.create({
+      event: eventId,
+      teamName,
+      registration: (regId && Types.ObjectId.isValid(regId)) ? regId : undefined,
+      scores,
+      totalScore,
+      rank: Number(input.rank) || 0
+    });
   }
 }
 
@@ -410,13 +428,19 @@ export async function updateResource(resource: AdminResource, id: string, input:
     return application;
   }
   if (resource === "leaderboard") {
-    const scores = Array.isArray(body.scores) ? body.scores : (body.scores ? JSON.parse(body.scores) : undefined);
-    const update: Record<string, any> = { ...body };
-    if (scores) {
-      update.scores = scores;
+    const scores = Array.isArray(input.scores) ? input.scores : (input.scores ? JSON.parse(input.scores) : undefined);
+    const update: Record<string, any> = {};
+    if (input.teamName !== undefined) update.teamName = String(input.teamName).trim();
+    if (input.rank !== undefined) update.rank = Number(input.rank) || 0;
+    if (scores) update.scores = scores;
+    const manualTotal = input.totalScore !== undefined && input.totalScore !== "" ? Number(input.totalScore) : undefined;
+    if (manualTotal !== undefined && !isNaN(manualTotal)) {
+      update.totalScore = manualTotal;
+    } else if (scores) {
       update.totalScore = scores.reduce((sum: number, s: any) => sum + (Number(s.baseScore) || 0) + (Number(s.timeBonus) || 0) - (Number(s.hintPenalty) || 0), 0);
     }
-    if (body.rank !== undefined) update.rank = Number(body.rank);
+    const regId = refId(input.registration);
+    if (regId && Types.ObjectId.isValid(regId)) update.registration = regId;
     return LeaderboardEntry.findByIdAndUpdate(id, update, { new: true, runValidators: true });
   }
 }
