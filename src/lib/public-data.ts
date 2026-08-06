@@ -627,3 +627,42 @@ export async function getAdminDashboardData() {
     leaderboardEntries
   });
 }
+
+export async function getPublicLeaderboards() {
+  await connectDB();
+  const events = await Event.find({ leaderboardVisible: true })
+    .select("slug title category banner venue startAt leaderboardVisible")
+    .sort({ startAt: -1 })
+    .lean();
+
+  const eventIds = events.map(e => e._id);
+  const entries = await LeaderboardEntry.find({ event: { $in: eventIds } })
+    .sort({ rank: 1, totalScore: -1 })
+    .lean();
+
+  const map = new Map<string, any[]>();
+  for (const entry of entries) {
+    const key = String(entry.event);
+    const list = map.get(key) || [];
+    list.push({
+      id: String(entry._id),
+      teamName: entry.teamName,
+      scores: entry.scores || [],
+      totalScore: entry.totalScore || 0,
+      rank: entry.rank || 0
+    });
+    map.set(key, list);
+  }
+
+  return serialize(
+    events.map(event => ({
+      id: String(event._id),
+      slug: event.slug,
+      title: event.title,
+      category: event.category,
+      banner: event.banner,
+      venue: event.venue,
+      leaderboard: map.get(String(event._id)) || []
+    }))
+  );
+}

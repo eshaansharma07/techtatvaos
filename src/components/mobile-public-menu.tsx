@@ -19,7 +19,8 @@ import {
   X,
   ArrowUpRight,
   Sparkles,
-  UserPlus
+  UserPlus,
+  Trophy
 } from "lucide-react";
 import { MotionLogo } from "./brand-motion";
 
@@ -29,6 +30,7 @@ const links = [
   ["Recruitment", "/recruitment", Briefcase],
   ["Join Us", "/join", UserPlus],
   ["Events", "/events", Calendar],
+  ["Leaderboard", "/leaderboard", Trophy],
   ["Teams", "/teams", Users],
   ["Hall of Fame", "/hall-of-fame", Award],
   ["Gallery", "/gallery", ImageIcon],

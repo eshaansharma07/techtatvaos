@@ -16,6 +16,7 @@ const publicLinks = [
   ["RECRUITMENT", "/recruitment"],
   ["JOIN US", "/join"],
   ["EVENTS", "/events"],
+  ["LEADERBOARD", "/leaderboard"],
   ["TEAMS", "/teams"],
   ["HALL OF FAME", "/hall-of-fame"],
   ["GALLERY", "/gallery"]
