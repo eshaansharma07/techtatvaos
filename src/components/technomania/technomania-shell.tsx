@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Instagram, Linkedin, Github, Zap, ArrowRight, ShieldCheck, HelpCircle } from "lucide-react";
@@ -294,6 +295,13 @@ function TechnomaniaFooter() {
 }
 
 export function TechnomaniaShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname() || "";
+  const isAdmin = pathname.includes("/admin");
+
+  if (isAdmin) {
+    return <main className="min-h-screen relative z-10">{children}</main>;
+  }
+
   return (
     <div className="min-h-screen bg-tm-bg text-tm-text selection:bg-tm-accent selection:text-tm-bg relative flex flex-col font-tm-body antialiased overflow-x-hidden">
       {/* Background grid */}
