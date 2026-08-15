@@ -1276,7 +1276,7 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
   
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const visible = filtered.slice(page * pageSize, page * pageSize + pageSize);
-  const exportHref = `/api/recruitment/export?${new URLSearchParams(Object.entries({team:teamFilter!=="all"?teamFilter:"",role:roleFilter!=="all"?roleFilter:"",status:statusFilter!=="all"?statusFilter:"",from:dateFrom,to:dateTo}).filter(([,v])=>v)).toString()}`;
+  const exportHref = `/api/recruitment/export?${new URLSearchParams(Object.entries({team:teamFilter!=="all"?teamFilter:"",role:roleFilter!=="all"?roleFilter:"",status:statusFilter!=="all"?statusFilter:"",from:dateFrom,to:dateTo,search:query,sortKey:sortKey,sortDir:sortDir}).filter(([,v])=>v)).toString()}`;
   
   function toggle(id:string){setSelected((state)=>state.includes(id)?state.filter((item)=>item!==id):[...state,id]);}
   function toggleAll(){setSelected(selected.length===visible.length?[]:visible.map((item:any)=>idOf(item)));}

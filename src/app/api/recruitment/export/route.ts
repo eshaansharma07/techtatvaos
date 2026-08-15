@@ -19,7 +19,17 @@ export async function GET(req: NextRequest) {
   const to = searchParams.get("to");
   if (from || to) query.submittedAt = { ...(from ? { $gte: new Date(from) } : {}), ...(to ? { $lte: new Date(to) } : {}) };
 
-  const applications = await RecruitmentApplication.find(query).sort({ submittedAt: -1 }).populate("team", "name").populate("role", "name").lean();
+  const search = searchParams.get("search");
+  if (search) {
+    const regex = { $regex: search, $options: "i" };
+    query.$or = [{ fullName: regex }, { uid: regex }, { email: regex }];
+  }
+
+  const sortKey = searchParams.get("sortKey") || "submittedAt";
+  const sortDir = searchParams.get("sortDir") === "asc" ? 1 : -1;
+  const sortQuery: Record<string, 1 | -1> = { [sortKey]: sortDir };
+
+  const applications = await RecruitmentApplication.find(query).sort(sortQuery).populate("team", "name").populate("role", "name").lean();
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Applications");
   sheet.columns = [
