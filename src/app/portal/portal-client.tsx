@@ -1298,16 +1298,17 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
     return <button type="button" onClick={()=>sortBy(column)} className="inline-flex items-center gap-1 text-left uppercase tracking-wider text-white/35 hover:text-white/70">{label}<ArrowUpDown size={11} className={sortKey===column?"text-violet-200":"text-white/25"}/></button>;
   }
   
-  async function bulk(action:"accept"|"reject"|"shortlist"|"hold"){
+  async function bulk(action:"accept"|"reject"|"shortlist"|"hold"|"delete"){
     if (!selected.length) return;
     const count = selected.length;
+    if (action === "delete" && !window.confirm(`Are you sure you want to permanently delete ${count} application(s)? This cannot be undone.`)) return;
     setBulkBusy(true);
     const res = await fetch("/api/recruitment/bulk",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,ids:selected})});
     setBulkBusy(false);
     if (!res.ok){setPanel("Bulk action failed.");return;}
     setSelected([]);
     await refresh();
-    setPanel(`Bulk ${action} completed for ${count} applications.`);
+    setPanel(action === "delete" ? `Permanently deleted ${count} application(s).` : `Bulk ${action} completed for ${count} applications.`);
   }
 
   const tabClass = (tab: typeof activeTab) =>
@@ -1423,6 +1424,9 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
                 <button disabled={!selected.length||bulkBusy} onClick={()=>bulk("reject")} className="portal-link-action text-rose-200 border-rose-500/20 disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-transparent">
                   Bulk reject
                 </button>
+                <button disabled={!selected.length||bulkBusy} onClick={()=>bulk("delete")} className="portal-link-action text-red-300 border-red-500/20 disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-transparent">
+                  <Trash2 size={12} className="mr-1"/> Bulk delete
+                </button>
               </div>
               <span className="font-medium text-white/50">{filtered.length} candidates match filters</span>
             </div>
@@ -1479,6 +1483,9 @@ function RecruitmentDesk({data,open,patch,remove,refresh,setPanel}:{data:Data;op
                     </button>
                     <button onClick={()=>patch("recruitmentApplications",item,{status:"rejected"},"Application rejected.")} className="portal-link-action text-rose-200 border-rose-500/20 hover:bg-rose-500/10">
                       <X size={12} className="mr-1"/> Reject
+                    </button>
+                    <button onClick={()=>{if(window.confirm(`Delete ${item.fullName}'s application permanently?`))remove("recruitmentApplications",item)}} className="portal-link-action text-red-300 border-red-500/20 hover:bg-red-500/10">
+                      <Trash2 size={12} className="mr-1"/> Delete
                     </button>
                   </div>
                 </div>
