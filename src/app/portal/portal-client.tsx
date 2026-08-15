@@ -44,17 +44,20 @@ import {
   User,
   Send,
   Volume2,
-  VolumeX
+  VolumeX,
+  Sparkles
 } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, Area, AreaChart, YAxis, CartesianGrid } from "recharts";
+import { TechnomaniaAdminPortal } from "@/components/portal/technomania-admin-portal";
 
-type Module = "Overview" | "Members" | "Teams" | "Events" | "Leaderboard" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Hall of Fame" | "Contact Messages" | "Settings";
+type Module = "Overview" | "Technomania 3.0" | "Members" | "Teams" | "Events" | "Leaderboard" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "Meetings" | "AI" | "Tasks" | "Announcements" | "Media" | "Hall of Fame" | "Contact Messages" | "Settings";
 type Resource = "users" | "teams" | "events" | "leaderboard" | "meetings" | "tasks" | "announcements" | "sponsors" | "achievements" | "gallery" | "hallOfFame" | "contacts" | "settings" | "invites" | "recruitmentSettings" | "recruitmentTeams" | "recruitmentRoles" | "recruitmentQuestions" | "recruitmentApplications" | "studentMembers" | "membershipDriveSettings";
 type Data = Record<string, any>;
 type Field = [string, string, string?];
 
 const nav = [
   [LayoutDashboard, "Overview"],
+  [Sparkles, "Technomania 3.0"],
   [Users, "Members"],
   [Workflow, "Teams"],
   [CalendarDays, "Events"],
@@ -73,7 +76,7 @@ const nav = [
   [Settings2, "Settings"]
 ] as const;
 
-const config: Record<Exclude<Module, "Overview" | "Leaderboard" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
+const config: Record<Exclude<Module, "Overview" | "Technomania 3.0" | "Leaderboard" | "Recruitment" | "Membership Drive" | "Attendance" | "Certificates" | "AI" | "Settings">, { key: string; resource: Resource; fields: Field[] }> = {
   Members: { key: "users", resource: "users", fields: [["name","Name"],["email","Email","email"],["teams","Teams","team-multi-select"],["image","Profile photo","upload:image"],["uid","UID"],["department","Department"],["program","Program"],["semester","Semester","number"],["phone","Phone"]] },
   Teams: { key: "teams", resource: "teams", fields: [["name","Team name"],["slug","Slug"],["description","Description"],["lead","Team lead","member-select"],["coLeads","Co-leads","member-multi-select"],["jointSecretaryLane","Reports under joint secretary","lane-select"],["order","Display order","number"],["active","Active","boolean-select"]] },
   Events: { key: "events", resource: "events", fields: [["title","Title"],["slug","Slug"],["description","Description"],["venue","Venue"],["capacity","Capacity","number"],["category","Category"],["team","Team","team-select"],["leads","Event leads","member-multi-select"],["participationMode","Participation type","participation-select"],["maxTeamSize","Maximum team size","number"],["winnerFirst","1st place winner","winner-select"],["winnerSecond","2nd place winner","winner-select"],["winnerThird","3rd place winner","winner-select"],["status","Public status","status-select"],["registrationOpen","Registration open","boolean-select"],["registrationStart","Registration start","datetime-local"],["registrationEnd","Registration end","datetime-local"],["startAt","Event start date/time","datetime-local"],["endAt","Event end date/time","datetime-local"],["banner","Event banner","upload:image"],["certEventLogo","Event logo","upload:image"],["whatsappGroupLink","WhatsApp group link"],["leaderboardVisible","Show leaderboard publicly","boolean-select"]] },
@@ -488,16 +491,37 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
         </button>
       </div>
       <nav className="mt-4 flex-1 space-y-1.5 pb-6">
-        {nav.map(([Icon,label])=>(
-          <button 
-            key={label} 
-            onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`);}} 
-            className={`portal-nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm transition ${active===label?"portal-nav-active text-white":"text-white/42 hover:border-white/[.08] hover:bg-white/[.045] hover:text-white/75"}`}
-          >
-            <Icon size={16}/>
-            {label}
-          </button>
-        ))}
+        {nav.map(([Icon,label])=>{
+          const isTM = label === "Technomania 3.0";
+          const isActive = active === label;
+
+          return (
+            <button 
+              key={label} 
+              onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`);}} 
+              className={`portal-nav-item flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm transition relative overflow-hidden ${
+                isTM
+                  ? isActive
+                    ? "bg-gradient-to-r from-blue-600/40 via-cyan-500/30 to-purple-600/40 border border-cyan-400 text-white shadow-[0_0_25px_rgba(74,158,255,0.4)]"
+                    : "bg-gradient-to-r from-blue-600/20 via-cyan-500/10 to-purple-600/20 border border-cyan-500/40 text-cyan-300 hover:border-cyan-400 hover:text-white shadow-[0_0_15px_rgba(74,158,255,0.2)]"
+                  : isActive
+                  ? "portal-nav-active text-white"
+                  : "text-white/42 hover:border-white/[.08] hover:bg-white/[.045] hover:text-white/75"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Icon size={16} className={isTM ? "text-cyan-400 animate-pulse" : ""}/>
+                <span className={isTM ? "font-bold tracking-wide text-white" : ""}>{label}</span>
+              </div>
+              {isTM && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-400 text-black text-[9px] font-black uppercase tracking-wider shadow-[0_0_12px_rgba(34,211,238,0.9)] animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-black animate-ping" />
+                  LIVE
+                </span>
+              )}
+            </button>
+          );
+        })}
       </nav>
       <div className="mt-auto border-t border-white/[.06] pt-4">
         <button onClick={()=>signOut({callbackUrl:"/login"})} className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm text-white/35 transition hover:bg-rose-500/10 hover:text-rose-200">
@@ -507,7 +531,7 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
       </div>
     </aside>
     <nav className="fixed inset-x-3 bottom-3 z-45 grid grid-cols-5 gap-1 rounded-[1.65rem] border border-white/10 bg-[#09070f]/88 p-2 shadow-2xl shadow-black/50 backdrop-blur-2xl xl:hidden">
-      {nav.slice(0,5).map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[10px] font-semibold transition active:scale-[.97] ${active===label?"bg-violet-400/18 text-white shadow-[0_0_24px_rgba(168,85,247,.16)]":"text-white/42"}`}><Icon size={17}/><span>{label==="Attendance"?"Attend":label}</span></button>)}
+      {nav.slice(0,5).map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[10px] font-semibold transition active:scale-[.97] ${active===label?"bg-violet-400/18 text-white shadow-[0_0_24px_rgba(168,85,247,.16)]":"text-white/42"}`}><Icon size={17}/><span>{label==="Attendance"?"Attend":label==="Technomania 3.0"?"TM 3.0":label}</span></button>)}
     </nav>
     <section className="xl:pl-72 relative z-10">
       <header className="portal-topbar flex min-h-24 flex-wrap items-center justify-between gap-4 px-5 py-4 md:px-8">
@@ -537,10 +561,36 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
       </header>
       <div className="p-4 md:p-8">
         <div className="mb-4 flex gap-2 overflow-x-auto pb-1 xl:hidden mobile-tabs">
-          {nav.map(([Icon,label])=><button key={label} onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`)}} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold ${active===label?"border-violet-200/35 bg-violet-500/18 text-white":"border-white/[.08] bg-white/[.035] text-white/50"}`}><Icon size={14}/>{label}</button>)}
+          {nav.map(([Icon,label])=>{
+            const isTM = label === "Technomania 3.0";
+            return (
+              <button
+                key={label}
+                onClick={()=>{setActive(label);setPanel(`${label} loaded from MongoDB.`);}}
+                className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-semibold ${
+                  isTM
+                    ? active===label ? "border-cyan-400 bg-cyan-500/20 text-white shadow-[0_0_15px_rgba(74,158,255,0.4)]" : "border-cyan-500/40 bg-cyan-500/10 text-cyan-300"
+                    : active===label ? "border-violet-200/35 bg-violet-500/18 text-white" : "border-white/[.08] bg-white/[.035] text-white/50"
+                }`}
+              >
+                <Icon size={14} className={isTM ? "text-cyan-400" : ""}/>
+                {label}
+                {isTM && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />}
+              </button>
+            );
+          })}
         </div>
         <Header active={active} data={data} open={setDrawer} setPanel={setPanel}/>
-        {active === "Events" ? (
+        {active === "Technomania 3.0" ? (
+          <TechnomaniaAdminPortal
+            data={data}
+            openDrawer={setDrawer}
+            setPanel={setPanel}
+            refresh={refresh}
+            patch={patch}
+            remove={remove}
+          />
+        ) : active === "Events" ? (
           <div>
             <div className="mb-4 flex gap-2">
               <button onClick={() => setEventsTab("events")} className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${eventsTab === "events" ? "border-violet-200/35 bg-violet-500/18 text-white" : "border-white/[.08] bg-white/[.035] text-white/50 hover:text-white"}`}>
