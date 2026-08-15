@@ -4,11 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Instagram, Linkedin, Github, Zap, ArrowRight } from "lucide-react";
+import { Menu, X, Instagram, Linkedin, Github, Zap, ArrowRight, ShieldCheck, HelpCircle } from "lucide-react";
 import { TM_CONFIG } from "@/lib/technomania-theme";
+import { useTechnomaniaHref } from "@/lib/technomania-links";
 
 function TechnomaniaNav() {
   const [isOpen, setIsOpen] = useState(false);
+  const getHref = useTechnomaniaHref();
 
   const links = [
     { label: "EVENTS", href: "/events" },
@@ -22,7 +24,7 @@ function TechnomaniaNav() {
       <nav className="fixed top-0 inset-x-0 z-50 bg-tm-bg/90 backdrop-blur-md border-b border-white/10 h-16 flex items-center transition-all duration-300">
         <div className="container mx-auto px-4 md:px-8 flex items-center justify-between h-full">
           {/* Left: Tech Tatva Logo ✕ TM 3.0 Logo */}
-          <Link href="/" className="group flex items-center gap-2.5 sm:gap-3.5">
+          <Link href={getHref("/")} className="group flex items-center gap-2.5 sm:gap-3.5">
             {/* Tech Tatva Club Logo */}
             <div className="relative h-8 w-8 sm:h-9 sm:w-9 shrink-0 transition-transform duration-300 group-hover:scale-105">
               <Image
@@ -54,7 +56,7 @@ function TechnomaniaNav() {
             {links.map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                href={getHref(link.href)}
                 className="relative text-xs font-tm-mono tracking-[0.2em] text-tm-muted hover:text-white transition-colors py-1 group"
               >
                 <span>{link.label}</span>
@@ -66,7 +68,7 @@ function TechnomaniaNav() {
           {/* Right: Register (Desktop) & Mobile Toggle */}
           <div className="flex items-center gap-4">
             <Link
-              href="/register"
+              href={getHref("/register")}
               className="hidden md:inline-flex items-center gap-2 tm-btn-solid text-xs px-5 py-2 hover:shadow-[0_0_20px_rgba(74,158,255,0.4)] transition-all group"
             >
               <Zap size={14} className="text-tm-accent group-hover:scale-110 transition-transform" />
@@ -126,7 +128,7 @@ function TechnomaniaNav() {
               {links.map((link) => (
                 <Link
                   key={link.href}
-                  href={link.href}
+                  href={getHref(link.href)}
                   onClick={() => setIsOpen(false)}
                   className="text-lg font-tm-heading tracking-widest text-tm-text hover:text-tm-accent transition-colors flex items-center justify-between"
                 >
@@ -138,7 +140,7 @@ function TechnomaniaNav() {
 
             <div className="mt-auto pt-6 border-t border-tm-border">
               <Link
-                href="/register"
+                href={getHref("/register")}
                 onClick={() => setIsOpen(false)}
                 className="w-full tm-btn-solid justify-center py-3 flex items-center gap-2 text-center"
               >
@@ -184,6 +186,8 @@ function TechnomaniaMarquee() {
 }
 
 function TechnomaniaFooter() {
+  const getHref = useTechnomaniaHref();
+
   return (
     <footer className="mt-20 border-t border-tm-border bg-tm-surface/60 backdrop-blur relative">
       <div className="absolute top-0 inset-x-0 h-1 tm-hazard-stripe opacity-50" />
@@ -213,8 +217,8 @@ function TechnomaniaFooter() {
             </div>
             
             <p className="text-xs font-tm-body text-tm-muted max-w-sm leading-relaxed">
-              The flagship technical festival organized by Tech Tatva, Chandigarh University. 
-              Engineering innovation, competitive gaming, and cultural excellence.
+              Technomania 3.0 — The flagship technical and cultural festival at Chandigarh University.
+              24H Hackathon, Esports Arena, Cultural Showcases, and Live Leaderboards.
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-tm-bg border border-tm-border rounded-full font-tm-mono text-[10px] text-tm-accent">
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-ping" />
@@ -222,22 +226,22 @@ function TechnomaniaFooter() {
             </div>
           </div>
 
-          {/* Col 2: Navigation */}
+          {/* Col 2: Navigation (100% Autonomous Festival Links) */}
           <div className="space-y-3">
-            <p className="font-tm-mono text-xs font-bold tracking-[0.2em] text-tm-text uppercase">NAVIGATION</p>
+            <p className="font-tm-mono text-xs font-bold tracking-[0.2em] text-tm-text uppercase">FESTIVAL NAVIGATION</p>
             <div className="grid grid-cols-2 gap-2 text-xs font-tm-mono text-tm-muted">
-              <Link href="/events" className="hover:text-tm-accent transition">EVENTS</Link>
-              <Link href="/schedule" className="hover:text-tm-accent transition">SCHEDULE</Link>
-              <Link href="/teams" className="hover:text-tm-accent transition">TEAMS</Link>
-              <Link href="/leaderboard" className="hover:text-tm-accent transition">LEADERBOARD</Link>
-              <Link href="/register" className="hover:text-tm-accent transition">REGISTER</Link>
-              <a href="https://techtatva.in" target="_blank" rel="noreferrer" className="hover:text-tm-accent transition">TECH TATVA ↗</a>
+              <Link href={getHref("/events")} className="hover:text-tm-accent transition">EVENTS</Link>
+              <Link href={getHref("/schedule")} className="hover:text-tm-accent transition">SCHEDULE</Link>
+              <Link href={getHref("/teams")} className="hover:text-tm-accent transition">TEAMS</Link>
+              <Link href={getHref("/leaderboard")} className="hover:text-tm-accent transition">LEADERBOARD</Link>
+              <Link href={getHref("/register")} className="hover:text-tm-accent transition">REGISTER</Link>
+              <Link href={getHref("/")} className="hover:text-tm-accent transition">HOME</Link>
             </div>
           </div>
 
-          {/* Col 3: Social & University */}
+          {/* Col 3: Social & Support */}
           <div className="space-y-4">
-            <p className="font-tm-mono text-xs font-bold tracking-[0.2em] text-tm-text uppercase">CONNECT</p>
+            <p className="font-tm-mono text-xs font-bold tracking-[0.2em] text-tm-text uppercase">OFFICIAL CHANNELS</p>
             <div className="flex items-center gap-3">
               <a
                 href={TM_CONFIG.socialLinks.instagram}
@@ -267,37 +271,48 @@ function TechnomaniaFooter() {
                 <Github size={18} />
               </a>
             </div>
-            <p className="font-tm-mono text-[10px] text-tm-dim uppercase tracking-wider">
-              ORGANIZED BY TECH TATVA<br />CHANDIGARH UNIVERSITY
+            <p className="text-[11px] font-tm-mono text-tm-dim">
+              CHANDIGARH UNIVERSITY · GHARUAN, MOHALI
             </p>
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-tm-border flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-tm-mono text-tm-dim">
-          <span>&copy; {new Date().getFullYear()} {TM_CONFIG.name}. ALL RIGHTS RESERVED.</span>
-          <span className="tracking-widest">BUILD V3.0 // 2026</span>
+        {/* Bottom bar */}
+        <div className="mt-12 pt-6 border-t border-tm-border/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-tm-mono text-tm-dim">
+          <p>© 2026 TECHNOMANIA 3.0 · ALL RIGHTS RESERVED</p>
+          <div className="flex items-center gap-6">
+            <Link href={getHref("/events")} className="hover:text-tm-muted transition">ALL ARENAS</Link>
+            <span>·</span>
+            <Link href={getHref("/schedule")} className="hover:text-tm-muted transition">TIMELINE</Link>
+            <span>·</span>
+            <Link href={getHref("/register")} className="hover:text-tm-muted transition">SQUAD PASSES</Link>
+          </div>
         </div>
       </div>
     </footer>
   );
 }
 
-export function TechnomaniaShell({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function TechnomaniaShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-tm-bg text-tm-text font-tm-body flex flex-col relative tm-grid-bg selection:bg-tm-accent selection:text-black">
+    <div className="min-h-screen bg-tm-bg text-tm-text selection:bg-tm-accent selection:text-tm-bg relative flex flex-col font-tm-body antialiased overflow-x-hidden">
+      {/* Background grid */}
+      <div className="fixed inset-0 tm-grid-bg pointer-events-none z-0" />
+      
+      {/* Navigation */}
       <TechnomaniaNav />
-      {/* Top Infinite Marquee Ticker */}
-      <div className="pt-16">
+
+      {/* Top infinite marquee ticker */}
+      <div className="mt-16 z-20">
         <TechnomaniaMarquee />
       </div>
-      <main className="flex-grow">
+
+      {/* Page content */}
+      <main className="flex-grow relative z-10">
         {children}
       </main>
-      <TechnomaniaMarquee />
+
+      {/* Footer */}
       <TechnomaniaFooter />
     </div>
   );

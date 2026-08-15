@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useTechnomaniaHref } from "@/lib/technomania-links";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -143,8 +144,10 @@ const faqs = [
   },
 ];
 
-export default function TechnomaniaHome() {
+export default function TechnomaniaPage() {
+  const getHref = useTechnomaniaHref();
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [hoveredEvent, setHoveredEvent] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const filteredEvents =
@@ -275,7 +278,7 @@ export default function TechnomaniaHome() {
             {/* Action CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               <Link
-                href="/register"
+                href={getHref("/register")}
                 className="w-full sm:w-auto tm-btn-solid text-sm py-4 px-10 flex items-center justify-center gap-3 shadow-[0_0_35px_rgba(74,158,255,0.5)] hover:shadow-[0_0_55px_rgba(74,158,255,0.8)] group"
               >
                 <Zap size={17} className="text-cyan-300 group-hover:rotate-12 transition-transform" />
@@ -284,7 +287,7 @@ export default function TechnomaniaHome() {
               </Link>
 
               <Link
-                href="/events"
+                href={getHref("/events")}
                 className="w-full sm:w-auto tm-btn text-sm py-4 px-10 flex items-center justify-center gap-2.5 hover:border-cyan-400 hover:text-white"
               >
                 <span>EXPLORE ALL EVENTS</span>
@@ -456,7 +459,7 @@ export default function TechnomaniaHome() {
                     </div>
 
                     <Link
-                      href="/events"
+                      href={getHref("/events")}
                       className="inline-flex items-center gap-1.5 text-xs font-tm-mono font-bold text-tm-accent hover:text-white transition-colors"
                     >
                       <span>VIEW RULES</span>
@@ -636,13 +639,13 @@ export default function TechnomaniaHome() {
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/register"
+                href={getHref("/register")}
                 className="w-full sm:w-auto tm-btn-solid text-sm py-3.5 px-8 shadow-[0_0_30px_rgba(74,158,255,0.4)]"
               >
                 REGISTER YOUR SQUAD NOW
               </Link>
               <Link
-                href="/events"
+                href={getHref("/schedule")}
                 className="w-full sm:w-auto tm-btn text-sm py-3.5 px-8"
               >
                 VIEW EVENT SCHEDULE

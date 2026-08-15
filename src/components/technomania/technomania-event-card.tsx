@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, Users, Target, ArrowUpRight } from "lucide-react";
+import { useTechnomaniaHref } from "@/lib/technomania-links";
 
 interface EventCardProps {
   event?: any;
@@ -18,6 +21,7 @@ interface EventCardProps {
 }
 
 export function TechnomaniaEventCard(props: EventCardProps) {
+  const getHref = useTechnomaniaHref();
   const e = props.event || props;
   const slug = e.slug || "";
   const title = e.title || "";
@@ -41,7 +45,7 @@ export function TechnomaniaEventCard(props: EventCardProps) {
   
   return (
     <Link
-      href={`/events/${slug}`}
+      href={getHref(`/events/${slug}`)}
       className="block tm-card bg-tm-surface flex flex-col group overflow-hidden tm-glow transition-all duration-300 hover:-translate-y-1"
     >
       {/* Banner */}

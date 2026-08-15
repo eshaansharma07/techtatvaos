@@ -23,8 +23,8 @@ export default async function TechnomaniaEventDetail({ params }: { params: Promi
   if (!event) {
     return (
       <section className="mx-auto max-w-4xl px-5 pb-20 pt-28 md:px-6 md:pt-36">
-        <Link href="/events" className="inline-flex items-center gap-2 text-tm-dim hover:text-white transition text-xs font-tm-mono tracking-wider">
-          <ArrowLeft size={14} /> BACK TO EVENTS
+        <Link href="/technomania/events" className="inline-flex items-center gap-2 text-tm-dim hover:text-white transition text-xs font-tm-mono tracking-wider">
+          <ArrowLeft size={14} /> BACK TO ALL ARENAS
         </Link>
         <div className="tm-card mt-8 p-10">
           <h1 className="font-tm-heading text-3xl font-bold">EVENT NOT FOUND</h1>
@@ -47,8 +47,8 @@ export default async function TechnomaniaEventDetail({ params }: { params: Promi
   return (
     <section className="mx-auto max-w-7xl px-5 pb-20 pt-28 md:px-6 md:pb-28 md:pt-36">
       {/* Back link */}
-      <Link href="/events" className="inline-flex items-center gap-2 text-tm-dim hover:text-white transition text-xs font-tm-mono tracking-wider mb-6">
-        <ArrowLeft size={14} /> BACK TO EVENTS
+      <Link href="/technomania/events" className="inline-flex items-center gap-2 text-tm-dim hover:text-white transition text-xs font-tm-mono tracking-wider mb-6">
+        <ArrowLeft size={14} /> BACK TO ALL ARENAS
       </Link>
 
       {/* Hero card */}

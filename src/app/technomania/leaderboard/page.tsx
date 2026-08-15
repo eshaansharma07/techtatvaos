@@ -10,8 +10,8 @@ export default async function TechnomaniaLeaderboardPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-5 pb-20 pt-28 md:px-6 md:pb-28 md:pt-36">
-      <Link href="/" className="inline-flex items-center gap-2 text-tm-dim hover:text-white transition text-xs font-tm-mono tracking-wider mb-6">
-        <ArrowLeft size={14} /> BACK TO HOME
+      <Link href="/technomania" className="inline-flex items-center gap-2 text-tm-dim hover:text-white transition text-xs font-tm-mono tracking-wider mb-6">
+        <ArrowLeft size={14} /> BACK TO TECHNOMANIA HOME
       </Link>
 
       <div className="flex items-center gap-3 mb-2">
@@ -32,7 +32,7 @@ export default async function TechnomaniaLeaderboardPage() {
             {eventsWithLeaderboard.map((event) => (
               <Link
                 key={event.slug}
-                href={`/events/${event.slug}`}
+                href={`/technomania/events/${event.slug}`}
                 className="tm-card tm-glow flex items-center justify-between p-5 group"
               >
                 <div className="flex items-center gap-4">
