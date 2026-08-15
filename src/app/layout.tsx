@@ -13,22 +13,10 @@ const portalHosts = (
   .map((h) => h.trim().toLowerCase())
   .filter(Boolean);
 
-const technomaniaHosts = (process.env.TECHNOMANIA_HOSTS || "technomania.techtatva.in")
-  .split(",")
-  .map((h) => h.trim().toLowerCase())
-  .filter(Boolean);
-
 function isPortal(host: string) {
   const h = host.split(":")[0].toLowerCase();
   if (portalHosts.includes(h)) return true;
   if (process.env.NODE_ENV !== "production" && (h.startsWith("admin") || h.startsWith("portal") || h.includes("admin") || h.includes("portal"))) return true;
-  return false;
-}
-
-function isTechnomania(host: string) {
-  const h = host.split(":")[0].toLowerCase();
-  if (technomaniaHosts.includes(h)) return true;
-  if (process.env.NODE_ENV !== "production" && (h.startsWith("technomania") || h.includes("technomania"))) return true;
   return false;
 }
 
@@ -45,34 +33,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers();
   const host = headersList.get("x-forwarded-host") || headersList.get("host") || "";
   const portal = isPortal(host);
-  const technomania = !portal && isTechnomania(host);
-
-  if (technomania) {
-    return {
-      title: "Technomania 3.0 — Tech Tatva's Flagship Tech Fest",
-      description: "The ultimate technical festival by Tech Tatva, Chandigarh University. Hackathon, Esports, Cultural events, and more.",
-      manifest: "/manifest-technomania.json",
-      appleWebApp: {
-        capable: true,
-        statusBarStyle: "black-translucent",
-        title: "TM3.0",
-      },
-      icons: {
-        icon: [
-          { url: "/technomania/logo.png", sizes: "512x512", type: "image/png" },
-        ],
-      },
-      openGraph: {
-        title: "Technomania 3.0",
-        description: "Tech Tatva's Flagship Technical Festival — Hackathon, Esports, Cultural & more.",
-        images: [{ url: "/technomania/logo.png" }],
-        siteName: "Technomania 3.0",
-      },
-      other: {
-        "mobile-web-app-capable": "yes",
-      },
-    };
-  }
 
   return {
     title: portal ? "Tech Tatva Admin" : "Tech Tatva OS",
@@ -101,7 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const headersList = await headers();
   const host = headersList.get("x-forwarded-host") || headersList.get("host") || "";
-  const showChat = !isPortal(host) && !isTechnomania(host);
+  const showChat = !isPortal(host);
 
   return (
     <html lang="en">
@@ -113,4 +73,3 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     </html>
   );
 }
-
