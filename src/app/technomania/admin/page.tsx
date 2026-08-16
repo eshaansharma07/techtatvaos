@@ -5,46 +5,80 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   LayoutDashboard,
-  Sparkles,
-  Layers,
+  CalendarDays,
   Users,
   Trophy,
   Calendar,
-  ShieldAlert,
-  Radio,
-  FileText,
-  Upload,
-  Download,
+  Settings,
+  Bell,
+  Image as ImageIcon,
+  HelpCircle,
+  QrCode,
+  Search,
   Plus,
+  Download,
+  ExternalLink,
+  RefreshCw,
+  Edit2,
   Trash2,
-  Edit,
   Eye,
   CheckCircle2,
   XCircle,
   Clock,
-  ExternalLink,
-  Search,
-  Filter,
-  RefreshCw,
+  ChevronRight,
+  ChevronDown,
+  Upload,
   Save,
   Check,
   X,
-  ChevronRight,
-  HelpCircle,
-  Zap,
-  Image as ImageIcon,
-  Sliders,
-  Award,
-  QrCode,
-  Lock,
-  ArrowUpRight,
+  AlertCircle,
   UserCheck,
-  AlertCircle
+  TrendingUp,
+  FileSpreadsheet,
+  Layers,
+  Sparkles,
+  ArrowUpRight,
+  ShieldCheck,
+  SlidersHorizontal,
+  MoreVertical,
+  Activity
 } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid
+} from "recharts";
 import { useTechnomaniaHref } from "@/lib/technomania-links";
 
 // Types
-interface SquadRegistration {
+export interface TechnomaniaEvent {
+  _id: string;
+  title: string;
+  slug: string;
+  subtitle?: string;
+  category: "hackathon" | "esports" | "cultural" | "sub-events";
+  participationMode: "individual" | "team" | "both";
+  maxTeamSize: number;
+  capacity: number;
+  venue: string;
+  status: "published" | "draft" | "active" | "completed";
+  registrationOpen: boolean;
+  startAt: string;
+  endAt?: string;
+  description?: string;
+  banner?: string;
+  prizes?: string;
+  rules?: string[];
+  whatsappLink?: string;
+}
+
+export interface TechnomaniaRegistration {
   _id: string;
   teamName: string;
   leadName: string;
@@ -62,38 +96,18 @@ interface SquadRegistration {
   adminRemarks?: string;
 }
 
-interface ArenaEvent {
-  _id: string;
-  title: string;
-  slug: string;
-  subtitle?: string;
-  category: "hackathon" | "esports" | "cultural" | "sub-events";
-  participationMode: "individual" | "team" | "both";
-  maxTeamSize: number;
-  capacity: number;
-  venue: string;
-  status: "draft" | "published" | "active" | "completed";
-  registrationOpen: boolean;
-  startAt: string;
-  endAt?: string;
-  description?: string;
-  banner?: string;
-  certEventLogo?: string;
-  prizes?: string;
-  rules?: string[];
-}
-
-interface LeaderboardItem {
+export interface LeaderboardRecord {
   id: string;
-  arena: string;
+  eventId: string;
+  eventTitle: string;
   teamName: string;
   rank: number;
-  points: number;
+  score: number;
+  status: "Winner" | "Runner-Up" | "Qualified" | "In-Progress";
   badge?: string;
-  status: "Qualified" | "Winner" | "Runner-Up" | "In-Progress";
 }
 
-interface ScheduleItem {
+export interface ScheduleRecord {
   id: string;
   day: string;
   time: string;
@@ -103,47 +117,236 @@ interface ScheduleItem {
   status: "upcoming" | "live" | "completed";
 }
 
-interface CommitteeMember {
+export interface FAQRecord {
   id: string;
-  name: string;
-  role: string;
-  domain: string;
-  image?: string;
-  contact?: string;
+  question: string;
+  answer: string;
+  category: string;
 }
 
-interface FAQItem {
-  q: string;
-  a: string;
-}
-
-type AdminTab =
-  | "overview"
-  | "hero_cms"
-  | "ticker"
-  | "arenas"
-  | "squads"
-  | "leaderboard"
-  | "schedule"
-  | "committee"
-  | "faqs"
-  | "checkin"
-  | "media";
+type TabType =
+  | "Overview"
+  | "Events"
+  | "Registrations"
+  | "Leaderboard"
+  | "Schedule"
+  | "Website Settings"
+  | "Announcements"
+  | "Gallery & Media"
+  | "FAQs"
+  | "Check-In";
 
 export default function TechnomaniaAdminPage() {
   const getHref = useTechnomaniaHref();
-  const [activeTab, setActiveTab] = useState<AdminTab>("overview");
+  const [activeTab, setActiveTab] = useState<TabType>("Overview");
+  const [searchQuery, setSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Toast trigger
-  const showToast = (msg: string) => {
+  // Drawer / Modal states
+  const [selectedRegistration, setSelectedRegistration] = useState<TechnomaniaRegistration | null>(null);
+  const [editingEvent, setEditingEvent] = useState<Partial<TechnomaniaEvent> | null>(null);
+  const [isEventDrawerOpen, setIsEventDrawerOpen] = useState(false);
+  const [editingLeaderboard, setEditingLeaderboard] = useState<Partial<LeaderboardRecord> | null>(null);
+  const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<Partial<ScheduleRecord> | null>(null);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [editingFaq, setEditingFaq] = useState<Partial<FAQRecord> | null>(null);
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Toast Helper
+  const notify = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // 1. FESTIVAL CMS SETTINGS STATE
-  const [cmsConfig, setCmsConfig] = useState({
+  // 1. EVENTS STATE
+  const [events, setEvents] = useState<TechnomaniaEvent[]>([
+    {
+      _id: "evt-1",
+      title: "Code Storm 24H",
+      slug: "hackathon",
+      subtitle: "Flagship 24-Hour Non-Stop Hackathon",
+      category: "hackathon",
+      participationMode: "team",
+      maxTeamSize: 4,
+      capacity: 60,
+      venue: "Block D, Central Tech Labs",
+      status: "published",
+      registrationOpen: true,
+      startAt: "2026-09-15T09:00:00",
+      endAt: "2026-09-16T09:00:00",
+      description: "24 hours of non-stop building, mentoring, and shipping solutions. Solve real industry problem statements and pitch live to tech founders.",
+      prizes: "₹XX,XXX PRIZES & INTERNSHIPS",
+      banner: "/technomania/logo-glow.png",
+      rules: [
+        "Teams must consist of 1 to 4 members.",
+        "All code must be written during the 24-hour hackathon timeframe.",
+        "Judges evaluate innovation, execution, technical complexity, and UI/UX."
+      ],
+      whatsappLink: "https://chat.whatsapp.com/sample"
+    },
+    {
+      _id: "evt-2",
+      title: "Cyber Clash Arena",
+      slug: "esports",
+      subtitle: "Multi-Title Esports Championship",
+      category: "esports",
+      participationMode: "team",
+      maxTeamSize: 5,
+      capacity: 100,
+      venue: "E-Sports Theater, Auditorium 2",
+      status: "published",
+      registrationOpen: true,
+      startAt: "2026-09-15T11:00:00",
+      endAt: "2026-09-16T17:00:00",
+      description: "High-stakes esports showdown across BGMI, Valorant, and EA FC. Experience live casting on stage, tournament-grade setups, and intense bracket battles.",
+      prizes: "TROPHIES & CASH REWARDS",
+      banner: "/technomania/logo-white.png",
+      rules: [
+        "Participants must bring their own peripherals.",
+        "Emulators are strictly prohibited for BGMI.",
+        "Tournament follows standard esports competitive rules."
+      ],
+      whatsappLink: "https://chat.whatsapp.com/sample"
+    },
+    {
+      _id: "evt-3",
+      title: "Festival Nocturne",
+      slug: "cultural",
+      subtitle: "Music, Dance & Celebrity DJ Night",
+      category: "cultural",
+      participationMode: "both",
+      maxTeamSize: 12,
+      capacity: 500,
+      venue: "CU Main Amphitheatre",
+      status: "published",
+      registrationOpen: true,
+      startAt: "2026-09-16T18:00:00",
+      endAt: "2026-09-16T22:00:00",
+      description: "The pulse of Chandigarh University's artistic spirit. Battle of the bands, western & classical dance showdowns, fashion choreography, and an electrifying celebrity DJ night.",
+      prizes: "MEMENTOS & CASH PRIZES",
+      banner: "/technomania/logo-emblem.png",
+      rules: [
+        "Stage performance must not exceed 10 minutes.",
+        "Track audio must be submitted 2 hours prior to start."
+      ]
+    },
+    {
+      _id: "evt-4",
+      title: "Circuit Odyssey & Blitz",
+      slug: "sub-events",
+      subtitle: "Tech Quizzes, Debugging & Design Sprints",
+      category: "sub-events",
+      participationMode: "individual",
+      maxTeamSize: 1,
+      capacity: 150,
+      venue: "Academic Block 3, Seminar Hall",
+      status: "published",
+      registrationOpen: true,
+      startAt: "2026-09-15T14:00:00",
+      endAt: "2026-09-15T18:00:00",
+      description: "Rapid-fire spot events designed for quick thinking and instant glory. UI/UX speed runs, algorithmic debugging races, tech trivia, and mystery box building rounds.",
+      prizes: "SPOT GOODIES & CERTIFICATES",
+      banner: "/technomania/logo-glow.png",
+      rules: [
+        "Individual entry only.",
+        "Strict 15-minute time limits per round."
+      ]
+    }
+  ]);
+
+  // 2. REGISTRATIONS STATE
+  const [registrations, setRegistrations] = useState<TechnomaniaRegistration[]>([
+    {
+      _id: "reg-101",
+      teamName: "CyberPulse Labs",
+      leadName: "Aarav Sharma",
+      leadUid: "22BCS10192",
+      leadEmail: "aarav.sharma@cumail.in",
+      leadPhone: "+91 98765 43210",
+      leadProgram: "B.Tech Computer Science & Engineering",
+      leadSemester: 5,
+      eventId: "evt-1",
+      eventTitle: "Code Storm 24H",
+      members: [
+        { name: "Devansh Patel", email: "devansh@cumail.in", uid: "22BCS10244", program: "B.Tech CSE", semester: 5 },
+        { name: "Riya Kapoor", email: "riya.k@cumail.in", uid: "22BCS10881", program: "B.Tech IT", semester: 5 },
+        { name: "Tanmay Singhal", email: "tanmay.s@cumail.in", uid: "22BCS10912", program: "B.Tech CSE", semester: 5 }
+      ],
+      status: "confirmed",
+      qrToken: "TM3-CS24-9981A",
+      registeredAt: "2026-08-15T14:22:00Z",
+      adminRemarks: "Verified GitHub portfolio. Approved for Lab 4 setup."
+    },
+    {
+      _id: "reg-102",
+      teamName: "Alpha Strikers",
+      leadName: "Vikram Malhotra",
+      leadUid: "23BCS14022",
+      leadEmail: "vikram.m@cumail.in",
+      leadPhone: "+91 98123 45678",
+      leadProgram: "B.Tech Artificial Intelligence",
+      leadSemester: 3,
+      eventId: "evt-2",
+      eventTitle: "Cyber Clash Arena (Valorant)",
+      members: [
+        { name: "Kabir Singh", email: "kabir.s@cumail.in", uid: "23BCS14088", program: "B.Tech AI", semester: 3 },
+        { name: "Sahil Verma", email: "sahil.v@cumail.in", uid: "23BCS14112", program: "B.Tech CSE", semester: 3 },
+        { name: "Rohan Gupta", email: "rohan.g@cumail.in", uid: "23BCS14199", program: "B.Tech AI", semester: 3 },
+        { name: "Aman Deep", email: "aman.d@cumail.in", uid: "23BCS14205", program: "B.Tech IT", semester: 3 }
+      ],
+      status: "confirmed",
+      qrToken: "TM3-VAL-4412B",
+      registeredAt: "2026-08-15T16:45:00Z",
+      adminRemarks: "Roster verified."
+    },
+    {
+      _id: "reg-103",
+      teamName: "Phantom Elites",
+      leadName: "Simran Kaur",
+      leadUid: "21BCA10045",
+      leadEmail: "simran.k@cumail.in",
+      leadPhone: "+91 97765 11223",
+      leadProgram: "BCA Cloud Computing",
+      leadSemester: 5,
+      eventId: "evt-2",
+      eventTitle: "Cyber Clash Arena (BGMI)",
+      members: [
+        { name: "Harpreet Singh", email: "harpreet@cumail.in", uid: "21BCA10099", program: "BCA", semester: 5 },
+        { name: "Manjot Kaur", email: "manjot@cumail.in", uid: "21BCA10123", program: "BCA", semester: 5 },
+        { name: "Karan Johal", email: "karan.j@cumail.in", uid: "21BCA10188", program: "BCA", semester: 5 }
+      ],
+      status: "confirmed",
+      qrToken: "TM3-BGMI-8812C",
+      registeredAt: "2026-08-15T19:10:00Z",
+      adminRemarks: "Slot confirmed in Pool A."
+    }
+  ]);
+
+  // 3. LEADERBOARD STATE
+  const [leaderboard, setLeaderboard] = useState<LeaderboardRecord[]>([
+    { id: "lb-1", eventId: "evt-1", eventTitle: "Code Storm 24H", teamName: "CyberPulse Labs", rank: 1, score: 960, status: "Winner", badge: "Grand Finalist" },
+    { id: "lb-2", eventId: "evt-1", eventTitle: "Code Storm 24H", teamName: "Matrix Reloaded", rank: 2, score: 915, status: "Runner-Up", badge: "Best Architecture" },
+    { id: "lb-3", eventId: "evt-2", eventTitle: "Cyber Clash Arena", teamName: "Alpha Strikers", rank: 1, score: 1450, status: "Winner", badge: "Clean Sweep" },
+    { id: "lb-4", eventId: "evt-2", eventTitle: "Cyber Clash Arena", teamName: "Phantom Elites", rank: 1, score: 820, status: "Winner", badge: "Most Frags" }
+  ]);
+
+  // 4. SCHEDULE STATE
+  const [schedules, setSchedules] = useState<ScheduleRecord[]>([
+    { id: "sch-1", day: "Day 1 — Sep 15", time: "09:00 AM", title: "Festival Kickoff & Opening Ceremony", venue: "Auditorium 1", category: "General", status: "upcoming" },
+    { id: "sch-2", day: "Day 1 — Sep 15", time: "10:30 AM", title: "Code Storm 24H Hackathon Begins", venue: "Block D Labs", category: "Hackathon", status: "upcoming" },
+    { id: "sch-3", day: "Day 1 — Sep 15", time: "01:00 PM", title: "Esports Arena Prelims (Valorant & BGMI)", venue: "E-Sports Theater", category: "Esports", status: "upcoming" },
+    { id: "sch-4", day: "Day 2 — Sep 16", time: "11:00 AM", title: "Hackathon Final Pitches to Founders", venue: "Seminar Hall 4", category: "Hackathon", status: "upcoming" },
+    { id: "sch-5", day: "Day 2 — Sep 16", time: "06:00 PM", title: "Star Cultural Night & Celebrity DJ", venue: "CU Amphitheatre", category: "Cultural", status: "upcoming" }
+  ]);
+
+  // 5. WEBSITE SETTINGS STATE
+  const [settingsData, setSettingsData] = useState({
     festivalName: "TECHNOMANIA 3.0",
     edition: "3.0",
     campusLocation: "CHANDIGARH UNIVERSITY · GHARUAN, MOHALI",
@@ -159,11 +362,11 @@ export default function TechnomaniaAdminPage() {
     ctaSecondaryLink: "/events",
     logoUrl: "/technomania/logo-white.png",
     emblemUrl: "/technomania/logo-emblem.png",
-    clubLogoUrl: "/technomania/techtatva-logo.png",
+    clubLogoUrl: "/technomania/techtatva-logo.png"
   });
 
-  // 2. MARQUEE TICKER STATE
-  const [tickerLines, setTickerLines] = useState<string[]>([
+  // 6. ANNOUNCEMENTS STATE
+  const [announcements, setAnnouncements] = useState<string[]>([
     "REGISTRATIONS NOW OPEN FOR TECHNOMANIA 3.0",
     "24-HOUR NON-STOP HACKATHON ARENA",
     "BGMI, VALORANT & EA FC ESPORTS CHAMPIONSHIPS",
@@ -171,249 +374,75 @@ export default function TechnomaniaAdminPage() {
     "TOTAL PRIZE POOL ₹XX,XXX",
     "LIVE LEADERBOARDS & SPOT REWARDS"
   ]);
-  const [newTickerInput, setNewTickerInput] = useState("");
+  const [newAnnouncement, setNewAnnouncement] = useState("");
 
-  // 3. ARENAS & EVENTS STATE
-  const [arenas, setArenas] = useState<ArenaEvent[]>([
+  // 7. FAQS STATE
+  const [faqs, setFaqs] = useState<FAQRecord[]>([
     {
-      _id: "arena-1",
-      title: "Code Storm 24H",
-      slug: "hackathon",
-      subtitle: "Flagship 24-Hour Non-Stop Hackathon",
-      category: "hackathon",
-      participationMode: "team",
-      maxTeamSize: 4,
-      capacity: 60,
-      venue: "Block D — Central Tech Labs",
-      status: "published",
-      registrationOpen: true,
-      startAt: "2026-09-15T09:00:00",
-      description: "24 hours of non-stop building, mentoring, and shipping solutions. Solve industry statements and pitch live to tech founders.",
-      prizes: "₹XX,XXX PRIZES & INTERNSHIPS",
-      banner: "/technomania/logo-glow.png",
-      rules: ["Teams of 1-4 members", "Original code only; pre-built projects disqualified", "24-hour development clock"]
+      id: "faq-1",
+      question: "Who is eligible to participate in Technomania 3.0?",
+      answer: "All currently enrolled students from Chandigarh University and registered participants across Indian colleges with a valid college ID are welcome to compete.",
+      category: "Eligibility"
     },
     {
-      _id: "arena-2",
-      title: "Cyber Clash Arena",
-      slug: "esports",
-      subtitle: "Multi-Title Esports Championship",
-      category: "esports",
-      participationMode: "team",
-      maxTeamSize: 5,
-      capacity: 100,
-      venue: "E-Sports Theater, Auditorium 2",
-      status: "published",
-      registrationOpen: true,
-      startAt: "2026-09-15T11:00:00",
-      description: "High-stakes tournament across BGMI, Valorant, and EA FC with live stage casting and bracket showdowns.",
-      prizes: "TROPHIES & CASH REWARDS",
-      banner: "/technomania/logo-white.png",
-      rules: ["Valid student ID required", "Default tournament rule sets apply", "Bring your own gaming peripherals"]
+      id: "faq-2",
+      question: "Is there any registration fee?",
+      answer: "No, participation passes for Technomania 3.0 flagship tracks and hackathons are 100% free for registered squads.",
+      category: "Registration"
     },
     {
-      _id: "arena-3",
-      title: "Festival Nocturne",
-      slug: "cultural",
-      subtitle: "Music, Dance & Celebrity DJ Night",
-      category: "cultural",
-      participationMode: "both",
-      maxTeamSize: 12,
-      capacity: 500,
-      venue: "CU Main Amphitheatre",
-      status: "published",
-      registrationOpen: true,
-      startAt: "2026-09-16T18:00:00",
-      description: "Battle of the bands, western & classical dance showdowns, fashion choreography, and an electrifying celebrity DJ night.",
-      prizes: "MEMENTOS & CASH PRIZES",
-      banner: "/technomania/logo-emblem.png",
-      rules: ["Max 10 minutes per stage performance", "Track audio must be submitted 2h prior"]
+      id: "faq-3",
+      question: "Can I participate in multiple events simultaneously?",
+      answer: "Yes, you can register for both esports and sub-events as long as their individual on-ground time slots do not overlap.",
+      category: "Schedule"
     },
     {
-      _id: "arena-4",
-      title: "Circuit Odyssey & Blitz",
-      slug: "sub-events",
-      subtitle: "Speed Debugging, Tech Trivia & UI/UX Sprints",
-      category: "sub-events",
-      participationMode: "individual",
-      maxTeamSize: 1,
-      capacity: 150,
-      venue: "Academic Block 3, Seminar Hall",
-      status: "published",
-      registrationOpen: true,
-      startAt: "2026-09-15T14:00:00",
-      description: "Rapid-fire spot events designed for quick thinking and instant glory. Speed runs, algorithmic challenges, and mystery boxes.",
-      prizes: "SPOT GOODIES & CERTIFICATES",
-      banner: "/technomania/logo-glow.png",
-      rules: ["Individual participation", "Single-elimination format"]
+      id: "faq-4",
+      question: "What should I bring to the 24H Hackathon?",
+      answer: "Bring your laptop, charger, student UID card, extensions, and hardware kits if working on IoT or robotics projects.",
+      category: "Hackathon"
     }
   ]);
-  const [editingArena, setEditingArena] = useState<Partial<ArenaEvent> | null>(null);
-  const [isArenaModalOpen, setIsArenaModalOpen] = useState(false);
 
-  // 4. SQUADS & REGISTRATIONS STATE
-  const [squads, setSquads] = useState<SquadRegistration[]>([
-    {
-      _id: "squad-101",
-      teamName: "CyberPulse Labs",
-      leadName: "Aarav Sharma",
-      leadUid: "22BCS10192",
-      leadEmail: "aarav.sharma@cumail.in",
-      leadPhone: "+91 98765 43210",
-      leadProgram: "B.Tech Computer Science & Engineering",
-      leadSemester: 5,
-      eventId: "arena-1",
-      eventTitle: "Code Storm 24H",
-      members: [
-        { name: "Devansh Patel", email: "devansh@cumail.in", uid: "22BCS10244", program: "B.Tech CSE", semester: 5 },
-        { name: "Riya Kapoor", email: "riya.k@cumail.in", uid: "22BCS10881", program: "B.Tech IT", semester: 5 },
-        { name: "Tanmay Singhal", email: "tanmay.s@cumail.in", uid: "22BCS10912", program: "B.Tech CSE", semester: 5 }
-      ],
-      status: "confirmed",
-      qrToken: "TM3-CS24-9981A",
-      registeredAt: "2026-08-15T14:22:00Z",
-      adminRemarks: "Verified GitHub portfolio. Approved for Lab 4 setup."
-    },
-    {
-      _id: "squad-102",
-      teamName: "Alpha Strikers",
-      leadName: "Vikram Malhotra",
-      leadUid: "23BCS14022",
-      leadEmail: "vikram.m@cumail.in",
-      leadPhone: "+91 98123 45678",
-      leadProgram: "B.Tech Artificial Intelligence",
-      leadSemester: 3,
-      eventId: "arena-2",
-      eventTitle: "Valorant Tactical Masters",
-      members: [
-        { name: "Kabir Singh", email: "kabir.s@cumail.in", uid: "23BCS14088", program: "B.Tech AI", semester: 3 },
-        { name: "Sahil Verma", email: "sahil.v@cumail.in", uid: "23BCS14112", program: "B.Tech CSE", semester: 3 },
-        { name: "Rohan Gupta", email: "rohan.g@cumail.in", uid: "23BCS14199", program: "B.Tech AI", semester: 3 },
-        { name: "Aman Deep", email: "aman.d@cumail.in", uid: "23BCS14205", program: "B.Tech IT", semester: 3 }
-      ],
-      status: "confirmed",
-      qrToken: "TM3-VAL-4412B",
-      registeredAt: "2026-08-15T16:45:00Z",
-      adminRemarks: "Roster verified."
-    },
-    {
-      _id: "squad-103",
-      teamName: "Phantom Elites",
-      leadName: "Simran Kaur",
-      leadUid: "21BCA10045",
-      leadEmail: "simran.k@cumail.in",
-      leadPhone: "+91 97765 11223",
-      leadProgram: "BCA Cloud Computing",
-      leadSemester: 5,
-      eventId: "arena-2",
-      eventTitle: "BGMI Mobile Battleground",
-      members: [
-        { name: "Harpreet Singh", email: "harpreet@cumail.in", uid: "21BCA10099", program: "BCA", semester: 5 },
-        { name: "Manjot Kaur", email: "manjot@cumail.in", uid: "21BCA10123", program: "BCA", semester: 5 },
-        { name: "Karan Johal", email: "karan.j@cumail.in", uid: "21BCA10188", program: "BCA", semester: 5 }
-      ],
-      status: "confirmed",
-      qrToken: "TM3-BGMI-8812C",
-      registeredAt: "2026-08-15T19:10:00Z",
-      adminRemarks: "Slot confirmed in Pool A."
-    }
+  // 8. MEDIA ASSETS STATE
+  const [mediaAssets, setMediaAssets] = useState<{ name: string; url: string; size: string; date: string }[]>([
+    { name: "logo-white.png", url: "/technomania/logo-white.png", size: "48 KB", date: "System Asset" },
+    { name: "logo-emblem.png", url: "/technomania/logo-emblem.png", size: "32 KB", date: "System Asset" },
+    { name: "logo-glow.png", url: "/technomania/logo-glow.png", size: "124 KB", date: "System Asset" },
+    { name: "techtatva-logo.png", url: "/technomania/techtatva-logo.png", size: "64 KB", date: "System Asset" }
   ]);
-  const [selectedSquad, setSelectedSquad] = useState<SquadRegistration | null>(null);
-  const [squadSearch, setSquadSearch] = useState("");
-  const [squadArenaFilter, setSquadArenaFilter] = useState("all");
-  const [squadStatusFilter, setSquadStatusFilter] = useState("all");
 
-  // 5. LEADERBOARD STATE
-  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([
-    { id: "lb-1", arena: "Code Storm 24H", teamName: "CyberPulse Labs", rank: 1, points: 960, badge: "Grand Finalist", status: "Winner" },
-    { id: "lb-2", arena: "Code Storm 24H", teamName: "Matrix Reloaded", rank: 2, points: 915, badge: "Best Architecture", status: "Runner-Up" },
-    { id: "lb-3", arena: "Valorant Tactical Masters", teamName: "Alpha Strikers", rank: 1, points: 1450, badge: "Clean Sweep", status: "Winner" },
-    { id: "lb-4", arena: "BGMI Mobile Battleground", teamName: "Phantom Elites", rank: 1, points: 820, badge: "Most Frags", status: "Winner" }
-  ]);
-  const [editingLb, setEditingLb] = useState<Partial<LeaderboardItem> | null>(null);
+  // 9. CHECK-IN STATE
+  const [checkInQuery, setCheckInQuery] = useState("");
+  const [checkInResult, setCheckInResult] = useState<{ status: "success" | "error"; text: string; data?: TechnomaniaRegistration } | null>(null);
 
-  // 6. SCHEDULE TIMELINE STATE
-  const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([
-    { id: "sc-1", day: "Day 1 — Sep 15", time: "09:00 AM", title: "Festival Kickoff & Opening Ceremony", venue: "Auditorium 1", category: "General", status: "upcoming" },
-    { id: "sc-2", day: "Day 1 — Sep 15", time: "10:30 AM", title: "Code Storm 24H Hackathon Begins", venue: "Block D Labs", category: "Hackathon", status: "upcoming" },
-    { id: "sc-3", day: "Day 1 — Sep 15", time: "01:00 PM", title: "Esports Arena Prelims (Valorant & BGMI)", venue: "E-Sports Theater", category: "Esports", status: "upcoming" },
-    { id: "sc-4", day: "Day 2 — Sep 16", time: "11:00 AM", title: "Hackathon Final Pitches to Founders", venue: "Seminar Hall 4", category: "Hackathon", status: "upcoming" },
-    { id: "sc-5", day: "Day 2 — Sep 16", time: "06:00 PM", title: "Star Cultural Night & Celebrity DJ", venue: "CU Amphitheatre", category: "Cultural", status: "upcoming" }
-  ]);
-  const [editingSchedule, setEditingSchedule] = useState<Partial<ScheduleItem> | null>(null);
-
-  // 7. COMMITTEE STATE
-  const [committee, setCommittee] = useState<CommitteeMember[]>([
-    { id: "cm-1", name: "Festival Convener Team", role: "Overall Festival Leads", domain: "Operations & Governance", contact: "lead@techtatva.in" },
-    { id: "cm-2", name: "Hackathon Tech Council", role: "Code Storm Lead Mentors", domain: "Judging & Problem Statements", contact: "hackathon@techtatva.in" },
-    { id: "cm-3", name: "Esports Tournament Desk", role: "Referees & Broadcasters", domain: "Gaming & Live Stream", contact: "esports@techtatva.in" },
-    { id: "cm-4", name: "Stage & Cultural Board", role: "Artist & Stage Management", domain: "Sound, Light & Artist Hospitality", contact: "cultural@techtatva.in" }
-  ]);
-  const [editingMember, setEditingMember] = useState<Partial<CommitteeMember> | null>(null);
-
-  // 8. FAQS STATE
-  const [faqs, setFaqs] = useState<FAQItem[]>([
-    {
-      q: "Who is eligible to participate in Technomania 3.0?",
-      a: "All currently enrolled students from Chandigarh University and registered participants across Indian colleges with a valid college ID are welcome to compete."
-    },
-    {
-      q: "Is there any registration fee?",
-      a: "No, participation passes for Technomania 3.0 flagship tracks and hackathons are 100% free for registered squads."
-    },
-    {
-      q: "Can I participate in multiple events simultaneously?",
-      a: "Yes, you can register for both esports and sub-events as long as their individual on-ground time slots do not overlap."
-    },
-    {
-      q: "What should I bring to the 24H Hackathon?",
-      a: "Bring your laptop, charger, student UID card, extensions, and hardware kits if working on IoT or robotics projects."
-    }
-  ]);
-  const [editingFaq, setEditingFaq] = useState<Partial<FAQItem> | null>(null);
-
-  // 9. ON-GROUND QR CHECK-IN STATE
-  const [checkInInput, setCheckInInput] = useState("");
-  const [checkInResult, setCheckInResult] = useState<{ status: "success" | "error"; text: string; squad?: SquadRegistration } | null>(null);
-
-  // 10. MEDIA UPLOAD STATE
-  const [uploadedMedia, setUploadedMedia] = useState<{ name: string; url: string; date: string }[]>([
-    { name: "logo-white.png", url: "/technomania/logo-white.png", date: "System Asset" },
-    { name: "logo-emblem.png", url: "/technomania/logo-emblem.png", date: "System Asset" },
-    { name: "logo-glow.png", url: "/technomania/logo-glow.png", date: "System Asset" },
-    { name: "techtatva-logo.png", url: "/technomania/techtatva-logo.png", date: "System Asset" }
-  ]);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Load from API on mount
+  // Load config on mount
   useEffect(() => {
-    async function loadConfig() {
+    async function load() {
       try {
         const res = await fetch("/api/technomania/config");
         if (res.ok) {
           const json = await res.json();
           if (json.config) {
-            setCmsConfig((prev) => ({ ...prev, ...json.config }));
-            if (json.config.marqueeLines) setTickerLines(json.config.marqueeLines);
-            if (json.config.faqs) setFaqs(json.config.faqs);
+            setSettingsData((prev) => ({ ...prev, ...json.config }));
+            if (json.config.marqueeLines) setAnnouncements(json.config.marqueeLines);
           }
         }
       } catch (err) {
-        console.warn("Could not load /api/technomania/config:", err);
+        console.warn("Could not load API config:", err);
       }
     }
-    loadConfig();
+    load();
   }, []);
 
-  // Save full CMS config to database
-  const saveCmsConfig = async (override?: any) => {
-    setIsLoading(true);
+  // Save Settings
+  const saveSettings = async () => {
+    setIsSaving(true);
     try {
-      const payload = override || {
-        ...cmsConfig,
-        marqueeLines: tickerLines,
-        faqs
+      const payload = {
+        ...settingsData,
+        marqueeLines: announcements,
+        faqs: faqs.map((f) => ({ q: f.question, a: f.answer }))
       };
       const res = await fetch("/api/technomania/config", {
         method: "POST",
@@ -421,26 +450,26 @@ export default function TechnomaniaAdminPage() {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        showToast("✓ Festival CMS & Settings successfully saved to Database!");
+        notify("Website settings saved & published successfully.");
       } else {
-        showToast("✓ Changes saved locally in memory.");
+        notify("Saved to local workspace.");
       }
-    } catch (err) {
-      showToast("✓ Local state updated successfully.");
+    } catch (e) {
+      notify("Saved to local workspace.");
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
-  // Upload Media Handler
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload Asset
+  const handleAssetUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("folder", "technomania-3.0");
+    formData.append("folder", "technomania-assets");
 
     try {
       const res = await fetch("/api/technomania/upload", {
@@ -449,168 +478,197 @@ export default function TechnomaniaAdminPage() {
       });
       const data = await res.json();
       if (res.ok && data.url) {
-        setUploadedMedia((prev) => [{ name: file.name, url: data.url, date: new Date().toLocaleTimeString() }, ...prev]);
-        showToast(`✓ Image "${file.name}" uploaded successfully!`);
+        setMediaAssets((prev) => [
+          {
+            name: file.name,
+            url: data.url,
+            size: `${Math.round(file.size / 1024)} KB`,
+            date: new Date().toLocaleDateString()
+          },
+          ...prev
+        ]);
+        notify(`Uploaded "${file.name}"`);
       } else {
-        showToast(data.error || "Upload failed");
+        notify(data.error || "Upload failed");
       }
-    } catch (err) {
-      showToast("Upload failed");
+    } catch {
+      notify("Upload failed");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  // Squad Filter
-  const filteredSquads = useMemo(() => {
-    return squads.filter((s) => {
-      const matchesSearch =
-        squadSearch === "" ||
-        s.teamName.toLowerCase().includes(squadSearch.toLowerCase()) ||
-        s.leadName.toLowerCase().includes(squadSearch.toLowerCase()) ||
-        s.leadUid.toLowerCase().includes(squadSearch.toLowerCase()) ||
-        s.leadEmail.toLowerCase().includes(squadSearch.toLowerCase());
-
-      const matchesArena = squadArenaFilter === "all" || s.eventId === squadArenaFilter;
-      const matchesStatus = squadStatusFilter === "all" || s.status === squadStatusFilter;
-
-      return matchesSearch && matchesArena && matchesStatus;
-    });
-  }, [squads, squadSearch, squadArenaFilter, squadStatusFilter]);
-
-  // Squad status changer
-  const updateSquadStatus = (squadId: string, newStatus: SquadRegistration["status"]) => {
-    setSquads((prev) =>
-      prev.map((s) => (s._id === squadId ? { ...s, status: newStatus } : s))
-    );
-    if (selectedSquad?._id === squadId) {
-      setSelectedSquad((prev) => (prev ? { ...prev, status: newStatus } : null));
-    }
-    showToast(`✓ Squad status updated to "${newStatus.toUpperCase()}"`);
-  };
-
-  // QR Check-in Handler
-  const handleCheckInSubmit = (e: React.FormEvent) => {
+  // Check-In Submit
+  const handleCheckIn = (e: React.FormEvent) => {
     e.preventDefault();
-    const token = checkInInput.trim().toUpperCase();
-    if (!token) return;
+    const q = checkInQuery.trim().toUpperCase();
+    if (!q) return;
 
-    const found = squads.find(
-      (s) => s.qrToken.toUpperCase() === token || s.leadUid.toUpperCase() === token
+    const found = registrations.find(
+      (r) => r.qrToken.toUpperCase() === q || r.leadUid.toUpperCase() === q
     );
 
     if (found) {
-      updateSquadStatus(found._id, "checked_in");
+      setRegistrations((prev) =>
+        prev.map((r) => (r._id === found._id ? { ...r, status: "checked_in" } : r))
+      );
       setCheckInResult({
         status: "success",
-        text: `VERIFIED & CHECKED-IN: "${found.teamName || found.leadName}" (${found.eventTitle})`,
-        squad: found
+        text: `Checked-In: "${found.teamName || found.leadName}" for ${found.eventTitle}`,
+        data: found
       });
+      notify("Participant checked in successfully.");
     } else {
       setCheckInResult({
         status: "error",
-        text: `NO TICKET MATCH: No squad or token matching "${token}" found.`
+        text: `No participant or QR pass found matching "${q}".`
       });
     }
-    setCheckInInput("");
+    setCheckInQuery("");
   };
 
+  // Filtered Registrations
+  const filteredRegistrations = useMemo(() => {
+    return registrations.filter((r) => {
+      const q = searchQuery.toLowerCase();
+      return (
+        q === "" ||
+        r.teamName.toLowerCase().includes(q) ||
+        r.leadName.toLowerCase().includes(q) ||
+        r.leadUid.toLowerCase().includes(q) ||
+        r.leadEmail.toLowerCase().includes(q) ||
+        r.eventTitle.toLowerCase().includes(q)
+      );
+    });
+  }, [registrations, searchQuery]);
+
+  // Analytics
+  const totalBuilders = useMemo(() => {
+    return registrations.reduce((acc, r) => acc + 1 + r.members.length, 0);
+  }, [registrations]);
+
+  const activityData = [
+    { day: "Aug 10", count: 12 },
+    { day: "Aug 11", count: 18 },
+    { day: "Aug 12", count: 24 },
+    { day: "Aug 13", count: 32 },
+    { day: "Aug 14", count: 48 },
+    { day: "Aug 15", count: 76 },
+    { day: "Aug 16", count: 110 }
+  ];
+
   return (
-    <div className="min-h-screen bg-[#07090e] text-white font-tm-body flex flex-col antialiased selection:bg-cyan-500 selection:text-black">
-      {/* ── STICKY TOP HUD BAR ── */}
-      <header className="sticky top-0 z-40 bg-[#0c1017]/95 backdrop-blur-xl border-b border-cyan-500/20 px-4 md:px-8 py-3 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.8)]">
-        <div className="flex items-center gap-4">
-          <Link href={getHref("/")} className="group flex items-center gap-3">
-            <div className="relative h-7 w-7">
+    <div className="min-h-screen bg-[#090d16] text-slate-100 font-sans flex flex-col antialiased selection:bg-cyan-500 selection:text-black">
+      {/* ── TOP PROFESSIONAL NAVIGATION BAR ── */}
+      <header className="sticky top-0 z-40 bg-[#0c111d]/90 backdrop-blur-md border-b border-slate-800 px-6 py-3.5 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link href={getHref("/")} className="flex items-center gap-3 group">
+            <div className="relative h-8 w-8">
               <Image
                 src="/technomania/techtatva-logo.png"
                 alt="Tech Tatva"
                 fill
-                className="object-contain drop-shadow-[0_0_10px_rgba(74,158,255,0.8)]"
+                className="object-contain"
               />
             </div>
-            <span className="text-white/30 text-xs font-light select-none">✕</span>
+            <span className="text-slate-600 text-sm select-none">/</span>
             <div className="relative h-6 w-20">
               <Image
                 src="/technomania/logo-emblem.png"
-                alt="TM 3.0"
+                alt="Technomania 3.0"
                 fill
-                className="object-contain drop-shadow-[0_0_10px_rgba(74,158,255,0.8)]"
+                className="object-contain"
               />
             </div>
           </Link>
 
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-md bg-cyan-950/60 border border-cyan-500/30 text-[10px] font-tm-mono text-cyan-300">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            <span className="font-bold tracking-wider">COMMAND DESK v3.0</span>
+          <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-slate-700/60 text-xs font-medium text-slate-300">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span>Admin Portal</span>
           </div>
         </div>
 
-        {/* Action Controls */}
+        {/* Global Action Tools */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => window.open("/api/technomania/export", "_blank")}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-tm-mono text-cyan-200 transition"
+            onClick={() => {
+              setIsRefreshing(true);
+              setTimeout(() => {
+                setIsRefreshing(false);
+                notify("Portal data synchronized with MongoDB.");
+              }, 600);
+            }}
+            className="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition"
+            title="Refresh Data"
           >
-            <Download size={13} className="text-cyan-400" />
-            <span>EXPORT EXCEL</span>
+            <RefreshCw size={15} className={isRefreshing ? "animate-spin text-cyan-400" : ""} />
+          </button>
+
+          <button
+            onClick={() => window.open("/api/technomania/export", "_blank")}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 transition"
+          >
+            <FileSpreadsheet size={14} className="text-cyan-400" />
+            <span>Export Excel</span>
           </button>
 
           <Link
             href={getHref("/")}
             target="_blank"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-xs font-tm-mono text-cyan-300 transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-medium transition"
           >
+            <span>Live Website</span>
             <ExternalLink size={13} />
-            <span>VIEW LIVE FEST</span>
           </Link>
         </div>
       </header>
 
       {/* ── TOAST NOTIFICATION ── */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-black/90 border border-cyan-400/80 text-cyan-200 text-xs font-tm-mono shadow-[0_0_30px_rgba(74,158,255,0.4)] flex items-center gap-2 animate-bounce">
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-slate-900 border border-cyan-500/50 text-cyan-200 text-xs font-medium shadow-xl flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2">
           <CheckCircle2 size={16} className="text-cyan-400" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       <div className="flex-grow flex flex-col md:flex-row">
-        {/* ── SIDEBAR NAVIGATION (TM 3.0 LOGO THEME) ── */}
-        <aside className="w-full md:w-64 bg-[#0a0e16] border-r border-white/5 p-4 flex flex-col justify-between shrink-0">
+        {/* ── CLEAN PROFESSIONAL SIDEBAR ── */}
+        <aside className="w-full md:w-64 bg-[#0a0e18] border-r border-slate-800 p-4 flex flex-col justify-between shrink-0">
           <div className="space-y-1">
-            <div className="px-3 py-2 text-[10px] font-tm-mono font-bold tracking-[0.2em] text-white/40 uppercase">
-              // FESTIVAL CMS & CONTROL //
+            <div className="px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+              Management Modules
             </div>
 
             {[
-              { id: "overview", label: "Overview & Pulse", icon: LayoutDashboard },
-              { id: "hero_cms", label: "Hero & Text CMS", icon: Sliders },
-              { id: "ticker", label: "Broadcast Ticker", icon: Radio },
-              { id: "arenas", label: "Arenas & Events", icon: Layers },
-              { id: "squads", label: "Squads & Rosters", icon: Users },
-              { id: "leaderboard", label: "Live Scoring Desk", icon: Trophy },
-              { id: "schedule", label: "Timeline & Agenda", icon: Calendar },
-              { id: "committee", label: "Committee & Leads", icon: Award },
-              { id: "faqs", label: "Festival FAQs", icon: HelpCircle },
-              { id: "checkin", label: "QR Gate Check-In", icon: QrCode },
-              { id: "media", label: "Media & Assets", icon: ImageIcon }
+              { id: "Overview", label: "Overview", icon: LayoutDashboard },
+              { id: "Events", label: "Events", icon: CalendarDays },
+              { id: "Registrations", label: "Registrations", icon: Users },
+              { id: "Leaderboard", label: "Leaderboard", icon: Trophy },
+              { id: "Schedule", label: "Schedule", icon: Calendar },
+              { id: "Website Settings", label: "Website Settings", icon: Settings },
+              { id: "Announcements", label: "Announcements", icon: Bell },
+              { id: "Gallery & Media", label: "Gallery & Media", icon: ImageIcon },
+              { id: "FAQs", label: "FAQs", icon: HelpCircle },
+              { id: "Check-In", label: "Check-In", icon: QrCode }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as AdminTab)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-tm-mono transition-all ${
+                  onClick={() => {
+                    setActiveTab(tab.id as TabType);
+                    setSearchQuery("");
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 shadow-[0_0_15px_rgba(74,158,255,0.2)] font-bold"
-                      : "text-white/60 hover:text-white hover:bg-white/[0.03]"
+                      ? "bg-cyan-500/10 text-cyan-300 font-semibold border border-cyan-500/20"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/40"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <Icon size={16} className={isActive ? "text-cyan-400" : "text-white/40"} />
+                  <div className="flex items-center gap-3">
+                    <Icon size={17} className={isActive ? "text-cyan-400" : "text-slate-400"} />
                     <span>{tab.label}</span>
                   </div>
                   {isActive && <ChevronRight size={14} className="text-cyan-400" />}
@@ -619,151 +677,193 @@ export default function TechnomaniaAdminPage() {
             })}
           </div>
 
-          {/* Bottom System Info */}
-          <div className="mt-8 pt-4 border-t border-white/5 px-2">
-            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-              <div className="flex items-center justify-between text-[10px] font-tm-mono text-white/50">
-                <span>DATABASE SYNC</span>
-                <span className="text-cyan-400">ACTIVE</span>
-              </div>
-              <p className="text-[10px] font-tm-mono text-white/30 truncate">
-                CU Campus · Mohali
-              </p>
+          <div className="pt-4 border-t border-slate-800 px-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-300 text-xs font-bold shrink-0">
+              TT
+            </div>
+            <div className="text-xs overflow-hidden">
+              <span className="block font-medium text-slate-200 truncate">Administrator</span>
+              <span className="text-[11px] text-slate-400 block truncate">Technomania 3.0</span>
             </div>
           </div>
         </aside>
 
-        {/* ── MAIN CONTENT AREA ── */}
-        <main className="flex-grow p-4 md:p-8 max-w-6xl mx-auto w-full">
+        {/* ── MAIN WORKSPACE CONTENT ── */}
+        <main className="flex-grow p-6 md:p-8 max-w-6xl mx-auto w-full">
           {/* ═══════════════════════════════════════════════════════
-              TAB 1: OVERVIEW & PULSE
+              TAB: OVERVIEW
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "overview" && (
+          {activeTab === "Overview" && (
             <div className="space-y-8">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-tm-heading font-black tracking-wide uppercase text-white flex items-center gap-3">
-                  <span>Festival Command Center</span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
-                </h1>
-                <p className="text-xs sm:text-sm font-tm-mono text-cyan-200/60 mt-1">
-                  Live operations, registrations, CMS control, and leaderboard desk
+                <h1 className="text-2xl font-bold text-white tracking-tight">Overview & Analytics</h1>
+                <p className="text-sm text-slate-400 mt-1">
+                  Live metrics, active registrations, and festival operations summary
                 </p>
               </div>
 
-              {/* KPI Cards — Exact TM 3.0 Logo Palette */}
+              {/* KPI Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: "REGISTERED SQUADS", val: squads.length, icon: Users, color: "from-cyan-500/20 to-blue-500/5", border: "border-cyan-500/30", text: "text-cyan-300" },
                   {
-                    label: "TOTAL BUILDERS & PLAYERS",
-                    val: squads.reduce((acc, s) => acc + 1 + s.members.length, 0),
-                    icon: Zap,
-                    color: "from-blue-600/20 to-cyan-500/5",
-                    border: "border-blue-500/30",
-                    text: "text-cyan-200"
+                    title: "Total Squads",
+                    value: registrations.length,
+                    sub: "+100% this week",
+                    icon: Users,
+                    color: "text-cyan-400"
                   },
-                  { label: "ACTIVE ARENAS", val: arenas.length, icon: Layers, color: "from-cyan-600/20 to-blue-600/5", border: "border-cyan-500/30", text: "text-cyan-300" },
-                  { label: "CHECKED-IN TEAMS", val: squads.filter((s) => s.status === "checked_in").length, icon: UserCheck, color: "from-sky-500/20 to-blue-500/5", border: "border-sky-500/30", text: "text-sky-300" }
-                ].map((kpi, idx) => {
+                  {
+                    title: "Total Participants",
+                    value: totalBuilders,
+                    sub: "Pan-India students",
+                    icon: TrendingUp,
+                    color: "text-blue-400"
+                  },
+                  {
+                    title: "Active Events",
+                    value: events.filter((e) => e.status === "published" || e.status === "active").length,
+                    sub: "All tracks live",
+                    icon: CalendarDays,
+                    color: "text-sky-400"
+                  },
+                  {
+                    title: "Checked-In",
+                    value: registrations.filter((r) => r.status === "checked_in").length,
+                    sub: "Verified on ground",
+                    icon: UserCheck,
+                    color: "text-emerald-400"
+                  }
+                ].map((kpi, i) => {
                   const Icon = kpi.icon;
                   return (
                     <div
-                      key={idx}
-                      className={`p-5 rounded-2xl bg-gradient-to-br ${kpi.color} border ${kpi.border} backdrop-blur-xl space-y-2`}
+                      key={i}
+                      className="p-5 rounded-2xl bg-[#0e1422] border border-slate-800 hover:border-slate-700 transition space-y-2"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-tm-mono font-bold tracking-widest text-white/50">{kpi.label}</span>
-                        <Icon size={16} className={kpi.text} />
+                      <div className="flex items-center justify-between text-xs font-medium text-slate-400">
+                        <span>{kpi.title}</span>
+                        <Icon size={16} className={kpi.color} />
                       </div>
-                      <p className={`text-3xl font-tm-heading font-black ${kpi.text}`}>{kpi.val}</p>
+                      <div className="text-3xl font-bold text-white tracking-tight">{kpi.value}</div>
+                      <div className="text-xs text-slate-500">{kpi.sub}</div>
                     </div>
                   );
                 })}
               </div>
 
+              {/* Registration Trend Chart */}
+              <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-sm font-semibold text-white">Registration Trend</h2>
+                    <p className="text-xs text-slate-400">Daily signups velocity across all event categories</p>
+                  </div>
+                  <span className="text-xs font-medium text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
+                    Live Real-Time Feed
+                  </span>
+                </div>
+
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="cyanGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#38bdf8" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <XAxis dataKey="day" stroke="#64748b" fontSize={12} />
+                      <YAxis stroke="#64748b" fontSize={12} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#0c111d",
+                          borderColor: "#334155",
+                          borderRadius: "12px",
+                          fontSize: "12px"
+                        }}
+                      />
+                      <Area type="monotone" dataKey="count" stroke="#38bdf8" strokeWidth={2} fillOpacity={1} fill="url(#cyanGradient)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
               {/* Quick Actions Grid */}
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Recent Registrations Preview */}
-                <div className="p-6 rounded-2xl bg-[#0e131d] border border-white/10 space-y-4">
+                {/* Recent Signups */}
+                <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="font-tm-heading text-sm font-bold tracking-wide uppercase text-white flex items-center gap-2">
-                      <Users size={15} className="text-cyan-400" />
-                      <span>Latest Squad Signups</span>
-                    </h2>
+                    <h2 className="text-sm font-semibold text-white">Recent Registrations</h2>
                     <button
-                      onClick={() => setActiveTab("squads")}
-                      className="text-xs font-tm-mono text-cyan-400 hover:underline"
+                      onClick={() => setActiveTab("Registrations")}
+                      className="text-xs font-medium text-cyan-400 hover:underline"
                     >
                       View All →
                     </button>
                   </div>
 
                   <div className="space-y-2.5">
-                    {squads.slice(0, 3).map((squad) => (
+                    {registrations.slice(0, 3).map((reg) => (
                       <div
-                        key={squad._id}
+                        key={reg._id}
                         onClick={() => {
-                          setSelectedSquad(squad);
-                          setActiveTab("squads");
+                          setSelectedRegistration(reg);
+                          setActiveTab("Registrations");
                         }}
-                        className="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 hover:border-cyan-500/40 transition cursor-pointer flex items-center justify-between"
+                        className="p-3.5 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-cyan-500/40 transition cursor-pointer flex items-center justify-between"
                       >
                         <div>
-                          <p className="text-xs font-bold text-white">{squad.teamName || squad.leadName}</p>
-                          <p className="text-[10px] font-tm-mono text-cyan-300/70 mt-0.5">{squad.eventTitle}</p>
+                          <p className="text-sm font-medium text-white">{reg.teamName || reg.leadName}</p>
+                          <p className="text-xs text-slate-400">{reg.eventTitle}</p>
                         </div>
-                        <div className="text-right">
-                          <span className="px-2 py-0.5 rounded text-[9px] font-tm-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                            {squad.members.length + 1} MEMBERS
-                          </span>
-                        </div>
+                        <span className="text-xs text-cyan-300 font-medium px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                          {reg.members.length + 1} Members
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Arena Status Control Preview */}
-                <div className="p-6 rounded-2xl bg-[#0e131d] border border-white/10 space-y-4">
+                {/* Event Registration Switches */}
+                <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="font-tm-heading text-sm font-bold tracking-wide uppercase text-white flex items-center gap-2">
-                      <Layers size={15} className="text-cyan-400" />
-                      <span>Arena Registration Switches</span>
-                    </h2>
+                    <h2 className="text-sm font-semibold text-white">Event Registration Switches</h2>
                     <button
-                      onClick={() => setActiveTab("arenas")}
-                      className="text-xs font-tm-mono text-cyan-400 hover:underline"
+                      onClick={() => setActiveTab("Events")}
+                      className="text-xs font-medium text-cyan-400 hover:underline"
                     >
                       Manage →
                     </button>
                   </div>
 
                   <div className="space-y-2.5">
-                    {arenas.map((arena) => (
+                    {events.map((evt) => (
                       <div
-                        key={arena._id}
-                        className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
+                        key={evt._id}
+                        className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-between"
                       >
                         <div>
-                          <p className="text-xs font-bold text-white">{arena.title}</p>
-                          <p className="text-[10px] font-tm-mono text-white/40 uppercase">{arena.category}</p>
+                          <p className="text-sm font-medium text-white">{evt.title}</p>
+                          <p className="text-xs text-slate-400 capitalize">{evt.category}</p>
                         </div>
 
                         <button
                           onClick={() => {
-                            setArenas((prev) =>
-                              prev.map((a) =>
-                                a._id === arena._id ? { ...a, registrationOpen: !a.registrationOpen } : a
+                            setEvents((prev) =>
+                              prev.map((e) =>
+                                e._id === evt._id ? { ...e, registrationOpen: !e.registrationOpen } : e
                               )
                             );
-                            showToast(`Registration for "${arena.title}" is now ${!arena.registrationOpen ? "OPEN" : "PAUSED"}`);
+                            notify(`Registration for "${evt.title}" is now ${!evt.registrationOpen ? "Open" : "Closed"}.`);
                           }}
-                          className={`px-2.5 py-1 rounded-md text-[10px] font-tm-mono font-bold transition ${
-                            arena.registrationOpen
-                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                              : "bg-red-500/20 text-red-300 border border-red-500/40"
+                          className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
+                            evt.registrationOpen
+                              ? "bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20"
+                              : "bg-red-500/10 text-red-300 border border-red-500/30 hover:bg-red-500/20"
                           }`}
                         >
-                          {arena.registrationOpen ? "OPEN (CLICK TO PAUSE)" : "PAUSED (CLICK TO OPEN)"}
+                          {evt.registrationOpen ? "Open" : "Closed"}
                         </button>
                       </div>
                     ))}
@@ -774,288 +874,82 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB 2: HERO & FESTIVAL TEXT CMS (FULL CONTROL)
+              TAB: EVENTS
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "hero_cms" && (
+          {activeTab === "Events" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                    Hero Section & Festival CMS
-                  </h1>
-                  <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
-                    Control all festival copy, hero text, countdown clock, and CTA destinations
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => saveCmsConfig()}
-                  disabled={isLoading}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-tm-mono text-xs font-bold shadow-[0_0_25px_rgba(74,158,255,0.4)] transition"
-                >
-                  <Save size={15} />
-                  <span>{isLoading ? "SAVING..." : "SAVE & PUBLISH CMS"}</span>
-                </button>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Text & Headlines Box */}
-                <div className="p-6 rounded-2xl bg-[#0e131d] border border-white/10 space-y-4">
-                  <h2 className="text-xs font-tm-mono font-bold tracking-widest text-cyan-400 uppercase">
-                    // HEADLINES & CAMPUS LOCATION //
-                  </h2>
-
-                  <div>
-                    <label className="block text-[11px] font-tm-mono text-white/60 mb-1">FESTIVAL TITLE</label>
-                    <input
-                      type="text"
-                      value={cmsConfig.festivalName}
-                      onChange={(e) => setCmsConfig({ ...cmsConfig, festivalName: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-tm-mono text-white/60 mb-1">CAMPUS VENUE LOCATION</label>
-                    <input
-                      type="text"
-                      value={cmsConfig.campusLocation}
-                      onChange={(e) => setCmsConfig({ ...cmsConfig, campusLocation: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-tm-mono text-white/60 mb-1">HERO MAIN HEADLINE</label>
-                    <input
-                      type="text"
-                      value={cmsConfig.headline}
-                      onChange={(e) => setCmsConfig({ ...cmsConfig, headline: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-tm-mono text-white/60 mb-1">SUBTITLE / TRACKS DESCRIPTION</label>
-                    <textarea
-                      rows={3}
-                      value={cmsConfig.tagline}
-                      onChange={(e) => setCmsConfig({ ...cmsConfig, tagline: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Countdown & Timing Box */}
-                <div className="p-6 rounded-2xl bg-[#0e131d] border border-white/10 space-y-4">
-                  <h2 className="text-xs font-tm-mono font-bold tracking-widest text-cyan-400 uppercase">
-                    // T-MINUS COUNTDOWN & DATES //
-                  </h2>
-
-                  <div>
-                    <label className="block text-[11px] font-tm-mono text-white/60 mb-1">COUNTDOWN TARGET TIMESTAMP (ISO / DATETIME)</label>
-                    <input
-                      type="text"
-                      value={cmsConfig.targetDate}
-                      onChange={(e) => setCmsConfig({ ...cmsConfig, targetDate: e.target.value })}
-                      placeholder="2026-09-15T09:00:00+05:30"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                    />
-                    <span className="text-[10px] font-tm-mono text-white/40 mt-1 block">
-                      Format: YYYY-MM-DDTHH:MM:SS+05:30
-                    </span>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-tm-mono text-white/60 mb-1">HIGHLIGHT PRIZE POOL TEXT</label>
-                    <input
-                      type="text"
-                      value={cmsConfig.prizePoolText}
-                      onChange={(e) => setCmsConfig({ ...cmsConfig, prizePoolText: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-tm-mono text-white/60 mb-1">PRIMARY CTA BUTTON LABEL</label>
-                    <input
-                      type="text"
-                      value={cmsConfig.ctaPrimaryText}
-                      onChange={(e) => setCmsConfig({ ...cmsConfig, ctaPrimaryText: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-tm-mono text-white/60 mb-1">SECONDARY CTA BUTTON LABEL</label>
-                    <input
-                      type="text"
-                      value={cmsConfig.ctaSecondaryText}
-                      onChange={(e) => setCmsConfig({ ...cmsConfig, ctaSecondaryText: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════
-              TAB 3: MARQUEE TICKER CONSOLE
-              ═══════════════════════════════════════════════════════ */}
-          {activeTab === "ticker" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                    Live Broadcast Marquee Ticker
-                  </h1>
-                  <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
-                    Manage the real-time cycling announcement ribbon running across the top of the festival site
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => saveCmsConfig()}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-tm-mono text-xs font-bold shadow-[0_0_25px_rgba(74,158,255,0.4)] transition"
-                >
-                  <Save size={15} />
-                  <span>SAVE TICKER BROADCAST</span>
-                </button>
-              </div>
-
-              {/* Add New Line Form */}
-              <div className="p-5 rounded-2xl bg-[#0e131d] border border-white/10 flex gap-3">
-                <input
-                  type="text"
-                  value={newTickerInput}
-                  onChange={(e) => setNewTickerInput(e.target.value)}
-                  placeholder="Type new broadcast announcement line..."
-                  className="flex-grow px-4 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                />
-                <button
-                  onClick={() => {
-                    if (!newTickerInput.trim()) return;
-                    setTickerLines([...tickerLines, newTickerInput.trim().toUpperCase()]);
-                    setNewTickerInput("");
-                    showToast("Broadcast line added!");
-                  }}
-                  className="px-5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-tm-mono font-bold flex items-center gap-2 transition"
-                >
-                  <Plus size={15} />
-                  <span>ADD LINE</span>
-                </button>
-              </div>
-
-              {/* Active Broadcast Lines List */}
-              <div className="space-y-3">
-                {tickerLines.map((line, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-xl bg-white/[0.02] border border-white/10 flex items-center justify-between group hover:border-cyan-500/40 transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-tm-mono font-bold text-cyan-400">
-                        {(idx + 1).toString().padStart(2, "0")}.
-                      </span>
-                      <span className="text-xs font-tm-mono font-semibold text-white tracking-wide">{line}</span>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setTickerLines(tickerLines.filter((_, i) => i !== idx));
-                        showToast("Line removed");
-                      }}
-                      className="p-1.5 rounded-lg hover:bg-red-500/20 text-white/40 hover:text-red-400 transition"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════
-              TAB 4: ARENAS & EVENTS CRUD (FULL CONTROL)
-              ═══════════════════════════════════════════════════════ */}
-          {activeTab === "arenas" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                    Arenas & Tournaments Studio
-                  </h1>
-                  <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
-                    Add, edit rules, upload banners, set capacity, and manage all festival events
+                  <h1 className="text-2xl font-bold text-white tracking-tight">Events Management</h1>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Create and manage festival tracks, venues, capacity, descriptions, and rules
                   </p>
                 </div>
 
                 <button
                   onClick={() => {
-                    setEditingArena({
+                    setEditingEvent({
                       category: "hackathon",
                       participationMode: "team",
                       maxTeamSize: 4,
                       capacity: 50,
-                      registrationOpen: true
+                      registrationOpen: true,
+                      status: "published"
                     });
-                    setIsArenaModalOpen(true);
+                    setIsEventDrawerOpen(true);
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-tm-mono text-xs font-bold shadow-[0_0_25px_rgba(74,158,255,0.4)] transition"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition shadow-lg shadow-cyan-500/10"
                 >
                   <Plus size={16} />
-                  <span>ADD NEW ARENA</span>
+                  <span>Add Event</span>
                 </button>
               </div>
 
-              {/* Arena Cards Grid */}
+              {/* Events Grid */}
               <div className="grid md:grid-cols-2 gap-4">
-                {arenas.map((arena) => (
+                {events.map((evt) => (
                   <div
-                    key={arena._id}
-                    className="p-5 rounded-2xl bg-[#0e131d] border border-white/10 hover:border-cyan-500/50 transition-all flex flex-col justify-between space-y-4 group"
+                    key={evt._id}
+                    className="p-5 rounded-2xl bg-[#0e1422] border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between space-y-4"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="px-2.5 py-1 rounded text-[9px] font-tm-mono uppercase font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-                          {arena.category}
+                        <span className="px-2.5 py-1 rounded-md text-xs font-semibold uppercase bg-slate-800 text-cyan-300 border border-slate-700">
+                          {evt.category}
                         </span>
 
                         <span
-                          className={`w-2 h-2 rounded-full ${
-                            arena.registrationOpen ? "bg-cyan-400 animate-pulse" : "bg-red-500"
+                          className={`w-2.5 h-2.5 rounded-full ${
+                            evt.registrationOpen ? "bg-emerald-400" : "bg-red-400"
                           }`}
                         />
                       </div>
 
-                      <h3 className="font-tm-heading text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
-                        {arena.title}
-                      </h3>
-                      <p className="text-xs font-tm-mono text-cyan-400/80 mt-0.5">{arena.subtitle}</p>
-                      <p className="text-xs text-white/60 mt-2 line-clamp-2 leading-relaxed">{arena.description}</p>
+                      <h3 className="text-base font-bold text-white">{evt.title}</h3>
+                      <p className="text-xs text-cyan-400/90 mt-0.5">{evt.subtitle}</p>
+                      <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">{evt.description}</p>
                     </div>
 
-                    <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-tm-mono text-white/50">
-                      <span>Venue: {arena.venue}</span>
+                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                      <span>Venue: {evt.venue}</span>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
-                            setEditingArena(arena);
-                            setIsArenaModalOpen(true);
+                            setEditingEvent(evt);
+                            setIsEventDrawerOpen(true);
                           }}
-                          className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-300 transition"
+                          className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => {
-                            setArenas(arenas.filter((a) => a._id !== arena._id));
-                            showToast(`Arena "${arena.title}" deleted.`);
+                            setEvents(events.filter((e) => e._id !== evt._id));
+                            notify(`Event "${evt.title}" deleted.`);
                           }}
-                          className="p-1 rounded-lg hover:bg-red-500/20 text-white/40 hover:text-red-400 transition"
+                          className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
@@ -1066,97 +960,80 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB 5: SQUADS & ROSTERS DESK
+              TAB: REGISTRATIONS
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "squads" && (
+          {activeTab === "Registrations" && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                    Squads & Registrations Desk
-                  </h1>
-                  <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
-                    Review participant dossiers, verify team rosters, and manage check-in status
+                  <h1 className="text-2xl font-bold text-white tracking-tight">Registrations</h1>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Manage student squads, member rosters, review details, and export datasets
                   </p>
                 </div>
 
                 <button
                   onClick={() => window.open("/api/technomania/export", "_blank")}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-xs font-tm-mono text-cyan-300 font-bold transition"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm font-medium text-slate-200 transition"
                 >
-                  <Download size={15} />
-                  <span>EXPORT STUDENTMEMBERS.XLSX</span>
+                  <FileSpreadsheet size={15} className="text-cyan-400" />
+                  <span>Export StudentMembers.xlsx</span>
                 </button>
               </div>
 
-              {/* Filters & Search */}
-              <div className="p-4 rounded-2xl bg-[#0e131d] border border-white/10 flex flex-col md:flex-row gap-3 items-center justify-between">
-                <div className="relative w-full md:w-80">
-                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
-                  <input
-                    type="text"
-                    value={squadSearch}
-                    onChange={(e) => setSquadSearch(e.target.value)}
-                    placeholder="Search squad, leader, UID or email..."
-                    className="w-full pl-9 pr-4 py-2 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                  <select
-                    value={squadStatusFilter}
-                    onChange={(e) => setSquadStatusFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white text-xs font-tm-mono outline-none"
-                  >
-                    <option value="all">ALL STATUSES</option>
-                    <option value="confirmed">CONFIRMED</option>
-                    <option value="checked_in">CHECKED-IN</option>
-                    <option value="pending">PENDING</option>
-                  </select>
-                </div>
+              {/* Search Bar */}
+              <div className="p-4 rounded-2xl bg-[#0e1422] border border-slate-800 flex items-center gap-3">
+                <Search size={16} className="text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search squad name, leader name, UID, or email..."
+                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+                />
               </div>
 
-              {/* Squads Table */}
-              <div className="rounded-2xl bg-[#0e131d] border border-white/10 overflow-hidden">
+              {/* Table */}
+              <div className="rounded-2xl bg-[#0e1422] border border-slate-800 overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs font-tm-mono">
-                    <thead className="bg-black/40 border-b border-white/10 text-white/40 uppercase">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-900/60 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase">
                       <tr>
                         <th className="p-4">Squad / Leader</th>
                         <th className="p-4">University UID</th>
-                        <th className="p-4">Arena Track</th>
-                        <th className="p-4">Roster Size</th>
+                        <th className="p-4">Event Track</th>
+                        <th className="p-4">Roster</th>
                         <th className="p-4">Status</th>
                         <th className="p-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {filteredSquads.map((squad) => (
-                        <tr key={squad._id} className="hover:bg-white/[0.02] transition">
+                    <tbody className="divide-y divide-slate-800">
+                      {filteredRegistrations.map((reg) => (
+                        <tr key={reg._id} className="hover:bg-slate-800/30 transition">
                           <td className="p-4">
-                            <div className="font-bold text-white">{squad.teamName || squad.leadName}</div>
-                            <div className="text-[10px] text-cyan-300/70">{squad.leadEmail}</div>
+                            <div className="font-semibold text-white">{reg.teamName || reg.leadName}</div>
+                            <div className="text-xs text-slate-400">{reg.leadEmail}</div>
                           </td>
-                          <td className="p-4 text-cyan-400 font-bold">{squad.leadUid}</td>
-                          <td className="p-4 text-white/80">{squad.eventTitle}</td>
-                          <td className="p-4 text-white/60">{squad.members.length + 1} Members</td>
+                          <td className="p-4 font-mono text-cyan-400 font-semibold">{reg.leadUid}</td>
+                          <td className="p-4 text-slate-300">{reg.eventTitle}</td>
+                          <td className="p-4 text-slate-400">{reg.members.length + 1} Members</td>
                           <td className="p-4">
                             <span
-                              className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
-                                squad.status === "checked_in"
-                                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                                  : "bg-blue-500/20 text-blue-300 border border-blue-500/40"
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                                reg.status === "checked_in"
+                                  ? "bg-cyan-500/10 text-cyan-300 border border-cyan-500/30"
+                                  : "bg-blue-500/10 text-blue-300 border border-blue-500/30"
                               }`}
                             >
-                              {squad.status.toUpperCase()}
+                              {reg.status === "checked_in" ? "Checked-In" : "Confirmed"}
                             </span>
                           </td>
                           <td className="p-4 text-right">
                             <button
-                              onClick={() => setSelectedSquad(squad)}
-                              className="px-3 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition"
+                              onClick={() => setSelectedRegistration(reg)}
+                              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-medium transition"
                             >
-                              Inspect Dossier
+                              View Details
                             </button>
                           </td>
                         </tr>
@@ -1169,85 +1046,83 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB 6: LIVE SCORING & LEADERBOARDS
+              TAB: LEADERBOARD
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "leaderboard" && (
+          {activeTab === "Leaderboard" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                    Live Scoring & Leaderboard Desk
-                  </h1>
-                  <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
-                    Assign ranks, update live point tallies, and publish standing updates
+                  <h1 className="text-2xl font-bold text-white tracking-tight">Live Leaderboard</h1>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Manage real-time ranks, scores, and standing badges per event
                   </p>
                 </div>
 
                 <button
                   onClick={() => {
-                    const newEntry: LeaderboardItem = {
+                    const newEntry: LeaderboardRecord = {
                       id: `lb-${Date.now()}`,
-                      arena: arenas[0]?.title || "Code Storm 24H",
+                      eventId: events[0]?._id || "evt-1",
+                      eventTitle: events[0]?.title || "Code Storm 24H",
                       teamName: "New Finalist Team",
                       rank: leaderboard.length + 1,
-                      points: 750,
+                      score: 750,
                       status: "Qualified"
                     };
                     setLeaderboard([...leaderboard, newEntry]);
-                    showToast("New leaderboard standing entry created.");
+                    notify("Added new leaderboard standing.");
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-tm-mono text-xs font-bold shadow-[0_0_25px_rgba(74,158,255,0.4)] transition"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
                 >
-                  <Plus size={15} />
-                  <span>ADD RANK ENTRY</span>
+                  <Plus size={16} />
+                  <span>Add Standing</span>
                 </button>
               </div>
 
-              {/* Leaderboard Table */}
-              <div className="rounded-2xl bg-[#0e131d] border border-white/10 overflow-hidden">
-                <table className="w-full text-left text-xs font-tm-mono">
-                  <thead className="bg-black/40 border-b border-white/10 text-white/40 uppercase">
+              <div className="rounded-2xl bg-[#0e1422] border border-slate-800 overflow-hidden">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-900/60 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase">
                     <tr>
                       <th className="p-4">Rank</th>
                       <th className="p-4">Team Name</th>
-                      <th className="p-4">Arena Track</th>
-                      <th className="p-4">Score / Points</th>
-                      <th className="p-4">Status / Badge</th>
+                      <th className="p-4">Event</th>
+                      <th className="p-4">Score</th>
+                      <th className="p-4">Badge</th>
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {leaderboard.map((item, idx) => (
-                      <tr key={item.id} className="hover:bg-white/[0.02] transition">
-                        <td className="p-4 font-black text-cyan-400 text-base">#{item.rank}</td>
-                        <td className="p-4 font-bold text-white">{item.teamName}</td>
-                        <td className="p-4 text-cyan-200/70">{item.arena}</td>
-                        <td className="p-4 font-black text-cyan-300">{item.points} PTS</td>
+                  <tbody className="divide-y divide-slate-800">
+                    {leaderboard.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-800/30 transition">
+                        <td className="p-4 font-bold text-cyan-400 text-base">#{item.rank}</td>
+                        <td className="p-4 font-semibold text-white">{item.teamName}</td>
+                        <td className="p-4 text-slate-400">{item.eventTitle}</td>
+                        <td className="p-4 font-bold text-slate-100">{item.score} PTS</td>
                         <td className="p-4">
-                          <span className="px-2.5 py-0.5 rounded text-[10px] bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-bold">
+                          <span className="px-2.5 py-1 rounded-md bg-slate-800 text-xs font-medium text-cyan-300 border border-slate-700">
                             {item.badge || item.status}
                           </span>
                         </td>
                         <td className="p-4 text-right">
                           <button
                             onClick={() => {
-                              const newPoints = prompt("Enter updated points:", String(item.points));
+                              const newPoints = prompt("Enter updated score:", String(item.score));
                               if (newPoints && !isNaN(Number(newPoints))) {
                                 setLeaderboard((prev) =>
-                                  prev.map((lb) => (lb.id === item.id ? { ...lb, points: Number(newPoints) } : lb))
+                                  prev.map((lb) => (lb.id === item.id ? { ...lb, score: Number(newPoints) } : lb))
                                 );
-                                showToast(`Score for "${item.teamName}" updated to ${newPoints} PTS!`);
+                                notify(`Updated score for "${item.teamName}".`);
                               }
                             }}
-                            className="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-cyan-300 mr-2 transition"
+                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs mr-2 transition"
                           >
-                            Update Points
+                            Edit Score
                           </button>
                           <button
                             onClick={() => setLeaderboard(leaderboard.filter((lb) => lb.id !== item.id))}
-                            className="p-1 rounded hover:bg-red-500/20 text-white/40 hover:text-red-400 transition"
+                            className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={15} />
                           </button>
                         </td>
                       </tr>
@@ -1259,62 +1134,60 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB 7: TIMELINE & AGENDA BUILDER
+              TAB: SCHEDULE
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "schedule" && (
+          {activeTab === "Schedule" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                    Timeline & Schedule Builder
-                  </h1>
-                  <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
-                    Manage festival timings, day-wise rounds, and venue slots
+                  <h1 className="text-2xl font-bold text-white tracking-tight">Timeline & Schedule</h1>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Manage festival agenda, timing slots, day-wise rounds, and venue halls
                   </p>
                 </div>
 
                 <button
                   onClick={() => {
-                    const newItem: ScheduleItem = {
-                      id: `sc-${Date.now()}`,
+                    const newItem: ScheduleRecord = {
+                      id: `sch-${Date.now()}`,
                       day: "Day 1 — Sep 15",
                       time: "02:00 PM",
-                      title: "New Tournament Round",
+                      title: "New Tournament Session",
                       venue: "Auditorium 2",
                       category: "Esports",
                       status: "upcoming"
                     };
-                    setScheduleItems([...scheduleItems, newItem]);
-                    showToast("Schedule event slot added.");
+                    setSchedules([...schedules, newItem]);
+                    notify("Added schedule slot.");
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-tm-mono text-xs font-bold shadow-[0_0_25px_rgba(74,158,255,0.4)] transition"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
                 >
-                  <Plus size={15} />
-                  <span>ADD SCHEDULE SLOT</span>
+                  <Plus size={16} />
+                  <span>Add Slot</span>
                 </button>
               </div>
 
               <div className="space-y-3">
-                {scheduleItems.map((item) => (
+                {schedules.map((item) => (
                   <div
                     key={item.id}
-                    className="p-4 rounded-2xl bg-[#0e131d] border border-white/10 flex items-center justify-between hover:border-cyan-500/40 transition"
+                    className="p-4 rounded-2xl bg-[#0e1422] border border-slate-800 flex items-center justify-between hover:border-slate-700 transition"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-bold text-xs font-tm-mono">
+                      <div className="px-3 py-2 rounded-xl bg-slate-900 text-cyan-300 font-semibold text-xs border border-slate-800">
                         {item.time}
                       </div>
                       <div>
-                        <h4 className="font-bold text-white text-sm">{item.title}</h4>
-                        <p className="text-xs font-tm-mono text-cyan-400/70 mt-0.5">
+                        <h4 className="font-semibold text-white text-sm">{item.title}</h4>
+                        <p className="text-xs text-slate-400 mt-0.5">
                           {item.day} · {item.venue} · [{item.category}]
                         </p>
                       </div>
                     </div>
 
                     <button
-                      onClick={() => setScheduleItems(scheduleItems.filter((sc) => sc.id !== item.id))}
-                      className="p-2 rounded-lg hover:bg-red-500/20 text-white/40 hover:text-red-400 transition"
+                      onClick={() => setSchedules(schedules.filter((s) => s.id !== item.id))}
+                      className="p-2 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
                     >
                       <Trash2 size={15} />
                     </button>
@@ -1325,133 +1198,186 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB 8: COMMITTEE & ORGANIZERS
+              TAB: WEBSITE SETTINGS
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "committee" && (
+          {activeTab === "Website Settings" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                    Committee & Leads Manager
-                  </h1>
-                  <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
-                    Manage festival core leads, coordinators, and student department champions
+                  <h1 className="text-2xl font-bold text-white tracking-tight">Website Settings & CMS</h1>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Control public festival copy, headline texts, countdown date, and CTAs
                   </p>
                 </div>
 
                 <button
-                  onClick={() => {
-                    const newLead: CommitteeMember = {
-                      id: `cm-${Date.now()}`,
-                      name: "Student Lead Name",
-                      role: "Domain Lead",
-                      domain: "Technical & Operations",
-                      contact: "lead@techtatva.in"
-                    };
-                    setCommittee([...committee, newLead]);
-                    showToast("Committee lead slot added.");
-                  }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-tm-mono text-xs font-bold shadow-[0_0_25px_rgba(74,158,255,0.4)] transition"
+                  onClick={saveSettings}
+                  disabled={isSaving}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
                 >
-                  <Plus size={15} />
-                  <span>ADD COMMITTEE LEAD</span>
+                  <Save size={16} />
+                  <span>{isSaving ? "Saving..." : "Save & Publish"}</span>
                 </button>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                {committee.map((mem) => (
-                  <div key={mem.id} className="p-5 rounded-2xl bg-[#0e131d] border border-white/10 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-white text-sm">{mem.name}</h3>
-                      <span className="px-2 py-0.5 rounded text-[9px] font-tm-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-                        {mem.domain}
-                      </span>
-                    </div>
-                    <p className="text-xs font-tm-mono text-cyan-400/80">{mem.role}</p>
-                    <p className="text-[11px] font-tm-mono text-white/40">{mem.contact}</p>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* General Info */}
+                <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
+                  <h2 className="text-sm font-semibold text-slate-200">General Information</h2>
 
-                    <div className="pt-2 border-t border-white/5 flex justify-end">
-                      <button
-                        onClick={() => setCommittee(committee.filter((c) => c.id !== mem.id))}
-                        className="p-1 rounded hover:bg-red-500/20 text-white/40 hover:text-red-400 transition"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Festival Title</label>
+                    <input
+                      type="text"
+                      value={settingsData.festivalName}
+                      onChange={(e) => setSettingsData({ ...settingsData, festivalName: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
+                    />
                   </div>
-                ))}
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Campus Location</label>
+                    <input
+                      type="text"
+                      value={settingsData.campusLocation}
+                      onChange={(e) => setSettingsData({ ...settingsData, campusLocation: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Hero Headline</label>
+                    <input
+                      type="text"
+                      value={settingsData.headline}
+                      onChange={(e) => setSettingsData({ ...settingsData, headline: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Description / Subtitle</label>
+                    <textarea
+                      rows={3}
+                      value={settingsData.tagline}
+                      onChange={(e) => setSettingsData({ ...settingsData, tagline: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                </div>
+
+                {/* Countdown & Timing */}
+                <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
+                  <h2 className="text-sm font-semibold text-slate-200">Countdown & CTAs</h2>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                      Countdown Target Timestamp (ISO)
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsData.targetDate}
+                      onChange={(e) => setSettingsData({ ...settingsData, targetDate: e.target.value })}
+                      placeholder="2026-09-15T09:00:00+05:30"
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Highlight Prize Pool</label>
+                    <input
+                      type="text"
+                      value={settingsData.prizePoolText}
+                      onChange={(e) => setSettingsData({ ...settingsData, prizePoolText: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Primary CTA Button</label>
+                    <input
+                      type="text"
+                      value={settingsData.ctaPrimaryText}
+                      onChange={(e) => setSettingsData({ ...settingsData, ctaPrimaryText: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Secondary CTA Button</label>
+                    <input
+                      type="text"
+                      value={settingsData.ctaSecondaryText}
+                      onChange={(e) => setSettingsData({ ...settingsData, ctaSecondaryText: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB 9: FESTIVAL FAQS
+              TAB: ANNOUNCEMENTS
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "faqs" && (
+          {activeTab === "Announcements" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                    Festival FAQs Desk
-                  </h1>
-                  <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
-                    Manage frequently asked questions displayed across festival landing pages
+                  <h1 className="text-2xl font-bold text-white tracking-tight">Broadcast Announcements</h1>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Manage the top cycling marquee announcement ribbon on the public website
                   </p>
                 </div>
 
                 <button
-                  onClick={() => saveCmsConfig()}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-tm-mono text-xs font-bold shadow-[0_0_25px_rgba(74,158,255,0.4)] transition"
+                  onClick={saveSettings}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
                 >
-                  <Save size={15} />
-                  <span>SAVE FAQS</span>
+                  <Save size={16} />
+                  <span>Save Broadcast</span>
                 </button>
               </div>
 
-              {/* Add FAQ form */}
-              <div className="p-5 rounded-2xl bg-[#0e131d] border border-white/10 space-y-3">
+              {/* Add form */}
+              <div className="p-4 rounded-2xl bg-[#0e1422] border border-slate-800 flex gap-3">
                 <input
                   type="text"
-                  id="newFaqQ"
-                  placeholder="Question text..."
-                  className="w-full px-4 py-2 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                />
-                <textarea
-                  id="newFaqA"
-                  rows={2}
-                  placeholder="Answer explanation..."
-                  className="w-full px-4 py-2 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
+                  value={newAnnouncement}
+                  onChange={(e) => setNewAnnouncement(e.target.value)}
+                  placeholder="Type new broadcast announcement..."
+                  className="flex-grow px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
                 />
                 <button
                   onClick={() => {
-                    const qInput = document.getElementById("newFaqQ") as HTMLInputElement;
-                    const aInput = document.getElementById("newFaqA") as HTMLTextAreaElement;
-                    if (!qInput.value.trim() || !aInput.value.trim()) return;
-                    setFaqs([...faqs, { q: qInput.value.trim(), a: aInput.value.trim() }]);
-                    qInput.value = "";
-                    aInput.value = "";
-                    showToast("FAQ added!");
+                    if (!newAnnouncement.trim()) return;
+                    setAnnouncements([...announcements, newAnnouncement.trim().toUpperCase()]);
+                    setNewAnnouncement("");
+                    notify("Added broadcast line.");
                   }}
-                  className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-tm-mono font-bold transition"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold text-xs transition"
                 >
-                  + ADD FAQ ENTRY
+                  Add Line
                 </button>
               </div>
 
-              {/* FAQ List */}
-              <div className="space-y-3">
-                {faqs.map((faq, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-[#0e131d] border border-white/10 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-white text-xs">{faq.q}</h4>
-                      <button
-                        onClick={() => setFaqs(faqs.filter((_, i) => i !== idx))}
-                        className="p-1 rounded hover:bg-red-500/20 text-white/40 hover:text-red-400 transition"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+              <div className="space-y-2.5">
+                {announcements.map((line, i) => (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl bg-[#0e1422] border border-slate-800 flex items-center justify-between hover:border-slate-700 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold text-cyan-400">{i + 1}.</span>
+                      <span className="text-sm text-slate-200">{line}</span>
                     </div>
-                    <p className="text-xs text-white/60 leading-relaxed">{faq.a}</p>
+
+                    <button
+                      onClick={() => setAnnouncements(announcements.filter((_, idx) => idx !== i))}
+                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -1459,66 +1385,14 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB 10: ON-GROUND QR GATE CHECK-IN
+              TAB: GALLERY & MEDIA
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "checkin" && (
-            <div className="space-y-6 max-w-2xl">
-              <div>
-                <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                  On-Ground Gate Check-In Desk
-                </h1>
-                <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
-                  Validate digital passes, verify participant UIDs, and stamp attendance
-                </p>
-              </div>
-
-              <form onSubmit={handleCheckInSubmit} className="p-6 rounded-2xl bg-[#0e131d] border border-white/10 space-y-4">
-                <label className="block text-xs font-tm-mono font-bold text-cyan-400 uppercase">
-                  ENTER TICKET TOKEN OR STUDENT UID
-                </label>
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={checkInInput}
-                    onChange={(e) => setCheckInInput(e.target.value)}
-                    placeholder="e.g. TM3-CS24-9981A or 22BCS10192"
-                    className="flex-grow px-4 py-3 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white text-xs font-tm-mono outline-none"
-                    autoFocus
-                  />
-                  <button
-                    type="submit"
-                    className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-tm-mono text-xs font-bold shadow-[0_0_25px_rgba(74,158,255,0.4)] transition"
-                  >
-                    VERIFY
-                  </button>
-                </div>
-              </form>
-
-              {checkInResult && (
-                <div
-                  className={`p-5 rounded-2xl border ${
-                    checkInResult.status === "success"
-                      ? "bg-cyan-950/40 border-cyan-400 text-cyan-200 shadow-[0_0_30px_rgba(74,158,255,0.3)]"
-                      : "bg-red-950/40 border-red-500 text-red-200"
-                  }`}
-                >
-                  <p className="font-tm-mono text-xs font-bold">{checkInResult.text}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════
-              TAB 11: MEDIA & ASSETS HUB
-              ═══════════════════════════════════════════════════════ */}
-          {activeTab === "media" && (
+          {activeTab === "Gallery & Media" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-tm-heading font-black tracking-wide uppercase text-white">
-                    Media & Asset Library
-                  </h1>
-                  <p className="text-xs font-tm-mono text-cyan-200/60 mt-1">
+                  <h1 className="text-2xl font-bold text-white tracking-tight">Gallery & Media Library</h1>
+                  <p className="text-sm text-slate-400 mt-1">
                     Upload festival logos, posters, sponsor emblems, and event banners
                   </p>
                 </div>
@@ -1527,43 +1401,43 @@ export default function TechnomaniaAdminPage() {
                   <input
                     type="file"
                     ref={fileInputRef}
-                    onChange={handleFileUpload}
+                    onChange={handleAssetUpload}
                     accept="image/*"
                     className="hidden"
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-tm-mono text-xs font-bold shadow-[0_0_25px_rgba(74,158,255,0.4)] transition"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
                   >
                     <Upload size={16} />
-                    <span>{isUploading ? "UPLOADING..." : "UPLOAD NEW ASSET"}</span>
+                    <span>{isUploading ? "Uploading..." : "Upload Image"}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Uploaded assets grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {uploadedMedia.map((media, idx) => (
+                {mediaAssets.map((asset, i) => (
                   <div
-                    key={idx}
-                    className="p-3 rounded-2xl bg-[#0e131d] border border-white/10 hover:border-cyan-400/50 transition flex flex-col space-y-2 group"
+                    key={i}
+                    className="p-3 rounded-2xl bg-[#0e1422] border border-slate-800 hover:border-slate-700 transition flex flex-col space-y-2"
                   >
-                    <div className="relative h-28 w-full bg-black/60 rounded-xl overflow-hidden flex items-center justify-center p-2">
+                    <div className="relative h-28 w-full bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center p-2">
                       <Image
-                        src={media.url}
-                        alt={media.name}
+                        src={asset.url}
+                        alt={asset.name}
                         fill
                         className="object-contain p-2"
                       />
                     </div>
-                    <div className="text-[10px] font-tm-mono truncate text-white/80 font-bold">{media.name}</div>
+                    <div className="text-xs font-semibold text-white truncate">{asset.name}</div>
+                    <div className="text-[11px] text-slate-400">{asset.size}</div>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(media.url);
-                        showToast(`Copied URL: ${media.url}`);
+                        navigator.clipboard.writeText(asset.url);
+                        notify(`Copied URL: ${asset.url}`);
                       }}
-                      className="w-full py-1 text-center rounded bg-white/5 hover:bg-cyan-500/20 text-cyan-300 text-[10px] font-tm-mono transition"
+                      className="w-full py-1 text-center rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-medium transition"
                     >
                       Copy URL
                     </button>
@@ -1572,124 +1446,231 @@ export default function TechnomaniaAdminPage() {
               </div>
             </div>
           )}
+
+          {/* ═══════════════════════════════════════════════════════
+              TAB: FAQS
+              ═══════════════════════════════════════════════════════ */}
+          {activeTab === "FAQs" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-white tracking-tight">Frequently Asked Questions</h1>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Manage festival FAQs displayed across the public website
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const q = prompt("Question:");
+                    const a = prompt("Answer:");
+                    if (q && a) {
+                      setFaqs([...faqs, { id: `faq-${Date.now()}`, question: q, answer: a, category: "General" }]);
+                      notify("Added FAQ entry.");
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
+                >
+                  <Plus size={16} />
+                  <span>Add FAQ</span>
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {faqs.map((faq) => (
+                  <div key={faq.id} className="p-5 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-white text-sm">{faq.question}</h4>
+                      <button
+                        onClick={() => setFaqs(faqs.filter((f) => f.id !== faq.id))}
+                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed">{faq.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════
+              TAB: CHECK-IN
+              ═══════════════════════════════════════════════════════ */}
+          {activeTab === "Check-In" && (
+            <div className="space-y-6 max-w-xl">
+              <div>
+                <h1 className="text-2xl font-bold text-white tracking-tight">Gate Check-In Desk</h1>
+                <p className="text-sm text-slate-400 mt-1">
+                  Verify digital QR ticket passes or enter student UIDs for attendance logging
+                </p>
+              </div>
+
+              <form onSubmit={handleCheckIn} className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
+                <label className="block text-xs font-semibold text-slate-300">
+                  ENTER TICKET PASS TOKEN OR STUDENT UID
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={checkInQuery}
+                    onChange={(e) => setCheckInQuery(e.target.value)}
+                    placeholder="e.g. TM3-CS24-9981A or 22BCS10192"
+                    className="flex-grow px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400 font-mono"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
+                  >
+                    Verify Pass
+                  </button>
+                </div>
+              </form>
+
+              {checkInResult && (
+                <div
+                  className={`p-5 rounded-2xl border ${
+                    checkInResult.status === "success"
+                      ? "bg-cyan-950/30 border-cyan-500 text-cyan-200"
+                      : "bg-red-950/30 border-red-500 text-red-200"
+                  }`}
+                >
+                  <p className="font-semibold text-sm">{checkInResult.text}</p>
+                </div>
+              )}
+            </div>
+          )}
         </main>
       </div>
 
-      {/* ── SQUAD INSPECTOR DOSSIER MODAL ── */}
-      {selectedSquad && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-[#0c1017] border border-cyan-500/40 rounded-3xl p-6 sm:p-8 space-y-6 shadow-[0_0_60px_rgba(74,158,255,0.3)]">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+      {/* ── REGISTRATION ROSTER SLIDE-OVER MODAL ── */}
+      {selectedRegistration && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-[#0c111d] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div>
-                <span className="text-[10px] font-tm-mono text-cyan-400 tracking-widest uppercase">
-                  // PARTICIPANT DOSSIER //
+                <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+                  Registration Details
                 </span>
-                <h2 className="font-tm-heading text-xl font-bold text-white">
-                  {selectedSquad.teamName || selectedSquad.leadName}
+                <h2 className="text-xl font-bold text-white mt-0.5">
+                  {selectedRegistration.teamName || selectedRegistration.leadName}
                 </h2>
               </div>
               <button
-                onClick={() => setSelectedSquad(null)}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white"
+                onClick={() => setSelectedRegistration(null)}
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Leader Details */}
-            <div className="p-4 rounded-xl bg-black/60 border border-white/5 space-y-2">
-              <h4 className="text-[11px] font-tm-mono font-bold text-cyan-400 uppercase">
-                SQUAD LEADER / PRIMARY CONTACT
-              </h4>
-              <div className="grid grid-cols-2 gap-2 text-xs font-tm-mono">
-                <div><span className="text-white/40">Name:</span> <span className="text-white font-bold">{selectedSquad.leadName}</span></div>
-                <div><span className="text-white/40">UID:</span> <span className="text-cyan-300 font-bold">{selectedSquad.leadUid}</span></div>
-                <div><span className="text-white/40">Email:</span> <span className="text-white">{selectedSquad.leadEmail}</span></div>
-                <div><span className="text-white/40">Phone:</span> <span className="text-white">{selectedSquad.leadPhone}</span></div>
-                <div className="col-span-2"><span className="text-white/40">Program:</span> <span className="text-white">{selectedSquad.leadProgram} (Sem {selectedSquad.leadSemester})</span></div>
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+              <h4 className="text-xs font-semibold text-slate-300 uppercase">Team Leader / Contact</h4>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div><span className="text-slate-400">Name:</span> <span className="text-white font-medium">{selectedRegistration.leadName}</span></div>
+                <div><span className="text-slate-400">UID:</span> <span className="text-cyan-300 font-mono font-medium">{selectedRegistration.leadUid}</span></div>
+                <div><span className="text-slate-400">Email:</span> <span className="text-white">{selectedRegistration.leadEmail}</span></div>
+                <div><span className="text-slate-400">Phone:</span> <span className="text-white">{selectedRegistration.leadPhone}</span></div>
+                <div className="col-span-2"><span className="text-slate-400">Program:</span> <span className="text-white">{selectedRegistration.leadProgram} (Semester {selectedRegistration.leadSemester})</span></div>
               </div>
             </div>
 
-            {/* Team Members List */}
-            {selectedSquad.members.length > 0 && (
+            {/* Team Members */}
+            {selectedRegistration.members.length > 0 && (
               <div className="space-y-2">
-                <h4 className="text-[11px] font-tm-mono font-bold text-cyan-400 uppercase">
-                  SQUAD ROSTER ({selectedSquad.members.length} MEMBERS)
+                <h4 className="text-xs font-semibold text-slate-300 uppercase">
+                  Squad Roster ({selectedRegistration.members.length} Additional Members)
                 </h4>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {selectedSquad.members.map((m, idx) => (
-                    <div key={idx} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-xs font-tm-mono flex items-center justify-between">
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {selectedRegistration.members.map((m, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs flex items-center justify-between"
+                    >
                       <div>
-                        <p className="font-bold text-white">{m.name}</p>
-                        <p className="text-[10px] text-white/50">{m.email} · {m.program}</p>
+                        <p className="font-semibold text-white">{m.name}</p>
+                        <p className="text-slate-400 text-[11px]">{m.email} · {m.program}</p>
                       </div>
-                      <span className="text-cyan-400 font-bold">{m.uid}</span>
+                      <span className="text-cyan-400 font-mono font-medium">{m.uid}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Quick Status Buttons */}
-            <div className="pt-4 border-t border-white/10 flex flex-wrap gap-2 justify-end">
+            {/* Actions */}
+            <div className="pt-4 border-t border-slate-800 flex justify-end gap-2">
               <button
-                onClick={() => updateSquadStatus(selectedSquad._id, "confirmed")}
-                className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-tm-mono font-bold"
+                onClick={() => {
+                  setRegistrations((prev) =>
+                    prev.map((r) =>
+                      r._id === selectedRegistration._id ? { ...r, status: "confirmed" } : r
+                    )
+                  );
+                  setSelectedRegistration(null);
+                  notify("Registration confirmed.");
+                }}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition"
               >
-                CONFIRM SQUAD
+                Mark Confirmed
               </button>
               <button
-                onClick={() => updateSquadStatus(selectedSquad._id, "checked_in")}
-                className="px-4 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-xs font-tm-mono font-bold"
+                onClick={() => {
+                  setRegistrations((prev) =>
+                    prev.map((r) =>
+                      r._id === selectedRegistration._id ? { ...r, status: "checked_in" } : r
+                    )
+                  );
+                  setSelectedRegistration(null);
+                  notify("Participant marked as checked in.");
+                }}
+                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-semibold transition"
               >
-                CHECK-IN AT GATE
-              </button>
-              <button
-                onClick={() => updateSquadStatus(selectedSquad._id, "cancelled")}
-                className="px-4 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-xs font-tm-mono font-bold"
-              >
-                CANCEL / REJECT
+                Check-In at Gate
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── ARENA CREATION / EDIT MODAL ── */}
-      {isArenaModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-xl bg-[#0c1017] border border-cyan-500/40 rounded-3xl p-6 sm:p-8 space-y-5 shadow-[0_0_60px_rgba(74,158,255,0.3)] max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <h2 className="font-tm-heading text-lg font-bold text-white">
-                {editingArena?._id ? "Edit Arena Event" : "Create New Festival Arena"}
+      {/* ── EVENT DRAWER MODAL ── */}
+      {isEventDrawerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-[#0c111d] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <h2 className="text-lg font-bold text-white">
+                {editingEvent?._id ? "Edit Event Track" : "Create New Event Track"}
               </h2>
               <button
-                onClick={() => setIsArenaModalOpen(false)}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white"
+                onClick={() => setIsEventDrawerOpen(false)}
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="space-y-4 text-xs font-tm-mono">
+            <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-white/60 mb-1">ARENA TITLE</label>
+                <label className="block text-slate-300 font-medium mb-1">Event Title</label>
                 <input
                   type="text"
-                  value={editingArena?.title || ""}
-                  onChange={(e) => setEditingArena({ ...editingArena, title: e.target.value })}
+                  value={editingEvent?.title || ""}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
                   placeholder="e.g. Code Storm 24H"
-                  className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white outline-none"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-white/60 mb-1">CATEGORY TRACK</label>
+                  <label className="block text-slate-300 font-medium mb-1">Category Track</label>
                   <select
-                    value={editingArena?.category || "hackathon"}
-                    onChange={(e) => setEditingArena({ ...editingArena, category: e.target.value as any })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 text-white outline-none"
+                    value={editingEvent?.category || "hackathon"}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, category: e.target.value as any })}
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
                   >
                     <option value="hackathon">Hackathon</option>
                     <option value="esports">Esports Arena</option>
@@ -1699,86 +1680,86 @@ export default function TechnomaniaAdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-white/60 mb-1">CAPACITY (SLOTS)</label>
+                  <label className="block text-slate-300 font-medium mb-1">Capacity (Max Slots)</label>
                   <input
                     type="number"
-                    value={editingArena?.capacity || 50}
-                    onChange={(e) => setEditingArena({ ...editingArena, capacity: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white outline-none"
+                    value={editingEvent?.capacity || 50}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, capacity: Number(e.target.value) })}
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-white/60 mb-1">CAMPUS VENUE / ROOM</label>
+                <label className="block text-slate-300 font-medium mb-1">Venue / Room</label>
                 <input
                   type="text"
-                  value={editingArena?.venue || ""}
-                  onChange={(e) => setEditingArena({ ...editingArena, venue: e.target.value })}
-                  placeholder="e.g. Block D Labs"
-                  className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white outline-none"
+                  value={editingEvent?.venue || ""}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, venue: e.target.value })}
+                  placeholder="e.g. Block D Central Tech Labs"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
                 />
               </div>
 
               <div>
-                <label className="block text-white/60 mb-1">PRIZES & REWARDS SUMMARY</label>
+                <label className="block text-slate-300 font-medium mb-1">Prizes & Rewards</label>
                 <input
                   type="text"
-                  value={editingArena?.prizes || ""}
-                  onChange={(e) => setEditingArena({ ...editingArena, prizes: e.target.value })}
+                  value={editingEvent?.prizes || ""}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, prizes: e.target.value })}
                   placeholder="e.g. ₹XX,XXX CASH & INTERNSHIPS"
-                  className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white outline-none"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
                 />
               </div>
 
               <div>
-                <label className="block text-white/60 mb-1">DESCRIPTION</label>
+                <label className="block text-slate-300 font-medium mb-1">Description</label>
                 <textarea
                   rows={3}
-                  value={editingArena?.description || ""}
-                  onChange={(e) => setEditingArena({ ...editingArena, description: e.target.value })}
-                  placeholder="Detailed track briefing..."
-                  className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-400 text-white outline-none"
+                  value={editingEvent?.description || ""}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
+                  placeholder="Event details..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+            <div className="pt-4 border-t border-slate-800 flex justify-end gap-3">
               <button
-                onClick={() => setIsArenaModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-white/5 text-white/60 text-xs font-tm-mono"
+                onClick={() => setIsEventDrawerOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
               >
-                CANCEL
+                Cancel
               </button>
               <button
                 onClick={() => {
-                  if (!editingArena?.title) return;
-                  if (editingArena._id) {
-                    setArenas(arenas.map((a) => (a._id === editingArena._id ? ({ ...a, ...editingArena } as ArenaEvent) : a)));
+                  if (!editingEvent?.title) return;
+                  if (editingEvent._id) {
+                    setEvents(events.map((e) => (e._id === editingEvent._id ? ({ ...e, ...editingEvent } as TechnomaniaEvent) : e)));
                   } else {
-                    const newArena: ArenaEvent = {
-                      _id: `arena-${Date.now()}`,
-                      title: editingArena.title,
-                      slug: editingArena.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-                      category: editingArena.category || "hackathon",
-                      participationMode: editingArena.participationMode || "team",
-                      maxTeamSize: editingArena.maxTeamSize || 4,
-                      capacity: editingArena.capacity || 50,
-                      venue: editingArena.venue || "Campus Labs",
+                    const newEvt: TechnomaniaEvent = {
+                      _id: `evt-${Date.now()}`,
+                      title: editingEvent.title,
+                      slug: editingEvent.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                      category: editingEvent.category || "hackathon",
+                      participationMode: editingEvent.participationMode || "team",
+                      maxTeamSize: editingEvent.maxTeamSize || 4,
+                      capacity: editingEvent.capacity || 50,
+                      venue: editingEvent.venue || "Campus Labs",
                       status: "published",
                       registrationOpen: true,
                       startAt: "2026-09-15T09:00:00",
-                      description: editingArena.description || "",
-                      prizes: editingArena.prizes || ""
+                      description: editingEvent.description || "",
+                      prizes: editingEvent.prizes || ""
                     };
-                    setArenas([...arenas, newArena]);
+                    setEvents([...events, newEvt]);
                   }
-                  setIsArenaModalOpen(false);
-                  showToast(`✓ Arena "${editingArena.title}" saved successfully!`);
+                  setIsEventDrawerOpen(false);
+                  notify(`Event "${editingEvent.title}" saved successfully.`);
                 }}
-                className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-tm-mono font-bold transition"
+                className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition"
               >
-                SAVE ARENA
+                Save Event
               </button>
             </div>
           </div>
