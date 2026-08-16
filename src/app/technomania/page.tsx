@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useTechnomaniaHref } from "@/lib/technomania-links";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   Code,
@@ -13,17 +13,12 @@ import {
   Zap,
   Sparkles,
   ChevronDown,
-  Trophy,
   Users,
-  Calendar,
   ExternalLink,
   Flame,
   Award,
-  ShieldCheck,
-  Cpu,
 } from "lucide-react";
 import { TechnomaniaCountdown } from "@/components/technomania/technomania-countdown";
-import { TechnomaniaIntro } from "@/components/technomania/technomania-intro";
 
 /* ── Flagship Events (Pure Monochrome Theme: Black, White & Zinc) ── */
 const flagshipEvents = [
@@ -39,7 +34,6 @@ const flagshipEvents = [
     prizes: "₹XX,XXX PRIZES & INTERNSHIPS",
     slug: "hackathon",
     teamSize: "1-4 Members",
-    badgeColor: "bg-zinc-900 text-zinc-200 border-zinc-800",
   },
   {
     id: "esports",
@@ -53,7 +47,6 @@ const flagshipEvents = [
     prizes: "TROPHIES & CASH REWARDS",
     slug: "esports",
     teamSize: "Squad & Solo",
-    badgeColor: "bg-zinc-900 text-zinc-200 border-zinc-800",
   },
   {
     id: "cultural",
@@ -67,7 +60,6 @@ const flagshipEvents = [
     prizes: "MEMENTOS & CASH PRIZES",
     slug: "cultural",
     teamSize: "Solo & Crews",
-    badgeColor: "bg-zinc-900 text-zinc-200 border-zinc-800",
   },
   {
     id: "sub-events",
@@ -81,7 +73,6 @@ const flagshipEvents = [
     prizes: "SPOT GOODIES & CERTIFICATES",
     slug: "sub-events",
     teamSize: "Solo Entry",
-    badgeColor: "bg-zinc-900 text-zinc-200 border-zinc-800",
   },
 ];
 
@@ -140,7 +131,6 @@ const faqs = [
 export default function TechnomaniaPage() {
   const getHref = useTechnomaniaHref();
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [hoveredEvent, setHoveredEvent] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const filteredEvents =
@@ -152,23 +142,25 @@ export default function TechnomaniaPage() {
 
   return (
     <div className="relative overflow-hidden bg-black text-white selection:bg-white selection:text-black">
-      {/* ── Cinematic Opening Entrance Animation ── */}
-      <TechnomaniaIntro />
-
       {/* ═══════════════════════════════════════════════════════
-          HERO SECTION — Spacious Monochrome Centerpiece
+          HERO SECTION — Ultra Smooth Logo Expansion & Lodging
           ═══════════════════════════════════════════════════════ */}
       <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 pt-12 pb-16 md:pt-16 md:pb-20">
-        {/* Subtle Ambient Radial Highlight */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] md:w-[1100px] h-[500px] bg-white/[0.025] blur-[160px] rounded-full pointer-events-none -z-10" />
+        {/* Soft Ambient Radial Highlight */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] md:w-[1100px] h-[500px] bg-white/[0.03] blur-[160px] rounded-full pointer-events-none -z-10"
+        />
 
         <div className="w-full max-w-6xl mx-auto relative z-10">
-          {/* Header Badge */}
+          {/* Header Badge (Graceful Fade-In) */}
           <div className="text-center mb-6">
             <motion.div
-              initial={{ opacity: 0, y: -15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              initial={{ opacity: 0, y: -20, filter: "blur(6px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.0, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950 border border-zinc-800 text-xs font-mono font-medium text-zinc-300"
             >
               <div className="relative h-5 w-5">
@@ -184,31 +176,52 @@ export default function TechnomaniaPage() {
             </motion.div>
           </div>
 
-          {/* ── MASSIVE TM 3.0 WHITE EMBLEM LOGO (HERO CENTERPIECE) ── */}
+          {/* ── BUTTERY SMOOTH TM 3.0 LOGO EXPANSION & LODGING ── */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative w-full max-w-4xl mx-auto my-4"
+            initial={{
+              scale: 0.38,
+              opacity: 0,
+              y: 40,
+              filter: "blur(16px)",
+            }}
+            animate={{
+              scale: 1,
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+            }}
+            transition={{
+              duration: 1.5,
+              ease: [0.16, 1, 0.3, 1], // Apple fluid momentum curve
+            }}
+            className="relative w-full max-w-4xl mx-auto my-4 will-change-transform transform-gpu"
           >
+            {/* Ambient Pulse Aura behind Logo */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: [0, 0.5, 0.25], scale: [0.8, 1.1, 1] }}
+              transition={{ duration: 2.0, ease: "easeOut" }}
+              className="absolute -inset-10 bg-white/[0.04] rounded-[50px] blur-3xl pointer-events-none"
+            />
+
             <div className="relative rounded-3xl p-4 sm:p-6 backdrop-blur-sm transition-transform duration-500 hover:scale-[1.01]">
               <div className="relative w-full aspect-[2.4/1]">
                 <Image
                   src="/technomania/logo-white.png"
                   alt="Technomania 3.0"
                   fill
-                  className="object-contain drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]"
+                  className="object-contain drop-shadow-[0_0_50px_rgba(255,255,255,0.45)]"
                   priority
                 />
               </div>
             </div>
           </motion.div>
 
-          {/* ── Subtitle & Festival Info ── */}
+          {/* ── Subtitle & Action Elements (Staggered Spring Entry) ── */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 1.1, delay: 0.75, ease: [0.16, 1, 0.3, 1] }}
             className="text-center mt-6 max-w-3xl mx-auto space-y-6"
           >
             {/* Campus Info & Headline */}
@@ -226,10 +239,15 @@ export default function TechnomaniaPage() {
             </div>
 
             {/* Action CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2"
+            >
               <Link
                 href={getHref("/register")}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-sm tracking-wide flex items-center justify-center gap-2.5 transition-all group"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-sm tracking-wide flex items-center justify-center gap-2.5 transition-all group shadow-[0_0_25px_rgba(255,255,255,0.15)] hover:shadow-[0_0_35px_rgba(255,255,255,0.3)]"
               >
                 <span>REGISTER SQUAD NOW</span>
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -242,12 +260,17 @@ export default function TechnomaniaPage() {
                 <span>EXPLORE ALL EVENTS</span>
                 <ExternalLink size={15} className="text-zinc-400" />
               </Link>
-            </div>
+            </motion.div>
 
             {/* Live Countdown Chronometer */}
-            <div className="pt-4 pb-2 flex justify-center items-center w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 1.05, ease: [0.16, 1, 0.3, 1] }}
+              className="pt-4 pb-2 flex justify-center items-center w-full"
+            >
               <TechnomaniaCountdown targetDate="2026-09-15T09:00:00+05:30" />
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -268,11 +291,10 @@ export default function TechnomaniaPage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -4 }}
               className="relative p-6 rounded-2xl bg-zinc-950 border border-zinc-900 hover:border-zinc-700 transition-all duration-300 group overflow-hidden"
             >
-              {/* Header */}
               <div className="flex items-center justify-between relative z-10 mb-3">
                 <span className="text-[10px] font-mono font-bold tracking-[0.2em] text-zinc-500 group-hover:text-zinc-300 transition-colors">
                   // {stat.tag}
@@ -280,7 +302,6 @@ export default function TechnomaniaPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-white transition-colors" />
               </div>
 
-              {/* Value & Labels */}
               <div className="relative z-10 space-y-1">
                 <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   {stat.value}
@@ -346,7 +367,7 @@ export default function TechnomaniaPage() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
+                transition={{ delay: idx * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -5 }}
                 className="group relative p-8 rounded-3xl bg-zinc-950 border border-zinc-900 hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between"
               >
@@ -410,8 +431,12 @@ export default function TechnomaniaPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {journeySteps.map((step, i) => (
-              <div
+              <motion.div
                 key={step.step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-4"
               >
                 <div className="flex items-center justify-between">
@@ -423,7 +448,7 @@ export default function TechnomaniaPage() {
 
                 <h3 className="text-lg font-bold text-white">{step.title}</h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">{step.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -454,16 +479,22 @@ export default function TechnomaniaPage() {
                   <span>{faq.q}</span>
                   <ChevronDown
                     size={16}
-                    className={`text-zinc-500 transition-transform ${
+                    className={`text-zinc-500 transition-transform duration-300 ${
                       openFaq === idx ? "rotate-180 text-white" : ""
                     }`}
                   />
                 </button>
 
                 {openFaq === idx && (
-                  <div className="px-5 pb-5 text-xs text-zinc-400 leading-relaxed border-t border-zinc-900/60 pt-3">
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="px-5 pb-5 text-xs text-zinc-400 leading-relaxed border-t border-zinc-900/60 pt-3"
+                  >
                     {faq.a}
-                  </div>
+                  </motion.div>
                 )}
               </div>
             ))}
@@ -485,7 +516,7 @@ export default function TechnomaniaPage() {
           <div className="flex justify-center pt-2">
             <Link
               href={getHref("/register")}
-              className="px-8 py-3.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-sm tracking-wide flex items-center gap-2.5 transition"
+              className="px-8 py-3.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-sm tracking-wide flex items-center gap-2.5 transition shadow-[0_0_25px_rgba(255,255,255,0.15)]"
             >
               <span>REGISTER SQUAD NOW</span>
               <ArrowRight size={16} />
