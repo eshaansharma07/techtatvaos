@@ -19,6 +19,7 @@ import {
   Award,
 } from "lucide-react";
 import { TechnomaniaCountdown } from "@/components/technomania/technomania-countdown";
+import { TechnomaniaSciFiIntro } from "@/components/technomania/technomania-scifi-intro";
 
 /* ── Flagship Events (Pure Monochrome Theme: Black, White & Zinc) ── */
 const flagshipEvents = [
@@ -142,49 +143,29 @@ export default function TechnomaniaPage() {
 
   return (
     <div className="relative overflow-hidden bg-black text-white selection:bg-white selection:text-black">
+      {/* ── Sci-Fi HUD Reticle & Shockwave Lock Entrance ── */}
+      <TechnomaniaSciFiIntro />
+
       {/* ═══════════════════════════════════════════════════════
-          HERO SECTION — Unified Sci-Fi Reticle & Buttery Expansion
+          HERO SECTION — Ultra Smooth Logo Expansion & Lodging
           ═══════════════════════════════════════════════════════ */}
-      <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 pt-12 pb-16 md:pt-16 md:pb-20 overflow-hidden">
-        {/* Continuous Rotating Tech Reticle Rings */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.6, rotate: 0 }}
-          animate={{ opacity: 0.35, scale: 1, rotate: 360 }}
-          transition={{
-            opacity: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-            scale: { duration: 1.4, ease: [0.16, 1, 0.3, 1] },
-            rotate: { duration: 30, repeat: Infinity, ease: "linear" },
-          }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] sm:w-[720px] sm:h-[720px] rounded-full border border-dashed border-zinc-800 pointer-events-none -z-10"
-        />
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
-          animate={{ opacity: 0.2, scale: 1, rotate: -360 }}
-          transition={{
-            opacity: { duration: 1.4, ease: [0.16, 1, 0.3, 1] },
-            scale: { duration: 1.6, ease: [0.16, 1, 0.3, 1] },
-            rotate: { duration: 40, repeat: Infinity, ease: "linear" },
-          }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[640px] sm:w-[900px] sm:h-[900px] rounded-full border border-zinc-900 pointer-events-none -z-10"
-        />
-
-        {/* Soft Radial Ambient Highlight */}
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 pt-12 pb-16 md:pt-16 md:pb-20">
+        {/* Soft Ambient Radial Highlight */}
         <motion.div
           initial={{ opacity: 0, scale: 0.7 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] md:w-[1100px] h-[500px] bg-white/[0.035] blur-[160px] rounded-full pointer-events-none -z-10"
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] md:w-[1100px] h-[500px] bg-white/[0.03] blur-[160px] rounded-full pointer-events-none -z-10"
         />
 
         <div className="w-full max-w-6xl mx-auto relative z-10">
-          {/* Header Badge */}
+          {/* Header Badge (Graceful Fade-In) */}
           <div className="text-center mb-6">
             <motion.div
-              initial={{ opacity: 0, y: -20, filter: "blur(8px)" }}
+              initial={{ opacity: 0, y: -20, filter: "blur(6px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.9, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950/80 border border-zinc-800 text-xs font-mono font-medium text-zinc-300 backdrop-blur-md"
+              transition={{ duration: 1.0, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950 border border-zinc-800 text-xs font-mono font-medium text-zinc-300"
             >
               <div className="relative h-5 w-5">
                 <Image
@@ -199,13 +180,13 @@ export default function TechnomaniaPage() {
             </motion.div>
           </div>
 
-          {/* ── SCI-FI RETICLE FRAME & EXPANDING TM 3.0 LOGO ── */}
+          {/* ── BUTTERY SMOOTH TM 3.0 LOGO EXPANSION & LODGING ── */}
           <motion.div
             initial={{
-              scale: 0.45,
+              scale: 0.38,
               opacity: 0,
-              y: 30,
-              filter: "blur(14px)",
+              y: 40,
+              filter: "blur(16px)",
             }}
             animate={{
               scale: 1,
@@ -214,65 +195,16 @@ export default function TechnomaniaPage() {
               filter: "blur(0px)",
             }}
             transition={{
-              duration: 1.4,
-              ease: [0.16, 1, 0.3, 1],
+              duration: 1.5,
+              ease: [0.16, 1, 0.3, 1], // Apple fluid momentum curve
             }}
             className="relative w-full max-w-4xl mx-auto my-4 will-change-transform transform-gpu"
           >
-            {/* Sci-Fi Corner Brackets */}
-            <motion.span
-              initial={{ opacity: 0, x: -10, y: -10 }}
-              animate={{ opacity: 0.8, x: 0, y: 0 }}
-              transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute -top-3 -left-3 text-white font-mono text-base select-none pointer-events-none"
-            >
-              ┌
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0, x: 10, y: -10 }}
-              animate={{ opacity: 0.8, x: 0, y: 0 }}
-              transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute -top-3 -right-3 text-white font-mono text-base select-none pointer-events-none"
-            >
-              ┐
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0, x: -10, y: 10 }}
-              animate={{ opacity: 0.8, x: 0, y: 0 }}
-              transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute -bottom-3 -left-3 text-white font-mono text-base select-none pointer-events-none"
-            >
-              └
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0, x: 10, y: 10 }}
-              animate={{ opacity: 0.8, x: 0, y: 0 }}
-              transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute -bottom-3 -right-3 text-white font-mono text-base select-none pointer-events-none"
-            >
-              ┘
-            </motion.span>
-
-            {/* Smooth Vertical Scanline Pulse */}
-            <motion.div
-              initial={{ top: "0%", opacity: 0 }}
-              animate={{
-                top: ["0%", "100%", "0%"],
-                opacity: [0, 0.8, 0],
-              }}
-              transition={{
-                duration: 2.2,
-                repeat: 1,
-                ease: "easeInOut",
-              }}
-              className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_20px_rgba(255,255,255,1)] pointer-events-none z-20"
-            />
-
             {/* Ambient Pulse Aura behind Logo */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: [0, 0.5, 0.25], scale: [0.8, 1.1, 1] }}
-              transition={{ duration: 1.8, ease: "easeOut" }}
+              transition={{ duration: 2.0, ease: "easeOut" }}
               className="absolute -inset-10 bg-white/[0.04] rounded-[50px] blur-3xl pointer-events-none"
             />
 
@@ -289,14 +221,14 @@ export default function TechnomaniaPage() {
             </div>
           </motion.div>
 
-          {/* ── Subtitle, Coordinates & Action Elements ── */}
+          {/* ── Subtitle & Action Elements (Staggered Spring Entry) ── */}
           <motion.div
             initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.0, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.1, delay: 0.75, ease: [0.16, 1, 0.3, 1] }}
             className="text-center mt-6 max-w-3xl mx-auto space-y-6"
           >
-            {/* Campus Info & Telemetry */}
+            {/* Campus Info & Headline */}
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-mono font-bold text-zinc-300 tracking-[0.2em] uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
@@ -314,7 +246,7 @@ export default function TechnomaniaPage() {
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.75, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.9, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2"
             >
               <Link
@@ -338,7 +270,7 @@ export default function TechnomaniaPage() {
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.9, delay: 1.05, ease: [0.16, 1, 0.3, 1] }}
               className="pt-4 pb-2 flex justify-center items-center w-full"
             >
               <TechnomaniaCountdown targetDate="2026-09-15T09:00:00+05:30" />
