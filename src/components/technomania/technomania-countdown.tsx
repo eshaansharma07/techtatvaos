@@ -44,10 +44,8 @@ export function TechnomaniaCountdown({ targetDate }: TechnomaniaCountdownProps) 
 
   if (isExpired) {
     return (
-      <div className="tm-card px-8 py-4 inline-flex items-center justify-center border-tm-accent bg-tm-accent/10">
-        <span className="font-tm-mono text-tm-accent tracking-[0.2em] font-bold text-sm">
-          EVENT STARTED
-        </span>
+      <div className="px-8 py-4 inline-flex items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-950 text-white font-mono text-sm tracking-widest">
+        <span>EVENT STARTED</span>
       </div>
     );
   }
@@ -60,46 +58,34 @@ export function TechnomaniaCountdown({ targetDate }: TechnomaniaCountdownProps) 
   ];
 
   return (
-    <div className="flex flex-col items-center gap-3 font-tm-mono mx-auto">
-      {/* Top Cyber HUD Header */}
-      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[10px] text-cyan-300 font-bold tracking-[0.2em] uppercase">
-        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-        <span>T-MINUS // FESTIVAL KICKOFF</span>
+    <div className="flex flex-col items-center gap-3 font-mono mx-auto">
+      {/* Top Header */}
+      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 font-bold tracking-[0.2em] uppercase">
+        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+        <span>T-MINUS // FESTIVAL COUNTDOWN</span>
       </div>
 
-      {/* Countdown Cards HUD */}
+      {/* Countdown Cards */}
       <div className="inline-flex items-center justify-center gap-2 sm:gap-3.5 mx-auto">
         {units.map((unit, i) => (
           <div key={unit.label} className="flex items-center gap-2 sm:gap-3.5">
-            <div className="relative flex flex-col items-center justify-center w-16 h-18 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-b from-blue-950/30 via-black/80 to-cyan-950/30 border border-cyan-500/30 hover:border-cyan-400/80 backdrop-blur-2xl shadow-[0_0_25px_rgba(74,158,255,0.15)] hover:shadow-[0_0_35px_rgba(56,189,248,0.35)] transition-all duration-300 group overflow-hidden">
-              {/* Subtle top scanline */}
-              <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
-
-              {/* Corner Crosshairs */}
-              <span className="absolute top-1.5 left-2 text-[8px] text-cyan-400/40 select-none">+</span>
-              <span className="absolute top-1.5 right-2 text-[8px] text-cyan-400/40 select-none">+</span>
-
-              {/* Glowing Digit */}
-              <span className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-[0_0_15px_rgba(74,158,255,0.7)] group-hover:text-cyan-200 transition-colors">
+            <div className="relative flex flex-col items-center justify-center w-16 h-18 sm:w-20 sm:h-20 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-zinc-700 backdrop-blur-2xl transition-all duration-300 group overflow-hidden">
+              {/* Digit */}
+              <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 {unit.value.toString().padStart(2, "0")}
               </span>
 
-              {/* Monospace Unit Label */}
-              <span className="text-[9px] sm:text-[10px] text-cyan-300/80 font-bold tracking-[0.25em] mt-1 group-hover:text-cyan-200 transition-colors">
+              {/* Label */}
+              <span className="text-[9px] sm:text-[10px] text-zinc-500 font-semibold tracking-[0.2em] mt-0.5">
                 {unit.label}
               </span>
-
-              {/* Bottom laser dot */}
-              <div className="absolute bottom-1 inset-x-0 flex justify-center">
-                <span className="w-1 h-1 rounded-full bg-cyan-400/40 group-hover:bg-cyan-400 transition-colors" />
-              </div>
             </div>
 
-            {/* Glowing Laser Delimiter */}
+            {/* Delimiter */}
             {i < units.length - 1 && (
               <div className="flex flex-col gap-1.5 select-none py-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/60 animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/60 animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                <span className="w-1 h-1 rounded-full bg-zinc-600" />
+                <span className="w-1 h-1 rounded-full bg-zinc-600" />
               </div>
             )}
           </div>

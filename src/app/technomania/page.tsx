@@ -24,11 +24,11 @@ import {
 } from "lucide-react";
 import { TechnomaniaCountdown } from "@/components/technomania/technomania-countdown";
 
-/* ── Flagship Events (Exact TM 3.0 Logo Theme: Ice Cyan, Blueprint Blue, Titanium White) ── */
+/* ── Flagship Events (Pure Monochrome Theme: Black, White & Zinc) ── */
 const flagshipEvents = [
   {
     id: "hackathon",
-    icon: <Code size={34} className="text-cyan-300" />,
+    icon: <Code size={32} className="text-white" />,
     category: "HACKATHON",
     tag: "24 HOURS NON-STOP",
     title: "CODE STORM 24H",
@@ -38,13 +38,11 @@ const flagshipEvents = [
     prizes: "₹XX,XXX PRIZES & INTERNSHIPS",
     slug: "hackathon",
     teamSize: "1-4 Members",
-    accentColor: "border-cyan-500/40 shadow-cyan-500/20",
-    gradient: "from-cyan-500/15 via-blue-600/10 to-transparent",
-    badgeColor: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
+    badgeColor: "bg-zinc-900 text-zinc-200 border-zinc-800",
   },
   {
     id: "esports",
-    icon: <Gamepad2 size={34} className="text-cyan-300" />,
+    icon: <Gamepad2 size={32} className="text-white" />,
     category: "ESPORTS",
     tag: "COMPETITIVE ARENA",
     title: "CYBER CLASH",
@@ -54,13 +52,11 @@ const flagshipEvents = [
     prizes: "TROPHIES & CASH REWARDS",
     slug: "esports",
     teamSize: "Squad & Solo",
-    accentColor: "border-cyan-500/40 shadow-cyan-500/20",
-    gradient: "from-blue-600/15 via-cyan-500/10 to-transparent",
-    badgeColor: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
+    badgeColor: "bg-zinc-900 text-zinc-200 border-zinc-800",
   },
   {
     id: "cultural",
-    icon: <Music size={34} className="text-cyan-300" />,
+    icon: <Music size={32} className="text-white" />,
     category: "CULTURAL",
     tag: "LIVE PERFORMANCES",
     title: "FESTIVAL NOCTURNE",
@@ -70,13 +66,11 @@ const flagshipEvents = [
     prizes: "MEMENTOS & CASH PRIZES",
     slug: "cultural",
     teamSize: "Solo & Crews",
-    accentColor: "border-cyan-500/40 shadow-cyan-500/20",
-    gradient: "from-cyan-600/15 via-blue-500/10 to-transparent",
-    badgeColor: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
+    badgeColor: "bg-zinc-900 text-zinc-200 border-zinc-800",
   },
   {
     id: "sub-events",
-    icon: <Sparkles size={34} className="text-cyan-300" />,
+    icon: <Sparkles size={32} className="text-white" />,
     category: "SUB-EVENTS",
     tag: "SPEED CHALLENGES",
     title: "CIRCUIT ODYSSEY & BLITZ",
@@ -86,9 +80,7 @@ const flagshipEvents = [
     prizes: "SPOT GOODIES & CERTIFICATES",
     slug: "sub-events",
     teamSize: "Solo Entry",
-    accentColor: "border-cyan-500/40 shadow-cyan-500/20",
-    gradient: "from-blue-500/15 via-cyan-600/10 to-transparent",
-    badgeColor: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
+    badgeColor: "bg-zinc-900 text-zinc-200 border-zinc-800",
   },
 ];
 
@@ -98,25 +90,25 @@ const journeySteps = [
     step: "01",
     title: "Choose Your Track",
     description: "Browse the hackathon, gaming tournaments, and cultural stages to find where you excel.",
-    icon: <Flame size={24} className="text-cyan-400" />,
+    icon: <Flame size={22} className="text-white" />,
   },
   {
     step: "02",
     title: "Register Your Squad",
     description: "Submit details in seconds, invite your teammates, and get your digital QR ticket pass.",
-    icon: <Users size={24} className="text-cyan-400" />,
+    icon: <Users size={22} className="text-white" />,
   },
   {
     step: "03",
     title: "Compete on Campus",
     description: "Show up at Chandigarh University, build with hands-on mentors, and battle top talent.",
-    icon: <Zap size={24} className="text-cyan-400" />,
+    icon: <Zap size={22} className="text-white" />,
   },
   {
     step: "04",
     title: "Take The Podium",
     description: "Pitch to esteemed industry judges, top the live leaderboard, and win grand cash prizes.",
-    icon: <Award size={24} className="text-cyan-400" />,
+    icon: <Award size={22} className="text-white" />,
   },
 ];
 
@@ -158,79 +150,73 @@ export default function TechnomaniaPage() {
         );
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden bg-black text-white selection:bg-white selection:text-black">
       {/* ═══════════════════════════════════════════════════════
-          HERO SECTION — Grand Blueprint Centerpiece
+          HERO SECTION — Spacious Monochrome Centerpiece
           ═══════════════════════════════════════════════════════ */}
-      <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 pt-10 pb-12 md:pt-14 md:pb-16">
-        {/* Exact TM 3.0 Blueprint Ambient Glow */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] md:w-[1200px] h-[600px] bg-gradient-to-tr from-blue-600/20 via-cyan-400/20 to-blue-500/15 blur-[170px] rounded-full pointer-events-none -z-10" />
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 pt-12 pb-16 md:pt-16 md:pb-20">
+        {/* Subtle Ambient Radial Highlight */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] md:w-[1100px] h-[500px] bg-white/[0.025] blur-[160px] rounded-full pointer-events-none -z-10" />
 
-        <div className="w-full max-w-7xl mx-auto relative z-10">
+        <div className="w-full max-w-6xl mx-auto relative z-10">
           {/* Header Badge */}
           <div className="text-center mb-6">
             <motion.div
               initial={{ opacity: 0, y: -15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/5 border border-cyan-500/30 backdrop-blur-md shadow-[0_0_30px_rgba(74,158,255,0.2)] hover:border-cyan-400/60 transition-all"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950 border border-zinc-800 text-xs font-mono font-medium text-zinc-300"
             >
-              <div className="relative h-6 w-6">
+              <div className="relative h-5 w-5">
                 <Image
                   src="/technomania/techtatva-logo.png"
                   alt="Tech Tatva"
                   fill
-                  className="object-contain drop-shadow-[0_0_10px_rgba(74,158,255,0.8)]"
+                  className="object-contain"
                 />
               </div>
-              <span className="font-tm-mono text-xs font-bold tracking-[0.25em] text-white uppercase">
-                TECH TATVA PRESENTS
-              </span>
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="tracking-[0.2em] uppercase">TECH TATVA PRESENTS</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             </motion.div>
           </div>
 
-          {/* ── MASSIVE TM 3.0 BLUEPRINT LOGO (HERO CENTERPIECE) ── */}
+          {/* ── MASSIVE TM 3.0 WHITE EMBLEM LOGO (HERO CENTERPIECE) ── */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative w-full max-w-4xl lg:max-w-5xl mx-auto my-4"
+            className="relative w-full max-w-4xl mx-auto my-4"
           >
-            {/* Multi-layer TM 3.0 Ice-Cyan Ambient Backlight Aura */}
-            <div className="absolute -inset-12 bg-gradient-to-r from-blue-600/30 via-cyan-400/35 to-blue-500/30 rounded-[40px] blur-3xl opacity-90 animate-pulse pointer-events-none" />
-
-            {/* Glowing Logo Frame */}
-            <div className="relative rounded-3xl p-4 sm:p-8 backdrop-blur-sm transition-transform duration-500 hover:scale-[1.01]">
+            <div className="relative rounded-3xl p-4 sm:p-6 backdrop-blur-sm transition-transform duration-500 hover:scale-[1.01]">
               <div className="relative w-full aspect-[2.4/1]">
                 <Image
                   src="/technomania/logo-white.png"
                   alt="Technomania 3.0"
                   fill
-                  className="object-contain drop-shadow-[0_0_50px_rgba(255,255,255,0.85)]"
+                  className="object-contain drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]"
                   priority
                 />
               </div>
             </div>
           </motion.div>
 
-          {/* ── Subtitle & Festival Info (Decluttered & Clean) ── */}
+          {/* ── Subtitle & Festival Info ── */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
             className="text-center mt-6 max-w-3xl mx-auto space-y-6"
           >
-            {/* Headline & Campus Info */}
+            {/* Campus Info & Headline */}
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-[10px] sm:text-[11px] font-tm-mono font-bold text-cyan-300 tracking-[0.2em] uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-mono font-bold text-zinc-300 tracking-[0.2em] uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 <span>CHANDIGARH UNIVERSITY · GHARUAN, MOHALI</span>
               </div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-tm-heading font-extrabold text-white tracking-wide uppercase">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight uppercase">
                 Flagship Technical & Cultural Festival
               </h2>
-              <p className="text-xs sm:text-sm font-tm-mono text-cyan-200/70 tracking-wider max-w-2xl mx-auto leading-relaxed">
+              <p className="text-xs sm:text-sm font-mono text-zinc-400 tracking-wider max-w-2xl mx-auto leading-relaxed">
                 24H Hackathon Sprint · Multi-Title Esports Championship · Star Cultural Stage
               </p>
             </div>
@@ -239,23 +225,22 @@ export default function TechnomaniaPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               <Link
                 href={getHref("/register")}
-                className="w-full sm:w-auto tm-btn-solid text-sm py-4 px-10 flex items-center justify-center gap-3 shadow-[0_0_35px_rgba(74,158,255,0.4)] hover:shadow-[0_0_55px_rgba(74,158,255,0.7)] group"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-sm tracking-wide flex items-center justify-center gap-2.5 transition-all group"
               >
-                <Zap size={17} className="text-cyan-300 group-hover:rotate-12 transition-transform" />
-                <span className="font-bold tracking-wider text-sm">REGISTER SQUAD NOW</span>
-                <ArrowRight size={17} className="group-hover:translate-x-1.5 transition-transform" />
+                <span>REGISTER SQUAD NOW</span>
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
 
               <Link
                 href={getHref("/events")}
-                className="w-full sm:w-auto tm-btn text-sm py-4 px-10 flex items-center justify-center gap-2.5 hover:border-cyan-400 hover:text-white"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-medium text-sm tracking-wide flex items-center justify-center gap-2.5 transition-all"
               >
                 <span>EXPLORE ALL EVENTS</span>
-                <ExternalLink size={15} />
+                <ExternalLink size={15} className="text-zinc-400" />
               </Link>
             </div>
 
-            {/* Realtime Live Countdown Chronometer HUD */}
+            {/* Live Countdown Chronometer */}
             <div className="pt-4 pb-2 flex justify-center items-center w-full">
               <TechnomaniaCountdown targetDate="2026-09-15T09:00:00+05:30" />
             </div>
@@ -264,15 +249,15 @@ export default function TechnomaniaPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          LIVELY METRICS — TM 3.0 Blueprint HUD Cards
+          LIVELY METRICS — Clean Monochrome Cards
           ═══════════════════════════════════════════════════════ */}
       <section className="relative px-4 py-8">
         <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { tag: "// 01_SPRINT", value: "24 HOURS", label: "NON-STOP HACKATHON", desc: "Build, Ship & Pitch Live", accent: "from-cyan-500/20 to-blue-500/5", glow: "hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(74,158,255,0.25)]" },
-            { tag: "// 02_ARENA", value: "3+ ARENAS", label: "GAMING & ESPORTS", desc: "BGMI · Valorant · EA FC", accent: "from-blue-500/20 to-cyan-500/5", glow: "hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(74,158,255,0.25)]" },
-            { tag: "// 03_SQUADS", value: "500+", label: "STUDENT BUILDERS", desc: "Pan-India Participants", accent: "from-cyan-500/20 to-blue-500/5", glow: "hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)]" },
-            { tag: "// 04_GRANTS", value: "₹XX,XXX", label: "CASH PRIZE POOL", desc: "Cash, Internships & Goodies", accent: "from-blue-500/20 to-cyan-500/5", glow: "hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(74,158,255,0.25)]" },
+            { tag: "01_SPRINT", value: "24 HOURS", label: "NON-STOP HACKATHON", desc: "Build, Ship & Pitch Live" },
+            { tag: "02_ARENA", value: "3+ ARENAS", label: "GAMING & ESPORTS", desc: "BGMI · Valorant · EA FC" },
+            { tag: "03_SQUADS", value: "500+", label: "STUDENT BUILDERS", desc: "Pan-India Participants" },
+            { tag: "04_GRANTS", value: "₹XX,XXX", label: "CASH PRIZE POOL", desc: "Cash, Internships & Goodies" },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -281,67 +266,52 @@ export default function TechnomaniaPage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -4 }}
-              className={`relative p-5 sm:p-6 rounded-2xl bg-black/60 border border-white/10 backdrop-blur-xl ${stat.glow} transition-all duration-300 group overflow-hidden`}
+              className="relative p-6 rounded-2xl bg-zinc-950 border border-zinc-900 hover:border-zinc-700 transition-all duration-300 group overflow-hidden"
             >
-              {/* Subtle Blueprint Ambient Gradient */}
-              <div className={`absolute inset-0 bg-gradient-to-b ${stat.accent} opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none`} />
-
-              {/* Technical Corner Brackets */}
-              <span className="absolute top-2 left-2 text-[9px] font-tm-mono text-white/20 select-none">┌</span>
-              <span className="absolute top-2 right-2 text-[9px] font-tm-mono text-white/20 select-none">┐</span>
-              <span className="absolute bottom-2 left-2 text-[9px] font-tm-mono text-white/20 select-none">└</span>
-              <span className="absolute bottom-2 right-2 text-[9px] font-tm-mono text-white/20 select-none">┘</span>
-
-              {/* Monospace Tag Header */}
+              {/* Header */}
               <div className="flex items-center justify-between relative z-10 mb-3">
-                <span className="text-[10px] font-tm-mono font-bold tracking-[0.2em] text-tm-dim group-hover:text-tm-accent transition-colors">
-                  {stat.tag}
+                <span className="text-[10px] font-mono font-bold tracking-[0.2em] text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                  // {stat.tag}
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-white/20 group-hover:bg-tm-accent transition-colors" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-white transition-colors" />
               </div>
 
               {/* Value & Labels */}
-              <div className="relative z-10">
-                <p className="font-tm-heading text-2xl sm:text-3xl font-black text-white tracking-tight group-hover:text-tm-accent transition-colors">
+              <div className="relative z-10 space-y-1">
+                <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   {stat.value}
                 </p>
-                <p className="font-tm-mono text-xs font-bold text-white/90 tracking-wider mt-2 uppercase">
+                <p className="font-mono text-xs font-bold text-zinc-300 tracking-wider pt-1 uppercase">
                   {stat.label}
                 </p>
-                <p className="text-xs text-tm-muted mt-1 leading-relaxed">
+                <p className="text-xs text-zinc-500 leading-relaxed">
                   {stat.desc}
                 </p>
               </div>
-
-              {/* Bottom Technical Accent Bar */}
-              <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-tm-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          FLAGSHIP ARENAS — TM 3.0 Blueprint HUD Cards
+          FLAGSHIP ARENAS — Monochrome Showcase Cards
           ═══════════════════════════════════════════════════════ */}
       <section className="relative px-4 py-20 md:py-28">
         <div className="max-w-6xl mx-auto">
-          {/* Header & Category Tabs — Perfectly Aligned */}
+          {/* Header & Category Tabs */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
             <div>
-              <div className="flex items-center gap-2 text-tm-accent text-xs font-tm-mono font-bold tracking-widest uppercase mb-2">
-                <span className="w-2 h-2 rounded-full bg-tm-accent animate-pulse" />
-                <span>// FESTIVAL TRACKS & ARENAS //</span>
+              <div className="flex items-center gap-2 text-zinc-400 text-xs font-mono font-bold tracking-widest uppercase mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                <span>FESTIVAL TRACKS & ARENAS</span>
               </div>
-              <h2 className="font-tm-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
-                Major Arenas of{" "}
-                <span className="font-black tracking-wider uppercase bg-gradient-to-r from-white via-cyan-200 to-tm-accent bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(74,158,255,0.4)]">
-                  TECHNOMANIA 3.0
-                </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+                Major Arenas of TECHNOMANIA 3.0
               </h2>
             </div>
 
-            {/* Filter Navigation Tabs — Cyber Blueprint Segment Bar */}
-            <div className="flex items-center gap-1.5 p-1.5 bg-black/80 border border-white/15 rounded-xl backdrop-blur-xl overflow-x-auto no-scrollbar max-w-full self-start lg:self-auto shadow-[0_0_25px_rgba(0,0,0,0.6)]">
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-1.5 p-1.5 bg-zinc-950 border border-zinc-900 rounded-xl overflow-x-auto no-scrollbar self-start lg:self-auto">
               {[
                 { id: "all", label: "ALL" },
                 { id: "hackathon", label: "HACKATHON" },
@@ -352,10 +322,10 @@ export default function TechnomaniaPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveCategory(tab.id)}
-                  className={`px-4 py-2 rounded-lg text-xs font-tm-mono font-bold tracking-[0.16em] uppercase whitespace-nowrap transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-lg text-xs font-mono font-bold tracking-wider uppercase transition-all ${
                     activeCategory === tab.id
-                      ? "bg-gradient-to-r from-blue-600/40 via-cyan-500/30 to-blue-600/40 border border-cyan-400 text-white shadow-[0_0_20px_rgba(56,189,248,0.4)]"
-                      : "border border-transparent text-tm-muted hover:text-white hover:bg-white/5 hover:border-white/10"
+                      ? "bg-white text-black font-extrabold"
+                      : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                   }`}
                 >
                   {tab.label}
@@ -365,128 +335,57 @@ export default function TechnomaniaPage() {
           </div>
 
           {/* Cards Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatePresence mode="popLayout">
-              {filteredEvents.map((event, idx) => (
-                <motion.div
-                  key={event.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95, y: 25 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.35, delay: idx * 0.08 }}
-                  whileHover={{ y: -6 }}
-                  className="relative p-6 sm:p-8 rounded-2xl bg-black/70 border border-white/10 hover:border-tm-accent/60 backdrop-blur-xl flex flex-col justify-between group transition-all duration-300 overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)]"
-                >
-                  {/* Subtle Blueprint Background Ambient */}
-                  <div className={`absolute inset-0 bg-gradient-to-b ${event.gradient} opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none`} />
-
-                  {/* Corner Blueprint Markers */}
-                  <span className="absolute top-2 left-3 text-[10px] font-tm-mono text-white/20 select-none">┌</span>
-                  <span className="absolute top-2 right-3 text-[10px] font-tm-mono text-white/20 select-none">┐</span>
-                  <span className="absolute bottom-2 left-3 text-[10px] font-tm-mono text-white/20 select-none">└</span>
-                  <span className="absolute bottom-2 right-3 text-[10px] font-tm-mono text-white/20 select-none">┘</span>
-
-                  <div className="relative z-10">
-                    {/* Top Tag & Icon */}
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 group-hover:border-tm-accent group-hover:scale-105 transition-all">
-                        {event.icon}
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-tm-mono font-bold tracking-wider uppercase border ${event.badgeColor}`}>
-                        {event.tag}
-                      </span>
-                    </div>
-
-                    {/* Title & Info */}
-                    <h3 className="font-tm-heading text-2xl font-bold text-white group-hover:text-tm-accent transition-colors">
-                      {event.title}
-                    </h3>
-                    <p className="text-xs font-tm-mono font-semibold text-tm-accent mt-1">
-                      {event.subtitle}
-                    </p>
-                    <p className="text-sm text-tm-muted leading-relaxed mt-4">
-                      {event.description}
-                    </p>
-                  </div>
-
-                  {/* Bottom Meta */}
-                  <div className="relative z-10 mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
-                    <div>
-                      <span className="block text-[10px] font-tm-mono text-tm-dim uppercase tracking-wider">REWARDS</span>
-                      <span className="text-xs font-tm-heading font-black text-white">{event.prizes}</span>
-                    </div>
-
-                    <Link
-                      href={getHref("/events")}
-                      className="inline-flex items-center gap-1.5 text-xs font-tm-mono font-bold text-tm-accent hover:text-white transition-colors"
-                    >
-                      <span>VIEW RULES</span>
-                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
-
-                  {/* Bottom Cyan Hover Line */}
-                  <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-tm-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          PARTICIPATION JOURNEY — TM 3.0 Blueprint Roadmap
-          ═══════════════════════════════════════════════════════ */}
-      <section className="relative px-4 py-20 bg-white/[0.01] border-y border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-tm-accent text-xs font-tm-mono font-bold tracking-widest uppercase">
-              // PARTICIPATION PIPELINE //
-            </span>
-            <h2 className="font-tm-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-2">
-              Four Steps to Victory
-            </h2>
-            <p className="text-tm-muted text-sm sm:text-base mt-3">
-              Follow the simple flow from registration to stepping onto the grand winner podium.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {journeySteps.map((item, i) => (
+          <div className="grid md:grid-cols-2 gap-6">
+            {filteredEvents.map((evt, idx) => (
               <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 30 }}
+                key={evt.id}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.12 }}
-                whileHover={{ y: -6 }}
-                className="relative p-6 sm:p-8 rounded-2xl bg-black/60 border border-white/10 hover:border-tm-accent/60 backdrop-blur-xl transition-all duration-300 group overflow-hidden"
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="group relative p-8 rounded-3xl bg-zinc-950 border border-zinc-900 hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between"
               >
-                {/* Corner Markers */}
-                <span className="absolute top-2 left-2 text-[9px] font-tm-mono text-white/20 select-none">┌</span>
-                <span className="absolute top-2 right-2 text-[9px] font-tm-mono text-white/20 select-none">┐</span>
-                <span className="absolute bottom-2 left-2 text-[9px] font-tm-mono text-white/20 select-none">└</span>
-                <span className="absolute bottom-2 right-2 text-[9px] font-tm-mono text-white/20 select-none">┘</span>
-
-                <div className="flex items-center justify-between mb-6 relative z-10">
-                  <span className="font-tm-heading text-3xl font-black text-white/20 group-hover:text-tm-accent transition-colors">
-                    {item.step}
-                  </span>
-                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 group-hover:border-tm-accent transition-colors">
-                    {item.icon}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="px-3 py-1 rounded-md text-[10px] font-mono font-bold tracking-widest uppercase bg-zinc-900 text-zinc-300 border border-zinc-800">
+                      {evt.tag}
+                    </span>
+                    <span className="text-xs font-mono text-zinc-500">
+                      {evt.teamSize}
+                    </span>
                   </div>
+
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 text-white">
+                      {evt.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white group-hover:text-zinc-200 transition-colors">
+                        {evt.title}
+                      </h3>
+                      <p className="text-xs font-mono text-zinc-400">{evt.subtitle}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-zinc-400 leading-relaxed mb-6">
+                    {evt.description}
+                  </p>
                 </div>
 
-                <h3 className="font-tm-heading text-lg font-bold text-white relative z-10">
-                  {item.title}
-                </h3>
-                <p className="text-xs sm:text-sm text-tm-muted leading-relaxed mt-2 relative z-10">
-                  {item.description}
-                </p>
+                <div className="pt-6 border-t border-zinc-900 flex items-center justify-between">
+                  <div className="text-xs font-mono font-semibold text-zinc-300">
+                    {evt.prizes}
+                  </div>
 
-                {/* Bottom Neon Line */}
-                <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-tm-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Link
+                    href={getHref(`/events/${evt.slug}`)}
+                    className="inline-flex items-center gap-2 text-xs font-mono font-bold text-white hover:text-zinc-300 transition"
+                  >
+                    <span>EXPLORE ARENA</span>
+                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -494,123 +393,100 @@ export default function TechnomaniaPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          FAQS ACCORDION
+          PARTICIPATION JOURNEY — Clean Timeline
           ═══════════════════════════════════════════════════════ */}
-      <section className="relative px-4 py-20 md:py-28">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <span className="text-tm-accent text-xs font-mono font-bold tracking-widest uppercase">
-              GOT QUESTIONS?
+      <section className="relative px-4 py-20 border-t border-zinc-900">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-2">
+            <span className="text-xs font-mono text-zinc-400 font-bold uppercase tracking-widest">
+              STEP-BY-STEP PROCESS
             </span>
-            <h2 className="font-tm-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-2">
-              Frequently Asked Questions
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">How To Participate</h2>
           </div>
 
-          <div className="space-y-3">
-            {faqs.map((faq, i) => {
-              const isOpen = openFaq === i;
-              return (
-                <div
-                  key={faq.q}
-                  className="rounded-xl border border-white/10 bg-tm-surface/70 backdrop-blur overflow-hidden transition-colors hover:border-white/20"
-                >
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : i)}
-                    className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 select-none"
-                  >
-                    <span className="font-tm-heading text-sm sm:text-base font-bold text-white">
-                      {faq.q}
-                    </span>
-                    <motion.div
-                      animate={{ rotate: isOpen ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="text-tm-muted shrink-0"
-                    >
-                      <ChevronDown size={18} />
-                    </motion.div>
-                  </button>
-
-                  <AnimatePresence>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-5 pb-6 sm:px-6 text-sm text-tm-muted leading-relaxed border-t border-white/5 pt-4">
-                          {faq.a}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {journeySteps.map((step, i) => (
+              <div
+                key={step.step}
+                className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold font-mono text-zinc-600">{step.step}</span>
+                  <div className="p-2.5 rounded-xl bg-zinc-900 text-white">
+                    {step.icon}
+                  </div>
                 </div>
-              );
-            })}
+
+                <h3 className="text-lg font-bold text-white">{step.title}</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">{step.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          FINAL CALL TO ACTION
+          FAQ SECTION — Clean Accordion
           ═══════════════════════════════════════════════════════ */}
-      <section className="relative px-4 py-16 pb-28">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="p-8 sm:p-14 rounded-3xl bg-gradient-to-b from-blue-600/20 via-cyan-500/10 to-tm-surface border border-cyan-500/30 backdrop-blur-xl shadow-[0_0_60px_rgba(74,158,255,0.25)]"
-          >
-            {/* Dual mini logo badge */}
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="relative h-8 w-8">
-                <Image
-                  src="/technomania/techtatva-logo.png"
-                  alt="Tech Tatva"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <span className="text-white/30 text-xs font-mono">✕</span>
-              <div className="relative h-7 w-20">
-                <Image
-                  src="/technomania/logo-emblem.png"
-                  alt="TM3.0"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-            </div>
+      <section className="relative px-4 py-20 border-t border-zinc-900">
+        <div className="max-w-3xl mx-auto space-y-8">
+          <div className="text-center space-y-2">
+            <span className="text-xs font-mono text-zinc-400 font-bold uppercase tracking-widest">
+              FREQUENTLY ASKED QUESTIONS
+            </span>
+            <h2 className="text-3xl font-bold text-white">Everything You Need To Know</h2>
+          </div>
 
-            <h2 className="font-tm-heading text-3xl sm:text-4xl md:text-5xl font-black text-white">
-              Ready to Make History at<br />
-              <span className="font-black tracking-wider uppercase bg-gradient-to-r from-white via-cyan-200 to-tm-accent bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(74,158,255,0.5)]">
-                TECHNOMANIA 3.0?
-              </span>
-            </h2>
-
-            <p className="text-tm-muted text-sm sm:text-base mt-4 max-w-lg mx-auto leading-relaxed">
-              Registrations are active now. Secure your squad&apos;s spot before seats fill up.
-            </p>
-
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href={getHref("/register")}
-                className="w-full sm:w-auto tm-btn-solid text-sm py-3.5 px-8 shadow-[0_0_30px_rgba(74,158,255,0.4)]"
+          <div className="space-y-3">
+            {faqs.map((faq, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl bg-zinc-950 border border-zinc-900 overflow-hidden"
               >
-                REGISTER YOUR SQUAD NOW
-              </Link>
-              <Link
-                href={getHref("/schedule")}
-                className="w-full sm:w-auto tm-btn text-sm py-3.5 px-8"
-              >
-                VIEW EVENT SCHEDULE
-              </Link>
-            </div>
-          </motion.div>
+                <button
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full p-5 text-left flex items-center justify-between text-sm font-semibold text-white hover:text-zinc-300 transition"
+                >
+                  <span>{faq.q}</span>
+                  <ChevronDown
+                    size={16}
+                    className={`text-zinc-500 transition-transform ${
+                      openFaq === idx ? "rotate-180 text-white" : ""
+                    }`}
+                  />
+                </button>
+
+                {openFaq === idx && (
+                  <div className="px-5 pb-5 text-xs text-zinc-400 leading-relaxed border-t border-zinc-900/60 pt-3">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          BOTTOM CTA BANNER
+          ═══════════════════════════════════════════════════════ */}
+      <section className="relative px-4 py-20 border-t border-zinc-900">
+        <div className="max-w-4xl mx-auto text-center p-10 sm:p-14 rounded-3xl bg-zinc-950 border border-zinc-800 space-y-6">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+            Ready to Compete in Technomania 3.0?
+          </h2>
+          <p className="text-sm text-zinc-400 max-w-xl mx-auto">
+            Free registration for all college students across India. Assemble your squad today.
+          </p>
+          <div className="flex justify-center pt-2">
+            <Link
+              href={getHref("/register")}
+              className="px-8 py-3.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-sm tracking-wide flex items-center gap-2.5 transition"
+            >
+              <span>REGISTER SQUAD NOW</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
       </section>
     </div>
