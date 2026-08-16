@@ -449,13 +449,13 @@ export default function TechnomaniaStandaloneAdmin() {
                 </p>
               </div>
 
-              {/* KPI Cards */}
+              {/* KPI Cards — Exact TM 3.0 Logo Palette */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   { label: "REGISTERED SQUADS", val: squads.length, icon: Users, color: "from-cyan-500/20 to-blue-500/5", border: "border-cyan-500/30", text: "text-cyan-300" },
-                  { label: "TOTAL BUILDERS & PLAYERS", val: stats.totalBuilders, icon: TrendingUp, color: "from-purple-500/20 to-pink-500/5", border: "border-purple-500/30", text: "text-purple-300" },
-                  { label: "ACTIVE ARENAS", val: arenas.length, icon: Layers, color: "from-amber-500/20 to-orange-500/5", border: "border-amber-500/30", text: "text-amber-300" },
-                  { label: "RANKED TEAMS", val: leaderboard.length, icon: Trophy, color: "from-emerald-500/20 to-teal-500/5", border: "border-emerald-500/30", text: "text-emerald-300" },
+                  { label: "TOTAL BUILDERS & PLAYERS", val: stats.totalBuilders, icon: TrendingUp, color: "from-blue-600/20 to-cyan-500/5", border: "border-blue-500/30", text: "text-cyan-200" },
+                  { label: "ACTIVE ARENAS", val: arenas.length, icon: Layers, color: "from-cyan-600/20 to-blue-600/5", border: "border-cyan-500/30", text: "text-cyan-300" },
+                  { label: "RANKED TEAMS", val: leaderboard.length, icon: Trophy, color: "from-sky-500/20 to-blue-500/5", border: "border-sky-500/30", text: "text-sky-300" },
                 ].map((kpi, idx) => {
                   const Icon = kpi.icon;
                   return (
@@ -502,7 +502,7 @@ export default function TechnomaniaStandaloneAdmin() {
                           <p className="text-[10px] font-tm-mono text-cyan-300/70 mt-0.5">{squad.eventTitle}</p>
                         </div>
                         <div className="text-right">
-                          <span className="px-2 py-0.5 rounded text-[9px] font-tm-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          <span className="px-2 py-0.5 rounded text-[9px] font-tm-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                             {squad.members.length + 1} MEMBERS
                           </span>
                         </div>
@@ -515,12 +515,12 @@ export default function TechnomaniaStandaloneAdmin() {
                 <div className="p-6 rounded-2xl bg-[#0e131d] border border-white/10 space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="font-tm-heading text-sm font-bold tracking-wide uppercase text-white flex items-center gap-2">
-                      <Layers size={15} className="text-purple-400" />
+                      <Layers size={15} className="text-cyan-400" />
                       <span>Arena Registration Switches</span>
                     </h2>
                     <button
                       onClick={() => setActiveTab("arenas")}
-                      className="text-xs font-tm-mono text-purple-400 hover:underline"
+                      className="text-xs font-tm-mono text-cyan-400 hover:underline"
                     >
                       Manage →
                     </button>

@@ -32,7 +32,7 @@ function TechnomaniaNav() {
                 src="/technomania/techtatva-logo.png"
                 alt="Tech Tatva Club"
                 fill
-                className="object-contain drop-shadow-[0_0_12px_rgba(139,92,246,0.7)]"
+                className="object-contain drop-shadow-[0_0_12px_rgba(74,158,255,0.8)]"
                 priority
               />
             </div>

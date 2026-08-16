@@ -24,11 +24,11 @@ import {
 } from "lucide-react";
 import { TechnomaniaCountdown } from "@/components/technomania/technomania-countdown";
 
-/* ── Flagship Events ── */
+/* ── Flagship Events (Exact TM 3.0 Logo Theme: Ice Cyan, Blueprint Blue, Titanium White) ── */
 const flagshipEvents = [
   {
     id: "hackathon",
-    icon: <Code size={36} className="text-blue-400" />,
+    icon: <Code size={34} className="text-cyan-300" />,
     category: "HACKATHON",
     tag: "24 HOURS NON-STOP",
     title: "CODE STORM 24H",
@@ -38,13 +38,13 @@ const flagshipEvents = [
     prizes: "₹XX,XXX PRIZES & INTERNSHIPS",
     slug: "hackathon",
     teamSize: "1-4 Members",
-    accentColor: "border-blue-500/40 shadow-blue-500/20",
-    gradient: "from-blue-600/15 via-cyan-500/10 to-transparent",
-    badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+    accentColor: "border-cyan-500/40 shadow-cyan-500/20",
+    gradient: "from-cyan-500/15 via-blue-600/10 to-transparent",
+    badgeColor: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
   },
   {
     id: "esports",
-    icon: <Gamepad2 size={36} className="text-purple-400" />,
+    icon: <Gamepad2 size={34} className="text-cyan-300" />,
     category: "ESPORTS",
     tag: "COMPETITIVE ARENA",
     title: "CYBER CLASH",
@@ -54,13 +54,13 @@ const flagshipEvents = [
     prizes: "TROPHIES & CASH REWARDS",
     slug: "esports",
     teamSize: "Squad & Solo",
-    accentColor: "border-purple-500/40 shadow-purple-500/20",
-    gradient: "from-purple-600/15 via-pink-500/10 to-transparent",
-    badgeColor: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+    accentColor: "border-cyan-500/40 shadow-cyan-500/20",
+    gradient: "from-blue-600/15 via-cyan-500/10 to-transparent",
+    badgeColor: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
   },
   {
     id: "cultural",
-    icon: <Music size={36} className="text-rose-400" />,
+    icon: <Music size={34} className="text-cyan-300" />,
     category: "CULTURAL",
     tag: "LIVE PERFORMANCES",
     title: "FESTIVAL NOCTURNE",
@@ -70,13 +70,13 @@ const flagshipEvents = [
     prizes: "MEMENTOS & CASH PRIZES",
     slug: "cultural",
     teamSize: "Solo & Crews",
-    accentColor: "border-rose-500/40 shadow-rose-500/20",
-    gradient: "from-rose-600/15 via-amber-500/10 to-transparent",
-    badgeColor: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+    accentColor: "border-cyan-500/40 shadow-cyan-500/20",
+    gradient: "from-cyan-600/15 via-blue-500/10 to-transparent",
+    badgeColor: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
   },
   {
     id: "sub-events",
-    icon: <Sparkles size={36} className="text-amber-400" />,
+    icon: <Sparkles size={34} className="text-cyan-300" />,
     category: "SUB-EVENTS",
     tag: "SPEED CHALLENGES",
     title: "CIRCUIT ODYSSEY & BLITZ",
@@ -86,9 +86,9 @@ const flagshipEvents = [
     prizes: "SPOT GOODIES & CERTIFICATES",
     slug: "sub-events",
     teamSize: "Solo Entry",
-    accentColor: "border-amber-500/40 shadow-amber-500/20",
-    gradient: "from-amber-600/15 via-yellow-500/10 to-transparent",
-    badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    accentColor: "border-cyan-500/40 shadow-cyan-500/20",
+    gradient: "from-blue-500/15 via-cyan-600/10 to-transparent",
+    badgeColor: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
   },
 ];
 
@@ -98,25 +98,25 @@ const journeySteps = [
     step: "01",
     title: "Choose Your Track",
     description: "Browse the hackathon, gaming tournaments, and cultural stages to find where you excel.",
-    icon: <Flame size={24} className="text-amber-400" />,
+    icon: <Flame size={24} className="text-cyan-400" />,
   },
   {
     step: "02",
     title: "Register Your Squad",
     description: "Submit details in seconds, invite your teammates, and get your digital QR ticket pass.",
-    icon: <Users size={24} className="text-blue-400" />,
+    icon: <Users size={24} className="text-cyan-400" />,
   },
   {
     step: "03",
     title: "Compete on Campus",
     description: "Show up at Chandigarh University, build with hands-on mentors, and battle top talent.",
-    icon: <Zap size={24} className="text-purple-400" />,
+    icon: <Zap size={24} className="text-cyan-400" />,
   },
   {
     step: "04",
     title: "Take The Podium",
     description: "Pitch to esteemed industry judges, top the live leaderboard, and win grand cash prizes.",
-    icon: <Award size={24} className="text-emerald-400" />,
+    icon: <Award size={24} className="text-cyan-400" />,
   },
 ];
 
@@ -163,8 +163,8 @@ export default function TechnomaniaPage() {
           HERO SECTION — Grand Blueprint Centerpiece
           ═══════════════════════════════════════════════════════ */}
       <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 pt-10 pb-12 md:pt-14 md:pb-16">
-        {/* Dynamic Multi-Color Ambient Glows */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] md:w-[1200px] h-[600px] bg-gradient-to-tr from-blue-600/20 via-purple-600/15 to-cyan-400/20 blur-[170px] rounded-full pointer-events-none -z-10" />
+        {/* Exact TM 3.0 Blueprint Ambient Glow */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] md:w-[1200px] h-[600px] bg-gradient-to-tr from-blue-600/20 via-cyan-400/20 to-blue-500/15 blur-[170px] rounded-full pointer-events-none -z-10" />
 
         <div className="w-full max-w-7xl mx-auto relative z-10">
           {/* Header Badge */}
@@ -173,20 +173,20 @@ export default function TechnomaniaPage() {
               initial={{ opacity: 0, y: -15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/5 border border-white/15 backdrop-blur-md shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:border-white/30 transition-all"
+              className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/5 border border-cyan-500/30 backdrop-blur-md shadow-[0_0_30px_rgba(74,158,255,0.2)] hover:border-cyan-400/60 transition-all"
             >
               <div className="relative h-6 w-6">
                 <Image
                   src="/technomania/techtatva-logo.png"
                   alt="Tech Tatva"
                   fill
-                  className="object-contain drop-shadow-[0_0_10px_rgba(139,92,246,0.9)]"
+                  className="object-contain drop-shadow-[0_0_10px_rgba(74,158,255,0.8)]"
                 />
               </div>
               <span className="font-tm-mono text-xs font-bold tracking-[0.25em] text-white uppercase">
                 TECH TATVA PRESENTS
               </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             </motion.div>
           </div>
 
@@ -197,8 +197,8 @@ export default function TechnomaniaPage() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="relative w-full max-w-4xl lg:max-w-5xl mx-auto my-4"
           >
-            {/* Multi-layer Ambient Backlight Aura */}
-            <div className="absolute -inset-12 bg-gradient-to-r from-blue-600/30 via-cyan-400/30 to-purple-600/30 rounded-[40px] blur-3xl opacity-90 animate-pulse pointer-events-none" />
+            {/* Multi-layer TM 3.0 Ice-Cyan Ambient Backlight Aura */}
+            <div className="absolute -inset-12 bg-gradient-to-r from-blue-600/30 via-cyan-400/35 to-blue-500/30 rounded-[40px] blur-3xl opacity-90 animate-pulse pointer-events-none" />
 
             {/* Glowing Logo Frame */}
             <div className="relative rounded-3xl p-4 sm:p-8 backdrop-blur-sm transition-transform duration-500 hover:scale-[1.01]">
@@ -235,9 +235,9 @@ export default function TechnomaniaPage() {
               </p>
             </div>
 
-            {/* Interactive Holographic Arena Capsules */}
+            {/* Interactive Holographic Arena Capsules (Unified TM 3.0 Logo Theme) */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5 pt-2 max-w-4xl mx-auto">
-              <div className="group relative flex flex-col items-center justify-center p-3 rounded-2xl bg-gradient-to-b from-blue-600/15 to-transparent border border-blue-500/30 hover:border-cyan-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(59,130,246,0.2)] hover:shadow-[0_0_30px_rgba(56,189,248,0.4)]">
+              <div className="group relative flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-cyan-950/30 to-black/60 border border-cyan-500/30 hover:border-cyan-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(74,158,255,0.15)] hover:shadow-[0_0_30px_rgba(56,189,248,0.35)]">
                 <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-xs font-tm-mono">
                   <Code size={15} className="text-cyan-400 group-hover:rotate-6 transition-transform" />
                   <span>24H HACKATHON</span>
@@ -245,25 +245,25 @@ export default function TechnomaniaPage() {
                 <span className="text-[9px] font-tm-mono text-white/50 tracking-widest mt-0.5">BUILD & SHIP LIVE</span>
               </div>
 
-              <div className="group relative flex flex-col items-center justify-center p-3 rounded-2xl bg-gradient-to-b from-purple-600/15 to-transparent border border-purple-500/30 hover:border-purple-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-[0_0_30px_rgba(192,132,252,0.4)]">
-                <div className="flex items-center gap-1.5 text-purple-300 font-bold text-xs font-tm-mono">
-                  <Gamepad2 size={15} className="text-purple-400 group-hover:rotate-6 transition-transform" />
+              <div className="group relative flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-blue-950/30 to-black/60 border border-cyan-500/30 hover:border-cyan-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(74,158,255,0.15)] hover:shadow-[0_0_30px_rgba(56,189,248,0.35)]">
+                <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-xs font-tm-mono">
+                  <Gamepad2 size={15} className="text-cyan-400 group-hover:rotate-6 transition-transform" />
                   <span>ESPORTS ARENA</span>
                 </div>
                 <span className="text-[9px] font-tm-mono text-white/50 tracking-widest mt-0.5">VALO · BGMI · EA FC</span>
               </div>
 
-              <div className="group relative flex flex-col items-center justify-center p-3 rounded-2xl bg-gradient-to-b from-rose-600/15 to-transparent border border-rose-500/30 hover:border-rose-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(244,63,94,0.2)] hover:shadow-[0_0_30px_rgba(251,113,133,0.4)]">
-                <div className="flex items-center gap-1.5 text-rose-300 font-bold text-xs font-tm-mono">
-                  <Music size={15} className="text-rose-400 group-hover:rotate-6 transition-transform" />
+              <div className="group relative flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-cyan-950/30 to-black/60 border border-cyan-500/30 hover:border-cyan-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(74,158,255,0.15)] hover:shadow-[0_0_30px_rgba(56,189,248,0.35)]">
+                <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-xs font-tm-mono">
+                  <Music size={15} className="text-cyan-400 group-hover:rotate-6 transition-transform" />
                   <span>CULTURAL STAGE</span>
                 </div>
                 <span className="text-[9px] font-tm-mono text-white/50 tracking-widest mt-0.5">CELEB DJ NIGHT</span>
               </div>
 
-              <div className="group relative flex flex-col items-center justify-center p-3 rounded-2xl bg-gradient-to-b from-amber-600/15 to-transparent border border-amber-500/30 hover:border-amber-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(251,191,36,0.4)]">
-                <div className="flex items-center gap-1.5 text-amber-300 font-bold text-xs font-tm-mono">
-                  <Trophy size={15} className="text-amber-400 group-hover:rotate-6 transition-transform" />
+              <div className="group relative flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-blue-950/30 to-black/60 border border-cyan-500/30 hover:border-cyan-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(74,158,255,0.15)] hover:shadow-[0_0_30px_rgba(56,189,248,0.35)]">
+                <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-xs font-tm-mono">
+                  <Trophy size={15} className="text-cyan-400 group-hover:rotate-6 transition-transform" />
                   <span>₹XX,XXX POOL</span>
                 </div>
                 <span className="text-[9px] font-tm-mono text-white/50 tracking-widest mt-0.5">CASH & INTERNSHIPS</span>
@@ -297,7 +297,7 @@ export default function TechnomaniaPage() {
 
             {/* Micro Live Status Ribbon */}
             <div className="flex items-center justify-center gap-2 pt-1 font-tm-mono text-[11px] text-white/50">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
               <span>REGISTRATIONS LIVE FOR UNIVERSITY STUDENTS · FREE PASSES</span>
             </div>
           </motion.div>
@@ -310,10 +310,10 @@ export default function TechnomaniaPage() {
       <section className="relative px-4 py-8">
         <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { tag: "// 01_SPRINT", value: "24 HOURS", label: "NON-STOP HACKATHON", desc: "Build, Ship & Pitch Live", accent: "from-blue-500/20 to-cyan-500/5", glow: "hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(74,158,255,0.25)]" },
-            { tag: "// 02_ARENA", value: "3+ ARENAS", label: "GAMING & ESPORTS", desc: "BGMI · Valorant · EA FC", accent: "from-purple-500/20 to-indigo-500/5", glow: "hover:border-purple-400/60 hover:shadow-[0_0_25px_rgba(168,85,247,0.25)]" },
+            { tag: "// 01_SPRINT", value: "24 HOURS", label: "NON-STOP HACKATHON", desc: "Build, Ship & Pitch Live", accent: "from-cyan-500/20 to-blue-500/5", glow: "hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(74,158,255,0.25)]" },
+            { tag: "// 02_ARENA", value: "3+ ARENAS", label: "GAMING & ESPORTS", desc: "BGMI · Valorant · EA FC", accent: "from-blue-500/20 to-cyan-500/5", glow: "hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(74,158,255,0.25)]" },
             { tag: "// 03_SQUADS", value: "500+", label: "STUDENT BUILDERS", desc: "Pan-India Participants", accent: "from-cyan-500/20 to-blue-500/5", glow: "hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)]" },
-            { tag: "// 04_GRANTS", value: "₹XX,XXX", label: "CASH PRIZE POOL", desc: "Cash, Internships & Goodies", accent: "from-amber-500/20 to-yellow-500/5", glow: "hover:border-amber-400/60 hover:shadow-[0_0_25px_rgba(245,158,11,0.25)]" },
+            { tag: "// 04_GRANTS", value: "₹XX,XXX", label: "CASH PRIZE POOL", desc: "Cash, Internships & Goodies", accent: "from-blue-500/20 to-cyan-500/5", glow: "hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(74,158,255,0.25)]" },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -603,7 +603,7 @@ export default function TechnomaniaPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="p-8 sm:p-14 rounded-3xl bg-gradient-to-b from-blue-600/20 via-purple-600/10 to-tm-surface border border-white/15 backdrop-blur-xl shadow-[0_0_60px_rgba(74,158,255,0.2)]"
+            className="p-8 sm:p-14 rounded-3xl bg-gradient-to-b from-blue-600/20 via-cyan-500/10 to-tm-surface border border-cyan-500/30 backdrop-blur-xl shadow-[0_0_60px_rgba(74,158,255,0.25)]"
           >
             {/* Dual mini logo badge */}
             <div className="flex items-center justify-center gap-3 mb-6">
