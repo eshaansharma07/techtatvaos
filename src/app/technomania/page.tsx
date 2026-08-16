@@ -23,6 +23,7 @@ import {
   Cpu,
 } from "lucide-react";
 import { TechnomaniaCountdown } from "@/components/technomania/technomania-countdown";
+import { TechnomaniaIntro } from "@/components/technomania/technomania-intro";
 
 /* ── Flagship Events (Pure Monochrome Theme: Black, White & Zinc) ── */
 const flagshipEvents = [
@@ -151,6 +152,9 @@ export default function TechnomaniaPage() {
 
   return (
     <div className="relative overflow-hidden bg-black text-white selection:bg-white selection:text-black">
+      {/* ── Cinematic Opening Entrance Animation ── */}
+      <TechnomaniaIntro />
+
       {/* ═══════════════════════════════════════════════════════
           HERO SECTION — Spacious Monochrome Centerpiece
           ═══════════════════════════════════════════════════════ */}
