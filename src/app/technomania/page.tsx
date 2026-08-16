@@ -19,6 +19,7 @@ import {
   Award,
 } from "lucide-react";
 import { TechnomaniaCountdown } from "@/components/technomania/technomania-countdown";
+import { TechnomaniaSciFiIntro } from "@/components/technomania/technomania-scifi-intro";
 
 /* ── Flagship Events (Pure Monochrome Theme: Black, White & Zinc) ── */
 const flagshipEvents = [
@@ -142,6 +143,9 @@ export default function TechnomaniaPage() {
 
   return (
     <div className="relative overflow-hidden bg-black text-white selection:bg-white selection:text-black">
+      {/* ── Sci-Fi HUD Reticle & Shockwave Lock Entrance ── */}
+      <TechnomaniaSciFiIntro />
+
       {/* ═══════════════════════════════════════════════════════
           HERO SECTION — Ultra Smooth Logo Expansion & Lodging
           ═══════════════════════════════════════════════════════ */}
