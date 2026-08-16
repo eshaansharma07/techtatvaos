@@ -214,72 +214,32 @@ export default function TechnomaniaPage() {
             </div>
           </motion.div>
 
-          {/* ── Subtitle & Festival Info ── */}
+          {/* ── Subtitle & Festival Info (Decluttered & Clean) ── */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-center mt-6 max-w-4xl mx-auto space-y-6"
+            className="text-center mt-6 max-w-3xl mx-auto space-y-6"
           >
-            {/* Holographic Headline Banner */}
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-[10px] sm:text-[11px] font-tm-mono font-bold text-cyan-300 tracking-[0.2em] uppercase">
+            {/* Headline & Campus Info */}
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-[10px] sm:text-[11px] font-tm-mono font-bold text-cyan-300 tracking-[0.2em] uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
                 <span>CHANDIGARH UNIVERSITY · GHARUAN, MOHALI</span>
               </div>
-              <h2 className="text-lg sm:text-2xl md:text-3xl font-tm-heading font-extrabold text-white tracking-wide uppercase">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-tm-heading font-extrabold text-white tracking-wide uppercase">
                 Flagship Technical & Cultural Festival
               </h2>
-              <p className="text-xs sm:text-sm font-tm-mono text-cyan-200/70 tracking-wider">
+              <p className="text-xs sm:text-sm font-tm-mono text-cyan-200/70 tracking-wider max-w-2xl mx-auto leading-relaxed">
                 24H Hackathon Sprint · Multi-Title Esports Championship · Star Cultural Stage
               </p>
-            </div>
-
-            {/* Interactive Holographic Arena Capsules (Unified TM 3.0 Logo Theme) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5 pt-2 max-w-4xl mx-auto">
-              <div className="group relative flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-cyan-950/30 to-black/60 border border-cyan-500/30 hover:border-cyan-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(74,158,255,0.15)] hover:shadow-[0_0_30px_rgba(56,189,248,0.35)]">
-                <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-xs font-tm-mono">
-                  <Code size={15} className="text-cyan-400 group-hover:rotate-6 transition-transform" />
-                  <span>24H HACKATHON</span>
-                </div>
-                <span className="text-[9px] font-tm-mono text-white/50 tracking-widest mt-0.5">BUILD & SHIP LIVE</span>
-              </div>
-
-              <div className="group relative flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-blue-950/30 to-black/60 border border-cyan-500/30 hover:border-cyan-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(74,158,255,0.15)] hover:shadow-[0_0_30px_rgba(56,189,248,0.35)]">
-                <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-xs font-tm-mono">
-                  <Gamepad2 size={15} className="text-cyan-400 group-hover:rotate-6 transition-transform" />
-                  <span>ESPORTS ARENA</span>
-                </div>
-                <span className="text-[9px] font-tm-mono text-white/50 tracking-widest mt-0.5">VALO · BGMI · EA FC</span>
-              </div>
-
-              <div className="group relative flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-cyan-950/30 to-black/60 border border-cyan-500/30 hover:border-cyan-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(74,158,255,0.15)] hover:shadow-[0_0_30px_rgba(56,189,248,0.35)]">
-                <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-xs font-tm-mono">
-                  <Music size={15} className="text-cyan-400 group-hover:rotate-6 transition-transform" />
-                  <span>CULTURAL STAGE</span>
-                </div>
-                <span className="text-[9px] font-tm-mono text-white/50 tracking-widest mt-0.5">CELEB DJ NIGHT</span>
-              </div>
-
-              <div className="group relative flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-blue-950/30 to-black/60 border border-cyan-500/30 hover:border-cyan-400/80 backdrop-blur-xl transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(74,158,255,0.15)] hover:shadow-[0_0_30px_rgba(56,189,248,0.35)]">
-                <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-xs font-tm-mono">
-                  <Trophy size={15} className="text-cyan-400 group-hover:rotate-6 transition-transform" />
-                  <span>₹XX,XXX POOL</span>
-                </div>
-                <span className="text-[9px] font-tm-mono text-white/50 tracking-widest mt-0.5">CASH & INTERNSHIPS</span>
-              </div>
-            </div>
-
-            {/* Realtime Live Countdown Chronometer HUD */}
-            <div className="pt-2 flex justify-center items-center w-full">
-              <TechnomaniaCountdown targetDate="2026-09-15T09:00:00+05:30" />
             </div>
 
             {/* Action CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               <Link
                 href={getHref("/register")}
-                className="w-full sm:w-auto tm-btn-solid text-sm py-4 px-10 flex items-center justify-center gap-3 shadow-[0_0_35px_rgba(74,158,255,0.5)] hover:shadow-[0_0_55px_rgba(74,158,255,0.8)] group"
+                className="w-full sm:w-auto tm-btn-solid text-sm py-4 px-10 flex items-center justify-center gap-3 shadow-[0_0_35px_rgba(74,158,255,0.4)] hover:shadow-[0_0_55px_rgba(74,158,255,0.7)] group"
               >
                 <Zap size={17} className="text-cyan-300 group-hover:rotate-12 transition-transform" />
                 <span className="font-bold tracking-wider text-sm">REGISTER SQUAD NOW</span>
@@ -295,10 +255,9 @@ export default function TechnomaniaPage() {
               </Link>
             </div>
 
-            {/* Micro Live Status Ribbon */}
-            <div className="flex items-center justify-center gap-2 pt-1 font-tm-mono text-[11px] text-white/50">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span>REGISTRATIONS LIVE FOR UNIVERSITY STUDENTS · FREE PASSES</span>
+            {/* Realtime Live Countdown Chronometer HUD */}
+            <div className="pt-4 pb-2 flex justify-center items-center w-full">
+              <TechnomaniaCountdown targetDate="2026-09-15T09:00:00+05:30" />
             </div>
           </motion.div>
         </div>
