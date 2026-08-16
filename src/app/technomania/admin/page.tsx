@@ -13,41 +13,30 @@ import {
   Bell,
   Image as ImageIcon,
   HelpCircle,
-  QrCode,
   Search,
   Plus,
-  Download,
   ExternalLink,
   RefreshCw,
   Edit2,
   Trash2,
-  Eye,
   CheckCircle2,
-  XCircle,
-  Clock,
-  ChevronRight,
-  ChevronDown,
   Upload,
   Save,
-  Check,
   X,
-  AlertCircle,
-  UserCheck,
-  TrendingUp,
   FileSpreadsheet,
-  Layers,
-  Sparkles,
   ArrowUpRight,
-  ShieldCheck,
-  SlidersHorizontal,
-  MoreVertical,
-  Activity
+  TrendingUp,
+  Clock,
+  ChevronRight,
+  UserCheck,
+  Filter,
+  Eye,
+  Check,
+  AlertCircle
 } from "lucide-react";
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -103,7 +92,7 @@ export interface LeaderboardRecord {
   teamName: string;
   rank: number;
   score: number;
-  status: "Winner" | "Runner-Up" | "Qualified" | "In-Progress";
+  status: "Winner" | "Runner-Up" | "Finalist" | "Participating";
   badge?: string;
 }
 
@@ -128,28 +117,26 @@ type TabType =
   | "Overview"
   | "Events"
   | "Registrations"
-  | "Leaderboard"
   | "Schedule"
-  | "Website Settings"
+  | "Website Content"
   | "Announcements"
-  | "Gallery & Media"
-  | "FAQs"
-  | "Check-In";
+  | "Leaderboard"
+  | "Media Library"
+  | "FAQs";
 
 export default function TechnomaniaAdminPage() {
   const getHref = useTechnomaniaHref();
   const [activeTab, setActiveTab] = useState<TabType>("Overview");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Drawer / Modal states
+  // Modals / Drawers
   const [selectedRegistration, setSelectedRegistration] = useState<TechnomaniaRegistration | null>(null);
   const [editingEvent, setEditingEvent] = useState<Partial<TechnomaniaEvent> | null>(null);
   const [isEventDrawerOpen, setIsEventDrawerOpen] = useState(false);
-  const [editingLeaderboard, setEditingLeaderboard] = useState<Partial<LeaderboardRecord> | null>(null);
-  const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Partial<ScheduleRecord> | null>(null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<Partial<FAQRecord> | null>(null);
@@ -158,7 +145,6 @@ export default function TechnomaniaAdminPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Toast Helper
   const notify = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -182,7 +168,7 @@ export default function TechnomaniaAdminPage() {
       endAt: "2026-09-16T09:00:00",
       description: "24 hours of non-stop building, mentoring, and shipping solutions. Solve real industry problem statements and pitch live to tech founders.",
       prizes: "₹XX,XXX PRIZES & INTERNSHIPS",
-      banner: "/technomania/logo-glow.png",
+      banner: "/technomania/logo-white.png",
       rules: [
         "Teams must consist of 1 to 4 members.",
         "All code must be written during the 24-hour hackathon timeframe.",
@@ -252,7 +238,7 @@ export default function TechnomaniaAdminPage() {
       endAt: "2026-09-15T18:00:00",
       description: "Rapid-fire spot events designed for quick thinking and instant glory. UI/UX speed runs, algorithmic debugging races, tech trivia, and mystery box building rounds.",
       prizes: "SPOT GOODIES & CERTIFICATES",
-      banner: "/technomania/logo-glow.png",
+      banner: "/technomania/logo-white.png",
       rules: [
         "Individual entry only.",
         "Strict 15-minute time limits per round."
@@ -260,7 +246,7 @@ export default function TechnomaniaAdminPage() {
     }
   ]);
 
-  // 2. REGISTRATIONS STATE
+  // 2. REGISTRATIONS STATE (Shared with Main Portal)
   const [registrations, setRegistrations] = useState<TechnomaniaRegistration[]>([
     {
       _id: "reg-101",
@@ -328,44 +314,32 @@ export default function TechnomaniaAdminPage() {
     }
   ]);
 
-  // 3. LEADERBOARD STATE
-  const [leaderboard, setLeaderboard] = useState<LeaderboardRecord[]>([
-    { id: "lb-1", eventId: "evt-1", eventTitle: "Code Storm 24H", teamName: "CyberPulse Labs", rank: 1, score: 960, status: "Winner", badge: "Grand Finalist" },
-    { id: "lb-2", eventId: "evt-1", eventTitle: "Code Storm 24H", teamName: "Matrix Reloaded", rank: 2, score: 915, status: "Runner-Up", badge: "Best Architecture" },
-    { id: "lb-3", eventId: "evt-2", eventTitle: "Cyber Clash Arena", teamName: "Alpha Strikers", rank: 1, score: 1450, status: "Winner", badge: "Clean Sweep" },
-    { id: "lb-4", eventId: "evt-2", eventTitle: "Cyber Clash Arena", teamName: "Phantom Elites", rank: 1, score: 820, status: "Winner", badge: "Most Frags" }
-  ]);
-
-  // 4. SCHEDULE STATE
+  // 3. SCHEDULE STATE
   const [schedules, setSchedules] = useState<ScheduleRecord[]>([
-    { id: "sch-1", day: "Day 1 — Sep 15", time: "09:00 AM", title: "Festival Kickoff & Opening Ceremony", venue: "Auditorium 1", category: "General", status: "upcoming" },
-    { id: "sch-2", day: "Day 1 — Sep 15", time: "10:30 AM", title: "Code Storm 24H Hackathon Begins", venue: "Block D Labs", category: "Hackathon", status: "upcoming" },
+    { id: "sch-1", day: "Day 1 — Sep 15", time: "09:00 AM", title: "Festival Opening Ceremony", venue: "Auditorium 1", category: "Ceremony", status: "upcoming" },
+    { id: "sch-2", day: "Day 1 — Sep 15", time: "10:30 AM", title: "Code Storm 24H Hackathon Kickoff", venue: "Block D Tech Labs", category: "Hackathon", status: "upcoming" },
     { id: "sch-3", day: "Day 1 — Sep 15", time: "01:00 PM", title: "Esports Arena Prelims (Valorant & BGMI)", venue: "E-Sports Theater", category: "Esports", status: "upcoming" },
-    { id: "sch-4", day: "Day 2 — Sep 16", time: "11:00 AM", title: "Hackathon Final Pitches to Founders", venue: "Seminar Hall 4", category: "Hackathon", status: "upcoming" },
-    { id: "sch-5", day: "Day 2 — Sep 16", time: "06:00 PM", title: "Star Cultural Night & Celebrity DJ", venue: "CU Amphitheatre", category: "Cultural", status: "upcoming" }
+    { id: "sch-4", day: "Day 2 — Sep 16", time: "11:00 AM", title: "Hackathon Final Pitches & Project Demos", venue: "Seminar Hall 4", category: "Hackathon", status: "upcoming" },
+    { id: "sch-5", day: "Day 2 — Sep 16", time: "06:00 PM", title: "Star Cultural Night & Awards Ceremony", venue: "CU Main Amphitheatre", category: "Cultural", status: "upcoming" }
   ]);
 
-  // 5. WEBSITE SETTINGS STATE
-  const [settingsData, setSettingsData] = useState({
+  // 4. WEBSITE CONTENT STATE (CMS)
+  const [contentSettings, setContentSettings] = useState({
     festivalName: "TECHNOMANIA 3.0",
     edition: "3.0",
     campusLocation: "CHANDIGARH UNIVERSITY · GHARUAN, MOHALI",
     headline: "Flagship Technical & Cultural Festival",
     tagline: "24H Hackathon Sprint · Multi-Title Esports Championship · Star Cultural Stage",
-    announcementStatus: "REGISTRATIONS LIVE FOR UNIVERSITY STUDENTS · FREE PASSES",
     targetDate: "2026-09-15T09:00:00+05:30",
     prizePoolText: "₹XX,XXX CASH & INTERNSHIPS",
     registrationStatus: "open",
     ctaPrimaryText: "REGISTER SQUAD NOW",
     ctaPrimaryLink: "/register",
     ctaSecondaryText: "EXPLORE ALL EVENTS",
-    ctaSecondaryLink: "/events",
-    logoUrl: "/technomania/logo-white.png",
-    emblemUrl: "/technomania/logo-emblem.png",
-    clubLogoUrl: "/technomania/techtatva-logo.png"
+    ctaSecondaryLink: "/events"
   });
 
-  // 6. ANNOUNCEMENTS STATE
+  // 5. ANNOUNCEMENTS STATE (Ticker)
   const [announcements, setAnnouncements] = useState<string[]>([
     "REGISTRATIONS NOW OPEN FOR TECHNOMANIA 3.0",
     "24-HOUR NON-STOP HACKATHON ARENA",
@@ -376,35 +350,15 @@ export default function TechnomaniaAdminPage() {
   ]);
   const [newAnnouncement, setNewAnnouncement] = useState("");
 
-  // 7. FAQS STATE
-  const [faqs, setFaqs] = useState<FAQRecord[]>([
-    {
-      id: "faq-1",
-      question: "Who is eligible to participate in Technomania 3.0?",
-      answer: "All currently enrolled students from Chandigarh University and registered participants across Indian colleges with a valid college ID are welcome to compete.",
-      category: "Eligibility"
-    },
-    {
-      id: "faq-2",
-      question: "Is there any registration fee?",
-      answer: "No, participation passes for Technomania 3.0 flagship tracks and hackathons are 100% free for registered squads.",
-      category: "Registration"
-    },
-    {
-      id: "faq-3",
-      question: "Can I participate in multiple events simultaneously?",
-      answer: "Yes, you can register for both esports and sub-events as long as their individual on-ground time slots do not overlap.",
-      category: "Schedule"
-    },
-    {
-      id: "faq-4",
-      question: "What should I bring to the 24H Hackathon?",
-      answer: "Bring your laptop, charger, student UID card, extensions, and hardware kits if working on IoT or robotics projects.",
-      category: "Hackathon"
-    }
+  // 6. LEADERBOARD STATE
+  const [leaderboard, setLeaderboard] = useState<LeaderboardRecord[]>([
+    { id: "lb-1", eventId: "evt-1", eventTitle: "Code Storm 24H", teamName: "CyberPulse Labs", rank: 1, score: 960, status: "Winner", badge: "Grand Winner" },
+    { id: "lb-2", eventId: "evt-1", eventTitle: "Code Storm 24H", teamName: "Matrix Reloaded", rank: 2, score: 915, status: "Runner-Up", badge: "Best Architecture" },
+    { id: "lb-3", eventId: "evt-2", eventTitle: "Cyber Clash Arena", teamName: "Alpha Strikers", rank: 1, score: 1450, status: "Winner", badge: "Clean Sweep" },
+    { id: "lb-4", eventId: "evt-2", eventTitle: "Cyber Clash Arena", teamName: "Phantom Elites", rank: 2, score: 820, status: "Runner-Up", badge: "Top Frags" }
   ]);
 
-  // 8. MEDIA ASSETS STATE
+  // 7. MEDIA ASSETS STATE
   const [mediaAssets, setMediaAssets] = useState<{ name: string; url: string; size: string; date: string }[]>([
     { name: "logo-white.png", url: "/technomania/logo-white.png", size: "48 KB", date: "System Asset" },
     { name: "logo-emblem.png", url: "/technomania/logo-emblem.png", size: "32 KB", date: "System Asset" },
@@ -412,35 +366,59 @@ export default function TechnomaniaAdminPage() {
     { name: "techtatva-logo.png", url: "/technomania/techtatva-logo.png", size: "64 KB", date: "System Asset" }
   ]);
 
-  // 9. CHECK-IN STATE
-  const [checkInQuery, setCheckInQuery] = useState("");
-  const [checkInResult, setCheckInResult] = useState<{ status: "success" | "error"; text: string; data?: TechnomaniaRegistration } | null>(null);
+  // 8. FAQS STATE
+  const [faqs, setFaqs] = useState<FAQRecord[]>([
+    {
+      id: "faq-1",
+      question: "Who is eligible to participate in Technomania 3.0?",
+      answer: "All students currently enrolled in Chandigarh University as well as recognized colleges across India with a valid student ID card are welcome to participate.",
+      category: "Eligibility"
+    },
+    {
+      id: "faq-2",
+      question: "Is there any registration fee for participants?",
+      answer: "No, registration and event participation passes for Technomania 3.0 are completely free for all verified students.",
+      category: "Registration"
+    },
+    {
+      id: "faq-3",
+      question: "Can I participate in multiple events?",
+      answer: "Yes, participants are permitted to register for multiple tracks as long as the event schedules do not clash.",
+      category: "Schedule"
+    },
+    {
+      id: "faq-4",
+      question: "What should participants bring for the 24H Hackathon?",
+      answer: "Bring your laptop, charger, student UID card, valid ID proof, and any specialized hardware components needed for your project.",
+      category: "Hackathon"
+    }
+  ]);
 
-  // Load config on mount
+  // Load configuration on initial render
   useEffect(() => {
-    async function load() {
+    async function loadConfig() {
       try {
         const res = await fetch("/api/technomania/config");
         if (res.ok) {
           const json = await res.json();
           if (json.config) {
-            setSettingsData((prev) => ({ ...prev, ...json.config }));
+            setContentSettings((prev) => ({ ...prev, ...json.config }));
             if (json.config.marqueeLines) setAnnouncements(json.config.marqueeLines);
           }
         }
-      } catch (err) {
-        console.warn("Could not load API config:", err);
+      } catch (e) {
+        console.warn("Could not load remote config, using defaults:", e);
       }
     }
-    load();
+    loadConfig();
   }, []);
 
-  // Save Settings
-  const saveSettings = async () => {
+  // Save Website Content (CMS)
+  const handleSaveContent = async () => {
     setIsSaving(true);
     try {
       const payload = {
-        ...settingsData,
+        ...contentSettings,
         marqueeLines: announcements,
         faqs: faqs.map((f) => ({ q: f.question, a: f.answer }))
       };
@@ -450,12 +428,12 @@ export default function TechnomaniaAdminPage() {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        notify("Website settings saved & published successfully.");
+        notify("Website content saved and published live.");
       } else {
-        notify("Saved to local workspace.");
+        notify("Saved locally.");
       }
-    } catch (e) {
-      notify("Saved to local workspace.");
+    } catch {
+      notify("Saved locally.");
     } finally {
       setIsSaving(false);
     }
@@ -499,124 +477,94 @@ export default function TechnomaniaAdminPage() {
     }
   };
 
-  // Check-In Submit
-  const handleCheckIn = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = checkInQuery.trim().toUpperCase();
-    if (!q) return;
-
-    const found = registrations.find(
-      (r) => r.qrToken.toUpperCase() === q || r.leadUid.toUpperCase() === q
-    );
-
-    if (found) {
-      setRegistrations((prev) =>
-        prev.map((r) => (r._id === found._id ? { ...r, status: "checked_in" } : r))
-      );
-      setCheckInResult({
-        status: "success",
-        text: `Checked-In: "${found.teamName || found.leadName}" for ${found.eventTitle}`,
-        data: found
-      });
-      notify("Participant checked in successfully.");
-    } else {
-      setCheckInResult({
-        status: "error",
-        text: `No participant or QR pass found matching "${q}".`
-      });
-    }
-    setCheckInQuery("");
-  };
-
   // Filtered Registrations
   const filteredRegistrations = useMemo(() => {
     return registrations.filter((r) => {
-      const q = searchQuery.toLowerCase();
-      return (
-        q === "" ||
-        r.teamName.toLowerCase().includes(q) ||
-        r.leadName.toLowerCase().includes(q) ||
-        r.leadUid.toLowerCase().includes(q) ||
-        r.leadEmail.toLowerCase().includes(q) ||
-        r.eventTitle.toLowerCase().includes(q)
-      );
-    });
-  }, [registrations, searchQuery]);
+      const matchesSearch =
+        searchQuery === "" ||
+        r.teamName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.leadName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.leadUid.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.leadEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.eventTitle.toLowerCase().includes(searchQuery.toLowerCase());
 
-  // Analytics
+      const matchesStatus =
+        statusFilter === "all" || r.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [registrations, searchQuery, statusFilter]);
+
+  // Total builders calculation
   const totalBuilders = useMemo(() => {
     return registrations.reduce((acc, r) => acc + 1 + r.members.length, 0);
   }, [registrations]);
 
   const activityData = [
-    { day: "Aug 10", count: 12 },
-    { day: "Aug 11", count: 18 },
-    { day: "Aug 12", count: 24 },
-    { day: "Aug 13", count: 32 },
-    { day: "Aug 14", count: 48 },
-    { day: "Aug 15", count: 76 },
-    { day: "Aug 16", count: 110 }
+    { day: "Aug 10", registrations: 12 },
+    { day: "Aug 11", registrations: 18 },
+    { day: "Aug 12", registrations: 26 },
+    { day: "Aug 13", registrations: 35 },
+    { day: "Aug 14", registrations: 52 },
+    { day: "Aug 15", registrations: 84 },
+    { day: "Aug 16", registrations: 110 }
   ];
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 font-sans flex flex-col antialiased selection:bg-cyan-500 selection:text-black">
-      {/* ── TOP PROFESSIONAL NAVIGATION BAR ── */}
-      <header className="sticky top-0 z-40 bg-[#0c111d]/90 backdrop-blur-md border-b border-slate-800 px-6 py-3.5 flex items-center justify-between">
+    <div className="min-h-screen bg-black text-white font-sans flex flex-col antialiased selection:bg-white selection:text-black">
+      {/* ── TOP CLEAN NAVIGATION BAR ── */}
+      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-md border-b border-zinc-900 px-6 sm:px-10 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href={getHref("/")} className="flex items-center gap-3 group">
-            <div className="relative h-8 w-8">
+            <div className="relative h-7 w-7">
               <Image
-                src="/technomania/techtatva-logo.png"
-                alt="Tech Tatva"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <span className="text-slate-600 text-sm select-none">/</span>
-            <div className="relative h-6 w-20">
-              <Image
-                src="/technomania/logo-emblem.png"
+                src="/technomania/logo-white.png"
                 alt="Technomania 3.0"
                 fill
                 className="object-contain"
               />
             </div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm tracking-tight text-white">TECHNOMANIA 3.0</span>
+              <span className="text-zinc-600 text-xs">/</span>
+              <span className="text-zinc-400 text-xs font-normal">Admin Portal</span>
+            </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-slate-700/60 text-xs font-medium text-slate-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span>Admin Portal</span>
+          <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-xs text-zinc-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            <span>Autonomous Festival System</span>
           </div>
         </div>
 
-        {/* Global Action Tools */}
+        {/* Global Action Header */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
               setIsRefreshing(true);
               setTimeout(() => {
                 setIsRefreshing(false);
-                notify("Portal data synchronized with MongoDB.");
-              }, 600);
+                notify("Portal data synchronized.");
+              }, 500);
             }}
-            className="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition"
+            className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 transition"
             title="Refresh Data"
           >
-            <RefreshCw size={15} className={isRefreshing ? "animate-spin text-cyan-400" : ""} />
+            <RefreshCw size={14} className={isRefreshing ? "animate-spin text-white" : ""} />
           </button>
 
           <button
             onClick={() => window.open("/api/technomania/export", "_blank")}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 transition"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-medium text-zinc-200 transition"
           >
-            <FileSpreadsheet size={14} className="text-cyan-400" />
+            <FileSpreadsheet size={14} className="text-zinc-400" />
             <span>Export Excel</span>
           </button>
 
           <Link
             href={getHref("/")}
             target="_blank"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-medium transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-medium transition"
           >
             <span>Live Website</span>
             <ExternalLink size={13} />
@@ -626,31 +574,30 @@ export default function TechnomaniaAdminPage() {
 
       {/* ── TOAST NOTIFICATION ── */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-slate-900 border border-cyan-500/50 text-cyan-200 text-xs font-medium shadow-xl flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2">
-          <CheckCircle2 size={16} className="text-cyan-400" />
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs font-medium shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 size={16} className="text-white" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       <div className="flex-grow flex flex-col md:flex-row">
-        {/* ── CLEAN PROFESSIONAL SIDEBAR ── */}
-        <aside className="w-full md:w-64 bg-[#0a0e18] border-r border-slate-800 p-4 flex flex-col justify-between shrink-0">
-          <div className="space-y-1">
-            <div className="px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
-              Management Modules
+        {/* ── SPACIOUS MINIMALIST SIDEBAR ── */}
+        <aside className="w-full md:w-64 bg-black border-r border-zinc-900 p-5 flex flex-col justify-between shrink-0">
+          <div className="space-y-1.5">
+            <div className="px-3 py-2 text-[11px] font-semibold tracking-wider text-zinc-500 uppercase">
+              Festival Management
             </div>
 
             {[
               { id: "Overview", label: "Overview", icon: LayoutDashboard },
               { id: "Events", label: "Events", icon: CalendarDays },
               { id: "Registrations", label: "Registrations", icon: Users },
-              { id: "Leaderboard", label: "Leaderboard", icon: Trophy },
               { id: "Schedule", label: "Schedule", icon: Calendar },
-              { id: "Website Settings", label: "Website Settings", icon: Settings },
+              { id: "Website Content", label: "Website Content", icon: Settings },
               { id: "Announcements", label: "Announcements", icon: Bell },
-              { id: "Gallery & Media", label: "Gallery & Media", icon: ImageIcon },
-              { id: "FAQs", label: "FAQs", icon: HelpCircle },
-              { id: "Check-In", label: "Check-In", icon: QrCode }
+              { id: "Leaderboard", label: "Leaderboard", icon: Trophy },
+              { id: "Media Library", label: "Media Library", icon: ImageIcon },
+              { id: "FAQs", label: "FAQs", icon: HelpCircle }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -663,42 +610,47 @@ export default function TechnomaniaAdminPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-cyan-500/10 text-cyan-300 font-semibold border border-cyan-500/20"
-                      : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/40"
+                      ? "bg-zinc-900 text-white font-semibold border border-zinc-800"
+                      : "text-zinc-400 hover:text-white hover:bg-zinc-900/60"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon size={17} className={isActive ? "text-cyan-400" : "text-slate-400"} />
+                    <Icon size={16} className={isActive ? "text-white" : "text-zinc-500"} />
                     <span>{tab.label}</span>
                   </div>
-                  {isActive && <ChevronRight size={14} className="text-cyan-400" />}
+                  {isActive && <ChevronRight size={14} className="text-zinc-400" />}
                 </button>
               );
             })}
           </div>
 
-          <div className="pt-4 border-t border-slate-800 px-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-300 text-xs font-bold shrink-0">
-              TT
+          {/* Unified Database Info Note */}
+          <div className="pt-5 border-t border-zinc-900 px-3 space-y-2">
+            <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-900 text-[11px] text-zinc-400 leading-relaxed">
+              <div className="font-semibold text-zinc-200 mb-1 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                Shared Database
+              </div>
+              All student registrations made here sync directly into the main Tech Tatva Admin Portal for official attendance.
             </div>
-            <div className="text-xs overflow-hidden">
-              <span className="block font-medium text-slate-200 truncate">Administrator</span>
-              <span className="text-[11px] text-slate-400 block truncate">Technomania 3.0</span>
+
+            <div className="text-[11px] text-zinc-600 px-1">
+              Chandigarh University · Gharuan
             </div>
           </div>
         </aside>
 
-        {/* ── MAIN WORKSPACE CONTENT ── */}
-        <main className="flex-grow p-6 md:p-8 max-w-6xl mx-auto w-full">
+        {/* ── SPACIOUS MAIN CONTENT ── */}
+        <main className="flex-grow p-6 sm:p-10 max-w-6xl mx-auto w-full">
           {/* ═══════════════════════════════════════════════════════
-              TAB: OVERVIEW
+              TAB 1: OVERVIEW
               ═══════════════════════════════════════════════════════ */}
           {activeTab === "Overview" && (
-            <div className="space-y-8">
+            <div className="space-y-10">
               <div>
-                <h1 className="text-2xl font-bold text-white tracking-tight">Overview & Analytics</h1>
-                <p className="text-sm text-slate-400 mt-1">
-                  Live metrics, active registrations, and festival operations summary
+                <h1 className="text-3xl font-bold tracking-tight text-white">Overview</h1>
+                <p className="text-sm text-zinc-400 mt-1">
+                  Summary of registrations, active event tracks, and festival operations
                 </p>
               </div>
 
@@ -706,60 +658,56 @@ export default function TechnomaniaAdminPage() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   {
-                    title: "Total Squads",
+                    title: "Registered Squads",
                     value: registrations.length,
-                    sub: "+100% this week",
-                    icon: Users,
-                    color: "text-cyan-400"
+                    sub: "Direct student signups",
+                    icon: Users
                   },
                   {
                     title: "Total Participants",
                     value: totalBuilders,
-                    sub: "Pan-India students",
-                    icon: TrendingUp,
-                    color: "text-blue-400"
+                    sub: "Pan-India college students",
+                    icon: TrendingUp
                   },
                   {
-                    title: "Active Events",
+                    title: "Active Tracks",
                     value: events.filter((e) => e.status === "published" || e.status === "active").length,
-                    sub: "All tracks live",
-                    icon: CalendarDays,
-                    color: "text-sky-400"
+                    sub: "Hackathon, Esports & Stages",
+                    icon: CalendarDays
                   },
                   {
                     title: "Checked-In",
                     value: registrations.filter((r) => r.status === "checked_in").length,
                     sub: "Verified on ground",
-                    icon: UserCheck,
-                    color: "text-emerald-400"
+                    icon: UserCheck
                   }
                 ].map((kpi, i) => {
                   const Icon = kpi.icon;
                   return (
                     <div
                       key={i}
-                      className="p-5 rounded-2xl bg-[#0e1422] border border-slate-800 hover:border-slate-700 transition space-y-2"
+                      className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 hover:border-zinc-800 transition space-y-3"
                     >
-                      <div className="flex items-center justify-between text-xs font-medium text-slate-400">
+                      <div className="flex items-center justify-between text-xs font-medium text-zinc-400">
                         <span>{kpi.title}</span>
-                        <Icon size={16} className={kpi.color} />
+                        <Icon size={16} className="text-zinc-500" />
                       </div>
                       <div className="text-3xl font-bold text-white tracking-tight">{kpi.value}</div>
-                      <div className="text-xs text-slate-500">{kpi.sub}</div>
+                      <div className="text-xs text-zinc-500">{kpi.sub}</div>
                     </div>
                   );
                 })}
               </div>
 
               {/* Registration Trend Chart */}
-              <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
+              <div className="p-7 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-sm font-semibold text-white">Registration Trend</h2>
-                    <p className="text-xs text-slate-400">Daily signups velocity across all event categories</p>
+                    <h2 className="text-base font-semibold text-white">Daily Registration Velocity</h2>
+                    <p className="text-xs text-zinc-400 mt-0.5">Students registering on technomania.techtatva.in</p>
                   </div>
-                  <span className="text-xs font-medium text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
-                    Live Real-Time Feed
+                  <span className="text-xs font-medium text-zinc-300 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
+                    Live Stream
                   </span>
                 </div>
 
@@ -767,37 +715,38 @@ export default function TechnomaniaAdminPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
-                        <linearGradient id="cyanGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#38bdf8" stopOpacity={0} />
+                        <linearGradient id="whiteGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#ffffff" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="#ffffff" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                      <XAxis dataKey="day" stroke="#64748b" fontSize={12} />
-                      <YAxis stroke="#64748b" fontSize={12} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                      <XAxis dataKey="day" stroke="#71717a" fontSize={12} />
+                      <YAxis stroke="#71717a" fontSize={12} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#0c111d",
-                          borderColor: "#334155",
-                          borderRadius: "12px",
-                          fontSize: "12px"
+                          backgroundColor: "#09090b",
+                          borderColor: "#27272a",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          color: "#ffffff"
                         }}
                       />
-                      <Area type="monotone" dataKey="count" stroke="#38bdf8" strokeWidth={2} fillOpacity={1} fill="url(#cyanGradient)" />
+                      <Area type="monotone" dataKey="registrations" stroke="#ffffff" strokeWidth={2} fillOpacity={1} fill="url(#whiteGradient)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              {/* Quick Actions Grid */}
+              {/* Quick Summary Grid */}
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Recent Signups */}
-                <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
+                {/* Recent Registrations */}
+                <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold text-white">Recent Registrations</h2>
+                    <h2 className="text-sm font-semibold text-white">Recent Student Signups</h2>
                     <button
                       onClick={() => setActiveTab("Registrations")}
-                      className="text-xs font-medium text-cyan-400 hover:underline"
+                      className="text-xs text-zinc-400 hover:text-white transition"
                     >
                       View All →
                     </button>
@@ -811,13 +760,13 @@ export default function TechnomaniaAdminPage() {
                           setSelectedRegistration(reg);
                           setActiveTab("Registrations");
                         }}
-                        className="p-3.5 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-cyan-500/40 transition cursor-pointer flex items-center justify-between"
+                        className="p-3.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-900 hover:border-zinc-800 transition cursor-pointer flex items-center justify-between"
                       >
                         <div>
                           <p className="text-sm font-medium text-white">{reg.teamName || reg.leadName}</p>
-                          <p className="text-xs text-slate-400">{reg.eventTitle}</p>
+                          <p className="text-xs text-zinc-400">{reg.eventTitle}</p>
                         </div>
-                        <span className="text-xs text-cyan-300 font-medium px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                        <span className="text-xs text-zinc-300 font-medium px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800">
                           {reg.members.length + 1} Members
                         </span>
                       </div>
@@ -825,15 +774,15 @@ export default function TechnomaniaAdminPage() {
                   </div>
                 </div>
 
-                {/* Event Registration Switches */}
-                <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
+                {/* Event Registration Toggles */}
+                <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold text-white">Event Registration Switches</h2>
+                    <h2 className="text-sm font-semibold text-white">Event Registration Status</h2>
                     <button
                       onClick={() => setActiveTab("Events")}
-                      className="text-xs font-medium text-cyan-400 hover:underline"
+                      className="text-xs text-zinc-400 hover:text-white transition"
                     >
-                      Manage →
+                      Manage Events →
                     </button>
                   </div>
 
@@ -841,11 +790,11 @@ export default function TechnomaniaAdminPage() {
                     {events.map((evt) => (
                       <div
                         key={evt._id}
-                        className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-between"
+                        className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-900 flex items-center justify-between"
                       >
                         <div>
                           <p className="text-sm font-medium text-white">{evt.title}</p>
-                          <p className="text-xs text-slate-400 capitalize">{evt.category}</p>
+                          <p className="text-xs text-zinc-400 capitalize">{evt.category}</p>
                         </div>
 
                         <button
@@ -859,8 +808,8 @@ export default function TechnomaniaAdminPage() {
                           }}
                           className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
                             evt.registrationOpen
-                              ? "bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20"
-                              : "bg-red-500/10 text-red-300 border border-red-500/30 hover:bg-red-500/20"
+                              ? "bg-white text-black hover:bg-zinc-200"
+                              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
                           }`}
                         >
                           {evt.registrationOpen ? "Open" : "Closed"}
@@ -874,15 +823,15 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB: EVENTS
+              TAB 2: EVENTS
               ═══════════════════════════════════════════════════════ */}
           {activeTab === "Events" && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-bold text-white tracking-tight">Events Management</h1>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Create and manage festival tracks, venues, capacity, descriptions, and rules
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Events</h1>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Manage Technomania tracks, team capacities, venues, descriptions, and rules
                   </p>
                 </div>
 
@@ -898,39 +847,43 @@ export default function TechnomaniaAdminPage() {
                     });
                     setIsEventDrawerOpen(true);
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition shadow-lg shadow-cyan-500/10"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-sm transition"
                 >
                   <Plus size={16} />
-                  <span>Add Event</span>
+                  <span>Create Event</span>
                 </button>
               </div>
 
               {/* Events Grid */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-5">
                 {events.map((evt) => (
                   <div
                     key={evt._id}
-                    className="p-5 rounded-2xl bg-[#0e1422] border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between space-y-4"
+                    className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 hover:border-zinc-800 transition flex flex-col justify-between space-y-4"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="px-2.5 py-1 rounded-md text-xs font-semibold uppercase bg-slate-800 text-cyan-300 border border-slate-700">
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="px-2.5 py-1 rounded-md text-xs font-semibold uppercase bg-zinc-900 text-zinc-200 border border-zinc-800">
                           {evt.category}
                         </span>
 
                         <span
-                          className={`w-2.5 h-2.5 rounded-full ${
-                            evt.registrationOpen ? "bg-emerald-400" : "bg-red-400"
+                          className={`text-xs px-2.5 py-0.5 rounded-full border ${
+                            evt.registrationOpen
+                              ? "bg-zinc-900 text-zinc-200 border-zinc-800"
+                              : "bg-zinc-900 text-zinc-500 border-zinc-900"
                           }`}
-                        />
+                        >
+                          {evt.registrationOpen ? "Registrations Open" : "Closed"}
+                        </span>
                       </div>
 
-                      <h3 className="text-base font-bold text-white">{evt.title}</h3>
-                      <p className="text-xs text-cyan-400/90 mt-0.5">{evt.subtitle}</p>
-                      <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">{evt.description}</p>
+                      <h3 className="text-lg font-bold text-white">{evt.title}</h3>
+                      <p className="text-xs text-zinc-400 mt-0.5">{evt.subtitle}</p>
+                      <p className="text-xs text-zinc-400 mt-3 line-clamp-2 leading-relaxed">{evt.description}</p>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                    <div className="pt-4 border-t border-zinc-900 flex items-center justify-between text-xs text-zinc-400">
                       <span>Venue: {evt.venue}</span>
                       <div className="flex items-center gap-2">
                         <button
@@ -938,7 +891,7 @@ export default function TechnomaniaAdminPage() {
                             setEditingEvent(evt);
                             setIsEventDrawerOpen(true);
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition"
+                          className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium transition"
                         >
                           Edit
                         </button>
@@ -947,7 +900,7 @@ export default function TechnomaniaAdminPage() {
                             setEvents(events.filter((e) => e._id !== evt._id));
                             notify(`Event "${evt.title}" deleted.`);
                           }}
-                          className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
+                          className="p-1.5 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -960,44 +913,58 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB: REGISTRATIONS
+              TAB 3: REGISTRATIONS
               ═══════════════════════════════════════════════════════ */}
           {activeTab === "Registrations" && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-bold text-white tracking-tight">Registrations</h1>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Manage student squads, member rosters, review details, and export datasets
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Registrations</h1>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Student squads and individual entries registered on Technomania 3.0
                   </p>
                 </div>
 
                 <button
                   onClick={() => window.open("/api/technomania/export", "_blank")}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm font-medium text-slate-200 transition"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-sm font-medium text-white transition"
                 >
-                  <FileSpreadsheet size={15} className="text-cyan-400" />
+                  <FileSpreadsheet size={15} className="text-zinc-400" />
                   <span>Export StudentMembers.xlsx</span>
                 </button>
               </div>
 
-              {/* Search Bar */}
-              <div className="p-4 rounded-2xl bg-[#0e1422] border border-slate-800 flex items-center gap-3">
-                <Search size={16} className="text-slate-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search squad name, leader name, UID, or email..."
-                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
-                />
+              {/* Search & Filter Bar */}
+              <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-900 flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex items-center gap-3 flex-grow w-full">
+                  <Search size={16} className="text-zinc-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search squad name, leader name, university UID, or email..."
+                    className="w-full bg-transparent text-sm text-white outline-none placeholder:text-zinc-500"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 outline-none"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="checked_in">Checked-In</option>
+                  </select>
+                </div>
               </div>
 
-              {/* Table */}
-              <div className="rounded-2xl bg-[#0e1422] border border-slate-800 overflow-hidden">
+              {/* Data Table */}
+              <div className="rounded-2xl bg-zinc-950 border border-zinc-900 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-900/60 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase">
+                    <thead className="bg-zinc-900/60 border-b border-zinc-900 text-xs font-semibold text-zinc-400 uppercase">
                       <tr>
                         <th className="p-4">Squad / Leader</th>
                         <th className="p-4">University UID</th>
@@ -1007,22 +974,22 @@ export default function TechnomaniaAdminPage() {
                         <th className="p-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800">
+                    <tbody className="divide-y divide-zinc-900">
                       {filteredRegistrations.map((reg) => (
-                        <tr key={reg._id} className="hover:bg-slate-800/30 transition">
+                        <tr key={reg._id} className="hover:bg-zinc-900/40 transition">
                           <td className="p-4">
                             <div className="font-semibold text-white">{reg.teamName || reg.leadName}</div>
-                            <div className="text-xs text-slate-400">{reg.leadEmail}</div>
+                            <div className="text-xs text-zinc-400">{reg.leadEmail}</div>
                           </td>
-                          <td className="p-4 font-mono text-cyan-400 font-semibold">{reg.leadUid}</td>
-                          <td className="p-4 text-slate-300">{reg.eventTitle}</td>
-                          <td className="p-4 text-slate-400">{reg.members.length + 1} Members</td>
+                          <td className="p-4 font-mono text-zinc-200 font-semibold">{reg.leadUid}</td>
+                          <td className="p-4 text-zinc-300">{reg.eventTitle}</td>
+                          <td className="p-4 text-zinc-400">{reg.members.length + 1} Members</td>
                           <td className="p-4">
                             <span
                               className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                                 reg.status === "checked_in"
-                                  ? "bg-cyan-500/10 text-cyan-300 border border-cyan-500/30"
-                                  : "bg-blue-500/10 text-blue-300 border border-blue-500/30"
+                                  ? "bg-white text-black"
+                                  : "bg-zinc-900 text-zinc-300 border border-zinc-800"
                               }`}
                             >
                               {reg.status === "checked_in" ? "Checked-In" : "Confirmed"}
@@ -1031,7 +998,7 @@ export default function TechnomaniaAdminPage() {
                           <td className="p-4 text-right">
                             <button
                               onClick={() => setSelectedRegistration(reg)}
-                              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-medium transition"
+                              className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium transition"
                             >
                               View Details
                             </button>
@@ -1046,15 +1013,266 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB: LEADERBOARD
+              TAB 4: SCHEDULE
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "Leaderboard" && (
-            <div className="space-y-6">
+          {activeTab === "Schedule" && (
+            <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-white tracking-tight">Live Leaderboard</h1>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Manage real-time ranks, scores, and standing badges per event
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Schedule</h1>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Manage festival timeline, session timing, and hall locations
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const newItem: ScheduleRecord = {
+                      id: `sch-${Date.now()}`,
+                      day: "Day 1 — Sep 15",
+                      time: "02:00 PM",
+                      title: "New Session / Round",
+                      venue: "Auditorium 2",
+                      category: "Esports",
+                      status: "upcoming"
+                    };
+                    setSchedules([...schedules, newItem]);
+                    notify("Added schedule slot.");
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-sm transition"
+                >
+                  <Plus size={16} />
+                  <span>Add Slot</span>
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {schedules.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-5 rounded-2xl bg-zinc-950 border border-zinc-900 flex items-center justify-between hover:border-zinc-800 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="px-3 py-2 rounded-xl bg-zinc-900 text-white font-semibold text-xs border border-zinc-800 font-mono">
+                        {item.time}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white text-sm">{item.title}</h4>
+                        <p className="text-xs text-zinc-400 mt-0.5">
+                          {item.day} · {item.venue} · [{item.category}]
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setSchedules(schedules.filter((s) => s.id !== item.id))}
+                      className="p-2 rounded-lg hover:bg-zinc-900 text-zinc-500 hover:text-white transition"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════
+              TAB 5: WEBSITE CONTENT (CMS)
+              ═══════════════════════════════════════════════════════ */}
+          {activeTab === "Website Content" && (
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Website Content</h1>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Control public headlines, campus venue, countdown timestamp, and CTA buttons
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleSaveContent}
+                  disabled={isSaving}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-sm transition"
+                >
+                  <Save size={16} />
+                  <span>{isSaving ? "Saving..." : "Save & Publish"}</span>
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* General Info */}
+                <div className="p-7 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-4">
+                  <h2 className="text-sm font-semibold text-zinc-200">Festival Details</h2>
+
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Festival Title</label>
+                    <input
+                      type="text"
+                      value={contentSettings.festivalName}
+                      onChange={(e) => setContentSettings({ ...contentSettings, festivalName: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Campus Venue</label>
+                    <input
+                      type="text"
+                      value={contentSettings.campusLocation}
+                      onChange={(e) => setContentSettings({ ...contentSettings, campusLocation: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Hero Main Headline</label>
+                    <input
+                      type="text"
+                      value={contentSettings.headline}
+                      onChange={(e) => setContentSettings({ ...contentSettings, headline: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Subtitle / Description</label>
+                    <textarea
+                      rows={3}
+                      value={contentSettings.tagline}
+                      onChange={(e) => setContentSettings({ ...contentSettings, tagline: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600"
+                    />
+                  </div>
+                </div>
+
+                {/* Countdown & CTAs */}
+                <div className="p-7 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-4">
+                  <h2 className="text-sm font-semibold text-zinc-200">Countdown & CTAs</h2>
+
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+                      Countdown Target Timestamp (ISO Format)
+                    </label>
+                    <input
+                      type="text"
+                      value={contentSettings.targetDate}
+                      onChange={(e) => setContentSettings({ ...contentSettings, targetDate: e.target.value })}
+                      placeholder="2026-09-15T09:00:00+05:30"
+                      className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Prize Pool Text</label>
+                    <input
+                      type="text"
+                      value={contentSettings.prizePoolText}
+                      onChange={(e) => setContentSettings({ ...contentSettings, prizePoolText: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Primary CTA Button Label</label>
+                    <input
+                      type="text"
+                      value={contentSettings.ctaPrimaryText}
+                      onChange={(e) => setContentSettings({ ...contentSettings, ctaPrimaryText: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">Secondary CTA Button Label</label>
+                    <input
+                      type="text"
+                      value={contentSettings.ctaSecondaryText}
+                      onChange={(e) => setContentSettings({ ...contentSettings, ctaSecondaryText: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════
+              TAB 6: ANNOUNCEMENTS
+              ═══════════════════════════════════════════════════════ */}
+          {activeTab === "Announcements" && (
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Announcements</h1>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Manage the top cycling marquee announcement ribbon on the website
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleSaveContent}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-sm transition"
+                >
+                  <Save size={16} />
+                  <span>Save Broadcast</span>
+                </button>
+              </div>
+
+              {/* Add form */}
+              <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-900 flex gap-3">
+                <input
+                  type="text"
+                  value={newAnnouncement}
+                  onChange={(e) => setNewAnnouncement(e.target.value)}
+                  placeholder="Type new broadcast headline..."
+                  className="flex-grow px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600"
+                />
+                <button
+                  onClick={() => {
+                    if (!newAnnouncement.trim()) return;
+                    setAnnouncements([...announcements, newAnnouncement.trim().toUpperCase()]);
+                    setNewAnnouncement("");
+                    notify("Added announcement line.");
+                  }}
+                  className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs transition"
+                >
+                  Add Line
+                </button>
+              </div>
+
+              <div className="space-y-2.5">
+                {announcements.map((line, i) => (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl bg-zinc-950 border border-zinc-900 flex items-center justify-between hover:border-zinc-800 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold text-zinc-500 font-mono">{i + 1}.</span>
+                      <span className="text-sm text-zinc-200">{line}</span>
+                    </div>
+
+                    <button
+                      onClick={() => setAnnouncements(announcements.filter((_, idx) => idx !== i))}
+                      className="p-1.5 rounded-lg hover:bg-zinc-900 text-zinc-500 hover:text-white transition"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════
+              TAB 7: LEADERBOARD
+              ═══════════════════════════════════════════════════════ */}
+          {activeTab === "Leaderboard" && (
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Leaderboard</h1>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Manage real-time ranks, points tallies, and winner badges per event track
                   </p>
                 </div>
 
@@ -1066,40 +1284,40 @@ export default function TechnomaniaAdminPage() {
                       eventTitle: events[0]?.title || "Code Storm 24H",
                       teamName: "New Finalist Team",
                       rank: leaderboard.length + 1,
-                      score: 750,
-                      status: "Qualified"
+                      score: 800,
+                      status: "Finalist"
                     };
                     setLeaderboard([...leaderboard, newEntry]);
-                    notify("Added new leaderboard standing.");
+                    notify("Added new leaderboard rank.");
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-sm transition"
                 >
                   <Plus size={16} />
                   <span>Add Standing</span>
                 </button>
               </div>
 
-              <div className="rounded-2xl bg-[#0e1422] border border-slate-800 overflow-hidden">
+              <div className="rounded-2xl bg-zinc-950 border border-zinc-900 overflow-hidden">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-900/60 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase">
+                  <thead className="bg-zinc-900/60 border-b border-zinc-900 text-xs font-semibold text-zinc-400 uppercase">
                     <tr>
                       <th className="p-4">Rank</th>
                       <th className="p-4">Team Name</th>
-                      <th className="p-4">Event</th>
+                      <th className="p-4">Event Track</th>
                       <th className="p-4">Score</th>
-                      <th className="p-4">Badge</th>
+                      <th className="p-4">Award Badge</th>
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800">
+                  <tbody className="divide-y divide-zinc-900">
                     {leaderboard.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-800/30 transition">
-                        <td className="p-4 font-bold text-cyan-400 text-base">#{item.rank}</td>
+                      <tr key={item.id} className="hover:bg-zinc-900/40 transition">
+                        <td className="p-4 font-bold text-white text-base">#{item.rank}</td>
                         <td className="p-4 font-semibold text-white">{item.teamName}</td>
-                        <td className="p-4 text-slate-400">{item.eventTitle}</td>
-                        <td className="p-4 font-bold text-slate-100">{item.score} PTS</td>
+                        <td className="p-4 text-zinc-400">{item.eventTitle}</td>
+                        <td className="p-4 font-bold text-zinc-100 font-mono">{item.score} PTS</td>
                         <td className="p-4">
-                          <span className="px-2.5 py-1 rounded-md bg-slate-800 text-xs font-medium text-cyan-300 border border-slate-700">
+                          <span className="px-2.5 py-1 rounded-md bg-zinc-900 text-xs font-medium text-zinc-200 border border-zinc-800">
                             {item.badge || item.status}
                           </span>
                         </td>
@@ -1114,13 +1332,13 @@ export default function TechnomaniaAdminPage() {
                                 notify(`Updated score for "${item.teamName}".`);
                               }
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs mr-2 transition"
+                            className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs mr-2 transition"
                           >
-                            Edit Score
+                            Edit Points
                           </button>
                           <button
                             onClick={() => setLeaderboard(leaderboard.filter((lb) => lb.id !== item.id))}
-                            className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
+                            className="p-1.5 rounded-lg hover:bg-zinc-900 text-zinc-500 hover:text-white transition"
                           >
                             <Trash2 size={15} />
                           </button>
@@ -1134,266 +1352,15 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB: SCHEDULE
+              TAB 8: MEDIA LIBRARY
               ═══════════════════════════════════════════════════════ */}
-          {activeTab === "Schedule" && (
-            <div className="space-y-6">
+          {activeTab === "Media Library" && (
+            <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-white tracking-tight">Timeline & Schedule</h1>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Manage festival agenda, timing slots, day-wise rounds, and venue halls
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => {
-                    const newItem: ScheduleRecord = {
-                      id: `sch-${Date.now()}`,
-                      day: "Day 1 — Sep 15",
-                      time: "02:00 PM",
-                      title: "New Tournament Session",
-                      venue: "Auditorium 2",
-                      category: "Esports",
-                      status: "upcoming"
-                    };
-                    setSchedules([...schedules, newItem]);
-                    notify("Added schedule slot.");
-                  }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
-                >
-                  <Plus size={16} />
-                  <span>Add Slot</span>
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {schedules.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 rounded-2xl bg-[#0e1422] border border-slate-800 flex items-center justify-between hover:border-slate-700 transition"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="px-3 py-2 rounded-xl bg-slate-900 text-cyan-300 font-semibold text-xs border border-slate-800">
-                        {item.time}
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-white text-sm">{item.title}</h4>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          {item.day} · {item.venue} · [{item.category}]
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => setSchedules(schedules.filter((s) => s.id !== item.id))}
-                      className="p-2 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════
-              TAB: WEBSITE SETTINGS
-              ═══════════════════════════════════════════════════════ */}
-          {activeTab === "Website Settings" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-white tracking-tight">Website Settings & CMS</h1>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Control public festival copy, headline texts, countdown date, and CTAs
-                  </p>
-                </div>
-
-                <button
-                  onClick={saveSettings}
-                  disabled={isSaving}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
-                >
-                  <Save size={16} />
-                  <span>{isSaving ? "Saving..." : "Save & Publish"}</span>
-                </button>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* General Info */}
-                <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
-                  <h2 className="text-sm font-semibold text-slate-200">General Information</h2>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Festival Title</label>
-                    <input
-                      type="text"
-                      value={settingsData.festivalName}
-                      onChange={(e) => setSettingsData({ ...settingsData, festivalName: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Campus Location</label>
-                    <input
-                      type="text"
-                      value={settingsData.campusLocation}
-                      onChange={(e) => setSettingsData({ ...settingsData, campusLocation: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Hero Headline</label>
-                    <input
-                      type="text"
-                      value={settingsData.headline}
-                      onChange={(e) => setSettingsData({ ...settingsData, headline: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Description / Subtitle</label>
-                    <textarea
-                      rows={3}
-                      value={settingsData.tagline}
-                      onChange={(e) => setSettingsData({ ...settingsData, tagline: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
-                    />
-                  </div>
-                </div>
-
-                {/* Countdown & Timing */}
-                <div className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
-                  <h2 className="text-sm font-semibold text-slate-200">Countdown & CTAs</h2>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                      Countdown Target Timestamp (ISO)
-                    </label>
-                    <input
-                      type="text"
-                      value={settingsData.targetDate}
-                      onChange={(e) => setSettingsData({ ...settingsData, targetDate: e.target.value })}
-                      placeholder="2026-09-15T09:00:00+05:30"
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400 font-mono"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Highlight Prize Pool</label>
-                    <input
-                      type="text"
-                      value={settingsData.prizePoolText}
-                      onChange={(e) => setSettingsData({ ...settingsData, prizePoolText: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Primary CTA Button</label>
-                    <input
-                      type="text"
-                      value={settingsData.ctaPrimaryText}
-                      onChange={(e) => setSettingsData({ ...settingsData, ctaPrimaryText: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Secondary CTA Button</label>
-                    <input
-                      type="text"
-                      value={settingsData.ctaSecondaryText}
-                      onChange={(e) => setSettingsData({ ...settingsData, ctaSecondaryText: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════
-              TAB: ANNOUNCEMENTS
-              ═══════════════════════════════════════════════════════ */}
-          {activeTab === "Announcements" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-white tracking-tight">Broadcast Announcements</h1>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Manage the top cycling marquee announcement ribbon on the public website
-                  </p>
-                </div>
-
-                <button
-                  onClick={saveSettings}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
-                >
-                  <Save size={16} />
-                  <span>Save Broadcast</span>
-                </button>
-              </div>
-
-              {/* Add form */}
-              <div className="p-4 rounded-2xl bg-[#0e1422] border border-slate-800 flex gap-3">
-                <input
-                  type="text"
-                  value={newAnnouncement}
-                  onChange={(e) => setNewAnnouncement(e.target.value)}
-                  placeholder="Type new broadcast announcement..."
-                  className="flex-grow px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400"
-                />
-                <button
-                  onClick={() => {
-                    if (!newAnnouncement.trim()) return;
-                    setAnnouncements([...announcements, newAnnouncement.trim().toUpperCase()]);
-                    setNewAnnouncement("");
-                    notify("Added broadcast line.");
-                  }}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold text-xs transition"
-                >
-                  Add Line
-                </button>
-              </div>
-
-              <div className="space-y-2.5">
-                {announcements.map((line, i) => (
-                  <div
-                    key={i}
-                    className="p-4 rounded-xl bg-[#0e1422] border border-slate-800 flex items-center justify-between hover:border-slate-700 transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-semibold text-cyan-400">{i + 1}.</span>
-                      <span className="text-sm text-slate-200">{line}</span>
-                    </div>
-
-                    <button
-                      onClick={() => setAnnouncements(announcements.filter((_, idx) => idx !== i))}
-                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════
-              TAB: GALLERY & MEDIA
-              ═══════════════════════════════════════════════════════ */}
-          {activeTab === "Gallery & Media" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-white tracking-tight">Gallery & Media Library</h1>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Upload festival logos, posters, sponsor emblems, and event banners
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Media Library</h1>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Upload festival logos, posters, and event banners
                   </p>
                 </div>
 
@@ -1408,7 +1375,7 @@ export default function TechnomaniaAdminPage() {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-sm transition"
                   >
                     <Upload size={16} />
                     <span>{isUploading ? "Uploading..." : "Upload Image"}</span>
@@ -1420,9 +1387,9 @@ export default function TechnomaniaAdminPage() {
                 {mediaAssets.map((asset, i) => (
                   <div
                     key={i}
-                    className="p-3 rounded-2xl bg-[#0e1422] border border-slate-800 hover:border-slate-700 transition flex flex-col space-y-2"
+                    className="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-900 hover:border-zinc-800 transition flex flex-col space-y-2.5"
                   >
-                    <div className="relative h-28 w-full bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center p-2">
+                    <div className="relative h-28 w-full bg-zinc-900 rounded-xl overflow-hidden flex items-center justify-center p-2">
                       <Image
                         src={asset.url}
                         alt={asset.name}
@@ -1431,15 +1398,15 @@ export default function TechnomaniaAdminPage() {
                       />
                     </div>
                     <div className="text-xs font-semibold text-white truncate">{asset.name}</div>
-                    <div className="text-[11px] text-slate-400">{asset.size}</div>
+                    <div className="text-[11px] text-zinc-500">{asset.size}</div>
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(asset.url);
                         notify(`Copied URL: ${asset.url}`);
                       }}
-                      className="w-full py-1 text-center rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-medium transition"
+                      className="w-full py-1.5 text-center rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium transition"
                     >
-                      Copy URL
+                      Copy Link
                     </button>
                   </div>
                 ))}
@@ -1448,15 +1415,15 @@ export default function TechnomaniaAdminPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              TAB: FAQS
+              TAB 9: FAQS
               ═══════════════════════════════════════════════════════ */}
           {activeTab === "FAQs" && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-white tracking-tight">Frequently Asked Questions</h1>
-                  <p className="text-sm text-slate-400 mt-1">
-                    Manage festival FAQs displayed across the public website
+                  <h1 className="text-3xl font-bold tracking-tight text-white">FAQs</h1>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Manage frequently asked questions on the website
                   </p>
                 </div>
 
@@ -1469,7 +1436,7 @@ export default function TechnomaniaAdminPage() {
                       notify("Added FAQ entry.");
                     }
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-sm transition"
                 >
                   <Plus size={16} />
                   <span>Add FAQ</span>
@@ -1478,81 +1445,33 @@ export default function TechnomaniaAdminPage() {
 
               <div className="space-y-3">
                 {faqs.map((faq) => (
-                  <div key={faq.id} className="p-5 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-2">
+                  <div key={faq.id} className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="font-semibold text-white text-sm">{faq.question}</h4>
                       <button
                         onClick={() => setFaqs(faqs.filter((f) => f.id !== faq.id))}
-                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
+                        className="p-1.5 rounded-lg hover:bg-zinc-900 text-zinc-500 hover:text-white transition"
                       >
                         <Trash2 size={15} />
                       </button>
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">{faq.answer}</p>
+                    <p className="text-xs text-zinc-400 leading-relaxed">{faq.answer}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
-
-          {/* ═══════════════════════════════════════════════════════
-              TAB: CHECK-IN
-              ═══════════════════════════════════════════════════════ */}
-          {activeTab === "Check-In" && (
-            <div className="space-y-6 max-w-xl">
-              <div>
-                <h1 className="text-2xl font-bold text-white tracking-tight">Gate Check-In Desk</h1>
-                <p className="text-sm text-slate-400 mt-1">
-                  Verify digital QR ticket passes or enter student UIDs for attendance logging
-                </p>
-              </div>
-
-              <form onSubmit={handleCheckIn} className="p-6 rounded-2xl bg-[#0e1422] border border-slate-800 space-y-4">
-                <label className="block text-xs font-semibold text-slate-300">
-                  ENTER TICKET PASS TOKEN OR STUDENT UID
-                </label>
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={checkInQuery}
-                    onChange={(e) => setCheckInQuery(e.target.value)}
-                    placeholder="e.g. TM3-CS24-9981A or 22BCS10192"
-                    className="flex-grow px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none focus:border-cyan-400 font-mono"
-                    autoFocus
-                  />
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition"
-                  >
-                    Verify Pass
-                  </button>
-                </div>
-              </form>
-
-              {checkInResult && (
-                <div
-                  className={`p-5 rounded-2xl border ${
-                    checkInResult.status === "success"
-                      ? "bg-cyan-950/30 border-cyan-500 text-cyan-200"
-                      : "bg-red-950/30 border-red-500 text-red-200"
-                  }`}
-                >
-                  <p className="font-semibold text-sm">{checkInResult.text}</p>
-                </div>
-              )}
-            </div>
-          )}
         </main>
       </div>
 
-      {/* ── REGISTRATION ROSTER SLIDE-OVER MODAL ── */}
+      {/* ── REGISTRATION ROSTER MODAL ── */}
       {selectedRegistration && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-[#0c111d] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
               <div>
-                <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
-                  Registration Details
+                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  Registration Dossier
                 </span>
                 <h2 className="text-xl font-bold text-white mt-0.5">
                   {selectedRegistration.teamName || selectedRegistration.leadName}
@@ -1560,41 +1479,41 @@ export default function TechnomaniaAdminPage() {
               </div>
               <button
                 onClick={() => setSelectedRegistration(null)}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+                className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Leader Details */}
-            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-              <h4 className="text-xs font-semibold text-slate-300 uppercase">Team Leader / Contact</h4>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div><span className="text-slate-400">Name:</span> <span className="text-white font-medium">{selectedRegistration.leadName}</span></div>
-                <div><span className="text-slate-400">UID:</span> <span className="text-cyan-300 font-mono font-medium">{selectedRegistration.leadUid}</span></div>
-                <div><span className="text-slate-400">Email:</span> <span className="text-white">{selectedRegistration.leadEmail}</span></div>
-                <div><span className="text-slate-400">Phone:</span> <span className="text-white">{selectedRegistration.leadPhone}</span></div>
-                <div className="col-span-2"><span className="text-slate-400">Program:</span> <span className="text-white">{selectedRegistration.leadProgram} (Semester {selectedRegistration.leadSemester})</span></div>
+            <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-3">
+              <h4 className="text-xs font-semibold text-zinc-300 uppercase">Team Leader / Contact</h4>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div><span className="text-zinc-500">Name:</span> <span className="text-white font-medium ml-1.5">{selectedRegistration.leadName}</span></div>
+                <div><span className="text-zinc-500">UID:</span> <span className="text-white font-mono font-medium ml-1.5">{selectedRegistration.leadUid}</span></div>
+                <div><span className="text-zinc-500">Email:</span> <span className="text-white ml-1.5">{selectedRegistration.leadEmail}</span></div>
+                <div><span className="text-zinc-500">Phone:</span> <span className="text-white ml-1.5">{selectedRegistration.leadPhone}</span></div>
+                <div className="col-span-2"><span className="text-zinc-500">Program:</span> <span className="text-white ml-1.5">{selectedRegistration.leadProgram} (Semester {selectedRegistration.leadSemester})</span></div>
               </div>
             </div>
 
             {/* Team Members */}
             {selectedRegistration.members.length > 0 && (
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-slate-300 uppercase">
-                  Squad Roster ({selectedRegistration.members.length} Additional Members)
+                <h4 className="text-xs font-semibold text-zinc-300 uppercase">
+                  Squad Roster ({selectedRegistration.members.length} Teammates)
                 </h4>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {selectedRegistration.members.map((m, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs flex items-center justify-between"
+                      className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-900 text-xs flex items-center justify-between"
                     >
                       <div>
                         <p className="font-semibold text-white">{m.name}</p>
-                        <p className="text-slate-400 text-[11px]">{m.email} · {m.program}</p>
+                        <p className="text-zinc-400 text-[11px]">{m.email} · {m.program}</p>
                       </div>
-                      <span className="text-cyan-400 font-mono font-medium">{m.uid}</span>
+                      <span className="text-zinc-300 font-mono font-medium">{m.uid}</span>
                     </div>
                   ))}
                 </div>
@@ -1602,7 +1521,7 @@ export default function TechnomaniaAdminPage() {
             )}
 
             {/* Actions */}
-            <div className="pt-4 border-t border-slate-800 flex justify-end gap-2">
+            <div className="pt-4 border-t border-zinc-900 flex justify-end gap-3">
               <button
                 onClick={() => {
                   setRegistrations((prev) =>
@@ -1613,7 +1532,7 @@ export default function TechnomaniaAdminPage() {
                   setSelectedRegistration(null);
                   notify("Registration confirmed.");
                 }}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition"
+                className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold transition"
               >
                 Mark Confirmed
               </button>
@@ -1627,26 +1546,26 @@ export default function TechnomaniaAdminPage() {
                   setSelectedRegistration(null);
                   notify("Participant marked as checked in.");
                 }}
-                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-semibold transition"
+                className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition"
               >
-                Check-In at Gate
+                Check-In Attendance
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── EVENT DRAWER MODAL ── */}
+      {/* ── CREATE / EDIT EVENT DRAWER ── */}
       {isEventDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-xl bg-[#0c111d] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-zinc-950 border border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
               <h2 className="text-lg font-bold text-white">
                 {editingEvent?._id ? "Edit Event Track" : "Create New Event Track"}
               </h2>
               <button
                 onClick={() => setIsEventDrawerOpen(false)}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+                className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition"
               >
                 <X size={18} />
               </button>
@@ -1654,23 +1573,23 @@ export default function TechnomaniaAdminPage() {
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Event Title</label>
+                <label className="block text-zinc-300 font-medium mb-1.5">Event Title</label>
                 <input
                   type="text"
                   value={editingEvent?.title || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
                   placeholder="e.g. Code Storm 24H"
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white outline-none focus:border-zinc-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-medium mb-1">Category Track</label>
+                  <label className="block text-zinc-300 font-medium mb-1.5">Category Track</label>
                   <select
                     value={editingEvent?.category || "hackathon"}
                     onChange={(e) => setEditingEvent({ ...editingEvent, category: e.target.value as any })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white outline-none"
                   >
                     <option value="hackathon">Hackathon</option>
                     <option value="esports">Esports Arena</option>
@@ -1680,54 +1599,54 @@ export default function TechnomaniaAdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-medium mb-1">Capacity (Max Slots)</label>
+                  <label className="block text-zinc-300 font-medium mb-1.5">Max Seat Capacity</label>
                   <input
                     type="number"
                     value={editingEvent?.capacity || 50}
                     onChange={(e) => setEditingEvent({ ...editingEvent, capacity: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white outline-none focus:border-zinc-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Venue / Room</label>
+                <label className="block text-zinc-300 font-medium mb-1.5">Venue Location</label>
                 <input
                   type="text"
                   value={editingEvent?.venue || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, venue: e.target.value })}
                   placeholder="e.g. Block D Central Tech Labs"
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white outline-none focus:border-zinc-600"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Prizes & Rewards</label>
+                <label className="block text-zinc-300 font-medium mb-1.5">Prizes & Awards</label>
                 <input
                   type="text"
                   value={editingEvent?.prizes || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, prizes: e.target.value })}
                   placeholder="e.g. ₹XX,XXX CASH & INTERNSHIPS"
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white outline-none focus:border-zinc-600"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Description</label>
+                <label className="block text-zinc-300 font-medium mb-1.5">Description</label>
                 <textarea
                   rows={3}
                   value={editingEvent?.description || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
                   placeholder="Event details..."
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none focus:border-cyan-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white outline-none focus:border-zinc-600"
                 />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-800 flex justify-end gap-3">
+            <div className="pt-4 border-t border-zinc-900 flex justify-end gap-3">
               <button
                 onClick={() => setIsEventDrawerOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
+                className="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-300 text-xs font-semibold"
               >
                 Cancel
               </button>
@@ -1757,7 +1676,7 @@ export default function TechnomaniaAdminPage() {
                   setIsEventDrawerOpen(false);
                   notify(`Event "${editingEvent.title}" saved successfully.`);
                 }}
-                className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition"
+                className="px-5 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition"
               >
                 Save Event
               </button>
