@@ -30,8 +30,6 @@ export function TechnomaniaSciFiIntro({ onComplete }: { onComplete?: () => void 
     };
   }, [onComplete]);
 
-  if (phase === "complete") return null;
-
   return (
     <AnimatePresence>
       {phase !== "complete" && (

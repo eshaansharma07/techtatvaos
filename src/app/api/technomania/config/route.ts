@@ -58,7 +58,7 @@ const DEFAULT_TM_CONFIG = {
 export async function GET() {
   try {
     await connectDB();
-    const doc = await ClubInfo.findOne({ key: "technomania_config" }).lean();
+    const doc = (await ClubInfo.findOne({ key: "technomania_config" }).lean()) as { value?: any } | null;
     if (!doc || !doc.value) {
       return NextResponse.json({ config: DEFAULT_TM_CONFIG, source: "default" });
     }
@@ -74,13 +74,13 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const body = await req.json();
     
-    const updated = await ClubInfo.findOneAndUpdate(
+    const updated = (await ClubInfo.findOneAndUpdate(
       { key: "technomania_config" },
       { $set: { value: body } },
       { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+    )) as any;
 
-    return NextResponse.json({ success: true, config: updated.value });
+    return NextResponse.json({ success: true, config: updated?.value });
   } catch (error) {
     console.error("POST /api/technomania/config error:", error);
     return NextResponse.json({ error: "Failed to update Technomania configuration" }, { status: 500 });
