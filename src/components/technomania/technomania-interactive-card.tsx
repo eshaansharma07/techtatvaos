@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useMotionTemplate, useMotionValue, useSpring } from "framer-motion";
 import { ArrowRight, Trophy, Users, ChevronRight, Sparkles } from "lucide-react";
+import { TechnomaniaDynamicMascot } from "./technomania-dynamic-mascot";
 
 export interface TechnomaniaEventItem {
   id: string;
@@ -170,32 +171,23 @@ export function TechnomaniaInteractiveCard({
               </p>
             </div>
 
-            {/* Right Column: 3D Mascot with Floating Physics */}
+            {/* Right Column: Dynamic Interactive Mascot */}
             <motion.div
               animate={{
-                y: [0, -8, 0],
-                rotate: [0, 1.5, 0, -1.5, 0],
+                y: [0, -6, 0],
               }}
               transition={{
-                duration: 4.5 + index * 0.5,
+                duration: 4 + index * 0.4,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              whileHover={{ scale: 1.08, y: -12 }}
-              className="relative w-28 h-28 sm:w-36 sm:h-36 shrink-0 rounded-2xl overflow-hidden bg-black/50 border border-zinc-800/80 group-hover:border-zinc-600 transition-all shadow-[0_0_30px_rgba(0,0,0,0.8)] group-hover:shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+              whileHover={{ scale: 1.05, y: -8 }}
+              className="shrink-0"
             >
-              {/* Soft Ambient Radial Behind Mascot */}
-              <div className="absolute inset-0 bg-radial-gradient from-white/10 to-transparent pointer-events-none" />
-              
-              <Image
-                src={event.mascotImage}
-                alt={event.mascotAlt}
-                fill
-                className="object-contain p-1.5 transition-transform duration-500 group-hover:scale-105"
+              <TechnomaniaDynamicMascot
+                type={event.id || event.category.toLowerCase()}
+                isHovered={isHovered}
               />
-
-              {/* Holographic Scanline Overlay on Mascot */}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.05] to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
             </motion.div>
           </div>
         </div>
