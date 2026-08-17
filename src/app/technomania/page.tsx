@@ -22,11 +22,11 @@ import { TechnomaniaCountdown } from "@/components/technomania/technomania-count
 import { TechnomaniaSciFiIntro } from "@/components/technomania/technomania-scifi-intro";
 import { TechnomaniaInteractiveCard } from "@/components/technomania/technomania-interactive-card";
 
-/* ── Flagship Events (Pure Monochrome Theme: Black, White & Zinc) ── */
+/* ── Flagship Events (Pure Monochrome Theme: Black, White & Zinc with 3D Mascots) ── */
 const flagshipEvents = [
   {
     id: "hackathon",
-    icon: <Code size={32} className="text-white" />,
+    icon: <Code size={24} className="text-white" />,
     category: "HACKATHON",
     tag: "24 HOURS NON-STOP",
     title: "CODE STORM 24H",
@@ -36,10 +36,12 @@ const flagshipEvents = [
     prizes: "₹XX,XXX PRIZES & INTERNSHIPS",
     slug: "hackathon",
     teamSize: "1-4 Members",
+    mascotImage: "/technomania/mascots/mascot-hackathon.jpg",
+    mascotAlt: "3D Cyber Coder Mascot",
   },
   {
     id: "esports",
-    icon: <Gamepad2 size={32} className="text-white" />,
+    icon: <Gamepad2 size={24} className="text-white" />,
     category: "ESPORTS",
     tag: "COMPETITIVE ARENA",
     title: "CYBER CLASH",
@@ -49,10 +51,12 @@ const flagshipEvents = [
     prizes: "TROPHIES & CASH REWARDS",
     slug: "esports",
     teamSize: "Squad & Solo",
+    mascotImage: "/technomania/mascots/mascot-esports.jpg",
+    mascotAlt: "3D Esports Gamer Mascot",
   },
   {
     id: "cultural",
-    icon: <Music size={32} className="text-white" />,
+    icon: <Music size={24} className="text-white" />,
     category: "CULTURAL",
     tag: "LIVE PERFORMANCES",
     title: "FESTIVAL NOCTURNE",
@@ -62,10 +66,12 @@ const flagshipEvents = [
     prizes: "MEMENTOS & CASH PRIZES",
     slug: "cultural",
     teamSize: "Solo & Crews",
+    mascotImage: "/technomania/mascots/mascot-cultural.jpg",
+    mascotAlt: "3D Cultural DJ Mascot",
   },
   {
     id: "sub-events",
-    icon: <Sparkles size={32} className="text-white" />,
+    icon: <Sparkles size={24} className="text-white" />,
     category: "SUB-EVENTS",
     tag: "SPEED CHALLENGES",
     title: "CIRCUIT ODYSSEY & BLITZ",
@@ -75,6 +81,8 @@ const flagshipEvents = [
     prizes: "SPOT GOODIES & CERTIFICATES",
     slug: "sub-events",
     teamSize: "Solo Entry",
+    mascotImage: "/technomania/mascots/mascot-subevents.jpg",
+    mascotAlt: "3D Speed Runner Mascot",
   },
 ];
 

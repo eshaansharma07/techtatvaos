@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useMotionTemplate, useMotionValue, useSpring } from "framer-motion";
-import { ArrowRight, Trophy, Users, Shield, Zap, Sparkles, ChevronRight } from "lucide-react";
+import { ArrowRight, Trophy, Users, ChevronRight, Sparkles } from "lucide-react";
 
 export interface TechnomaniaEventItem {
   id: string;
@@ -16,6 +17,8 @@ export interface TechnomaniaEventItem {
   prizes: string;
   slug: string;
   teamSize: string;
+  mascotImage: string;
+  mascotAlt: string;
   timeline?: string;
   slotsLeft?: number;
 }
@@ -52,8 +55,8 @@ export function TechnomaniaInteractiveCard({
     const xPct = (clientX / width - 0.5) * 2;
     const yPct = (clientY / height - 0.5) * 2;
 
-    rotateX.set(-yPct * 7); // Max 7 deg tilt
-    rotateY.set(xPct * 7);
+    rotateX.set(-yPct * 6); // Max 6 deg tilt
+    rotateY.set(xPct * 6);
 
     mouseX.set(clientX);
     mouseY.set(clientY);
@@ -69,18 +72,17 @@ export function TechnomaniaInteractiveCard({
     rotateY.set(0);
   }
 
-  const spotlightBg = useMotionTemplate`radial-gradient(380px circle at ${mouseX}px ${mouseY}px, rgba(255, 255, 255, 0.08), transparent 75%)`;
+  const spotlightBg = useMotionTemplate`radial-gradient(420px circle at ${mouseX}px ${mouseY}px, rgba(255, 255, 255, 0.09), transparent 75%)`;
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 35, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, margin: "-50px" }}
-      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.25 } }}
+      initial={{ opacity: 0, y: 25 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
       transition={{
-        duration: 0.6,
-        delay: index * 0.08,
+        duration: 0.5,
+        delay: index * 0.06,
         ease: [0.16, 1, 0.3, 1],
       }}
       style={{ perspective: 1200 }}
@@ -98,7 +100,7 @@ export function TechnomaniaInteractiveCard({
         }}
         whileHover={{ y: -6 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="group relative rounded-3xl bg-zinc-950/90 border border-zinc-900 hover:border-zinc-700 transition-colors duration-500 overflow-hidden flex flex-col justify-between p-7 sm:p-9 will-change-transform shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+        className="group relative rounded-3xl bg-zinc-950/95 border border-zinc-900 hover:border-zinc-700 transition-colors duration-500 overflow-hidden flex flex-col justify-between p-6 sm:p-8 will-change-transform shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.9)]"
       >
         {/* Dynamic Holographic Spotlight Layer */}
         <motion.div
@@ -110,7 +112,7 @@ export function TechnomaniaInteractiveCard({
         <div className="absolute inset-0 tm-grid-bg opacity-20 pointer-events-none" />
 
         {/* Animated Laser Border Sweep on Hover */}
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
 
         {/* Corner Reticle Brackets */}
         <span className="absolute top-3 left-3 text-zinc-600 group-hover:text-white transition-colors font-mono text-xs select-none pointer-events-none">
@@ -126,7 +128,7 @@ export function TechnomaniaInteractiveCard({
           ┘
         </span>
 
-        {/* ── CARD HEADER ── */}
+        {/* ── CARD CONTENT WITH 3D MASCOT ── */}
         <div className="relative z-20 space-y-5">
           {/* Top Status & Telemetry Row */}
           <div className="flex items-center justify-between">
@@ -141,36 +143,68 @@ export function TechnomaniaInteractiveCard({
             </div>
           </div>
 
-          {/* Icon & Title Block */}
-          <div className="flex items-start gap-4">
-            <motion.div
-              whileHover={{ scale: 1.08, rotate: 3 }}
-              transition={{ type: "spring", stiffness: 300, damping: 15 }}
-              className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-white shadow-[0_0_20px_rgba(255,255,255,0.06)] group-hover:border-zinc-600 transition-colors"
-            >
-              {event.icon}
-            </motion.div>
-            <div className="space-y-1">
-              <h3 className="text-2xl sm:text-3xl font-black text-white group-hover:text-zinc-100 transition-colors tracking-tight">
-                {event.title}
-              </h3>
-              <p className="text-xs font-mono font-medium text-zinc-400 tracking-wider uppercase">
-                {event.subtitle}
+          {/* Main Showcase: Text Info + 3D Animated Floating Mascot */}
+          <div className="flex flex-col-reverse sm:flex-row items-center sm:items-start justify-between gap-4 pt-1">
+            {/* Left Column: Title & Description */}
+            <div className="space-y-3 flex-1">
+              <div className="flex items-center gap-3">
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 4 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white shadow-[0_0_15px_rgba(255,255,255,0.06)] group-hover:border-zinc-600 transition-colors"
+                >
+                  {event.icon}
+                </motion.div>
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-black text-white group-hover:text-zinc-100 transition-colors tracking-tight">
+                    {event.title}
+                  </h3>
+                  <p className="text-xs font-mono font-medium text-zinc-400 tracking-wider uppercase">
+                    {event.subtitle}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1">
+                {event.description}
               </p>
             </div>
-          </div>
 
-          {/* Description */}
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1">
-            {event.description}
-          </p>
+            {/* Right Column: 3D Mascot with Floating Physics */}
+            <motion.div
+              animate={{
+                y: [0, -8, 0],
+                rotate: [0, 1.5, 0, -1.5, 0],
+              }}
+              transition={{
+                duration: 4.5 + index * 0.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              whileHover={{ scale: 1.08, y: -12 }}
+              className="relative w-28 h-28 sm:w-36 sm:h-36 shrink-0 rounded-2xl overflow-hidden bg-black/50 border border-zinc-800/80 group-hover:border-zinc-600 transition-all shadow-[0_0_30px_rgba(0,0,0,0.8)] group-hover:shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+            >
+              {/* Soft Ambient Radial Behind Mascot */}
+              <div className="absolute inset-0 bg-radial-gradient from-white/10 to-transparent pointer-events-none" />
+              
+              <Image
+                src={event.mascotImage}
+                alt={event.mascotAlt}
+                fill
+                className="object-contain p-1.5 transition-transform duration-500 group-hover:scale-105"
+              />
+
+              {/* Holographic Scanline Overlay on Mascot */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.05] to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            </motion.div>
+          </div>
         </div>
 
         {/* ── CARD FOOTER / TELEMETRY & CTA ── */}
         <div className="relative z-20 pt-6 mt-6 border-t border-zinc-900/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           {/* Prize Pool Badge */}
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-200">
-            <div className="p-1 rounded bg-zinc-900 border border-zinc-800 text-white">
+            <div className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-white">
               <Trophy size={14} />
             </div>
             <span>{event.prizes}</span>

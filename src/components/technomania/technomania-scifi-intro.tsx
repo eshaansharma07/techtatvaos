@@ -14,13 +14,13 @@ export function TechnomaniaSciFiIntro({ onComplete }: { onComplete?: () => void 
     const t1 = setTimeout(() => setPhase("locking"), 400);
     // Stage 2: Aperture Lock & Shockwave (400 - 1100ms)
     const t2 = setTimeout(() => setPhase("materializing"), 1100);
-    // Stage 3: Smooth Dissolve & Handover to Hero (1800ms)
-    const t3 = setTimeout(() => setPhase("dissolving"), 1800);
-    // Complete
+    // Stage 3: Smooth Dissolve & Handover to Hero (1600ms)
+    const t3 = setTimeout(() => setPhase("dissolving"), 1600);
+    // Complete - remove from DOM completely (2100ms)
     const t4 = setTimeout(() => {
       setPhase("complete");
       if (onComplete) onComplete();
-    }, 2400);
+    }, 2100);
 
     return () => {
       clearTimeout(t1);
@@ -30,17 +30,16 @@ export function TechnomaniaSciFiIntro({ onComplete }: { onComplete?: () => void 
     };
   }, [onComplete]);
 
+  if (phase === "complete") return null;
+
   return (
-    <AnimatePresence>
-      {phase !== "complete" && (
-        <motion.div
-          key="tm3-scifi-overlay"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: phase === "dissolving" ? 0 : 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center pointer-events-none select-none overflow-hidden"
-        >
+    <motion.div
+      key="tm3-scifi-overlay"
+      initial={{ opacity: 1 }}
+      animate={{ opacity: phase === "dissolving" ? 0 : 1 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center pointer-events-none select-none overflow-hidden"
+    >
           {/* ── 1. Cyber Blueprint Grid & Radar Sweep ── */}
           <div className="absolute inset-0 tm-grid-bg opacity-40" />
 
@@ -48,33 +47,39 @@ export function TechnomaniaSciFiIntro({ onComplete }: { onComplete?: () => void 
           <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/60 to-black pointer-events-none" />
 
           {/* ── 2. Telemetry HUD Corners ── */}
-          {/* Top Left: System Boot Status */}
-          <div className="absolute top-6 left-6 font-mono text-[9px] text-zinc-500 tracking-[0.25em] space-y-1 hidden sm:block">
-            <div className="flex items-center gap-2 text-zinc-400 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-              <span>SYS_ONLINE // TM 3.0</span>
+          <motion.div
+            animate={{ opacity: phase === "dissolving" ? 0 : 1 }}
+            transition={{ duration: 0.4 }}
+            className="contents"
+          >
+            {/* Top Left: System Boot Status */}
+            <div className="absolute top-6 left-6 font-mono text-[9px] text-zinc-500 tracking-[0.25em] space-y-1 hidden sm:block">
+              <div className="flex items-center gap-2 text-zinc-400 font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                <span>SYS_ONLINE // TM 3.0</span>
+              </div>
+              <div>SECTOR: GHARUAN // MOHALI</div>
+              <div>GEO: {coords.x} | {coords.y}</div>
             </div>
-            <div>SECTOR: GHARUAN // MOHALI</div>
-            <div>GEO: {coords.x} | {coords.y}</div>
-          </div>
 
-          {/* Top Right: Frequency & Core */}
-          <div className="absolute top-6 right-6 font-mono text-[9px] text-zinc-500 tracking-[0.25em] text-right space-y-1 hidden sm:block">
-            <div className="text-zinc-400 font-bold">QUANTUM_BUS: 142.80 GHz</div>
-            <div>SECURITY: BYPASS_AUTH</div>
-            <div>STATUS: SYNCHRONIZED</div>
-          </div>
+            {/* Top Right: Frequency & Core */}
+            <div className="absolute top-6 right-6 font-mono text-[9px] text-zinc-500 tracking-[0.25em] text-right space-y-1 hidden sm:block">
+              <div className="text-zinc-400 font-bold">QUANTUM_BUS: 142.80 GHz</div>
+              <div>SECURITY: BYPASS_AUTH</div>
+              <div>STATUS: SYNCHRONIZED</div>
+            </div>
 
-          {/* Bottom Left: Festival Metrics */}
-          <div className="absolute bottom-6 left-6 font-mono text-[9px] text-zinc-500 tracking-[0.25em] space-y-1 hidden sm:block">
-            <div>24H HACKATHON // ESPORTS // CULTURAL</div>
-            <div className="text-zinc-400">ORGANIZER: TECH TATVA OS</div>
-          </div>
+            {/* Bottom Left: Festival Metrics */}
+            <div className="absolute bottom-6 left-6 font-mono text-[9px] text-zinc-500 tracking-[0.25em] space-y-1 hidden sm:block">
+              <div>24H HACKATHON // ESPORTS // CULTURAL</div>
+              <div className="text-zinc-400">ORGANIZER: TECH TATVA OS</div>
+            </div>
 
-          {/* Bottom Right: Progress Segment */}
-          <div className="absolute bottom-6 right-6 font-mono text-[9px] text-zinc-400 tracking-[0.25em] text-right hidden sm:block">
-            <span>[ ■■■■■■■■■■■■■■■■ 100% ]</span>
-          </div>
+            {/* Bottom Right: Progress Segment */}
+            <div className="absolute bottom-6 right-6 font-mono text-[9px] text-zinc-400 tracking-[0.25em] text-right hidden sm:block">
+              <span>[ ■■■■■■■■■■■■■■■■ 100% ]</span>
+            </div>
+          </motion.div>
 
           {/* ── 3. Rotating Tech Aperture & Reticle Rings ── */}
           <motion.div
@@ -190,8 +195,6 @@ export function TechnomaniaSciFiIntro({ onComplete }: { onComplete?: () => void 
               {(phase === "materializing" || phase === "dissolving") && "ACCESS GRANTED // READY"}
             </span>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    </motion.div>
   );
 }
