@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useTechnomaniaHref } from "@/lib/technomania-links";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   Code,
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { TechnomaniaCountdown } from "@/components/technomania/technomania-countdown";
 import { TechnomaniaSciFiIntro } from "@/components/technomania/technomania-scifi-intro";
+import { TechnomaniaInteractiveCard } from "@/components/technomania/technomania-interactive-card";
 
 /* ── Flagship Events (Pure Monochrome Theme: Black, White & Zinc) ── */
 const flagshipEvents = [
@@ -323,101 +324,72 @@ export default function TechnomaniaPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          FLAGSHIP ARENAS — Monochrome Showcase Cards
+          FLAGSHIP ARENAS — Fully Animated 3D Interactive Cards
           ═══════════════════════════════════════════════════════ */}
       <section className="relative px-4 py-20 md:py-28">
+        {/* Subtle Ambient Radial Highlight behind Arenas */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-white/[0.02] blur-[150px] rounded-full pointer-events-none -z-10" />
+
         <div className="max-w-6xl mx-auto">
-          {/* Header & Category Tabs */}
+          {/* Header & Animated Category Tabs */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
             <div>
               <div className="flex items-center gap-2 text-zinc-400 text-xs font-mono font-bold tracking-widest uppercase mb-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 <span>FESTIVAL TRACKS & ARENAS</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white">
                 Major Arenas of TECHNOMANIA 3.0
               </h2>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-1.5 p-1.5 bg-zinc-950 border border-zinc-900 rounded-xl overflow-x-auto no-scrollbar self-start lg:self-auto">
+            {/* Filter Tabs with Fluid Animated Background Slider */}
+            <div className="flex items-center gap-1.5 p-1.5 bg-zinc-950/90 border border-zinc-900 rounded-2xl overflow-x-auto no-scrollbar self-start lg:self-auto backdrop-blur-md">
               {[
-                { id: "all", label: "ALL" },
+                { id: "all", label: "ALL ARENAS" },
                 { id: "hackathon", label: "HACKATHON" },
                 { id: "esports", label: "ESPORTS" },
                 { id: "cultural", label: "CULTURAL" },
                 { id: "sub-events", label: "SUB-EVENTS" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveCategory(tab.id)}
-                  className={`px-4 py-2 rounded-lg text-xs font-mono font-bold tracking-wider uppercase transition-all ${
-                    activeCategory === tab.id
-                      ? "bg-white text-black font-extrabold"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-900"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              ].map((tab) => {
+                const isActive = activeCategory === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveCategory(tab.id)}
+                    className={`relative px-4 py-2 rounded-xl text-xs font-mono font-bold tracking-wider uppercase transition-colors z-10 ${
+                      isActive
+                        ? "text-black"
+                        : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeArenaTab"
+                        className="absolute inset-0 bg-white rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.3)] -z-10"
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {filteredEvents.map((evt, idx) => (
-              <motion.div
-                key={evt.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ y: -5 }}
-                className="group relative p-8 rounded-3xl bg-zinc-950 border border-zinc-900 hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="px-3 py-1 rounded-md text-[10px] font-mono font-bold tracking-widest uppercase bg-zinc-900 text-zinc-300 border border-zinc-800">
-                      {evt.tag}
-                    </span>
-                    <span className="text-xs font-mono text-zinc-500">
-                      {evt.teamSize}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 text-white">
-                      {evt.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-white group-hover:text-zinc-200 transition-colors">
-                        {evt.title}
-                      </h3>
-                      <p className="text-xs font-mono text-zinc-400">{evt.subtitle}</p>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-zinc-400 leading-relaxed mb-6">
-                    {evt.description}
-                  </p>
-                </div>
-
-                <div className="pt-6 border-t border-zinc-900 flex items-center justify-between">
-                  <div className="text-xs font-mono font-semibold text-zinc-300">
-                    {evt.prizes}
-                  </div>
-
-                  <Link
-                    href={getHref(`/events/${evt.slug}`)}
-                    className="inline-flex items-center gap-2 text-xs font-mono font-bold text-white hover:text-zinc-300 transition"
-                  >
-                    <span>EXPLORE ARENA</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          {/* Fully Animated 3D Interactive Cards Grid */}
+          <motion.div layout className="grid md:grid-cols-2 gap-6 items-stretch">
+            <AnimatePresence mode="popLayout">
+              {filteredEvents.map((evt, idx) => (
+                <TechnomaniaInteractiveCard
+                  key={evt.id}
+                  event={evt}
+                  index={idx}
+                  getHref={getHref}
+                />
+              ))}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </section>
 
