@@ -1,5 +1,7 @@
 import "server-only";
 import { connectDB } from "@/lib/db";
+import { Arena } from "@/lib/models/Arena";
+import { FestRegistration } from "@/lib/models/Registration";
 import {
   Achievement,
   Announcement,
@@ -571,7 +573,9 @@ export async function getAdminDashboardData() {
     recruitmentApplications,
     studentMembers,
     membershipDriveSettings,
-    leaderboardEntries
+    leaderboardEntries,
+    arenas,
+    festRegistrations
   ] = await Promise.all([
     User.find(clubMemberQuery).sort({ createdAt: -1 }).limit(300).populate("role", "name slug").populate("team", "name").populate("teams", "name").lean(),
     Team.find({}).sort({ order: 1, name: 1 }).populate("lead", "name").populate("coLeads", "name").lean(),
@@ -579,7 +583,7 @@ export async function getAdminDashboardData() {
     Task.find({}).sort({ dueAt: 1 }).limit(200).populate("team", "name").lean(),
     Announcement.find({}).sort({ publishAt: -1 }).limit(200).lean(),
     Notification.find({}).sort({ createdAt: -1 }).limit(50).lean(),
-    Attendance.find({}).populate("event", "title").populate("user", "name email uid program semester").limit(1000).lean(),
+    Attendance.find({}).limit(1000).lean(),
     EventRegistration.find({}).populate("event", "title participationMode").populate("user", "name email uid program semester").limit(1000).lean(),
     Sponsor.find({}).sort({ name: 1 }).lean(),
     Achievement.find({}).sort({ awardedAt: -1 }).lean(),
@@ -597,8 +601,63 @@ export async function getAdminDashboardData() {
     RecruitmentApplication.find({}).sort({ submittedAt: -1 }).limit(1000).populate("team", "name").populate("role", "name").lean(),
     StudentMember.find({}).sort({ registeredAt: -1 }).limit(1000).lean(),
     MembershipDriveSettings.find({}).sort({ createdAt: -1 }).lean(),
-    LeaderboardEntry.find({}).populate("event","title").sort({event:1,rank:1}).lean()
+    LeaderboardEntry.find({}).populate("event","title").sort({event:1,rank:1}).lean(),
+    Arena.find({}).lean(),
+    FestRegistration.find({}).lean()
   ]);
+  
+  // --- MANUALLY POPULATE ATTENDANCE ---
+  const userIds = attendance.map((a: any) => a.user);
+  const populatedUsers = await User.find({ _id: { $in: userIds } }).select("name email uid program semester").lean();
+  const userMap = new Map(populatedUsers.map((u: any) => [String(u._id), u]));
+  attendance.forEach((a: any) => {
+    const rawUserId = String(a.user);
+    const foundUser = userMap.get(rawUserId);
+    if (foundUser) {
+      a.user = foundUser;
+    } else {
+      a.user = { _id: rawUserId, name: "Fest Member", uid: "N/A" };
+    }
+    // Mock event populate
+    a.event = { _id: String(a.event), title: "Arena" };
+  });
+
+  // --- MERGE FEST ARENAS & SQUADS ---
+  const mappedArenas = arenas.map((a: any) => ({
+    _id: String(a._id),
+    title: `[FEST] ${a.title}`,
+    slug: a.slug,
+    category: a.category,
+    startAt: new Date(),
+    participationMode: (a.teamSize?.max > 1) ? "team" : "individual"
+  }));
+  
+  const mappedFestRegs = festRegistrations.map((r: any) => ({
+    _id: String(r._id),
+    event: { _id: String(r.arenaId), title: "Fest Event", participationMode: "team" },
+    mode: (r.members && r.members.length > 0) ? "team" : "individual",
+    teamName: r.teamName || r.leader?.name || "Fest Squad",
+    user: {
+      _id: String(r._id),
+      name: r.leader?.name || "Unknown",
+      email: r.leader?.email || "unknown@example.com",
+      uid: r.leader?.uid || "N/A",
+      program: r.leader?.college || "N/A",
+      semester: 1
+    },
+    teamMembers: (r.members || []).map((m: any, i: number) => ({
+      _id: String(r._id).slice(0, 22) + String(i).padStart(2, "0"),
+      name: m.name || "Unknown",
+      email: m.email || "unknown@example.com",
+      uid: m.uid || "N/A",
+      program: "N/A",
+      semester: 1
+    }))
+  }));
+
+  const allEvents = [...events, ...mappedArenas];
+  const allRegistrations = [...registrations, ...mappedFestRegs];
+
   return serialize({
     users,
     teams,

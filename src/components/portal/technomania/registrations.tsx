@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Loader2, Download, CheckCircle, XCircle } from "lucide-react";
 import * as XLSX from "xlsx";
 
-export default function AdminRegistrationsPage() {
+export function TechnomaniaRegistrations() {
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");

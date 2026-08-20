@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Loader2, Plus, Edit2, Trash2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function AdminArenasPage() {
+export function TechnomaniaArenas() {
   const [arenas, setArenas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

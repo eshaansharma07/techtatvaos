@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Loader2, Settings, Save } from "lucide-react";
 
-export default function AdminConfigPage() {
+export function TechnomaniaConfig() {
   const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

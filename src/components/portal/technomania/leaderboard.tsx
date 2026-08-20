@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Loader2, Save, Trophy } from "lucide-react";
 
-export default function AdminLeaderboardPage() {
+export function TechnomaniaLeaderboard() {
   const [arenas, setArenas] = useState<any[]>([]);
   const [selectedArena, setSelectedArena] = useState<string>("");
   const [bracket, setBracket] = useState<any>([]);

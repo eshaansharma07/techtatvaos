@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Loader2, Radio, Plus, Trash2, Save } from "lucide-react";
 
-export default function AdminBroadcastsPage() {
+export function TechnomaniaBroadcasts() {
   const [tickerMsgs, setTickerMsgs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
