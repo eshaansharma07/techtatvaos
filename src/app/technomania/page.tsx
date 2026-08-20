@@ -142,6 +142,16 @@ export default function TechnomaniaPage() {
   const getHref = useTechnomaniaHref();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [stats, setStats] = useState({ totalEvents: 6, totalRegistrations: 0 });
+
+  React.useEffect(() => {
+    fetch("/api/fest/stats").then(res => res.json()).then(data => {
+      setStats({
+        totalEvents: data.activeFestArenas || 6,
+        totalRegistrations: data.totalBuilders || 0
+      });
+    }).catch(() => {});
+  }, []);
 
   const filteredEvents =
     activeCategory === "all"
@@ -294,10 +304,10 @@ export default function TechnomaniaPage() {
       <section className="relative px-4 py-8">
         <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { tag: "01_SPRINT", value: "24 HOURS", label: "NON-STOP HACKATHON", desc: "Build, Ship & Pitch Live" },
-            { tag: "02_ARENA", value: "3+ ARENAS", label: "GAMING & ESPORTS", desc: "BGMI · Valorant · EA FC" },
-            { tag: "03_SQUADS", value: "500+", label: "STUDENT BUILDERS", desc: "Pan-India Participants" },
-            { tag: "04_GRANTS", value: "₹XX,XXX", label: "CASH PRIZE POOL", desc: "Cash, Internships & Goodies" },
+            { tag: "01_DAYS", value: "3 DAYS", label: "NON-STOP FESTIVAL", desc: "Events, Competitions & Nights" },
+            { tag: "02_PARTICIPANTS", value: `${stats.totalRegistrations}+`, label: "PARTICIPANTS", desc: "Live Registrations" },
+            { tag: "03_ARENAS", value: `${stats.totalEvents} ARENAS`, label: "FLAGSHIP EVENTS", desc: "Hackathon, Esports & Tech" },
+            { tag: "04_PRIZES", value: "₹1L+", label: "COMBINED PRIZE POOL", desc: "Cash, Internships & Goodies" },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}

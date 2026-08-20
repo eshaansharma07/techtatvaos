@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Instagram, Linkedin, Github, Zap, ArrowRight } from "lucide-react";
 import { TM_CONFIG } from "@/lib/technomania-theme";
 import { useTechnomaniaHref } from "@/lib/technomania-links";
+import { TechnomaniaSponsors } from "./technomania-sponsors";
 
 function TechnomaniaNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -317,6 +318,9 @@ export function TechnomaniaShell({ children }: { children: React.ReactNode }) {
       <main className="flex-grow relative z-10">
         {children}
       </main>
+
+      {/* Sponsors */}
+      <TechnomaniaSponsors />
 
       {/* Footer */}
       <TechnomaniaFooter />

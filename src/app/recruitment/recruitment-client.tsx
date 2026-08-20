@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock3, FileUp, Github, Linkedin, Link as LinkIcon, Loader2, Lock, Pencil, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock3, FileUp, Github, Linkedin, Link as LinkIcon, Loader2, Lock, Pencil, ShieldCheck, Sparkles, Users, UserPlus, Compass, Trophy, Zap } from "lucide-react";
 import Link from "next/link";
 import { getRecruitmentTeamIcon } from "@/lib/recruitment-team-icons";
 
@@ -54,7 +54,7 @@ function normalizeOptionalUrl(value: unknown) {
   return /^https?:\/\//i.test(text) ? text : `https://${text}`;
 }
 
-export function RecruitmentClient({ data }: { data: RecruitmentData }) {
+function CoreApplicationForm({ data, onBack }: { data: RecruitmentData, onBack: () => void }) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<Record<string, any>>({});
   const [team, setTeam] = useState("");
@@ -176,6 +176,9 @@ export function RecruitmentClient({ data }: { data: RecruitmentData }) {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(168,85,247,0.06),transparent_45%)] pointer-events-none" />
       <div className="relative grid gap-8 lg:grid-cols-[.72fr_1fr] lg:items-start">
         <aside className="lg:sticky lg:top-28">
+          <button type="button" onClick={onBack} className="mb-6 flex items-center gap-2 text-xs font-bold text-white/50 hover:text-white transition">
+            <ArrowLeft size={14} /> Back to Discovery
+          </button>
           <div className="glass-brutalist rounded-[2rem] p-6 md:p-8">
             <span className="inline-flex rounded-xl border-2 border-black bg-purple-500 px-4 py-1.5 text-[10px] font-bold tracking-[.25em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] uppercase">
               {statusCopy[data.settings.status] || "Recruitment"}
@@ -431,6 +434,109 @@ function SuccessPanel({ message, whatsappLink }: { message: string; whatsappLink
           </Link>
         </motion.div>
       </div>
+    </div>
+  );
+}
+
+
+export function RecruitmentClient({ data }: { data: RecruitmentData }) {
+  const [showCoreForm, setShowCoreForm] = useState(false);
+  
+  if (showCoreForm) {
+    return <CoreApplicationForm data={data} onBack={() => setShowCoreForm(false)} />;
+  }
+
+  return <DiscoveryFunnel data={data} onApplyCore={() => setShowCoreForm(true)} />;
+}
+
+function DiscoveryFunnel({ data, onApplyCore }: { data: RecruitmentData, onApplyCore: () => void }) {
+  return (
+    <div className="relative min-h-screen">
+      {/* Hero */}
+      <section className="relative mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 pt-32 pb-16 md:px-6 md:pt-44 md:pb-24 spatial-grid-bg">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(168,85,247,0.06),transparent_45%)] pointer-events-none" />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-3xl mx-auto relative z-10">
+          <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-purple-500 px-4 py-1.5 text-xs font-bold text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)] uppercase tracking-widest mb-6">
+            <Compass size={14} /> Discover Tech Tatva
+          </span>
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-[-0.04em] text-white leading-tight">
+            Find your place in the <span className="text-purple-400">community.</span>
+          </h1>
+          <p className="mt-6 text-lg leading-relaxed text-white/60">
+            Whether you want to participate in events, learn through workshops, or help run the club as a core member, your journey starts here.
+          </p>
+        </motion.div>
+      </section>
+
+      {/* Explore Teams */}
+      <section className="border-y border-white/[0.05] bg-black/40 py-20 md:py-28">
+        <div className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 md:px-6">
+          <div className="mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Explore the disciplines.</h2>
+            <p className="mt-3 text-sm text-white/50">Tech Tatva operates across multiple domains. See what we build.</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {data.teams.map((team, i) => {
+               const visual = getRecruitmentTeamIcon(team.slug, team.icon);
+               const Icon = visual.Icon;
+               return (
+                 <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} key={team.id} className="glass-brutalist rounded-[2rem] p-6 hover:-translate-y-1 transition duration-300">
+                    <span className={`grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br ${visual.accent} ring-1 ring-white/10 mb-5`}>
+                      <Icon size={20} />
+                    </span>
+                    <h3 className="text-xl font-bold text-white">{team.name}</h3>
+                    <p className="mt-2 text-sm leading-6 text-white/45">{team.description}</p>
+                 </motion.div>
+               );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Opportunities / Join Community */}
+      <section className="py-20 md:py-32">
+        <div className="mx-auto max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] px-5 md:px-6">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div>
+              <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl">Join the <br/>Membership Drive.</h2>
+              <p className="mt-6 text-base leading-relaxed text-white/50">
+                Become a Student Member to get priority access to club events, internal bootcamps, and networking opportunities. Open to all students who want to learn and grow.
+              </p>
+              
+              <ul className="mt-8 space-y-4">
+                {["Priority event registrations and updates.", "Exclusive access to technical bootcamps.", "Verified membership certificates and developer badge."].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <CheckCircle2 className="text-purple-400 shrink-0 mt-0.5" size={18} />
+                    <span className="text-sm text-white/70">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-10">
+                <Link href="/join" className="brutalist-btn-purple inline-flex h-14 items-center justify-center gap-2 rounded-2xl px-8 text-sm font-bold text-black shadow-[0_0_30px_rgba(168,85,247,0.3)] hover:scale-105 transition">
+                  <UserPlus size={16} /> Become a Student Member
+                </Link>
+              </div>
+            </div>
+
+            <div className="glass-brutalist rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden group border border-white/10 bg-white/[0.02]">
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_10%,rgba(255,255,255,0.03),transparent_60%)] pointer-events-none" />
+               <Zap className="text-amber-400 mb-6" size={32} />
+               <h3 className="text-2xl font-bold text-white tracking-tight">Looking to build with us?</h3>
+               <p className="mt-4 text-sm leading-6 text-white/50">
+                 If you want to organize events, manage the technical infrastructure, or design the club's creative identity, you can apply for a Core Member position during active recruitment cycles.
+               </p>
+               
+               <div className="mt-8 border-t border-white/10 pt-6">
+                 <button onClick={onApplyCore} className="brutalist-btn-dark w-full inline-flex h-12 items-center justify-between rounded-xl px-5 text-sm font-bold text-white hover:border-purple-500/50 transition">
+                   <span>Apply for Core Role</span>
+                   <ArrowRight size={16} />
+                 </button>
+               </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

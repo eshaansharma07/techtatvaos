@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Filter } from "lucide-react";
 import { TechnomaniaEventCard } from "@/components/technomania/technomania-event-card";
+import { TechnomaniaEventsClient } from "@/components/technomania/technomania-events-client";
 import { getTechnomaniaEvents } from "@/lib/technomania-data";
 
 export const revalidate = 60;
@@ -29,22 +30,8 @@ export default async function TechnomaniaEventsPage() {
         </p>
       </div>
 
-      {/* Events grid */}
-      {events.length > 0 ? (
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {events.map((event) => (
-            <TechnomaniaEventCard key={event.slug} event={event} />
-          ))}
-        </div>
-      ) : (
-        <div className="tm-card p-10 md:p-16 text-center">
-          <p className="font-tm-heading text-xl font-bold">NO EVENTS YET</p>
-          <p className="text-tm-dim text-sm mt-3 max-w-md mx-auto">
-            Events will appear here once they are published by the organizers. Check back soon!
-          </p>
-          <div className="tm-hazard-stripe w-16 mx-auto mt-6" />
-        </div>
-      )}
+      {/* Events Client with Tabs & Modals */}
+      <TechnomaniaEventsClient events={events} />
 
       {/* Info note */}
       <div className="mt-10 flex items-center gap-3 text-tm-dim">

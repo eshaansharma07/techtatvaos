@@ -1,26 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { EventRegistration, Attendance } from "@/lib/models";
-import { audit, requirePortal } from "@/lib/portal";
+import { FestRegistration } from "@/lib/models/Registration";
+
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    await connectDB();
+    const { id } = await params;
+    const body = await req.json();
+    
+    // Only allow updating paymentStatus, attended, checkpointsCleared
+    const updateData: any = {};
+    if (body.paymentStatus !== undefined) updateData.paymentStatus = body.paymentStatus;
+    if (body.attended !== undefined) updateData.attended = body.attended;
+    if (body.checkpointsCleared !== undefined) updateData.checkpointsCleared = body.checkpointsCleared;
+
+    const reg = await FestRegistration.findByIdAndUpdate(id, updateData, { new: true }).lean();
+    if (!reg) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(reg);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 400 });
+  }
+}
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const blocked = await requirePortal(req);
-  if (blocked) return blocked;
-
-  await connectDB();
-  const { id } = await params;
-
-  const registration = await EventRegistration.findById(id);
-  if (!registration) {
-    return NextResponse.json({ error: "Registration not found" }, { status: 404 });
+  try {
+    await connectDB();
+    const { id } = await params;
+    const reg = await FestRegistration.findByIdAndDelete(id);
+    if (!reg) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
-
-  const eventId = registration.event;
-  const userId = registration.user;
-
-  await Attendance.deleteMany({ event: eventId, user: userId });
-  await EventRegistration.findByIdAndDelete(id);
-
-  await audit(req, "portal.registrations.delete", { entityType: "registrations", entityId: id });
-  return NextResponse.json({ success: true });
 }

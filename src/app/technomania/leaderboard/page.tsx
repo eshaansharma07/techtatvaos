@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { getTechnomaniaEvents } from "@/lib/technomania-data";
+import { TechnomaniaBracket } from "@/components/technomania/technomania-bracket";
 
 export const revalidate = 60;
 
@@ -26,36 +27,31 @@ export default async function TechnomaniaLeaderboardPage() {
         Live rankings and results from Technomania 3.0 events. Leaderboards become visible once events are completed or organizers publish them.
       </p>
 
-      <div className="mt-10">
-        {eventsWithLeaderboard.length > 0 ? (
-          <div className="space-y-4">
-            {eventsWithLeaderboard.map((event) => (
-              <Link
-                key={event.slug}
-                href={`/technomania/events/${event.slug}`}
-                className="tm-card tm-glow flex items-center justify-between p-5 group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-tm-accent/10 border border-tm-accent/20 flex items-center justify-center">
-                    <Trophy size={18} className="text-tm-accent" />
-                  </div>
-                  <div>
-                    <p className="font-tm-heading text-sm md:text-base font-bold tracking-wide">{event.title}</p>
-                    <span className="font-tm-mono text-[10px] text-tm-dim">
-                      {event.category?.toUpperCase() || "EVENT"} · RESULTS AVAILABLE
-                    </span>
-                  </div>
-                </div>
-                <span className="text-tm-dim group-hover:text-white transition text-xs font-tm-mono">VIEW →</span>
-              </Link>
-            ))}
+      <div className="mt-10 space-y-16">
+        {events.filter((e: any) => e.bracketData && Array.isArray(e.bracketData) && e.bracketData.length > 0).map((event: any) => (
+          <div key={event.slug} className="space-y-6">
+            <div className="flex items-center gap-4 border-b border-tm-border pb-4">
+              <div className="w-12 h-12 rounded-lg bg-tm-accent/10 border border-tm-accent/20 flex items-center justify-center">
+                <Trophy size={20} className="text-tm-accent" />
+              </div>
+              <div>
+                <h2 className="font-tm-heading text-2xl font-bold tracking-wide uppercase">{event.title}</h2>
+                <span className="font-tm-mono text-xs text-tm-dim tracking-widest uppercase">
+                  {event.category} · LIVE BRACKET
+                </span>
+              </div>
+            </div>
+            
+            <TechnomaniaBracket rounds={event.bracketData} />
           </div>
-        ) : (
+        ))}
+
+        {events.filter((e: any) => e.bracketData && Array.isArray(e.bracketData) && e.bracketData.length > 0).length === 0 && (
           <div className="tm-card p-10 text-center">
             <Trophy size={32} className="text-tm-dim mx-auto mb-4" />
             <p className="font-tm-heading text-xl font-bold">NO LEADERBOARDS YET</p>
             <p className="text-tm-dim text-sm mt-3 max-w-md mx-auto">
-              Leaderboards will appear here once events are completed and results are published by the organizers.
+              Brackets and Leaderboards will appear here once events begin and results are updated by admins.
             </p>
             <div className="tm-hazard-stripe w-16 mx-auto mt-6" />
           </div>
