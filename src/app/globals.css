@@ -1377,3 +1377,227 @@ body:before {
   animation: cardShimmer 4s ease-in-out infinite;
   pointer-events: none;
 }
+
+/* ═══════════════════════════════════════════════════════
+   TECHNOMANIA 3.0 — Luxury Monochrome Theme Utilities
+   ═══════════════════════════════════════════════════════ */
+
+/* Monochrome grid background */
+.tm-grid-bg {
+  background-color: #000000;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+}
+
+/* Monochrome card */
+.tm-card {
+  background: #09090b;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  position: relative;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+.tm-card:hover {
+  border-color: #52525b;
+  box-shadow: 0 0 30px rgba(255,255,255,0.04);
+}
+
+/* Crosshair decorator */
+.tm-crosshair {
+  position: relative;
+}
+.tm-crosshair::before,
+.tm-crosshair::after {
+  content: "+";
+  position: absolute;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  color: #71717a;
+  pointer-events: none;
+  line-height: 1;
+}
+.tm-crosshair::before { top: -8px; left: -8px; }
+.tm-crosshair::after { bottom: -8px; right: -8px; }
+
+/* Hazard stripe divider */
+.tm-hazard-stripe {
+  height: 2px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #3f3f46,
+    #3f3f46 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.tm-hazard-stripe-accent {
+  height: 2px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #ffffff,
+    #ffffff 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+/* Dot matrix indicator */
+.tm-dot-matrix {
+  display: inline-flex;
+  gap: 4px;
+}
+.tm-dot-matrix .dot {
+  width: 6px;
+  height: 6px;
+  border: 1px solid #52525b;
+  border-radius: 1px;
+}
+.tm-dot-matrix .dot.active {
+  background: #fff;
+  border-color: #fff;
+}
+
+/* Monochrome border glow on hover */
+.tm-glow {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.tm-glow:hover {
+  box-shadow: 0 0 20px rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.4);
+}
+
+/* Coordinate label */
+.tm-coordinate {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: #71717a;
+  text-transform: uppercase;
+}
+
+/* Monochrome Buttons */
+.tm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 28px;
+  font-family: var(--font-tm-mono), "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: 1px solid #3f3f46;
+  color: #ffffff;
+  background: #18181b;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tm-btn:hover {
+  background: #27272a;
+  border-color: #71717a;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+.tm-btn-accent {
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+.tm-btn-accent:hover {
+  background: #ffffff;
+  color: #000000;
+  transform: translateY(-2px);
+}
+.tm-btn-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 28px;
+  font-family: var(--font-tm-mono), "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: #ffffff;
+  color: #000000 !important;
+  border: 1px solid #ffffff;
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.tm-btn-solid:hover {
+  background: #e4e4e7;
+  border-color: #e4e4e7;
+  color: #000000 !important;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Section label */
+.tm-label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+
+/* Vignette overlay */
+.tm-vignette {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.8) 100%);
+}
+
+/* Glass card variant for Technomania */
+.tm-glass {
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid #27272a;
+  border-radius: 20px;
+}
+
+/* Input field styling */
+.tm-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: #09090b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  color: #fff;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.tm-input:focus {
+  border-color: #ffffff;
+}
+.tm-input::placeholder {
+  color: #71717a;
+}
+
+/* Status badge */
+.tm-status-open {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+.tm-status-closed {
+  color: #71717a;
+  border-color: #3f3f46;
+}
+.tm-status-upcoming {
+  color: #e4e4e7;
+  border-color: #71717a;
+}
