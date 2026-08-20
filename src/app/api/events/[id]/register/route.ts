@@ -1,68 +1,149 @@
+import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { Arena } from "@/lib/models/Arena";
-import { FestRegistration } from "@/lib/models/Registration";
+import { Attendance, Event, EventRegistration, User } from "@/lib/models";
+import { rateLimit } from "@/lib/rate-limit";
+import { registrationInput } from "@/lib/validations/event";
+
+type PublicParticipant = {
+  name?: string;
+  email?: string;
+  uid?: string;
+  program?: string;
+  semester?: string | number;
+  customFields?: Record<string, any>;
+};
+
+const clean = (value: unknown) => (typeof value === "string" ? value.trim() : "");
+const semesterOf = (value: unknown) => {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : undefined;
+};
+
+function isValidParticipant(input: PublicParticipant) {
+  return clean(input.name).length >= 2 && clean(input.email).includes("@") && clean(input.uid).length >= 2 && clean(input.program).length >= 1;
+}
+
+async function upsertParticipant(input: PublicParticipant) {
+  const email = clean(input.email).toLowerCase();
+  const uid = clean(input.uid);
+  const query = {
+    $or: [
+      { email },
+      ...(uid ? [{ uid }] : [])
+    ]
+  };
+  const set: Record<string, unknown> = {
+    name: clean(input.name),
+    email,
+    uid,
+    program: clean(input.program),
+    semester: semesterOf(input.semester),
+    status: "active"
+  };
+  return User.findOneAndUpdate(
+    query,
+    {
+      $set: set,
+      $setOnInsert: { memberType: "event_candidate" }
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+}
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    if (!rateLimit(`register:${ip}`, 8)) return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
+
+    const payload = await req.json();
+    const legacy = registrationInput.safeParse(payload);
+
     await connectDB();
     const { id } = await params;
-    
-    // Support querying by ID or slug
-    const arena = await Arena.findOne({
-      $or: [{ _id: id.match(/^[0-9a-fA-F]{24}$/) ? id : null }, { slug: id }]
-    });
-
-    if (!arena) {
-      return NextResponse.json({ error: "Arena not found" }, { status: 404 });
+    const event = await Event.findById(id);
+    if (!event?.registrationOpen || !["published", "active"].includes(event.status)) {
+      return NextResponse.json({ error: "Registration is closed" }, { status: 409 });
     }
 
-    if (arena.status === "closed" || !arena.isPublished) {
-      return NextResponse.json({ error: "Registrations are closed for this arena" }, { status: 400 });
+    const mode = payload.mode === "team" ? "team" : "individual";
+    const eventMode = event.participationMode || "individual";
+    const allowed = eventMode === "both" || eventMode === mode;
+    if (!allowed) return NextResponse.json({ error: `This event accepts ${eventMode} registrations only.` }, { status: 400 });
+
+    let userId = legacy.success ? legacy.data.userId : null;
+    let leader: any = null;
+    let teamMembers: any[] = [];
+
+    if (!userId) {
+      const leaderInput: PublicParticipant = payload;
+      if (!isValidParticipant(leaderInput)) return NextResponse.json({ error: "Valid candidate details are required." }, { status: 400 });
+
+      const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
+      const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => clean(member?.name) || clean(member?.email) || clean(member?.uid)) : [];
+      const totalSize = 1 + memberInputs.length;
+      const maxTeamSize = Math.max(1, Number(event.maxTeamSize || 1));
+      if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
+      if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
+      if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
+        return NextResponse.json({ error: "Every team member needs name, email, UID, program, and semester." }, { status: 400 });
+      }
+
+      leader = await upsertParticipant(leaderInput);
+      userId = String(leader._id);
+      const memberUsers = await Promise.all(memberInputs.map((member) => upsertParticipant(member)));
+      teamMembers = memberUsers.map((member, index) => ({
+        user: member._id,
+        name: member.name,
+        email: member.email,
+        uid: member.uid,
+        program: member.program,
+        semester: member.semester ?? semesterOf(memberInputs[index]?.semester),
+        customFields: memberInputs[index]?.customFields
+      }));
     }
 
-    if (arena.capacity > 0 && arena.registeredCount >= arena.capacity) {
-      return NextResponse.json({ error: "Arena capacity reached" }, { status: 400 });
+    const count = await EventRegistration.countDocuments({ event: id, status: "confirmed" });
+    const status = count >= (event.capacity || Infinity) ? "waitlisted" : "confirmed";
+    const record = await EventRegistration.findOneAndUpdate(
+      { event: id, user: userId },
+      { $setOnInsert: { qrToken: randomUUID() }, $set: { status, mode, teamName: clean(payload.teamName), teamMembers, customFields: payload.customFields, registeredAt: new Date() } },
+      { upsert: true, new: true }
+    );
+
+    const participantIds = [userId, ...teamMembers.map((member) => String(member.user))];
+    await Promise.all(
+      participantIds.map((participantId) =>
+        Attendance.findOneAndUpdate(
+          { event: id, user: participantId },
+          { $setOnInsert: { status: "absent", method: "manual", markedAt: new Date(), registration: record._id } },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        )
+      )
+    );
+
+    return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode }, { status: 201 });
+  } catch (error: any) {
+    if (error?.code === 11000) {
+      return NextResponse.json({ error: "A candidate with this email or UID is already registered. Use the same details or update the existing candidate." }, { status: 409 });
     }
-
-    const body = await req.json();
-    const { teamName, leader, members, subCategory } = body;
-
-    if (!leader || !leader.name || !leader.email || !leader.uid) {
-      return NextResponse.json({ error: "Leader details are incomplete" }, { status: 400 });
-    }
-
-    // Check existing registration for this email/uid in this arena to prevent duplicates
-    const existing = await FestRegistration.findOne({
-      arenaId: arena._id,
-      $or: [
-        { "leader.email": leader.email.toLowerCase() },
-        { "leader.uid": leader.uid }
-      ]
-    });
-
-    if (existing) {
-      return NextResponse.json({ error: "You have already registered for this arena." }, { status: 409 });
-    }
-
-    const registrationId = `TM3-${arena.slug.toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-
-    await FestRegistration.create({
-      registrationId,
-      arenaId: arena._id,
-      teamName,
-      leader: { ...leader, email: leader.email.toLowerCase() },
-      members: members || [],
-      subCategory
-    });
-
-    // Increment registeredCount
-    arena.registeredCount = (arena.registeredCount || 0) + 1;
-    await arena.save();
-
-    return NextResponse.json({ success: true, registrationId });
-  } catch (err: any) {
-    console.error("Registration error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Registration failed." }, { status: 500 });
   }
+}
+
+import { audit, requirePortal } from "@/lib/portal";
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const blocked = await requirePortal(req);
+  if (blocked) return blocked;
+
+  const bodyJson = await req.json().catch(() => ({}));
+  const input = registrationInput.safeParse(bodyJson);
+  if (!input.success) return NextResponse.json({ error: input.error.flatten() }, { status: 400 });
+
+  await connectDB();
+  const { id } = await params;
+  const record = await EventRegistration.findOneAndUpdate({ event: id, user: input.data.userId }, { status: "cancelled" }, { new: true });
+  await audit(req, "portal.event.registration.cancel", { eventId: id, userId: input.data.userId });
+  return NextResponse.json(record);
 }

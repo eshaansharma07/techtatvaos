@@ -9,8 +9,8 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
   const [selectedEventId, setSelectedEventId] = useState("");
   const [subCategory, setSubCategory] = useState("");
   const [teamName, setTeamName] = useState("");
-  const [leader, setLeader] = useState({ name: "", email: "", uid: "" });
-  const [members, setMembers] = useState([{ name: "", email: "", uid: "" }]);
+  const [leader, setLeader] = useState({ name: "", email: "", uid: "", gameId: "", inGameName: "" });
+  const [members, setMembers] = useState([{ name: "", email: "", uid: "", gameId: "", inGameName: "" }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ticketId, setTicketId] = useState("");
@@ -28,6 +28,10 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
       setError("Please select an event.");
       return;
     }
+    if (requiresTeam && members.length < minSize - 1) {
+      setError(`This event requires a minimum of ${minSize} team members (Leader + ${minSize - 1} members).`);
+      return;
+    }
     if (requiresTeam && !teamName) {
       setError("Team name is required.");
       return;
@@ -41,10 +45,22 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
     setError("");
 
     const payload = {
+      mode: requiresTeam ? "team" : "individual",
       teamName: requiresTeam ? teamName : undefined,
-      leader,
-      members: requiresTeam ? members : [],
-      subCategory: selectedEvent.slug === "battlegrid" ? subCategory : undefined,
+      name: leader.name,
+      email: leader.email,
+      uid: leader.uid,
+      program: "N/A",
+      semester: 1,
+      customFields: leader.gameId || subCategory ? { gameId: leader.gameId, inGameName: leader.inGameName, subCategory } : undefined,
+      members: requiresTeam ? members.map(m => ({
+        name: m.name,
+        email: m.email,
+        uid: m.uid,
+        program: "N/A",
+        semester: 1,
+        customFields: m.gameId ? { gameId: m.gameId, inGameName: m.inGameName } : undefined
+      })) : [],
     };
 
     try {
@@ -69,7 +85,7 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
 
   const addMember = () => {
     if (members.length < maxSize - 1) {
-      setMembers([...members, { name: "", email: "", uid: "" }]);
+      setMembers([...members, { name: "", email: "", uid: "", gameId: "", inGameName: "" }]);
     }
   };
 
@@ -116,7 +132,7 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
             value={selectedEventId}
             onChange={(e) => {
               setSelectedEventId(e.target.value);
-              setMembers([{ name: "", email: "", uid: "" }]);
+              setMembers([{ name: "", email: "", uid: "", gameId: "", inGameName: "" }]);
               setSubCategory("");
             }}
           >
@@ -176,6 +192,12 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
                 <input type="email" placeholder="Email Address" required className="bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={leader.email} onChange={e => setLeader({...leader, email: e.target.value})} />
                 <input type="text" placeholder="University UID" required className="bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={leader.uid} onChange={e => setLeader({...leader, uid: e.target.value})} />
               </div>
+              {selectedEvent.slug === "battlegrid" && subCategory && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <input type="text" placeholder={subCategory === "VALORANT" ? "Riot ID" : subCategory === "CLASH ROYALE" ? "Player Tag" : "Player ID"} required className="bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={(leader as any).gameId || ""} onChange={e => setLeader({...leader, gameId: e.target.value} as any)} />
+                  <input type="text" placeholder="In-Game Name (IGN)" required className="bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={(leader as any).inGameName || ""} onChange={e => setLeader({...leader, inGameName: e.target.value} as any)} />
+                </div>
+              )}
             </div>
 
             {/* Additional Members */}
@@ -199,16 +221,24 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
                       exit={{ opacity: 0, height: 0 }}
                       className="grid grid-cols-1 md:grid-cols-4 gap-4 relative"
                     >
-                      <input type="text" placeholder="Full Name" required className="bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={m.name} onChange={e => { const newM = [...members]; newM[i].name = e.target.value; setMembers(newM); }} />
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full md:col-span-4">
+<input type="text" placeholder="Full Name" required className="bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={m.name} onChange={e => { const newM = [...members]; newM[i].name = e.target.value; setMembers(newM); }} />
                       <input type="email" placeholder="Email Address" required className="col-span-1 md:col-span-2 bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={m.email} onChange={e => { const newM = [...members]; newM[i].email = e.target.value; setMembers(newM); }} />
                       <div className="flex gap-2">
                         <input type="text" placeholder="UID" required className="flex-1 bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={m.uid} onChange={e => { const newM = [...members]; newM[i].uid = e.target.value; setMembers(newM); }} />
-                        {members.length > (minSize - 1) && (
+                        {true && (
                           <button type="button" onClick={() => removeMember(i)} className="w-12 flex items-center justify-center text-tm-dim hover:text-red-500 transition-colors bg-black border border-tm-border rounded-xl">
                             <AlertCircle size={16} />
                           </button>
                         )}
                       </div>
+</div>
+                      {selectedEvent.slug === "battlegrid" && subCategory && (
+                        <div className="col-span-1 md:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input type="text" placeholder={subCategory === "VALORANT" ? "Riot ID" : subCategory === "CLASH ROYALE" ? "Player Tag" : "Player ID"} required className="bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={(m as any).gameId || ""} onChange={e => { const newM: any = [...members]; newM[i].gameId = e.target.value; setMembers(newM); }} />
+                          <input type="text" placeholder="In-Game Name (IGN)" required className="bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={(m as any).inGameName || ""} onChange={e => { const newM: any = [...members]; newM[i].inGameName = e.target.value; setMembers(newM); }} />
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </AnimatePresence>
