@@ -1,7 +1,6 @@
 import "server-only";
 import { connectDB } from "@/lib/db";
-import { Arena } from "@/lib/models/Arena";
-import { FestRegistration } from "@/lib/models/Registration";
+import { Event, EventRegistration } from "@/lib/models";
 import { FestConfig } from "@/lib/models/FestConfig";
 import { TM_CONFIG } from "@/lib/technomania-theme";
 
@@ -85,16 +84,16 @@ export async function getTechnomaniaEvents() {
       });
     }
 
-    let arenas = await Arena.find({ isPublished: true }).lean();
+    let arenas = await Event.find({ $or: [{ fest: "technomania" }, { category: { $in: ["DeepTech & AI", "Hardware & Speed", "Gaming & Community"] } }], status: { $in: ["active", "published"] } }).lean();
 
     if (arenas.length === 0) {
       console.log("Seeding Arenas...");
-      await Arena.insertMany(TECHNOMANIA_SEED.map(a => ({
+      await Event.insertMany(TECHNOMANIA_SEED.map(a => ({
         ...a,
         status: "active",
-        isPublished: true
+        fest: "technomania"
       })));
-      arenas = await Arena.find({ isPublished: true }).lean();
+      arenas = await Event.find({ $or: [{ fest: "technomania" }, { category: { $in: ["DeepTech & AI", "Hardware & Speed", "Gaming & Community"] } }], status: { $in: ["active", "published"] } }).lean();
     }
 
     return serialize(
@@ -134,7 +133,7 @@ export async function getFestConfig() {
 export async function getTechnomaniaEvent(slug: string) {
   try {
     await connectDB();
-    const event = await Arena.findOne({ slug, isPublished: true }).lean() as any;
+    const event = await Event.findOne({ slug, $or: [{ fest: "technomania" }, { category: { $in: ["DeepTech & AI", "Hardware & Speed", "Gaming & Community"] } }], status: { $in: ["active", "published"] } }).lean() as any;
     if (!event) return null;
     return serialize({
       ...event,
@@ -152,16 +151,17 @@ export async function getTechnomaniaEvent(slug: string) {
 export async function getTechnomaniaStats() {
   try {
     await connectDB();
-    const activeFestArenas = await Arena.countDocuments({ isPublished: true });
+    const activeFestArenas = await Event.countDocuments({ $or: [{ fest: "technomania" }, { category: { $in: ["DeepTech & AI", "Hardware & Speed", "Gaming & Community"] } }], status: { $in: ["active", "published"] } });
     
-    const registrations = await FestRegistration.find().lean();
-    const registeredSquads = registrations.filter(r => (r as any).teamName).length;
+    const registrations = await EventRegistration.find().populate({ path: "event", match: { $or: [{ fest: "technomania" }, { category: { $in: ["DeepTech & AI", "Hardware & Speed", "Gaming & Community"] } }] } }).lean();
+    const festRegs = registrations.filter((r: any) => r.event);
+    const registeredSquads = festRegs.filter((r: any) => r.teamName).length;
     
     let totalBuilders = 0;
-    registrations.forEach(r => {
+    festRegs.forEach((r: any) => {
       totalBuilders += 1; // leader
-      if ((r as any).members && Array.isArray((r as any).members)) {
-        totalBuilders += (r as any).members.length;
+      if (r.teamMembers && Array.isArray(r.teamMembers)) {
+        totalBuilders += r.teamMembers.length;
       }
     });
 

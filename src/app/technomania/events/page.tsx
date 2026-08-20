@@ -4,7 +4,7 @@ import { TechnomaniaEventCard } from "@/components/technomania/technomania-event
 import { TechnomaniaEventsClient } from "@/components/technomania/technomania-events-client";
 import { getTechnomaniaEvents } from "@/lib/technomania-data";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function TechnomaniaEventsPage() {
   const events = await getTechnomaniaEvents();

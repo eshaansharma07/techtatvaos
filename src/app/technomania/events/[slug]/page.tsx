@@ -5,7 +5,7 @@ import { getTechnomaniaEvent } from "@/lib/technomania-data";
 import { TechnomaniaRegisterForm } from "@/components/technomania/technomania-register-form";
 import { optimizeCloudinaryUrl } from "@/lib/cloudinary-client";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 const dateText = (value?: string) =>
   value ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(new Date(value)) : "Date TBA";

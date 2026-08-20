@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
 import { TechnomaniaRegisterClient } from "@/components/technomania/technomania-register-client";
 import { getTechnomaniaEvents } from "@/lib/technomania-data";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function TechnomaniaRegisterPage() {
   const events = await getTechnomaniaEvents();

@@ -1,274 +1,67 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { TechnomaniaOverview } from "./technomania/overview";
-import { TechnomaniaArenas } from "./technomania/arenas";
-import { TechnomaniaRegistrations } from "./technomania/registrations";
-import { TechnomaniaLeaderboard } from "./technomania/leaderboard";
-import { TechnomaniaBroadcasts } from "./technomania/broadcasts";
-import { TechnomaniaConfig } from "./technomania/config";
-import {
-  Zap,
-  Calendar,
-  Users,
-  Trophy,
-  Download,
-  Plus,
-  Search,
-  ExternalLink,
-  Filter,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Sparkles,
-  Gamepad2,
-  Code,
-  Music,
-  Eye,
-  Edit,
-  Trash2,
-  RefreshCw,
-  Sliders,
-  ChevronRight,
-  Radio,
-  Bell,
-  Layers,
-  ArrowUpRight
-} from "lucide-react";
+import { Plus, Users, Search, Activity, Zap, Calendar, Trophy, FileText, CheckCircle, ExternalLink, Settings, Radio } from "lucide-react";
 
-interface TechnomaniaAdminPortalProps {
-  data: any;
-  openDrawer: (drawer: any) => void;
-  setPanel: (msg: string) => void;
-  refresh: () => void;
-  patch: (resource: any, item: any, body: Record<string, any>, message: string) => Promise<void>;
-  remove: (resource: any, id: string) => Promise<void>;
-}
+export function TechnomaniaAdminPortal({ data, openDrawer, setPanel, refresh, patch, remove }: { data: any, openDrawer: any, setPanel: any, refresh?: any, patch?: any, remove?: any }) {
+  const [subTab, setSubTab] = useState<"overview" | "events" | "squads" | "ticker" | "settings">("overview");
 
-export function TechnomaniaAdminPortal({
-  data,
-  openDrawer,
-  setPanel,
-  refresh,
-  patch,
-  remove
-}: TechnomaniaAdminPortalProps) {
-  const [subTab, setSubTab] = useState<"overview" | "arenas" | "squads" | "leaderboard" | "ticker" | "settings">("overview");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedArenaFilter, setSelectedArenaFilter] = useState("all");
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState("all");
-  const [selectedReg, setSelectedReg] = useState<any | null>(null);
-
-  // All events matching Technomania
   const tmEvents = useMemo(() => {
-    return (data.events || []).filter((e: any) => {
-      return e.fest === "technomania" || ["hackathon", "esports", "cultural", "sub-events"].includes(e.category?.toLowerCase());
-    });
+    return (data.events || []).filter((e: any) => e.fest === "technomania" || e.category === "DeepTech & AI" || e.category === "Hardware & Speed" || e.category === "Gaming & Community");
   }, [data.events]);
 
-  const tmEventIds = useMemo(() => new Set(tmEvents.map((e: any) => String(e._id || e.id))), [tmEvents]);
-
-  // All registrations for Technomania events
   const tmRegistrations = useMemo(() => {
-    return (data.registrations || data.eventRegistrations || []).filter((r: any) => {
-      const eventId = String(r.event?._id || r.event?.id || r.event);
-      return tmEventIds.has(eventId) || r.event?.fest === "technomania";
-    });
-  }, [data.registrations, data.eventRegistrations, tmEventIds]);
+    const tmEventIds = new Set(tmEvents.map((e: any) => e._id || e.id));
+    return (data.registrations || []).filter((r: any) => tmEventIds.has(r.event?._id || r.event));
+  }, [data.registrations, tmEvents]);
 
-  // All leaderboard entries for Technomania events
-  const tmLeaderboard = useMemo(() => {
-    return (data.leaderboardEntries || []).filter((entry: any) => {
-      const eventId = String(entry.event?._id || entry.event?.id || entry.event);
-      return tmEventIds.has(eventId) || entry.event?.fest === "technomania";
-    });
-  }, [data.leaderboardEntries, tmEventIds]);
-
-  // Statistics calculation
-  const totalSquads = tmRegistrations.length;
   const totalMembers = useMemo(() => {
-    return tmRegistrations.reduce((acc: number, reg: any) => {
-      const memberCount = Array.isArray(reg.teamMembers) ? reg.teamMembers.length : 0;
-      return acc + 1 + memberCount;
-    }, 0);
+    let count = 0;
+    tmRegistrations.forEach((r: any) => {
+      count += 1;
+      if (r.teamMembers && Array.isArray(r.teamMembers)) count += r.teamMembers.length;
+    });
+    return count;
   }, [tmRegistrations]);
 
-  const liveArenasCount = tmEvents.filter((e: any) => ["published", "active"].includes(e.status)).length;
-
-  // Filtered registrations
-  const filteredSquads = useMemo(() => {
-    return tmRegistrations.filter((reg: any) => {
-      const eventId = String(reg.event?._id || reg.event?.id || reg.event);
-      const matchesArena = selectedArenaFilter === "all" || eventId === selectedArenaFilter;
-      const matchesStatus = selectedStatusFilter === "all" || reg.status === selectedStatusFilter;
-
-      const q = searchQuery.toLowerCase();
-      const squadName = (reg.teamName || "").toLowerCase();
-      const leaderName = (reg.user?.name || "").toLowerCase();
-      const leaderEmail = (reg.user?.email || "").toLowerCase();
-      const leaderUid = (reg.user?.uid || "").toLowerCase();
-      const leaderPhone = (reg.user?.phone || "").toLowerCase();
-
-      const memberMatch = Array.isArray(reg.teamMembers) && reg.teamMembers.some((m: any) => {
-        const u = m.user || m;
-        return (u.name || "").toLowerCase().includes(q) ||
-               (u.email || "").toLowerCase().includes(q) ||
-               (u.uid || "").toLowerCase().includes(q);
-      });
-
-      const matchesSearch = !q || squadName.includes(q) || leaderName.includes(q) || leaderEmail.includes(q) || leaderUid.includes(q) || leaderPhone.includes(q) || memberMatch;
-
-      return matchesArena && matchesStatus && matchesSearch;
-    });
-  }, [tmRegistrations, selectedArenaFilter, selectedStatusFilter, searchQuery]);
+  const totalSquads = tmRegistrations.filter((r: any) => r.teamName).length;
+  const liveArenasCount = tmEvents.filter((e: any) => e.status === "active" || e.status === "published").length;
 
   const handleCreateArena = () => {
     openDrawer({
-      title: "Create Technomania 3.0 Arena",
       resource: "events",
-      defaults: {
-        fest: "technomania",
-        status: "published",
-        registrationOpen: true,
-        category: "hackathon",
-        participationMode: "team",
-        maxTeamSize: 4
-      },
+      title: "Add Technomania Event",
       fields: [
-        ["title", "Arena / Event Title"],
-        ["slug", "Slug (e.g. code-storm-24h)"],
-        ["description", "Description"],
-        ["category", "Category (hackathon / esports / cultural / sub-events)"],
-        ["venue", "Arena Venue / Stage"],
-        ["capacity", "Max Capacity", "number"],
-        ["participationMode", "Mode", "participation-select"],
-        ["maxTeamSize", "Max Team Size", "number"],
-        ["status", "Status", "status-select"],
-        ["registrationOpen", "Registration Open", "boolean-select"],
-        ["startAt", "Kickoff Date/Time", "datetime-local"],
-        ["endAt", "Ending Date/Time", "datetime-local"],
-        ["banner", "Event Banner URL", "upload:image"],
-        ["certEventLogo", "Emblem Logo", "upload:image"],
-        ["whatsappGroupLink", "Squad WhatsApp / Discord Link"],
-        ["rules", "Rules & Guidelines (one per line)"]
-      ]
+        { key: "title", label: "Event Title", type: "text", required: true },
+        { key: "slug", label: "URL Slug", type: "text", required: true },
+        { key: "category", label: "Category", type: "select", options: ["DeepTech & AI", "Hardware & Speed", "Gaming & Community", "Other"] },
+        { key: "description", label: "Description", type: "textarea" },
+        { key: "banner", label: "Banner Image URL", type: "text" },
+        { key: "fest", label: "Fest Label", type: "text" },
+        { key: "capacity", label: "Capacity", type: "number" },
+        { key: "participationMode", label: "Mode", type: "select", options: ["individual", "team", "both"] },
+        { key: "maxTeamSize", label: "Max Team Size", type: "number" },
+        { key: "status", label: "Status", type: "select", options: ["draft", "published", "active", "completed", "archived"] },
+        { key: "registrationOpen", label: "Registration Open", type: "select", options: ["true", "false"] }
+      ],
+      defaults: { status: "published", registrationOpen: "true", fest: "technomania" }
     });
   };
 
-  const handleEditArena = (event: any) => {
-    openDrawer({
-      title: `Edit ${event.title}`,
-      resource: "events",
-      item: event,
-      fields: [
-        ["title", "Arena / Event Title"],
-        ["slug", "Slug"],
-        ["description", "Description"],
-        ["category", "Category"],
-        ["venue", "Arena Venue"],
-        ["capacity", "Capacity", "number"],
-        ["participationMode", "Mode", "participation-select"],
-        ["maxTeamSize", "Max Team Size", "number"],
-        ["status", "Status", "status-select"],
-        ["registrationOpen", "Registration Open", "boolean-select"],
-        ["startAt", "Kickoff Date/Time", "datetime-local"],
-        ["endAt", "Ending Date/Time", "datetime-local"],
-        ["banner", "Event Banner URL", "upload:image"],
-        ["whatsappGroupLink", "Squad WhatsApp Link"]
-      ]
-    });
-  };
+  const tabs = [
+    { id: "overview", label: "Command Center", icon: Activity },
+    { id: "events", label: "Arenas & Events", icon: Calendar, badge: tmEvents.length },
+    { id: "squads", label: "Squads & Regs", icon: Users, badge: tmRegistrations.length },
+    { id: "ticker", label: "Broadcasts", icon: Radio },
+    { id: "settings", label: "Fest Config", icon: Settings }
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* ═══════════════════════════════════════════════════════
-          TECHNOMANIA 3.0 FESTIVAL COMMAND HEADER
-          ═══════════════════════════════════════════════════════ */}
-      <div className="relative p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#0a1224] via-[#0f172a] to-[#1a0f2e] border border-cyan-500/30 backdrop-blur-2xl shadow-[0_0_40px_rgba(74,158,255,0.15)] overflow-hidden">
-        {/* Ambient Neon Backlights */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 blur-[100px] pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 font-mono text-[11px] font-bold tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                FESTIVAL COMMAND CENTER
-              </span>
-              <span className="text-white/30 text-xs font-mono">BUILD V3.0 // 2026</span>
-            </div>
-
-            <div className="flex items-center gap-4 pt-1">
-              <div className="relative h-10 w-10 shrink-0">
-                <Image
-                  src="/technomania/techtatva-logo.png"
-                  alt="Tech Tatva Logo"
-                  fill
-                  className="object-contain drop-shadow-[0_0_15px_rgba(139,92,246,0.6)]"
-                />
-              </div>
-              <span className="text-white/30 text-base font-mono">✕</span>
-              <div className="relative h-9 w-32 shrink-0">
-                <Image
-                  src="/technomania/logo-emblem.png"
-                  alt="TM 3.0 Logo"
-                  fill
-                  className="object-contain drop-shadow-[0_0_15px_rgba(74,158,255,0.6)]"
-                />
-              </div>
-              <h1 className="text-xl sm:text-2xl font-black font-tm-heading tracking-wide uppercase text-white hidden sm:inline">
-                CONTROL PORTAL
-              </h1>
-            </div>
-            <p className="text-xs text-white/60 font-mono">
-              Live registration management, arena configurations, leaderboards, and broadcast controls for Technomania 3.0.
-            </p>
-          </div>
-
-          {/* Quick Action Controls */}
-          <div className="flex flex-wrap items-center gap-3">
-            <a
-              href="/technomania"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white font-mono text-xs font-bold tracking-wider transition-all hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(74,158,255,0.3)]"
-            >
-              <ExternalLink size={14} className="text-cyan-400" />
-              <span>LIVE SITE</span>
-            </a>
-
-            <a
-              href="/api/technomania/export"
-              download
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-green-500/40 bg-green-500/10 hover:bg-green-500/20 text-green-300 font-mono text-xs font-bold tracking-wider transition-all shadow-[0_0_20px_rgba(34,197,94,0.2)]"
-            >
-              <Download size={14} />
-              <span>EXPORT SQUADS (EXCEL)</span>
-            </a>
-
-            <button
-              onClick={handleCreateArena}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-mono text-xs font-bold tracking-wider transition-all shadow-[0_0_25px_rgba(74,158,255,0.4)]"
-            >
-              <Plus size={15} />
-              <span>ADD FEST ARENA</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Sub-Navigation Tabs */}
-        <div className="mt-8 pt-6 border-t border-white/10 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          {[
-            { id: "overview", label: "OVERVIEW & KPIS", icon: Zap },
-            { id: "arenas", label: "ARENAS & EVENTS", icon: Calendar, badge: tmEvents.length },
-            { id: "squads", label: "SQUADS & REGISTRATIONS", icon: Users, badge: tmRegistrations.length },
-            { id: "leaderboard", label: "LEADERBOARD & ROUNDS", icon: Trophy, badge: tmLeaderboard.length },
-            { id: "ticker", label: "BROADCASTS & TICKER", icon: Bell },
-            { id: "settings", label: "FEST CONFIGURATION", icon: Sliders },
-          ].map((tab) => {
+    <div className="w-full space-y-6">
+      {/* Navigation */}
+      <div className="p-3 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md overflow-x-auto custom-scrollbar">
+        <div className="flex items-center gap-2 min-w-max">
+          {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = subTab === tab.id;
             return (
@@ -294,20 +87,117 @@ export function TechnomaniaAdminPortal({
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════
-          TAB 1: OVERVIEW & LIVE KPIS
-          ═══════════════════════════════════════════════════════ */}
-      {subTab === "overview" && <TechnomaniaOverview />}
+      {/* Tabs */}
+      {subTab === "overview" && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { label: "REGISTERED SQUADS", value: totalSquads, icon: Users, color: "text-blue-400" },
+              { label: "TOTAL BUILDERS / PLAYERS", value: totalMembers, icon: Zap, color: "text-cyan-400" },
+              { label: "ACTIVE FEST ARENAS", value: liveArenasCount, icon: Calendar, color: "text-purple-400" },
+              { label: "TOTAL REGISTRATIONS", value: tmRegistrations.length, icon: FileText, color: "text-amber-400" },
+            ].map((card, i) => (
+              <div key={i} className="p-6 rounded-2xl bg-black/60 border border-white/10 backdrop-blur-xl relative overflow-hidden group">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-mono text-white/50 tracking-widest uppercase">{card.label}</span>
+                  <card.icon size={18} className={card.color} />
+                </div>
+                <p className="text-3xl sm:text-4xl font-black text-white tracking-tight">{card.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="p-6 rounded-3xl bg-black/60 border border-white/10 backdrop-blur-xl">
+            <h3 className="font-bold text-white uppercase tracking-wider mb-4">Action Panel</h3>
+            <p className="text-xs text-white/50">Technomania 3.0 loaded from main MongoDB Event schema. All changes apply globally.</p>
+          </div>
+        </div>
+      )}
 
-      {subTab === "arenas" && <TechnomaniaArenas />}
+      {subTab === "events" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-white uppercase tracking-wider">Technomania Arenas</h3>
+              <p className="text-xs text-white/50 font-mono">Manage fest events. Uses the standard Event editor for full features.</p>
+            </div>
+            <button onClick={handleCreateArena} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-mono text-xs font-bold transition-all">
+              <Plus size={15} />
+              <span>ADD NEW ARENA</span>
+            </button>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {tmEvents.map((evt: any) => {
+              const count = tmRegistrations.filter((r: any) => String(r.event?._id || r.event) === String(evt._id)).length;
+              return (
+                <div key={evt._id} className="p-6 rounded-2xl bg-black/60 border border-white/10 flex flex-col justify-between space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider">{evt.category || "ARENA"}</span>
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${evt.status === "active" || evt.status === "published" ? "bg-green-500/20 text-green-400" : "bg-white/10 text-white/40"}`}>{evt.status}</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white">{evt.title}</h4>
+                    <p className="text-xs text-white/50 mt-1 line-clamp-2">{evt.description}</p>
+                  </div>
+                  <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono">
+                    <span className="text-white/60">Registrations:</span>
+                    <span className="text-white font-bold">{count} {evt.capacity ? `/ ${evt.capacity}` : ""}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-      {subTab === "squads" && <TechnomaniaRegistrations />}
+      {subTab === "squads" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-white uppercase tracking-wider">Squads & Registrations</h3>
+            <p className="text-xs text-white/50 font-mono">{tmRegistrations.length} Total</p>
+          </div>
+          <div className="bg-black/60 border border-white/10 rounded-2xl overflow-hidden overflow-x-auto">
+            <table className="w-full text-left text-sm font-mono whitespace-nowrap">
+              <thead className="bg-white/5 text-white/40 text-[10px] uppercase tracking-widest">
+                <tr>
+                  <th className="px-6 py-4">Squad / Leader</th>
+                  <th className="px-6 py-4">Event</th>
+                  <th className="px-6 py-4">Members</th>
+                  <th className="px-6 py-4">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {tmRegistrations.slice(0, 50).map((reg: any) => (
+                  <tr key={reg._id} className="hover:bg-white/[0.02]">
+                    <td className="px-6 py-4">
+                      <p className="text-white font-bold">{reg.teamName || reg.user?.name}</p>
+                      <p className="text-[10px] text-white/40">{reg.user?.uid} • {reg.user?.email}</p>
+                    </td>
+                    <td className="px-6 py-4 text-cyan-400 text-xs">{(reg.event?.title || "Unknown Event").replace("[FEST] ", "")}</td>
+                    <td className="px-6 py-4 text-white/60 text-xs">{reg.teamMembers?.length ? `${reg.teamMembers.length + 1} Size` : "Solo"}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-2 py-1 rounded bg-green-500/20 text-green-400 text-[10px] uppercase">{reg.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
-      {subTab === "leaderboard" && <TechnomaniaLeaderboard />}
+      {subTab === "ticker" && (
+        <div className="p-6 rounded-3xl bg-black/60 border border-white/10 space-y-4">
+          <h3 className="text-xl font-bold text-white uppercase tracking-wider">Broadcasts & Ticker</h3>
+          <p className="text-xs text-white/50 font-mono">Use the Fest Config to modify the ticker text.</p>
+        </div>
+      )}
 
-      {subTab === "ticker" && <TechnomaniaBroadcasts />}
-
-      {subTab === "settings" && <TechnomaniaConfig />}
+      {subTab === "settings" && (
+        <div className="p-8 rounded-3xl bg-black/60 border border-white/10 space-y-6">
+          <h3 className="text-xl font-bold text-white uppercase tracking-wider">Fest Configuration</h3>
+          <p className="text-xs text-white/50 font-mono">Use the global Settings tab to manage global features, and Events tab for event-level configuration.</p>
+        </div>
+      )}
     </div>
   );
 }

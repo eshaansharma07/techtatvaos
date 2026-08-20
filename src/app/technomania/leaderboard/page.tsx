@@ -3,7 +3,7 @@ import { ArrowLeft, Trophy } from "lucide-react";
 import { getTechnomaniaEvents } from "@/lib/technomania-data";
 import { TechnomaniaBracket } from "@/components/technomania/technomania-bracket";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function TechnomaniaLeaderboardPage() {
   const events = await getTechnomaniaEvents();

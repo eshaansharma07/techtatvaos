@@ -3,7 +3,7 @@ import Link from "next/link";
 import { TechnomaniaScheduleView } from "@/components/technomania/technomania-schedule";
 import { getTechnomaniaSchedule } from "@/lib/technomania-data";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function TechnomaniaSchedulePage() {
   const events = await getTechnomaniaSchedule();
