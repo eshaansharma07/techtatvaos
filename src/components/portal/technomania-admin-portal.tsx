@@ -242,7 +242,16 @@ export function TechnomaniaAdminPortal({ data, openDrawer, setPanel, refresh, pa
                   </div>
 
                   {/* Additional Squad Members */}
-                  {Array.isArray(selectedReg.teamMembers) && selectedReg.teamMembers.map((m: any, idx: number) => {
+                  {Array.isArray(selectedReg.teamMembers) && selectedReg.teamMembers
+                    .filter((m: any) => {
+                      const u = m.user || m;
+                      const uid = u.uid || m.uid;
+                      const email = u.email || m.email;
+                      const lUid = selectedReg.user?.uid;
+                      const lEmail = selectedReg.user?.email;
+                      return (!lUid || uid !== lUid) && (!lEmail || email !== lEmail);
+                    })
+                    .map((m: any, idx: number) => {
                     const u = m.user || m;
                     return (
                       <div key={idx} className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
