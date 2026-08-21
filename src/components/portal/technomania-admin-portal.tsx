@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Plus, Users, Search, Activity, Zap, Calendar, Trophy, FileText, CheckCircle, ExternalLink, Settings, Radio } from "lucide-react";
+import { Plus, Users, Search, Activity, Zap, Calendar, Trophy, FileText, CheckCircle, ExternalLink, Settings, Radio, X } from "lucide-react";
 
 export function TechnomaniaAdminPortal({ data, openDrawer, setPanel, refresh, patch, remove }: { data: any, openDrawer: any, setPanel: any, refresh?: any, patch?: any, remove?: any }) {
   const [subTab, setSubTab] = useState<"overview" | "events" | "squads" | "ticker" | "settings">("overview");
+  const [selectedReg, setSelectedReg] = useState<any>(null);
 
   const tmEvents = useMemo(() => {
     return (data.events || []).filter((e: any) => e.fest === "technomania" || e.category === "DeepTech & AI" || e.category === "Hardware & Speed" || e.category === "Gaming & Community");
@@ -167,7 +168,11 @@ export function TechnomaniaAdminPortal({ data, openDrawer, setPanel, refresh, pa
               </thead>
               <tbody className="divide-y divide-white/5">
                 {tmRegistrations.slice(0, 50).map((reg: any) => (
-                  <tr key={reg._id} className="hover:bg-white/[0.02]">
+                  <tr 
+                    key={reg._id} 
+                    className="hover:bg-white/[0.05] cursor-pointer transition-colors"
+                    onClick={() => setSelectedReg(reg)}
+                  >
                     <td className="px-6 py-4">
                       <p className="text-white font-bold">{reg.teamName || reg.user?.name}</p>
                       <p className="text-[10px] text-white/40">{reg.user?.uid} • {reg.user?.email}</p>
@@ -182,6 +187,98 @@ export function TechnomaniaAdminPortal({ data, openDrawer, setPanel, refresh, pa
               </tbody>
             </table>
           </div>
+
+          {/* Squad Dossier Modal */}
+          {selectedReg && (
+            <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div className="w-full max-w-2xl rounded-3xl bg-[#0d1322] border border-cyan-500/40 p-6 sm:p-8 shadow-2xl relative space-y-6 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <div>
+                    <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">SQUAD DOSSIER</span>
+                    <h3 className="font-tm-heading text-2xl font-bold text-white mt-0.5">
+                      {selectedReg.teamName || selectedReg.user?.name}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setSelectedReg(null)}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                  <div>Arena: <span className="text-white font-bold block mt-1">{selectedReg.event?.title}</span></div>
+                  <div>Status: <span className="text-green-400 font-bold uppercase block mt-1">{selectedReg.status}</span></div>
+                  <div>Registered: <span className="text-white block mt-1">{new Date(selectedReg.registeredAt).toLocaleString()}</span></div>
+                  <div>Mode: <span className="text-white uppercase block mt-1">{selectedReg.mode}</span></div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-mono text-xs text-white/60 uppercase tracking-wider">Squad Members Roster</h4>
+                  
+                  {/* Leader */}
+                  <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-blue-500/30 text-blue-300 uppercase">
+                          Squad Leader
+                        </span>
+                        <div className="font-bold text-white text-base mt-2">{selectedReg.user?.name}</div>
+                        <div className="text-xs text-white/60 font-mono mt-1">{selectedReg.user?.email} · {selectedReg.user?.phone || "N/A"}</div>
+                      </div>
+                      <div className="text-right font-mono text-xs">
+                        <div className="text-white font-bold">{selectedReg.user?.uid}</div>
+                        <div className="text-white/40 mt-1">{selectedReg.user?.program || "N/A"}</div>
+                      </div>
+                    </div>
+                    {selectedReg.customFields && Object.keys(selectedReg.customFields).length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-blue-500/20 grid grid-cols-2 gap-3 text-[11px] font-mono">
+                        {Object.entries(selectedReg.customFields).map(([k, v]) => (
+                          <div key={k}><span className="text-blue-200/50 uppercase">{k}:</span> <span className="text-blue-100">{String(v)}</span></div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Additional Squad Members */}
+                  {Array.isArray(selectedReg.teamMembers) && selectedReg.teamMembers.map((m: any, idx: number) => {
+                    const u = m.user || m;
+                    return (
+                      <div key={idx} className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-white/10 text-white/60 uppercase">
+                              Member #{idx + 2}
+                            </span>
+                            <div className="font-bold text-white text-base mt-2">{u.name || m.name}</div>
+                            <div className="text-xs text-white/60 font-mono mt-1">{u.email || m.email} · {u.phone || m.phone || "N/A"}</div>
+                          </div>
+                          <div className="text-right font-mono text-xs">
+                            <div className="text-white font-bold">{u.uid || m.uid}</div>
+                            <div className="text-white/40 mt-1">{u.program || m.program || "N/A"}</div>
+                          </div>
+                        </div>
+                        {m.customFields && Object.keys(m.customFields).length > 0 && (
+                          <div className="mt-4 pt-3 border-t border-white/10 grid grid-cols-2 gap-3 text-[11px] font-mono">
+                            {Object.entries(m.customFields).map(([k, v]) => (
+                              <div key={k}><span className="text-white/30 uppercase">{k}:</span> <span className="text-white/80">{String(v)}</span></div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <button onClick={() => setSelectedReg(null)} className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition">
+                    Close Dossier
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

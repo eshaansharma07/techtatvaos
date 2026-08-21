@@ -93,6 +93,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         return NextResponse.json({ error: "Every team member needs name, email, UID, program, and semester." }, { status: 400 });
       }
 
+      if (mode === "team") {
+        const allEmails = [clean(leaderInput.email), ...memberInputs.map(m => clean(m.email))].map(e => e.toLowerCase());
+        const allUids = [clean(leaderInput.uid), ...memberInputs.map(m => clean(m.uid))].map(u => u.toLowerCase());
+        
+        if (new Set(allEmails).size !== allEmails.length) {
+          return NextResponse.json({ error: "Duplicate email addresses found in the team." }, { status: 400 });
+        }
+        if (new Set(allUids).size !== allUids.length) {
+          return NextResponse.json({ error: "Duplicate UIDs found in the team." }, { status: 400 });
+        }
+      }
+
       leader = await upsertParticipant(leaderInput);
       userId = String(leader._id);
       const memberUsers = await Promise.all(memberInputs.map((member) => upsertParticipant(member)));
