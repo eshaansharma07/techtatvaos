@@ -86,12 +86,14 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
   };
 
   const addMember = () => {
+    setError("");
     if (members.length < maxSize - 1) {
       setMembers([...members, { name: "", email: "", uid: "", gameId: "", inGameName: "" }]);
     }
   };
 
   const removeMember = (index: number) => {
+    setError("");
     setMembers(members.filter((_, i) => i !== index));
   };
 
@@ -145,6 +147,7 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
               setSelectedEventId(e.target.value);
               setMembers([{ name: "", email: "", uid: "", gameId: "", inGameName: "" }]);
               setSubCategory("");
+              setError("");
             }}
           >
             <option value="">-- CHOOSE EVENT --</option>

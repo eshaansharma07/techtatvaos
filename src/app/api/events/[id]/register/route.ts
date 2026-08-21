@@ -67,7 +67,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const mode = payload.mode === "team" ? "team" : "individual";
-    const eventMode = event.participationMode || "individual";
+    
+    // Coerce data inconsistencies where maxTeamSize or teamSize.max > 1 but participationMode was left as "individual"
+    const derivedMaxTeamSize = Math.max(1, Number(event.maxTeamSize || 1), Number(event.teamSize?.max || 1));
+    const eventMode = event.participationMode === "both" ? "both" : (derivedMaxTeamSize > 1 ? "team" : (event.participationMode || "individual"));
+    
     const allowed = eventMode === "both" || eventMode === mode;
     if (!allowed) return NextResponse.json({ error: `This event accepts ${eventMode} registrations only.` }, { status: 400 });
 
@@ -82,7 +86,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
       const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => clean(member?.name) || clean(member?.email) || clean(member?.uid)) : [];
       const totalSize = 1 + memberInputs.length;
-      const maxTeamSize = Math.max(1, Number(event.maxTeamSize || 1));
+      const maxTeamSize = derivedMaxTeamSize;
       if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
       if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
       if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
