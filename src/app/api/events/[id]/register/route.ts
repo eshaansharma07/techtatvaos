@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { Attendance, Event, EventRegistration, User } from "@/lib/models";
+import { Attendance, Event, EventRegistration, RecruitmentSettings, User } from "@/lib/models";
 import { rateLimit } from "@/lib/rate-limit";
 import { registrationInput } from "@/lib/validations/event";
 
@@ -111,6 +111,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       { upsert: true, new: true }
     );
 
+    let whatsappGroupLink = event.whatsappGroupLink || "";
+    if (!whatsappGroupLink) {
+      const settings = await RecruitmentSettings.findOne({ key: "default" }).lean();
+      whatsappGroupLink = (settings as any)?.whatsappGroupLink || "";
+    }
+
     const participantIds = [userId, ...teamMembers.map((member) => String(member.user))];
     await Promise.all(
       participantIds.map((participantId) =>
@@ -122,7 +128,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       )
     );
 
-    return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode }, { status: 201 });
+    return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode, whatsappGroupLink }, { status: 201 });
   } catch (error: any) {
     if (error?.code === 11000) {
       return NextResponse.json({ error: "A candidate with this email or UID is already registered. Use the same details or update the existing candidate." }, { status: 409 });

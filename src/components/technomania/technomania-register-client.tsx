@@ -14,6 +14,7 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ticketId, setTicketId] = useState("");
+  const [whatsappLink, setWhatsappLink] = useState("");
 
   const selectedEvent = events.find(e => e.id === selectedEventId || e.slug === selectedEventId);
 
@@ -75,7 +76,8 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
         throw new Error(data.error || "Failed to register");
       }
       
-      setTicketId(data.registrationId);
+      setTicketId(data.id || data.registrationId);
+      if (data.whatsappGroupLink) setWhatsappLink(data.whatsappGroupLink);
     } catch (err: any) {
       setError(err.message || "An error occurred during registration.");
     } finally {
@@ -117,6 +119,15 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
           {requiresTeam && <p><span className="text-white">TEAM:</span> {teamName}</p>}
           <p><span className="text-white">LEADER:</span> {leader.name} ({leader.uid})</p>
         </div>
+        
+        {whatsappLink && (
+          <div className="pt-6 border-t border-tm-border/50 flex flex-col items-center gap-4">
+            <p className="text-xs font-tm-mono text-tm-muted uppercase">Join the official WhatsApp group for updates</p>
+            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold tracking-widest text-sm py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all w-full max-w-sm">
+              JOIN WHATSAPP GROUP
+            </a>
+          </div>
+        )}
       </div>
     );
   }

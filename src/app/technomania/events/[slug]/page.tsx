@@ -93,6 +93,18 @@ export default async function TechnomaniaEventDetail({ params }: { params: Promi
               </div>
             </div>
           </div>
+          {event.banner && (
+            <div className="flex justify-end items-center h-full">
+              <div className="relative w-full max-w-[400px] aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-white/5">
+                <Image 
+                  src={optimizeCloudinaryUrl(event.banner, 800)} 
+                  alt={event.title} 
+                  fill 
+                  className="object-cover hover:scale-105 transition-transform duration-700" 
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
