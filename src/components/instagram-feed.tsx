@@ -52,13 +52,13 @@ function formatDate(timestamp?: string) {
  
 export function InstagramFeed({
   handle = "techtatvaclub",
-  profileUrl = "https://instagram.com/techtatvaclub",
+  profileUrl = "https://www.instagram.com/techtatvaclub/",
   post1_image,
-  post1_url = "https://instagram.com/techtatvaclub",
+  post1_url = "https://www.instagram.com/techtatvaclub/",
   post2_image,
-  post2_url = "https://instagram.com/techtatvaclub",
+  post2_url = "https://www.instagram.com/techtatvaclub/",
   post3_image,
-  post3_url = "https://instagram.com/techtatvaclub"
+  post3_url = "https://www.instagram.com/techtatvaclub/"
 }: InstagramFeedProps) {
   
   const [posts, setPosts] = useState<InstagramPost[]>([]);
@@ -87,17 +87,17 @@ export function InstagramFeed({
 
       // Merge manual posts with API posts
       const manualPosts: InstagramPost[] = [];
-      if (post1_image) manualPosts.push({ id: "manual-1", image: post1_image, url: post1_url || "https://instagram.com/techtatvaclub", caption: "Latest update from Tech Tatva Club." });
-      if (post2_image) manualPosts.push({ id: "manual-2", image: post2_image, url: post2_url || "https://instagram.com/techtatvaclub", caption: "Featured update." });
-      if (post3_image) manualPosts.push({ id: "manual-3", image: post3_image, url: post3_url || "https://instagram.com/techtatvaclub", caption: "Tech Tatva news." });
+      if (post1_image) manualPosts.push({ id: "manual-1", image: post1_image, url: post1_url || "https://www.instagram.com/techtatvaclub/", caption: "Latest update from Tech Tatva Club." });
+      if (post2_image) manualPosts.push({ id: "manual-2", image: post2_image, url: post2_url || "https://www.instagram.com/techtatvaclub/", caption: "Featured update." });
+      if (post3_image) manualPosts.push({ id: "manual-3", image: post3_image, url: post3_url || "https://www.instagram.com/techtatvaclub/", caption: "Tech Tatva news." });
 
       const combined = [...manualPosts, ...apiPosts.filter(p => !manualPosts.some(m => m.url === p.url))].slice(0, 3);
 
       if (combined.length === 0) {
         setPosts([
-          { id: "ig-1", image: "/chandigarh-university-logo.png", url: "https://instagram.com/techtatvaclub", caption: "Welcome to Tech Tatva" },
-          { id: "ig-2", image: "/chandigarh-university-logo.png", url: "https://instagram.com/techtatvaclub", caption: "Innovation & Excellence" },
-          { id: "ig-3", image: "/chandigarh-university-logo.png", url: "https://instagram.com/techtatvaclub", caption: "Connect with us" }
+          { id: "ig-1", image: "/chandigarh-university-logo.png", url: "https://www.instagram.com/techtatvaclub/", caption: "Welcome to Tech Tatva" },
+          { id: "ig-2", image: "/chandigarh-university-logo.png", url: "https://www.instagram.com/techtatvaclub/", caption: "Innovation & Excellence" },
+          { id: "ig-3", image: "/chandigarh-university-logo.png", url: "https://www.instagram.com/techtatvaclub/", caption: "Connect with us" }
         ]);
       } else {
         setPosts(combined);

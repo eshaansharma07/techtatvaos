@@ -213,7 +213,7 @@ export function TechnomaniaInteractiveCard({
             </Link>
 
             <Link
-              href={getHref("/register")}
+              href={getHref(`/register?event=${event.slug || event.id}`)}
               className="px-5 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black font-mono text-xs font-black tracking-wider uppercase inline-flex items-center gap-1.5 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:shadow-[0_0_30px_rgba(255,255,255,0.3)]"
             >
               <span>REGISTER</span>

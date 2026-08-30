@@ -61,7 +61,7 @@ export default async function Contact() {
             <div className="space-y-3 pt-4 border-t border-white/[.06]">
               <span className="text-[9px] font-bold uppercase tracking-[.25em] text-white/30">Follow the network</span>
               <div className="flex flex-wrap gap-3">
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="group flex h-12 w-12 items-center justify-center rounded-xl border border-white/[.06] bg-white/[.02] text-white/50 transition-all duration-300 hover:border-purple-500/50 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(168,85,247,0.2)] hover:text-white">
+                <a href="https://www.instagram.com/techtatvaclub/" target="_blank" rel="noopener noreferrer" className="group flex h-12 w-12 items-center justify-center rounded-xl border border-white/[.06] bg-white/[.02] text-white/50 transition-all duration-300 hover:border-purple-500/50 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(168,85,247,0.2)] hover:text-white">
                   <Instagram size={18} className="transition-transform group-hover:scale-110" />
                 </a>
                 <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="group flex h-12 w-12 items-center justify-center rounded-xl border border-white/[.06] bg-white/[.02] text-white/50 transition-all duration-300 hover:border-purple-500/50 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(168,85,247,0.2)] hover:text-white">

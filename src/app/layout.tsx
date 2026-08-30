@@ -58,6 +58,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+import NextTopLoader from 'nextjs-toploader';
+
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const headersList = await headers();
   const host = headersList.get("x-forwarded-host") || headersList.get("host") || "";
@@ -66,6 +68,17 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <body>
+        <NextTopLoader 
+          color="#A855F7"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #A855F7,0 0 5px #A855F7"
+        />
         {children}
         {showChat && <FloatingAIChat />}
         <ServiceWorkerRegister />

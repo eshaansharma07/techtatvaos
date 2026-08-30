@@ -11,7 +11,7 @@ interface SocialConnectBannerProps {
 
 export function SocialConnectBanner({
   handle = "techtatvaclub",
-  profileUrl = "https://instagram.com/techtatvaclub",
+  profileUrl = "https://www.instagram.com/techtatvaclub/",
 }: SocialConnectBannerProps) {
   const [showModal, setShowModal] = useState(false);
 

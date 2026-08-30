@@ -27,7 +27,7 @@ export const TM_CONFIG = {
   festTag: "technomania", // Used to filter events from DB
   domain: "technomania.techtatva.in",
   socialLinks: {
-    instagram: "https://instagram.com/techtatva.cu",
+    instagram: "https://www.instagram.com/techtatvaclub/",
     linkedin: "https://linkedin.com/company/techtatva",
     github: "https://github.com/techtatva",
   },

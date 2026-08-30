@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, User, Users, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Check, User, Users, AlertCircle, ArrowRight, Loader2, Trash2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
@@ -270,8 +270,8 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
                       <div className="flex gap-2">
                         <input type="text" placeholder="UID" required className="flex-1 bg-black border border-tm-border rounded-xl p-3 text-sm text-white font-tm-mono outline-none focus:border-white" value={m.uid} onChange={e => { const newM = [...members]; newM[i].uid = e.target.value; setMembers(newM); }} />
                         {true && (
-                          <button type="button" onClick={() => removeMember(i)} className="w-12 flex items-center justify-center text-tm-dim hover:text-red-500 transition-colors bg-black border border-tm-border rounded-xl">
-                            <AlertCircle size={16} />
+                          <button type="button" onClick={() => removeMember(i)} title="Remove Member" className="w-12 flex items-center justify-center text-zinc-500 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-colors bg-black border border-tm-border rounded-xl">
+                            <Trash2 size={16} />
                           </button>
                         )}
                       </div>

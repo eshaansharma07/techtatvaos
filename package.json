@@ -22,6 +22,7 @@
     "mongoose": "^8.15.1",
     "next": "^15.3.3",
     "next-auth": "^5.0.0-beta.28",
+    "nextjs-toploader": "^3.9.17",
     "pdf-lib": "^1.17.1",
     "puppeteer-core": "^25.1.0",
     "qrcode.react": "^4.2.0",
