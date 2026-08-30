@@ -323,7 +323,7 @@ export default function TechnomaniaPage() {
               transition={{ duration: 0.9, delay: 1.05, ease: [0.16, 1, 0.3, 1] }}
               className="pt-4 pb-2 flex justify-center items-center w-full"
             >
-              <TechnomaniaCountdown targetDate="2026-09-15T09:00:00+05:30" />
+              <TechnomaniaCountdown targetDate="2026-09-21T09:00:00+05:30" />
             </motion.div>
           </motion.div>
         </div>
