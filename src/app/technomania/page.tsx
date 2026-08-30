@@ -143,6 +143,7 @@ export default function TechnomaniaPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [stats, setStats] = useState({ totalEvents: 6, totalRegistrations: 0 });
+  const [dynamicEvents, setDynamicEvents] = useState<any[]>([]);
 
   React.useEffect(() => {
     fetch("/api/fest/stats").then(res => res.json()).then(data => {
@@ -151,13 +152,43 @@ export default function TechnomaniaPage() {
         totalRegistrations: data.totalBuilders || 0
       });
     }).catch(() => {});
+    
+    fetch("/api/technomania/events").then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setDynamicEvents(data);
+    }).catch(() => {});
   }, []);
+
+  const mergedEvents = React.useMemo(() => {
+    if (dynamicEvents.length === 0) return flagshipEvents;
+    return dynamicEvents.map((dbEvent) => {
+      const baseCat = (dbEvent.category || "").toLowerCase();
+      let template = flagshipEvents[3];
+      if (baseCat.includes("hack") || baseCat.includes("deep") || baseCat.includes("ai")) template = flagshipEvents[0];
+      else if (baseCat.includes("game") || baseCat.includes("esport")) template = flagshipEvents[1];
+      else if (baseCat.includes("cult") || baseCat.includes("art") || baseCat.includes("music")) template = flagshipEvents[2];
+
+      return {
+        id: String(dbEvent.id || dbEvent._id),
+        icon: template.icon,
+        category: dbEvent.category || template.category,
+        tag: template.tag,
+        title: dbEvent.title,
+        subtitle: template.subtitle,
+        description: dbEvent.description || template.description,
+        prizes: dbEvent.prizePool || template.prizes,
+        slug: dbEvent.slug,
+        teamSize: dbEvent.maxTeamSize > 1 ? `Up to ${dbEvent.maxTeamSize} Members` : "Solo",
+        mascotImage: template.mascotImage,
+        mascotAlt: template.mascotAlt,
+      };
+    });
+  }, [dynamicEvents]);
 
   const filteredEvents =
     activeCategory === "all"
-      ? flagshipEvents
-      : flagshipEvents.filter(
-          (e) => e.category.toLowerCase() === activeCategory.toLowerCase()
+      ? mergedEvents
+      : mergedEvents.filter(
+          (e) => e.category.toLowerCase().includes(activeCategory.toLowerCase())
         );
 
   return (
