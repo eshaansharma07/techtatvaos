@@ -515,7 +515,7 @@ export default function TechnomaniaAdminPage() {
       {/* ── TOP CLEAN NAVIGATION BAR ── */}
       <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-md border-b border-zinc-900 px-6 sm:px-10 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href={getHref("/")} className="flex items-center gap-3 group">
+          <Link href="/technomania" className="flex items-center gap-3 group">
             <div className="relative h-7 w-7">
               <Image
                 src="/technomania/logo-white.png"
@@ -562,7 +562,7 @@ export default function TechnomaniaAdminPage() {
           </button>
 
           <Link
-            href={getHref("/")}
+            href="/technomania"
             target="_blank"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-medium transition"
           >
@@ -976,7 +976,11 @@ export default function TechnomaniaAdminPage() {
                     </thead>
                     <tbody className="divide-y divide-zinc-900">
                       {filteredRegistrations.map((reg) => (
-                        <tr key={reg._id} className="hover:bg-zinc-900/40 transition">
+                        <tr 
+                          key={reg._id} 
+                          className="hover:bg-zinc-900/40 transition cursor-pointer"
+                          onClick={() => setSelectedRegistration(reg)}
+                        >
                           <td className="p-4">
                             <div className="font-semibold text-white">{reg.teamName || reg.leadName}</div>
                             <div className="text-xs text-zinc-400">{reg.leadEmail}</div>

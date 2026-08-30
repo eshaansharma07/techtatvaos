@@ -108,6 +108,7 @@ export async function getTechnomaniaEvents() {
         teamSize: a.teamSize,
         prizePool: a.prizePool,
         rounds: a.rounds,
+        unstopLink: a.unstopLink,
         status: a.status,
         isPublished: a.isPublished,
         // Mock start dates based on day 1/2 for UI layout

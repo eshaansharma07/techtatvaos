@@ -225,11 +225,16 @@ export function TechnomaniaAdminPortal({ data, openDrawer, setPanel, refresh, pa
                           Squad Leader
                         </span>
                         <div className="font-bold text-white text-base mt-2">{selectedReg.user?.name}</div>
-                        <div className="text-xs text-white/60 font-mono mt-1">{selectedReg.user?.email} · {selectedReg.user?.phone || "N/A"}</div>
+                        <div className="text-xs text-white/60 font-mono mt-1">
+                          {selectedReg.user?.email}
+                          {selectedReg.user?.phone && ` · ${selectedReg.user?.phone}`}
+                        </div>
                       </div>
                       <div className="text-right font-mono text-xs">
                         <div className="text-white font-bold">{selectedReg.user?.uid}</div>
-                        <div className="text-white/40 mt-1">{selectedReg.user?.program || "N/A"}</div>
+                        {selectedReg.user?.program && (
+                          <div className="text-white/40 mt-1">{selectedReg.user?.program}</div>
+                        )}
                       </div>
                     </div>
                     {selectedReg.customFields && Object.keys(selectedReg.customFields).length > 0 && (
@@ -261,11 +266,16 @@ export function TechnomaniaAdminPortal({ data, openDrawer, setPanel, refresh, pa
                               Member #{idx + 2}
                             </span>
                             <div className="font-bold text-white text-base mt-2">{u.name || m.name}</div>
-                            <div className="text-xs text-white/60 font-mono mt-1">{u.email || m.email} · {u.phone || m.phone || "N/A"}</div>
+                            <div className="text-xs text-white/60 font-mono mt-1">
+                              {u.email || m.email}
+                              {(u.phone || m.phone) && ` · ${u.phone || m.phone}`}
+                            </div>
                           </div>
                           <div className="text-right font-mono text-xs">
                             <div className="text-white font-bold">{u.uid || m.uid}</div>
-                            <div className="text-white/40 mt-1">{u.program || m.program || "N/A"}</div>
+                            {(u.program || m.program) && (
+                              <div className="text-white/40 mt-1">{u.program || m.program}</div>
+                            )}
                           </div>
                         </div>
                         {m.customFields && Object.keys(m.customFields).length > 0 && (

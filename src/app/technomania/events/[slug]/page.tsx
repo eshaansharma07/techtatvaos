@@ -172,11 +172,26 @@ export default async function TechnomaniaEventDetail({ params }: { params: Promi
           </p>
 
           {isRegistrationOpen ? (
-            <TechnomaniaRegisterForm
-              eventId={event.id}
-              participationMode={event.teamSize?.max > 1 ? "team" : "individual"}
-              maxTeamSize={event.teamSize?.max}
-            />
+            event.unstopLink ? (
+              <div className="mt-5 rounded-lg border border-[#3b4bf9]/30 bg-[#3b4bf9]/5 p-6 text-center">
+                <h4 className="text-[#3b4bf9] font-bold font-tm-heading text-lg mb-2">Register on Unstop</h4>
+                <p className="text-xs text-white/60 mb-5">Registration for this event is being exclusively hosted on Unstop.</p>
+                <a 
+                  href={event.unstopLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="inline-block w-full py-3 px-4 bg-[#3b4bf9] hover:bg-[#2b3be9] text-white font-tm-mono font-bold text-xs uppercase tracking-widest rounded-lg transition-colors shadow-[0_0_20px_rgba(59,75,249,0.3)]"
+                >
+                  GO TO UNSTOP
+                </a>
+              </div>
+            ) : (
+              <TechnomaniaRegisterForm
+                eventId={event.id}
+                participationMode={event.teamSize?.max > 1 ? "team" : "individual"}
+                maxTeamSize={event.teamSize?.max}
+              />
+            )
           ) : (
             <p className="mt-5 rounded-lg border border-tm-border bg-tm-bg p-4 text-center text-xs text-tm-dim font-tm-mono">
               REGISTRATION CLOSED

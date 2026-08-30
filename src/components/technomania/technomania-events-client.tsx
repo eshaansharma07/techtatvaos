@@ -118,6 +118,26 @@ export function TechnomaniaEventsClient({ events }: { events: any[] }) {
                     </ul>
                   </div>
                 )}
+                
+                <div className="pt-4 border-t border-zinc-900">
+                  {selectedEvent.unstopLink ? (
+                    <a
+                      href={selectedEvent.unstopLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full py-4 rounded-xl text-center font-tm-mono font-bold text-sm tracking-widest uppercase transition-all bg-indigo-500 hover:bg-indigo-400 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]"
+                    >
+                      REGISTER ON UNSTOP
+                    </a>
+                  ) : (
+                    <a
+                      href={`/technomania/register?event=${selectedEvent.slug || selectedEvent.id}`}
+                      className="block w-full py-4 rounded-xl text-center font-tm-mono font-bold text-sm tracking-widest uppercase transition-all bg-white hover:bg-zinc-200 text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                    >
+                      REGISTER NOW
+                    </a>
+                  )}
+                </div>
               </div>
             </motion.div>
           </>

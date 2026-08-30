@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, User, Users, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
-  const [selectedEventId, setSelectedEventId] = useState("");
+  const searchParams = useSearchParams();
+  const preselectedEvent = searchParams.get("event");
+  const [selectedEventId, setSelectedEventId] = useState(preselectedEvent || "");
   const [subCategory, setSubCategory] = useState("");
   const [teamName, setTeamName] = useState("");
   const [leader, setLeader] = useState({ name: "", email: "", uid: "", gameId: "", inGameName: "" });
@@ -138,26 +141,52 @@ export function TechnomaniaRegisterClient({ events }: { events: any[] }) {
     <div className="max-w-2xl mx-auto tm-card p-8 bg-tm-surface/30 backdrop-blur-sm">
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Event Selection */}
-        <div className="space-y-3">
-          <label className="text-xs font-tm-mono tracking-widest text-tm-dim uppercase">Select Arena / Event</label>
-          <select 
-            className="w-full bg-black border border-tm-border rounded-xl p-4 text-white font-tm-heading font-bold outline-none focus:border-white transition-colors appearance-none"
-            value={selectedEventId}
-            onChange={(e) => {
-              setSelectedEventId(e.target.value);
-              setMembers([{ name: "", email: "", uid: "", gameId: "", inGameName: "" }]);
-              setSubCategory("");
-              setError("");
-            }}
-          >
-            <option value="">-- CHOOSE EVENT --</option>
-            {events.map(e => (
-              <option key={e.slug || e.id} value={e.slug || e.id}>{e.title}</option>
-            ))}
-          </select>
-        </div>
+        {preselectedEvent && selectedEvent ? (
+          <div className="p-5 border border-tm-accent/30 bg-tm-accent/10 rounded-2xl">
+            <p className="text-[10px] font-tm-mono text-tm-accent uppercase tracking-widest mb-1">Registering For</p>
+            <h2 className="text-xl md:text-2xl font-black text-white uppercase font-tm-heading">{selectedEvent.title}</h2>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <label className="text-xs font-tm-mono tracking-widest text-tm-dim uppercase">Select Arena / Event</label>
+            <select 
+              className="w-full bg-black border border-tm-border rounded-xl p-4 text-white font-tm-heading font-bold outline-none focus:border-white transition-colors appearance-none"
+              value={selectedEventId}
+              onChange={(e) => {
+                setSelectedEventId(e.target.value);
+                setMembers([{ name: "", email: "", uid: "", gameId: "", inGameName: "" }]);
+                setSubCategory("");
+                setError("");
+              }}
+            >
+              <option value="" disabled>-- CHOOSE AN EVENT --</option>
+              {events.map((e) => (
+                <option key={e.slug || e.id} value={e.slug || e.id}>{e.title}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        {selectedEvent && (
+        {selectedEvent && selectedEvent.unstopLink ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className="p-8 border border-[#3b4bf9]/30 bg-[#3b4bf9]/5 rounded-3xl text-center space-y-6"
+          >
+            <div>
+              <h4 className="text-[#3b4bf9] font-bold font-tm-heading text-2xl mb-2">Register on Unstop</h4>
+              <p className="text-sm text-white/60">Registration for this event is being exclusively hosted on Unstop.</p>
+            </div>
+            <a 
+              href={selectedEvent.unstopLink} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="inline-block py-4 px-8 bg-[#3b4bf9] hover:bg-[#2b3be9] text-white font-tm-mono font-bold text-sm uppercase tracking-widest rounded-xl transition-all shadow-[0_0_30px_rgba(59,75,249,0.4)] hover:-translate-y-1"
+            >
+              PROCEED TO UNSTOP
+            </a>
+          </motion.div>
+        ) : selectedEvent && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }} 
             animate={{ opacity: 1, y: 0 }} 

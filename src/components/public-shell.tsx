@@ -198,12 +198,12 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
       </div>
     </footer>
     <FloatingAnnouncement data={{
-      announcementEnabled: latestAnn ? ((latestAnn as any).status === "published") : !!info.announcementEnabled,
-      announcementText: latestAnn ? (latestAnn as any).title : (info.announcementText || ""),
-      announcementLink: latestAnn ? "" : (info.announcementLink || ""),
-      announcementLinkText: latestAnn ? "" : (info.announcementLinkText || ""),
-      announcementType: latestAnn ? "info" : (info.announcementType || "info"),
-      announcementDetails: latestAnn ? (latestAnn as any).body : (info.announcementDetails || ""),
+      announcementEnabled: latestAnn ? ((latestAnn as any).status === "published") : true,
+      announcementText: latestAnn ? (latestAnn as any).title : "Technomania 3.0 registrations are now live! Secure your spot.",
+      announcementLink: latestAnn ? "" : "/technomania",
+      announcementLinkText: latestAnn ? "" : "Explore",
+      announcementType: latestAnn ? "event" : "event",
+      announcementDetails: latestAnn ? (latestAnn as any).body : "",
     }} />
   </main>;
 }
