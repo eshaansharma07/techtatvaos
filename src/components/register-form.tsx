@@ -81,7 +81,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
   const fields = [
     { name: "name", label: "Full Name", type: "text", placeholder: "Eshaan Sharma", icon: User },
     { name: "email", label: "University Email", type: "email", placeholder: "eshaan@university.edu", icon: Mail },
-    { name: "phone", label: "WhatsApp Number *", type: "tel", placeholder: "+91 98765 43210", icon: Phone },
+    { name: "phone", label: "WhatsApp Number (Required)", type: "tel", placeholder: "+91 98765 43210", icon: Phone },
     { name: "uid", label: "University UID", type: "text", placeholder: "24BAI70387", icon: FileText },
     { name: "program", label: "Degree Program", type: "text", placeholder: "B.E. CSE AI/ML", icon: Layers },
     { name: "semester", label: "Current Semester", type: "number", placeholder: "4", icon: Sparkles }
@@ -89,7 +89,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
   // Validation functions
   const isEmailValid = (email: string) => email.includes("@") && email.length >= 5;
-  const isPhoneValid = (phone: string) => phone.replace(/\D/g, "").length >= 8;
+  const isPhoneValid = (phone: string) => phone.replace(/\D/g, "").length >= 10;
   const isNameValid = (name: string) => name.trim().length >= 2;
   const isUidValid = (uid: string) => uid.trim().length >= 2;
   const isProgramValid = (prog: string) => prog.trim().length >= 1;
@@ -407,7 +407,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         else if (name === "semester") isValid = isSemesterValid(val);
 
                         return (
-                          <div key={name} className={name === "name" || name === "email" ? "sm:col-span-2" : ""}>
+                          <div key={name} className={name === "name" || name === "email" || name === "phone" ? "sm:col-span-2" : ""}>
                             <label className="block text-[9px] font-black tracking-widest text-white/40 uppercase mb-2">
                               {label}
                             </label>
@@ -511,7 +511,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           else if (name === "semester") isValid = isSemesterValid(val);
 
                           return (
-                            <div key={name} className={name === "name" || name === "email" ? "sm:col-span-2" : ""}>
+                            <div key={name} className={name === "name" || name === "email" || name === "phone" ? "sm:col-span-2" : ""}>
                               <label className="block text-[9px] font-black tracking-widest text-white/40 uppercase mb-2">
                                 {label}
                               </label>
@@ -574,6 +574,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                         <div className="bg-black/35 rounded-xl p-3 text-xs space-y-1">
                           <p className="text-white font-semibold">{leader.name}</p>
                           <p className="text-white/40">{leader.email} · {leader.uid}</p>
+                          <p className="text-white/40">📱 {leader.phone}</p>
                           <p className="text-white/40">{leader.program} · Semester {leader.semester}</p>
                         </div>
                       </div>
@@ -585,6 +586,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                             <div key={i} className="bg-black/35 rounded-xl p-3 text-xs space-y-1">
                               <p className="text-white font-semibold">Member {i + 2}: {member.name || "N/A"}</p>
                               <p className="text-white/40">{member.email || "N/A"} · {member.uid || "N/A"}</p>
+                              <p className="text-white/40">📱 {member.phone || "N/A"}</p>
                               <p className="text-white/40">{member.program || "N/A"} · Semester {member.semester || "N/A"}</p>
                             </div>
                           ))}
@@ -735,10 +737,40 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           </>
                         )}
                       </button>
+                    ) : step === 3 && mode === "team" ? (
+                      /* On team member step: cycle through members, then advance to review */
+                      <button
+                        type="button"
+                        disabled={!isMemberValid(activeTab)}
+                        onClick={() => {
+                          // Find the next member that needs filling
+                          const nextTab = activeTab + 1;
+                          if (nextTab < activeMemberCount) {
+                            // More members to fill — switch to next tab
+                            setActiveTab(nextTab);
+                          } else if (allMembersValid) {
+                            // All members are done — go to review step
+                            setStep(prev => prev + 1);
+                          } else {
+                            // Some earlier member is incomplete — jump to first incomplete
+                            for (let i = 0; i < activeMemberCount; i++) {
+                              if (!isMemberValid(i)) {
+                                setActiveTab(i);
+                                setStatus(`Please complete Member ${i + 2} details.`);
+                                break;
+                              }
+                            }
+                          }
+                        }}
+                        className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
+                      >
+                        <span>{activeTab + 1 < activeMemberCount ? `Next: Member ${activeTab + 3}` : allMembersValid ? "Review & Compile" : "Continue"}</span>
+                        <ArrowRight size={13} />
+                      </button>
                     ) : (
                       <button
                         type="button"
-                        disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : step === 3 ? !allMembersValid : false}
+                        disabled={step === 1 ? !isStep1Valid : step === 2 ? !isLeaderValid : false}
                         onClick={() => setStep(prev => prev + 1)}
                         className="brutalist-btn-purple flex items-center justify-center gap-1.5 rounded-xl px-6 py-3 text-xs tracking-wider font-extrabold uppercase transition disabled:opacity-40"
                       >

@@ -8,25 +8,49 @@ import { registrationInput } from "@/lib/validations/event";
 type PublicParticipant = {
   name?: string;
   email?: string;
+  phone?: string;
   uid?: string;
   program?: string;
   semester?: string | number;
   customFields?: Record<string, any>;
 };
 
-const clean = (value: unknown) => (typeof value === "string" ? value.trim() : "");
-const semesterOf = (value: unknown) => {
-  const number = Number(value);
-  return Number.isFinite(number) && number > 0 ? number : undefined;
+const clean = (value: unknown): string => {
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number") return String(value);
+  return "";
 };
 
-function isValidParticipant(input: PublicParticipant) {
-  return clean(input.name).length >= 2 && clean(input.email).includes("@") && clean(input.uid).length >= 2 && clean(input.program).length >= 1;
+const cleanPhone = (value: unknown): string => {
+  const raw = clean(value);
+  // Strip everything except digits and leading +
+  return raw.replace(/[^\d+]/g, "");
+};
+
+const semesterOf = (value: unknown): number | undefined => {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 && number <= 12 ? number : undefined;
+};
+
+function isValidPhone(phone: string): boolean {
+  const digits = phone.replace(/\D/g, "");
+  return digits.length >= 8 && digits.length <= 15;
+}
+
+function isValidParticipant(input: PublicParticipant): boolean {
+  return (
+    clean(input.name).length >= 2 &&
+    clean(input.email).includes("@") &&
+    isValidPhone(clean(input.phone)) &&
+    clean(input.uid).length >= 2 &&
+    clean(input.program).length >= 1
+  );
 }
 
 async function upsertParticipant(input: PublicParticipant) {
   const email = clean(input.email).toLowerCase();
   const uid = clean(input.uid);
+  const phone = cleanPhone(input.phone);
   const query = {
     $or: [
       { email },
@@ -37,6 +61,7 @@ async function upsertParticipant(input: PublicParticipant) {
     name: clean(input.name),
     email,
     uid,
+    phone,
     program: clean(input.program),
     semester: semesterOf(input.semester),
     status: "active"
@@ -56,7 +81,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const ip = req.headers.get("x-forwarded-for") || "unknown";
     if (!rateLimit(`register:${ip}`, 8)) return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
 
-    const payload = await req.json();
+    let payload: any;
+    try {
+      payload = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    }
+
+    // Guard: payload must be an object
+    if (!payload || typeof payload !== "object") {
+      return NextResponse.json({ error: "Invalid request format." }, { status: 400 });
+    }
+
     const legacy = registrationInput.safeParse(payload);
 
     await connectDB();
@@ -81,16 +117,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (!userId) {
       const leaderInput: PublicParticipant = payload;
-      if (!isValidParticipant(leaderInput)) return NextResponse.json({ error: "Valid candidate details are required." }, { status: 400 });
+      if (!isValidParticipant(leaderInput)) {
+        return NextResponse.json({ error: "Valid candidate details are required (name, email, phone, UID, program)." }, { status: 400 });
+      }
 
       const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
-      const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => clean(member?.name) || clean(member?.email) || clean(member?.uid)) : [];
+      const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => member && (clean(member?.name) || clean(member?.email) || clean(member?.uid))) : [];
       const totalSize = 1 + memberInputs.length;
       const maxTeamSize = derivedMaxTeamSize;
       if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
       if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
       if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
-        return NextResponse.json({ error: "Every team member needs name, email, UID, program, and semester." }, { status: 400 });
+        return NextResponse.json({ error: "Every team member needs valid name, email, phone, UID, and program." }, { status: 400 });
       }
 
       if (mode === "team") {
@@ -112,6 +150,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         user: member._id,
         name: member.name,
         email: member.email,
+        phone: member.phone || cleanPhone(memberInputs[index]?.phone),
         uid: member.uid,
         program: member.program,
         semester: member.semester ?? semesterOf(memberInputs[index]?.semester),
@@ -147,9 +186,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ id: String(record._id), status: record.status, mode: record.mode, whatsappGroupLink }, { status: 201 });
   } catch (error: any) {
     if (error?.code === 11000) {
-      return NextResponse.json({ error: "A candidate with this email or UID is already registered. Use the same details or update the existing candidate." }, { status: 409 });
+      return NextResponse.json({ error: "A candidate with this email or UID is already registered for this event." }, { status: 409 });
     }
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Registration failed." }, { status: 500 });
+    // Log server-side for debugging but return a clean error message
+    console.error("[Registration Error]", error);
+    return NextResponse.json({ error: "Registration failed. Please try again or contact the organizers." }, { status: 500 });
   }
 }
 
