@@ -5,7 +5,12 @@ type GeminiRequest = {
   fallback: string;
 };
 
-const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const CANDIDATE_MODELS = [
+  process.env.GEMINI_MODEL,
+  "gemini-2.5-flash",
+  "gemini-flash-latest",
+  "gemini-2.0-flash",
+].filter(Boolean) as string[];
 
 export async function generateWithGemini({ system, prompt, contents, fallback }: GeminiRequest) {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || "";
@@ -14,33 +19,42 @@ export async function generateWithGemini({ system, prompt, contents, fallback }:
     return fallback;
   }
 
-  try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents: contents || [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.35,
-          topP: 0.9,
-          maxOutputTokens: 1200
-        }
-      })
-    });
-    
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error(`Gemini API Error: Google endpoint returned HTTP ${res.status}:`, errText);
-      return fallback;
+  // De-duplicate models to try
+  const modelsToTry = Array.from(new Set(CANDIDATE_MODELS));
+
+  for (const currentModel of modelsToTry) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: contents || [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.35,
+            topP: 0.9,
+            maxOutputTokens: 1200
+          }
+        })
+      });
+      
+      if (!res.ok) {
+        const errText = await res.text();
+        console.warn(`Gemini API Warning (${currentModel}): HTTP ${res.status}:`, errText);
+        continue;
+      }
+      
+      const json = await res.json();
+      const textResult = json?.candidates?.[0]?.content?.parts?.map((part: any) => part.text).filter(Boolean).join("\n").trim();
+      if (textResult) {
+        return textResult;
+      }
+    } catch (err) {
+      console.warn(`Gemini API Warning (${currentModel}): Network exception:`, err);
     }
-    
-    const json = await res.json();
-    return json?.candidates?.[0]?.content?.parts?.map((part: any) => part.text).filter(Boolean).join("\n").trim() || fallback;
-  } catch (err) {
-    console.error("Gemini API Error: Network/parsing exception thrown:", err);
-    return fallback;
   }
+
+  return fallback;
 }
 
 export function compactJson(value: unknown) {

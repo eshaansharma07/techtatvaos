@@ -41,13 +41,15 @@ async function getPublicContext() {
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get("x-forwarded-for") || "public";
-    if (!rateLimit(`public-ai:${ip}`, 6, 60_000)) {
-      return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
+    if (!rateLimit(`public-ai:${ip}`, 25, 60_000)) {
+      return NextResponse.json({ error: "You're asking questions very quickly! Please wait a few seconds." }, { status: 429 });
     }
 
     const body = await req.json();
     const prompt = String(body.prompt || "").trim();
-    if (prompt.length < 3) return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+    if (!prompt) {
+      return NextResponse.json({ error: "Please enter a message or question." }, { status: 400 });
+    }
     const history = Array.isArray(body.history) ? body.history : [];
 
     await connectDB();
@@ -68,12 +70,26 @@ export async function POST(req: NextRequest) {
     
     contents.push({
       role: "user",
-      parts: [{ text: `User question:\n${prompt}\n\nLive Tech Tatva Club public information:\n${JSON.stringify(publicContext, null, 2).slice(0, 10000)}` }]
+      parts: [{ text: `User question:\n${prompt}\n\nLive Tech Tatva Club public information & database context:\n${JSON.stringify(publicContext, null, 2).slice(0, 12000)}` }]
     });
 
-    const fallback = "Tech Tatva is a premier student-led tech club. We host hackathons, workshops, and recruitment drives. Ask me about our teams, events, or how to register!";
+    const fallback = "Tech Tatva is Bennett University's premier student-led tech club. We organize hackathons, prompt wars, developer workshops, and student mentorship. You can explore our events at /events, register for student membership at /join, or check recruitment opportunities at /recruitment!";
     const response = await generateWithGemini({
-      system: "You are the public Tech Tatva Chat Assistant. Help candidates and visitors learn about the club, upcoming events, recruitment, and teams. Always answer politely using only the provided public club details. If info is not present, guide them to our links (e.g. /recruitment for joining, /events for registering). Never make up details or give private member information.",
+      system: `You are 'Tech Tatva AI', the official interactive virtual assistant for Tech Tatva (the premier student technology and innovation club of Bennett University).
+
+Your core objectives:
+1. Enthusiastically help students, participants, and visitors learn about Tech Tatva events, workshops, hackathons, registrations, teams, and membership.
+2. Provide concise, friendly, and structured responses (use bullet points and emojis where helpful).
+3. If the user greets you with 'hi', 'hello', or similar greetings, warmly welcome them to Tech Tatva and mention 2-3 things you can help with (like upcoming events, membership drive, or teams).
+4. Direct users to relevant website sections using clean markdown links:
+   - Student Membership Drive: [Join Tech Tatva](/join)
+   - Live & Upcoming Events: [Explore Events](/events)
+   - Core Team Recruitment: [Recruitment Portal](/recruitment)
+   - Club Teams & Leads: [Our Teams](/teams)
+   - Hall of Fame & Alumni: [Hall of Fame](/hall-of-fame)
+   - Event Gallery: [Gallery](/gallery)
+   - Contact Organizers: [Contact Us](/contact)
+5. Never make up false dates or private personal contact numbers. If details are not in the context, guide them to the respective page or [Contact Us](/contact).`,
       contents,
       fallback
     });

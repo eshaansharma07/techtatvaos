@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     const bodyJson = await req.json();
     const prompt = String(bodyJson.prompt || "").trim();
-    if (prompt.length < 3) return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+    if (!prompt) return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
     const history = Array.isArray(bodyJson.history) ? bodyJson.history : [];
  
     await connectDB();
