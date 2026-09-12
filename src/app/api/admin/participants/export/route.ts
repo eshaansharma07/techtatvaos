@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Types } from "mongoose";
 import ExcelJS from "exceljs";
 import { connectDB } from "@/lib/db";
 import { Event, EventRegistration } from "@/lib/models";
@@ -15,7 +16,21 @@ export async function GET(req: NextRequest) {
   const eventId = searchParams.get("event");
 
   const query: Record<string, any> = {};
-  if (eventId) query.event = eventId;
+  let selectedEvent: any = null;
+
+  if (eventId && eventId !== "all") {
+    if (Types.ObjectId.isValid(eventId)) {
+      query.event = new Types.ObjectId(eventId);
+      selectedEvent = await Event.findById(eventId).lean();
+    } else {
+      selectedEvent = await Event.findOne({
+        $or: [{ slug: eventId }, { title: eventId }]
+      }).lean();
+      if (selectedEvent) {
+        query.event = selectedEvent._id;
+      }
+    }
+  }
 
   const [events, registrations] = await Promise.all([
     Event.find({}).lean(),
@@ -28,9 +43,11 @@ export async function GET(req: NextRequest) {
   ]);
 
   const eventMap = new Map((events as any[]).map((e) => [String(e._id), e.title]));
+  const eventTitle = selectedEvent?.title || (eventId && eventId !== "all" ? eventMap.get(String(eventId)) : null);
 
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet("Event Participants");
+  const sheetName = eventTitle ? `${eventTitle.slice(0, 28)}` : "Event Participants";
+  const sheet = workbook.addWorksheet(sheetName);
 
   sheet.columns = [
     { header: "Event", key: "event", width: 25 },
@@ -106,10 +123,11 @@ export async function GET(req: NextRequest) {
   );
 
   const buffer = await workbook.xlsx.writeBuffer();
+  const safeTitle = eventTitle ? eventTitle.replace(/[^a-zA-Z0-9_-]/g, "_") : "AllEvents";
   return new NextResponse(buffer, {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename="EventParticipants-${new Date().toISOString().slice(0, 10)}.xlsx"`
+      "Content-Disposition": `attachment; filename="${safeTitle}-Participants-${new Date().toISOString().slice(0, 10)}.xlsx"`
     }
   });
 }

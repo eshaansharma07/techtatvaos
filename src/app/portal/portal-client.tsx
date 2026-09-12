@@ -2701,9 +2701,15 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
     }
   };
 
-  const exportExcel = () => {
-    window.open("/api/admin/participants/export", "_blank");
-    setPanel("Exporting all event participants to Excel...");
+  const exportExcel = (forEventId?: string) => {
+    const targetEvent = forEventId !== undefined ? forEventId : selectedEventId;
+    const isSingleEvent = targetEvent && targetEvent !== "all";
+    const url = isSingleEvent
+      ? `/api/admin/participants/export?event=${encodeURIComponent(targetEvent)}`
+      : "/api/admin/participants/export";
+    window.open(url, "_blank");
+    const eventName = isSingleEvent ? (eventMap.get(targetEvent) || "selected event") : "all events";
+    setPanel(`Exporting participants for "${eventName}" to Excel...`);
   };
 
   // Events that have registrations, plus any other events
@@ -2745,14 +2751,30 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
         <div className="rounded-[1.7rem] border border-emerald-500/20 bg-emerald-500/[0.04] p-5 backdrop-blur-xl relative overflow-hidden flex flex-col justify-between">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-emerald-300/70">Export Roster</p>
-            <p className="mt-1 text-xs text-white/50">One-click download of all candidates & squads.</p>
+            <p className="mt-1 text-xs text-white/50">
+              {selectedEventId !== "all"
+                ? `Exporting: ${eventMap.get(selectedEventId) || "Selected Event"}`
+                : "Downloads all events, or select an event tab below to isolate."}
+            </p>
           </div>
-          <button
-            onClick={exportExcel}
-            className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30 transition shadow-sm"
-          >
-            <Download size={13} /> Export Excel
-          </button>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => exportExcel()}
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30 px-3.5 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30 transition shadow-sm truncate"
+            >
+              <Download size={13} />
+              <span>{selectedEventId !== "all" ? `Download ${eventMap.get(selectedEventId)?.slice(0, 16)}...` : "Download All Events"}</span>
+            </button>
+            {selectedEventId !== "all" && (
+              <button
+                onClick={() => exportExcel("all")}
+                className="inline-flex items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-[10px] font-bold text-white/50 hover:text-white transition"
+                title="Download all events without filter"
+              >
+                All Events
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
