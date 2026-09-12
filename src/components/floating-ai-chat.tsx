@@ -107,7 +107,7 @@ export function FloatingAIChat() {
     {
       id: "welcome",
       role: "model",
-      text: "👋 Hi! I am **Tech Tatva AI**.\n\nAsk me anything about our upcoming hackathons, event registrations, membership drive, or student technical teams!",
+      text: "👋 Hi! I am **Tech Tatva AI**, the official virtual assistant for Tech Tatva at Chandigarh University.\n\nAsk me anything about our upcoming hackathons, event registrations, membership drive, or student technical teams!",
       timestamp: new Date()
     }
   ]);
@@ -203,7 +203,7 @@ export function FloatingAIChat() {
       {
         id: `welcome-${Date.now()}`,
         role: "model",
-        text: "Conversation refreshed. Ask me anything about Tech Tatva events, team recruitment, or the membership drive!",
+        text: "Conversation refreshed. Ask me anything about Tech Tatva events, team recruitment, or the membership drive at Chandigarh University!",
         timestamp: new Date()
       }
     ]);
