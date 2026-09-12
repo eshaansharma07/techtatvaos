@@ -2720,7 +2720,7 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
               const event = events.find((e: any) => idOf(e) === eventId);
               const when = event?.startAt ? new Date(event.startAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "";
               const isExpanded = expandedEvents[eventId] !== false;
-              const teams = useMemo(() => {
+              const teams = (() => {
                 const map = new Map<string, typeof rows>();
                 rows.forEach((row) => {
                   const key = row.teamName;
@@ -2728,7 +2728,7 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
                   map.get(key)!.push(row);
                 });
                 return Array.from(map.entries());
-              }, [rows]);
+              })();
 
               return (
                 <div key={eventId} className="rounded-[1.7rem] border border-white/[.06] bg-black/20">
