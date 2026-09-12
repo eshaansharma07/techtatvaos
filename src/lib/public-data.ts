@@ -164,8 +164,10 @@ export async function getPublicEvent(slug: string) {
   if (!event) return null;
   const record: any = event;
   let participantCount = 0;
+  let teamCount = 0;
   if (record.participationMode === "team" || record.participationMode === "both") {
     const regs = await EventRegistration.find({ event: record._id, status: "confirmed" }).select("mode teamMembers");
+    teamCount = regs.filter((r) => r.mode === "team").length;
     participantCount = regs.reduce((acc, r) => {
       if (r.mode === "team" && Array.isArray(r.teamMembers)) {
         return acc + 1 + r.teamMembers.length;
@@ -174,6 +176,7 @@ export async function getPublicEvent(slug: string) {
     }, 0);
   } else {
     participantCount = await EventRegistration.countDocuments({ event: record._id, status: "confirmed" });
+    teamCount = 0;
   }
 
   let leaderboard: any[] = [];
@@ -210,7 +213,9 @@ export async function getPublicEvent(slug: string) {
       level: sponsor.level
     })),
     certEventLogo: record.certEventLogo || "",
-    registrations: participantCount,
+    registrations: record.participationMode === "team" ? teamCount : participantCount,
+    teamCount,
+    participantCount,
     leaderboardVisible: !!record.leaderboardVisible,
     leaderboard: leaderboard.map((entry: any) => ({
       id: String(entry._id),
@@ -579,8 +584,8 @@ export async function getAdminDashboardData() {
     Task.find({}).sort({ dueAt: 1 }).limit(200).populate("team", "name").lean(),
     Announcement.find({}).sort({ publishAt: -1 }).limit(200).lean(),
     Notification.find({}).sort({ createdAt: -1 }).limit(50).lean(),
-    Attendance.find({}).populate("event", "title").populate("user", "name email uid program semester").limit(1000).lean(),
-    EventRegistration.find({}).populate("event", "title participationMode").populate("user", "name email uid program semester").limit(1000).lean(),
+    Attendance.find({}).populate("event", "title").populate("user", "name email uid program semester phone").limit(1000).lean(),
+    EventRegistration.find({}).populate("event", "title participationMode").populate("user", "name email uid program semester phone").limit(1000).lean(),
     Sponsor.find({}).sort({ name: 1 }).lean(),
     Achievement.find({}).sort({ awardedAt: -1 }).lean(),
     Gallery.find({}).sort({ createdAt: -1 }).populate("event", "title").lean(),

@@ -34,6 +34,8 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
+  ChevronUp,
   UserX,
   UserPlus,
   ClipboardList,
@@ -45,7 +47,10 @@ import {
   Send,
   Volume2,
   VolumeX,
-  Sparkles
+  Sparkles,
+  Phone,
+  Mail,
+  ExternalLink
 } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, Area, AreaChart, YAxis, CartesianGrid } from "recharts";
 import { TechnomaniaAdminPortal } from "@/components/portal/technomania-admin-portal";
@@ -2543,122 +2548,156 @@ function Attendance({ data, setPanel, refresh }: { data: Data; setPanel: (value:
 }
 
 function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPanel: (value: string) => void; refresh: () => Promise<void> }) {
-  const events = data.events || [];
-  const registrations = data.registrations || [];
+  const events: any[] = data.events || [];
+  const registrations: any[] = data.registrations || [];
   const eventMap = useMemo(() => new Map((events || []).map((e: any) => [idOf(e), e.title || "Untitled Event"])), [events]);
 
   const [query, setQuery] = useState("");
-  const [eventFilter, setEventFilter] = useState("all");
-  const [modeFilter, setModeFilter] = useState("all");
-  const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});
+  const [selectedEventId, setSelectedEventId] = useState("all");
+  const [modeFilter, setModeFilter] = useState<"all" | "team" | "individual">("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [expandedTeamIds, setExpandedTeamIds] = useState<Record<string, boolean>>({});
 
-  const participants = useMemo(() => {
-    const list: Array<{
-      registrationId: string;
-      eventId: string;
-      eventTitle: string;
-      mode: string;
-      teamName: string;
-      role: string;
-      name: string;
-      email: string;
-      phone: string;
-      uid: string;
-      program: string;
-      semester: string;
-      status: string;
-      registeredAt: string;
-    }> = [];
-
-    (registrations as any[]).forEach((reg: any) => {
+  // Process registrations into structured team & individual cards
+  const formattedRegistrations = useMemo(() => {
+    return (registrations as any[]).map((reg: any) => {
+      const regId = String(idOf(reg));
       const eventId = String(idOf(reg.event));
-      const eventTitle = String(eventMap.get(eventId) || "Unknown Event");
-      const mode = reg.mode === "team" ? "Team" : "Individual";
-      const teamName = String(reg.teamName || (reg.mode === "team" ? "Unnamed Team" : "N/A"));
-      const regDate = reg.registeredAt ? new Date(reg.registeredAt).toLocaleString("en-IN") : "";
-      const leaderUser = reg.user;
+      const eventObj = events.find((e: any) => idOf(e) === eventId);
+      const eventTitle = String(eventObj?.title || eventMap.get(eventId) || "Unknown Event");
+      const mode = reg.mode === "team" ? "team" : "individual";
+      const teamName = String(reg.teamName || (mode === "team" ? "Unnamed Squad" : "Individual Entry"));
+      const status = String(reg.status || "confirmed");
+      const registeredAt = reg.registeredAt ? new Date(reg.registeredAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "N/A";
+      const leaderUser = reg.user || {};
 
-      list.push({
-        registrationId: String(idOf(reg)),
-        eventId,
-        eventTitle,
-        mode,
-        teamName,
-        role: reg.mode === "team" ? "Team Leader" : "Candidate",
-        name: String(leaderUser?.name || "N/A"),
-        email: String(leaderUser?.email || "N/A"),
-        phone: String(leaderUser?.phone || "N/A"),
-        uid: String(leaderUser?.uid || "N/A"),
-        program: String(leaderUser?.program || "N/A"),
-        semester: String(leaderUser?.semester ?? "N/A"),
-        status: String(reg.status || "confirmed"),
-        registeredAt: regDate
-      });
+      const leader = {
+        name: String(leaderUser.name || "N/A"),
+        email: String(leaderUser.email || "N/A"),
+        phone: String(leaderUser.phone || "N/A"),
+        uid: String(leaderUser.uid || "N/A"),
+        program: String(leaderUser.program || "N/A"),
+        semester: String(leaderUser.semester ?? "N/A"),
+        role: mode === "team" ? "Team Leader" : "Candidate"
+      };
 
-      if (reg.mode === "team" && Array.isArray(reg.teamMembers)) {
-        reg.teamMembers.forEach((member: any, index: number) => {
-          const u = member.user || member;
-          list.push({
-            registrationId: String(idOf(reg)),
-            eventId,
-            eventTitle,
-            mode,
-            teamName,
-            role: `Squad Member ${index + 2}`,
-            name: String(member.name || u.name || "N/A"),
-            email: String(member.email || u.email || "N/A"),
-            phone: String(member.phone || u.phone || "N/A"),
-            uid: String(member.uid || u.uid || "N/A"),
-            program: String(member.program || u.program || "N/A"),
-            semester: String(member.semester ?? u.semester ?? "N/A"),
-            status: String(reg.status || "confirmed"),
-            registeredAt: regDate
+      const members: Array<{
+        name: string;
+        email: string;
+        phone: string;
+        uid: string;
+        program: string;
+        semester: string;
+        role: string;
+      }> = [];
+
+      if (mode === "team" && Array.isArray(reg.teamMembers)) {
+        reg.teamMembers.forEach((m: any, idx: number) => {
+          const u = m.user || m;
+          members.push({
+            name: String(m.name || u.name || "N/A"),
+            email: String(m.email || u.email || "N/A"),
+            phone: String(m.phone || u.phone || "N/A"),
+            uid: String(m.uid || u.uid || "N/A"),
+            program: String(m.program || u.program || "N/A"),
+            semester: String(m.semester ?? u.semester ?? "N/A"),
+            role: `Squad Member ${idx + 2}`
           });
         });
       }
+
+      const totalSize = 1 + members.length;
+      return {
+        id: regId,
+        eventId,
+        eventTitle,
+        eventObj,
+        mode,
+        teamName,
+        status,
+        registeredAt,
+        leader,
+        members,
+        totalSize
+      };
     });
+  }, [registrations, events, eventMap]);
 
-    return list;
-  }, [registrations, eventMap]);
+  // Compute event stats map for fast pill indicators
+  const eventStatsMap = useMemo(() => {
+    const map = new Map<string, { teams: number; individuals: number; participants: number }>();
+    formattedRegistrations.forEach((reg) => {
+      if (!map.has(reg.eventId)) {
+        map.set(reg.eventId, { teams: 0, individuals: 0, participants: 0 });
+      }
+      const entry = map.get(reg.eventId)!;
+      if (reg.mode === "team") {
+        entry.teams += 1;
+        entry.participants += reg.totalSize;
+      } else {
+        entry.individuals += 1;
+        entry.participants += 1;
+      }
+    });
+    return map;
+  }, [formattedRegistrations]);
 
+  // Overall metrics
+  const totalTeams = useMemo(() => formattedRegistrations.filter(r => r.mode === "team").length, [formattedRegistrations]);
+  const totalIndividuals = useMemo(() => formattedRegistrations.filter(r => r.mode === "individual").length, [formattedRegistrations]);
+  const totalParticipants = useMemo(() => formattedRegistrations.reduce((acc, r) => acc + r.totalSize, 0), [formattedRegistrations]);
+
+  // Filtered registrations
   const filtered = useMemo(() => {
-    return participants.filter((row) => {
-      const hay = `${row.eventTitle} ${row.teamName} ${row.name} ${row.email} ${row.uid} ${row.program} ${row.phone}`.toLowerCase();
-      if (query && !hay.includes(query.toLowerCase())) return false;
-      if (modeFilter !== "all" && row.mode.toLowerCase() !== modeFilter.toLowerCase()) return false;
-      if (eventFilter !== "all" && row.eventId !== eventFilter) return false;
+    return formattedRegistrations.filter((item) => {
+      // Event filter
+      if (selectedEventId !== "all" && item.eventId !== selectedEventId) return false;
+      // Mode filter
+      if (modeFilter !== "all" && item.mode !== modeFilter) return false;
+      // Status filter
+      if (statusFilter !== "all" && item.status !== statusFilter) return false;
+      // Search query
+      if (query.trim()) {
+        const q = query.toLowerCase().trim();
+        const inTeamName = item.teamName.toLowerCase().includes(q);
+        const inEvent = item.eventTitle.toLowerCase().includes(q);
+        const inLeader = `${item.leader.name} ${item.leader.email} ${item.leader.uid} ${item.leader.phone}`.toLowerCase().includes(q);
+        const inMembers = item.members.some(m => `${m.name} ${m.email} ${m.uid} ${m.phone}`.toLowerCase().includes(q));
+        if (!inTeamName && !inEvent && !inLeader && !inMembers) return false;
+      }
       return true;
     });
-  }, [participants, query, modeFilter, eventFilter]);
+  }, [formattedRegistrations, selectedEventId, modeFilter, statusFilter, query]);
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, typeof filtered>();
-    filtered.forEach((row) => {
-      const key = row.eventId;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(row);
-    });
-    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [filtered]);
-
-  const toggleEvent = (eventId: string) => {
-    setExpandedEvents((prev) => ({ ...prev, [eventId]: !prev[eventId] }));
+  // Toggle card expansion
+  const toggleExpand = (id: string) => {
+    setExpandedTeamIds(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const confirmDelete = async (registrationId: string, name: string) => {
-    if (!window.confirm(`Remove ${name || "this participant"} from this event? This will delete their attendance records too.`)) return;
-    setPanel(`Removing ${name || "participant"}...`);
+  const expandAll = () => {
+    const next: Record<string, boolean> = {};
+    filtered.forEach(r => { next[r.id] = true; });
+    setExpandedTeamIds(next);
+  };
+
+  const collapseAll = () => {
+    setExpandedTeamIds({});
+  };
+
+  const confirmDelete = async (registrationId: string, teamOrName: string) => {
+    if (!window.confirm(`Are you sure you want to remove registration for "${teamOrName}"? This will delete all team members and attendance records for this entry.`)) return;
+    setPanel(`Removing ${teamOrName}...`);
     try {
       const res = await fetch(`/api/admin/registrations/${encodeURIComponent(registrationId)}`, { method: "DELETE" });
       const result = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setPanel(result.error || "Failed to remove participant.");
+        setPanel(result.error || "Failed to remove registration.");
         return;
       }
       await refresh();
-      setPanel(`${name || "Participant"} removed.`);
-    } catch (error) {
-      setPanel("Network error while removing participant.");
+      setPanel(`Registration for "${teamOrName}" removed successfully.`);
+    } catch {
+      setPanel("Network error while removing registration.");
     }
   };
 
@@ -2667,185 +2706,446 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
     setPanel("Exporting all event participants to Excel...");
   };
 
+  // Events that have registrations, plus any other events
+  const eventsWithRegistrations = useMemo(() => {
+    return events.filter(e => eventStatsMap.has(idOf(e)));
+  }, [events, eventStatsMap]);
+
   return (
-    <div className="mt-7 grid gap-5 xl:grid-cols-[1fr_.42fr] animate-in fade-in duration-200">
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.02] via-transparent to-blue-500/[0.02]" />
+    <div className="mt-7 space-y-6 animate-in fade-in duration-200">
+      {/* Top Metrics Strip */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-[1.7rem] border border-white/[.08] bg-[#05070d]/80 p-5 backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-16 w-16 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+          <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/40">Total Participants</p>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-white tracking-tight">{totalParticipants}</span>
+            <span className="text-[10px] font-mono text-purple-400">candidates</span>
+          </div>
+        </div>
 
-        <div className="relative flex flex-col gap-4 border-b border-white/[0.06] pb-5 mb-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="rounded-[1.7rem] border border-violet-500/20 bg-violet-500/[0.04] p-5 backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-16 w-16 bg-violet-500/10 rounded-full blur-2xl pointer-events-none" />
+          <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-violet-300/70">Teams Registered</p>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-violet-300 tracking-tight">{totalTeams}</span>
+            <span className="text-[10px] font-mono text-violet-400/70">squads</span>
+          </div>
+        </div>
+
+        <div className="rounded-[1.7rem] border border-blue-500/20 bg-blue-500/[0.04] p-5 backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-16 w-16 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+          <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-blue-300/70">Individual Candidates</p>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-blue-300 tracking-tight">{totalIndividuals}</span>
+            <span className="text-[10px] font-mono text-blue-400/70">solo</span>
+          </div>
+        </div>
+
+        <div className="rounded-[1.7rem] border border-emerald-500/20 bg-emerald-500/[0.04] p-5 backdrop-blur-xl relative overflow-hidden flex flex-col justify-between">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-emerald-300/70">Export Roster</p>
+            <p className="mt-1 text-xs text-white/50">One-click download of all candidates & squads.</p>
+          </div>
+          <button
+            onClick={exportExcel}
+            className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/30 transition shadow-sm"
+          >
+            <Download size={13} /> Export Excel
+          </button>
+        </div>
+      </div>
+
+      {/* Main Control Panel: Event Switcher & Filters */}
+      <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/85 p-6 backdrop-blur-xl relative overflow-hidden">
+        <div className="flex flex-col gap-5">
+          {/* Header & Search */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">Event Participants</h3>
-              <p className="mt-1 text-xs text-white/38">Browse registered candidates grouped by event.</p>
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-500/10 px-2.5 py-1 text-[9px] font-bold text-purple-300 uppercase tracking-widest">
+                <Sparkles size={10} /> ROSTER MANAGEMENT
+              </span>
+              <h2 className="text-xl font-extrabold text-white mt-2 tracking-tight">Event Squads & Participants</h2>
+              <p className="text-xs text-white/45 mt-0.5">Click any team card to inspect the complete squad breakdown with contact info.</p>
             </div>
 
-            <div className="relative flex min-w-[220px] items-center gap-2 rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-white/45 focus-within:border-violet-400/40 transition">
-              <Search size={14} />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, UID, email..." className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/28" />
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Search Bar */}
+              <div className="relative min-w-[260px] flex items-center gap-2 rounded-2xl border border-white/[.08] bg-black/40 px-4 py-2.5 text-white/50 focus-within:border-purple-500/50 transition">
+                <Search size={14} className="text-purple-400/80 shrink-0" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search squad, candidate, UID, phone..."
+                  className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/28 font-mono"
+                />
+                {query && (
+                  <button onClick={() => setQuery("")} className="text-white/30 hover:text-white text-xs">
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <select value={eventFilter} onChange={(event) => setEventFilter(event.target.value)} className="rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-xs text-white outline-none focus:border-violet-400/40 transition">
-              <option value="all">All Events</option>
-              {events.map((e: any) => <option value={idOf(e)} key={idOf(e)}>{e.title}</option>)}
-            </select>
+          {/* Event Switcher Tabs */}
+          <div>
+            <p className="text-[9px] font-bold text-white/35 uppercase tracking-[.22em] mb-3">SELECT EVENT TO ISOLATE ROSTER</p>
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <button
+                onClick={() => setSelectedEventId("all")}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition shrink-0 border ${
+                  selectedEventId === "all"
+                    ? "bg-purple-500 border-purple-400 text-black shadow-[0_0_20px_rgba(168,85,247,0.25)]"
+                    : "bg-black/35 border-white/[.07] text-white/60 hover:text-white hover:border-white/20"
+                }`}
+              >
+                <span>ALL EVENTS</span>
+                <span className={`px-2 py-0.5 rounded-lg text-[9px] font-mono ${selectedEventId === "all" ? "bg-black/20 text-black font-black" : "bg-white/5 text-white/50"}`}>
+                  {formattedRegistrations.length}
+                </span>
+              </button>
 
-            <select value={modeFilter} onChange={(event) => setModeFilter(event.target.value)} className="rounded-2xl border border-white/[.07] bg-black/35 px-4 py-2.5 text-xs text-white outline-none focus:border-violet-400/40 transition">
-              <option value="all">All Modes</option>
-              <option value="individual">Individual</option>
-              <option value="team">Team</option>
-            </select>
+              {events.map((ev: any) => {
+                const eid = idOf(ev);
+                const stats = eventStatsMap.get(eid);
+                const isSelected = selectedEventId === eid;
+                const hasRegistrations = stats && stats.participants > 0;
+
+                return (
+                  <button
+                    key={eid}
+                    onClick={() => setSelectedEventId(eid)}
+                    className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold transition shrink-0 border ${
+                      isSelected
+                        ? "bg-purple-500 border-purple-400 text-black shadow-[0_0_20px_rgba(168,85,247,0.25)]"
+                        : "bg-black/35 border-white/[.07] text-white/60 hover:text-white hover:border-white/20"
+                    }`}
+                  >
+                    <span className="truncate max-w-[180px]">{ev.title}</span>
+                    {hasRegistrations ? (
+                      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-mono ${isSelected ? "bg-black/20 text-black font-black" : "bg-purple-500/10 text-purple-300 border border-purple-500/20"}`}>
+                        {stats.teams > 0 ? `${stats.teams}T` : ""}{stats.teams > 0 && stats.individuals > 0 ? " · " : ""}{stats.individuals > 0 ? `${stats.individuals}S` : ""} ({stats.participants}p)
+                      </span>
+                    ) : (
+                      <span className={`text-[9px] ${isSelected ? "text-black/60" : "text-white/25"}`}>0</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Secondary Filter Bar: Mode, Status, Expand/Collapse */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/[0.05]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Mode filter */}
+              <div className="inline-flex rounded-xl bg-black/40 border border-white/[.07] p-1">
+                {(["all", "team", "individual"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setModeFilter(m)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition ${
+                      modeFilter === m
+                        ? "bg-white/15 text-white shadow-sm"
+                        : "text-white/45 hover:text-white"
+                    }`}
+                  >
+                    {m === "all" ? "All Formats" : m === "team" ? "Teams Only" : "Individual Only"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Status filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-xl border border-white/[.07] bg-black/40 px-3 py-2 text-xs text-white outline-none focus:border-purple-500/40 transition"
+              >
+                <option value="all">All Statuses</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="waitlisted">Waitlisted</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            {/* Quick bulk view controls */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={expandAll}
+                className="rounded-xl border border-white/[.06] bg-white/[.02] px-3 py-1.5 text-[10px] font-bold text-white/50 hover:text-white hover:border-white/15 transition uppercase tracking-wider"
+              >
+                Expand All
+              </button>
+              <button
+                onClick={collapseAll}
+                className="rounded-xl border border-white/[.06] bg-white/[.02] px-3 py-1.5 text-[10px] font-bold text-white/50 hover:text-white hover:border-white/15 transition uppercase tracking-wider"
+              >
+                Collapse All
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 mb-6 relative z-10">
-          <div className="rounded-2xl border border-white/[.06] bg-white/[.02] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-white/35">Participants</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-white">{participants.length}</p>
-          </div>
-          <div className="rounded-2xl border border-violet-500/15 bg-violet-500/[0.04] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-violet-300/60">Events</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-violet-300">{new Set(participants.map((p) => p.eventId)).size}</p>
-          </div>
-          <div className="rounded-2xl border border-blue-500/15 bg-blue-500/[0.04] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-blue-300/60">Teams</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-blue-300">{new Set(participants.filter((p) => p.mode === "Team").map((p) => `${p.eventId}-${p.teamName}`)).size}</p>
-          </div>
+      {/* Squad / Participant Cards Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-2 text-xs text-white/40 font-mono">
+          <span>SHOWING {filtered.length} REGISTRATIONS ({filtered.reduce((acc, r) => acc + r.totalSize, 0)} TOTAL PARTICIPANTS)</span>
+          {selectedEventId !== "all" && (
+            <button onClick={() => setSelectedEventId("all")} className="text-purple-400 hover:underline">
+              Clear event filter
+            </button>
+          )}
         </div>
 
-        {grouped.length ? (
-          <div className="grid gap-4">
-            {grouped.map(([eventId, rows]) => {
-              const event = events.find((e: any) => idOf(e) === eventId);
-              const when = event?.startAt ? new Date(event.startAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "";
-              const isExpanded = expandedEvents[eventId] !== false;
-              const teams = (() => {
-                const map = new Map<string, typeof rows>();
-                rows.forEach((row) => {
-                  const key = row.teamName;
-                  if (!map.has(key)) map.set(key, []);
-                  map.get(key)!.push(row);
-                });
-                return Array.from(map.entries());
-              })();
+        {filtered.length === 0 ? (
+          <div className="rounded-[2.2rem] border border-white/[.08] bg-[#05070d]/60 p-12 text-center">
+            <div className="mx-auto h-16 w-16 rounded-2xl border border-white/[.08] bg-white/[.02] flex items-center justify-center text-white/20 mb-4">
+              <Users size={28} />
+            </div>
+            <h3 className="text-base font-bold text-white">No registrations match current filters</h3>
+            <p className="text-xs text-white/40 mt-1 max-w-sm mx-auto leading-relaxed">
+              Try choosing a different event, clearing your search query, or selecting "All Formats".
+            </p>
+            <button
+              onClick={() => { setSelectedEventId("all"); setModeFilter("all"); setStatusFilter("all"); setQuery(""); }}
+              className="mt-5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-xs font-bold text-purple-300 hover:bg-purple-500/20 transition"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {filtered.map((item) => {
+              const isExpanded = !!expandedTeamIds[item.id];
+              const isTeam = item.mode === "team";
 
               return (
-                <div key={eventId} className="rounded-[1.7rem] border border-white/[.06] bg-black/20">
-                  <button
-                    type="button"
-                    onClick={() => toggleEvent(eventId)}
-                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-white/[0.015] transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`flex h-8 w-8 items-center justify-center rounded-full border border-white/[.08] bg-white/[.025] text-[10px] font-bold text-white/55`}>{isExpanded ? "Hide" : "Show"}</span>
-                      <div>
-                        <p className="text-sm font-bold text-white">{rows[0]?.eventTitle || "Unknown Event"}</p>
-                        <p className="text-[10px] text-white/40 mt-0.5">{when ? `Starts ${when}` : `${rows.length} registration${rows.length === 1 ? "" : "s"}`}</p>
+                <div
+                  key={item.id}
+                  className={`rounded-[2rem] border transition-all duration-300 overflow-hidden ${
+                    isExpanded
+                      ? "border-purple-500/40 bg-black/70 shadow-[0_10px_35px_rgba(168,85,247,0.12)] md:col-span-2"
+                      : "border-white/[.08] bg-[#05070d]/80 hover:border-white/20 hover:bg-black/40"
+                  }`}
+                >
+                  {/* Card Header */}
+                  <div className="p-5 md:p-6">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className={`h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 border ${
+                          isTeam
+                            ? "border-purple-500/30 bg-purple-500/10 text-purple-300"
+                            : "border-blue-500/30 bg-blue-500/10 text-blue-300"
+                        }`}>
+                          {isTeam ? <Users size={18} /> : <User size={18} />}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-lg font-black text-white tracking-tight">{item.teamName}</h3>
+                            <span className="rounded-lg border border-purple-500/20 bg-purple-500/10 px-2.5 py-0.5 text-[8px] font-bold tracking-wider text-purple-300 uppercase">
+                              {item.eventTitle}
+                            </span>
+                          </div>
+                          <p className="text-xs text-white/50 mt-1 flex items-center gap-2">
+                            <span>👑 Leader: <strong className="text-white/80">{item.leader.name}</strong></span>
+                            <span className="text-white/20">·</span>
+                            <span className="font-mono text-white/40">{item.leader.uid}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Top Right Badges & Delete */}
+                      <div className="flex items-center gap-2">
+                        <span className={`rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider border ${
+                          item.status === "confirmed"
+                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                            : item.status === "waitlisted"
+                            ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                            : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                        }`}>
+                          {item.status}
+                        </span>
+
+                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[8.5px] font-bold text-white/70 uppercase">
+                          {item.totalSize} {item.totalSize === 1 ? "MEMBER" : "MEMBERS"}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confirmDelete(item.id, item.teamName);
+                          }}
+                          className="h-8 w-8 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-300/70 hover:text-rose-200 hover:bg-rose-500/20 flex items-center justify-center transition"
+                          title="Remove Registration"
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                     </div>
-                    <span className="rounded-full border border-white/[.06] bg-white/[.02] px-3 py-1 text-[10px] font-semibold text-white/55">{rows.length} participant{rows.length === 1 ? "" : "s"}</span>
-                  </button>
 
+                    {/* Quick Preview of Squad */}
+                    {isTeam && item.members.length > 0 && !isExpanded && (
+                      <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center gap-1.5 overflow-hidden text-white/45">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-white/30 shrink-0">Squad:</span>
+                          <span className="truncate">
+                            {item.members.map(m => m.name).join(", ")}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(item.id)}
+                          className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-purple-400 hover:text-purple-300 uppercase tracking-wider"
+                        >
+                          <span>View Roster</span>
+                          <ChevronDown size={13} />
+                        </button>
+                      </div>
+                    )}
+
+                    {!isTeam && !isExpanded && (
+                      <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center justify-between gap-3 text-xs text-white/45">
+                        <span>{item.leader.program} · Sem {item.leader.semester}</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(item.id)}
+                          className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-purple-400 hover:text-purple-300 uppercase tracking-wider"
+                        >
+                          <span>View Details</span>
+                          <ChevronDown size={13} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Expanded Section: All Team Members Grid */}
                   {isExpanded && (
-                    <div className="border-t border-white/[0.04] px-4 pb-4">
-                      {teams.map(([teamName, teamRows]) => (
-                        <div key={teamName} className="mt-4 rounded-[1.5rem] border border-white/[.05] bg-black/15">
-                          <div className="flex items-center justify-between gap-3 px-5 py-3">
-                            <div className="flex items-center gap-2">
-                              <span className="rounded-full border border-white/[.06] bg-white/[.025] px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white/45">{teamRows[0]?.mode || "Individual"}</span>
-                              <span className="text-xs font-semibold text-white">{teamName}</span>
-                            </div>
-                            <span className="text-[10px] text-white/35">{teamRows.length} entr{teamRows.length === 1 ? "y" : "ies"}</span>
+                    <div className="border-t border-white/[0.08] bg-black/40 p-5 md:p-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-bold text-purple-300 uppercase tracking-[.22em] font-mono flex items-center gap-1.5">
+                          <Users size={12} /> SQUAD ROSTER BREAKDOWN ({item.totalSize} REGISTERED)
+                        </p>
+                        <span className="text-[10px] font-mono text-white/35">Registered: {item.registeredAt}</span>
+                      </div>
+
+                      {/* Members Cards Grid */}
+                      <div className="grid gap-3.5 sm:grid-cols-2">
+                        {/* Member 1: Leader Card */}
+                        <div className="rounded-2xl border border-purple-500/30 bg-purple-500/[0.04] p-4 relative overflow-hidden">
+                          <div className="flex items-center justify-between mb-2.5">
+                            <span className="inline-flex items-center gap-1 rounded-md bg-purple-500/20 border border-purple-500/40 px-2 py-0.5 text-[8.5px] font-black text-purple-300 uppercase tracking-wider">
+                              👑 TEAM LEADER
+                            </span>
+                            <span className="font-mono text-[9px] font-bold text-white/60 bg-black/40 px-2 py-0.5 rounded-md border border-white/10">
+                              UID: {item.leader.uid}
+                            </span>
                           </div>
 
-                          <div className="divide-y divide-white/[0.04]">
-                            {teamRows.map((row) => (
-                              <div key={`${row.registrationId}-${row.role}`} className="px-5 py-3.5 text-xs hover:bg-white/[0.01] transition">
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                  <div className="flex flex-col gap-1.5">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-white/80 font-semibold">{row.name}</span>
-                                      <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider border ${row.status === "confirmed" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300" : row.status === "waitlisted" ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-white/[0.03] border-white/[0.05] text-white/45"}`}>{row.status}</span>
-                                      <span className="text-[9px] font-semibold text-white/35">{row.role}</span>
-                                    </div>
-                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/45">
-                                      <span>UID: <span className="font-mono text-white/55">{row.uid}</span></span>
-                                      <span>{row.email}</span>
-                                      <span className="hidden sm:inline">Phone: <span className="text-white/55">{row.phone}</span></span>
-                                    </div>
-                                    <div className="flex flex-wrap items-center gap-3 text-white/35">
-                                      <span>{row.program}</span>
-                                      <span>Sem {row.semester}</span>
-                                      <span className="hidden sm:inline text-white/28">{row.registeredAt}</span>
-                                    </div>
-                                  </div>
+                          <h4 className="text-sm font-black text-white">{item.leader.name}</h4>
 
-                                  <div className="flex shrink-0 items-center gap-2">
-                                    <button type="button" onClick={() => confirmDelete(row.registrationId, row.name)} className="flex items-center gap-1.5 rounded-full border border-rose-500/25 bg-rose-500/10 px-3 py-1.5 text-[10px] font-bold text-rose-200 transition hover:bg-rose-500/15 active:scale-95">
-                                      <Trash2 size={12} /> Remove
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                          <div className="mt-3 space-y-1.5 text-xs text-white/60">
+                            <div className="flex items-center gap-2">
+                              <Mail size={12} className="text-purple-400/80 shrink-0" />
+                              <a href={`mailto:${item.leader.email}`} className="truncate hover:text-purple-300 underline font-mono text-[11px]">
+                                {item.leader.email}
+                              </a>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Phone size={12} className="text-emerald-400/80 shrink-0" />
+                              {item.leader.phone && item.leader.phone !== "N/A" ? (
+                                <a
+                                  href={`https://wa.me/${item.leader.phone.replace(/[^\d]/g, "")}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-emerald-300 hover:text-emerald-200 font-mono text-[11px] underline"
+                                >
+                                  <span>{item.leader.phone}</span>
+                                  <ExternalLink size={10} />
+                                </a>
+                              ) : (
+                                <span className="text-white/30 font-mono text-[11px]">No WhatsApp phone</span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2 text-[11px] text-white/40 pt-1 border-t border-white/5">
+                              <span>{item.leader.program || "Degree TBA"}</span>
+                              <span>·</span>
+                              <span>Semester {item.leader.semester || "N/A"}</span>
+                            </div>
                           </div>
                         </div>
-                      ))}
+
+                        {/* Members 2, 3, 4 Cards */}
+                        {item.members.map((member, idx) => (
+                          <div key={idx} className="rounded-2xl border border-white/[.08] bg-white/[0.02] p-4 relative overflow-hidden">
+                            <div className="flex items-center justify-between mb-2.5">
+                              <span className="inline-flex items-center gap-1 rounded-md bg-white/[0.05] border border-white/10 px-2 py-0.5 text-[8.5px] font-black text-white/60 uppercase tracking-wider">
+                                {member.role}
+                              </span>
+                              <span className="font-mono text-[9px] font-bold text-white/60 bg-black/40 px-2 py-0.5 rounded-md border border-white/10">
+                                UID: {member.uid}
+                              </span>
+                            </div>
+
+                            <h4 className="text-sm font-black text-white">{member.name}</h4>
+
+                            <div className="mt-3 space-y-1.5 text-xs text-white/60">
+                              <div className="flex items-center gap-2">
+                                <Mail size={12} className="text-purple-400/80 shrink-0" />
+                                <a href={`mailto:${member.email}`} className="truncate hover:text-purple-300 underline font-mono text-[11px]">
+                                  {member.email}
+                                </a>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Phone size={12} className="text-emerald-400/80 shrink-0" />
+                                {member.phone && member.phone !== "N/A" ? (
+                                  <a
+                                    href={`https://wa.me/${member.phone.replace(/[^\d]/g, "")}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-emerald-300 hover:text-emerald-200 font-mono text-[11px] underline"
+                                  >
+                                    <span>{member.phone}</span>
+                                    <ExternalLink size={10} />
+                                  </a>
+                                ) : (
+                                  <span className="text-white/30 font-mono text-[11px]">No WhatsApp phone</span>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-2 text-[11px] text-white/40 pt-1 border-t border-white/5">
+                                <span>{member.program || "Degree TBA"}</span>
+                                <span>·</span>
+                                <span>Semester {member.semester || "N/A"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Collapse Button */}
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(item.id)}
+                          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/70 hover:text-white hover:border-white/20 transition uppercase"
+                        >
+                          <span>Collapse Squad</span>
+                          <ChevronUp size={14} />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               );
             })}
-            {!grouped.length ? (
-              <p className="rounded-[1.7rem] border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium">No participants match your filters.</p>
-            ) : null}
           </div>
-        ) : (
-          <p className="rounded-[1.7rem] border border-white/[.06] bg-white/[.02] p-8 text-sm text-white/35 text-center font-medium">No registrations yet.</p>
         )}
-      </div>
-
-      <div className="grid gap-5 self-start">
-        <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.03] via-transparent to-transparent" />
-
-          <div className="relative">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Export Roster</h3>
-            <p className="text-xs leading-relaxed text-white/40 mb-5">Export all participants with team info and registration status.</p>
-
-            <div className="grid gap-3 relative z-10">
-              <a
-                href="/api/admin/participants/export"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="portal-command-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-center text-xs font-semibold hover:-translate-y-0.5 transition"
-              >
-                <Download size={13} /> Download Excel
-              </a>
-              <button onClick={exportExcel} className="flex items-center justify-center gap-2 rounded-2xl border border-white/[.08] bg-white/[.035] px-4 py-3.5 text-center text-xs font-semibold text-white/70 hover:bg-white/[.06] hover:-translate-y-0.5 hover:text-white transition">
-                <RefreshCw size={13} /> Refresh First
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-[2rem] border border-white/[.08] bg-[#05070d]/75 p-6 md:p-7 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.03] via-transparent to-transparent" />
-          
-          <div className="relative">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-white/[0.06] pb-4 mb-4">Roster Summary</h3>
-            <div className="rounded-2xl bg-black/35 border border-white/[0.05] p-4 text-xs space-y-2.5 text-white/50">
-              <div className="flex justify-between"><span>Total registrations:</span><span className="font-semibold text-white">{participants.length}</span></div>
-              <div className="flex justify-between"><span>Events with registrations:</span><span className="font-semibold text-white">{new Set(participants.map((p) => p.eventId)).size}</span></div>
-              <div className="flex justify-between"><span>Individual registrations:</span><span className="font-semibold text-white">{participants.filter((p) => p.mode === "Individual").length}</span></div>
-              <div className="flex justify-between"><span>Team leaders:</span><span className="font-semibold text-white">{participants.filter((p) => p.mode === "Team" && p.role === "Team Leader").length}</span></div>
-              <div className="flex justify-between"><span>Team members:</span><span className="font-semibold text-white">{participants.filter((p) => p.role.startsWith("Squad Member")).length}</span></div>
-              <div className="flex justify-between"><span>Confirmed:</span><span className="font-semibold text-emerald-300">{participants.filter((p) => p.status === "confirmed").length}</span></div>
-              <div className="flex justify-between"><span>Waitlisted:</span><span className="font-semibold text-amber-300">{participants.filter((p) => p.status === "waitlisted").length}</span></div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
