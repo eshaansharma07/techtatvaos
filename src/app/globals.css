@@ -446,12 +446,9 @@ body:before {
   padding: 0;
 }
 .public-header-inner {
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  background: rgba(0,0,0,0.78);
   box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.05);
   -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
-  border-radius: 20px;
 }
 .public-nav {
   border: 2px solid rgba(255, 255, 255, 0.12);
@@ -562,10 +559,6 @@ body:before {
 @media (min-width: 768px) {
   .public-header {
     padding-inline: 1.5rem;
-  }
-  .public-header-inner {
-    border: 1px solid rgba(255,255,255,.085);
-    border-radius: 999px;
   }
 }
 
