@@ -57,8 +57,8 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     {/* Subtle Vignette & Depth Bloom Layer */}
     <div className="premium-vignette" aria-hidden="true" />
 
-    <header className="public-header fixed inset-x-0 top-0 z-50">
-      <div className="public-header-inner w-full rounded-none md:rounded-[999px] md:mx-auto flex max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] flex-row items-center justify-between px-5 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 md:mt-4 md:h-[4.75rem] md:px-5 md:py-0 border-b border-white/10 md:border-2 md:border-white/15 md:bg-black/80 bg-black/95">
+    <header className="public-header fixed inset-x-0 top-0 z-[70] pt-[env(safe-area-inset-top)]">
+      <div className="public-header-inner mx-4 mt-2 md:mx-auto flex max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] flex-row items-center justify-between px-5 py-3.5 md:mt-4 md:h-[4.75rem] md:px-5 md:py-0 border border-white/10 md:border-2 md:border-white/15 rounded-[20px] md:rounded-[999px] bg-black/80 md:bg-black/95">
         <MotionLogo logo={info.logo}/>
         <nav className="public-nav hidden w-auto items-center gap-1 text-xs font-medium tracking-[.15em] text-white/50 md:flex">
           {publicLinks.map(([label,href])=><Link className="rounded-xl px-4 py-3 transition hover:bg-white/10 hover:text-white font-bold uppercase" key={href} href={href}>{label}</Link>)}
