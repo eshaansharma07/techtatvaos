@@ -130,7 +130,27 @@ function normalizeEventBody(input: Record<string, any>, create = false) {
   const normalized: Record<string, any> = { ...body };
   if (body.slug || body.title) normalized.slug = slugify(String(body.slug || body.title));
   if (body.capacity !== undefined) normalized.capacity = Number(body.capacity);
-  if (body.maxTeamSize !== undefined) normalized.maxTeamSize = Math.max(1, Number(body.maxTeamSize) || 1);
+  const minVal = body.minParticipants !== undefined && body.minParticipants !== "" 
+    ? Number(body.minParticipants) 
+    : (body.minTeamSize !== undefined && body.minTeamSize !== "" ? Number(body.minTeamSize) : undefined);
+  const maxVal = body.maxParticipants !== undefined && body.maxParticipants !== "" 
+    ? Number(body.maxParticipants) 
+    : (body.maxTeamSize !== undefined && body.maxTeamSize !== "" ? Number(body.maxTeamSize) : undefined);
+
+  if (minVal !== undefined || create) {
+    const minP = Math.max(1, minVal || 1);
+    normalized.minParticipants = minP;
+    normalized.minTeamSize = minP;
+  }
+  if (maxVal !== undefined || create) {
+    const maxP = Math.max(normalized.minParticipants || 1, maxVal || 1);
+    normalized.maxParticipants = maxP;
+    normalized.maxTeamSize = maxP;
+  }
+  normalized.teamSize = {
+    min: normalized.minParticipants || 1,
+    max: normalized.maxParticipants || normalized.maxTeamSize || 1
+  };
   if (body.team !== undefined) normalized.team = refId(body.team);
   if (body.participationMode !== undefined || create) normalized.participationMode = participationModes.has(String(body.participationMode)) ? body.participationMode : "individual";
   if (create || body.status !== undefined) normalized.status = normalizeEventStatus(body.status, "published");

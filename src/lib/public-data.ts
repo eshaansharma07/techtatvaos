@@ -36,7 +36,7 @@ const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$
 const slugRegex = (value: string) => ({ $regex: `^${escapeRegex(value)}$`, $options: "i" });
 const publishedStatuses = ["published", "active", "completed"] as const;
 const publicEventSelect =
-  "slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo";
+  "slug title description banner venue capacity category status participationMode minTeamSize maxTeamSize minParticipants maxParticipants teamSize registrationOpen registrationStart registrationEnd startAt endAt schedule rules faqs team leads sponsors certEventLogo";
 
 export type PublicEvent = {
   id: string;
@@ -49,7 +49,10 @@ export type PublicEvent = {
   category?: string;
   status: string;
   participationMode: "individual" | "team" | "both";
+  minTeamSize?: number;
   maxTeamSize: number;
+  minParticipants?: number;
+  maxParticipants?: number;
   registrationOpen: boolean;
   startAt?: string;
   endAt?: string;
@@ -123,7 +126,10 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
       category: event.category,
       status: event.status,
       participationMode: (event as any).participationMode || "individual",
-      maxTeamSize: (event as any).maxTeamSize || 1,
+      minTeamSize: (event as any).minParticipants || (event as any).minTeamSize || (event as any).teamSize?.min || 1,
+      maxTeamSize: (event as any).maxParticipants || (event as any).maxTeamSize || (event as any).teamSize?.max || 1,
+      minParticipants: (event as any).minParticipants || (event as any).minTeamSize || (event as any).teamSize?.min || 1,
+      maxParticipants: (event as any).maxParticipants || (event as any).maxTeamSize || (event as any).teamSize?.max || 1,
       registrationOpen: event.registrationOpen,
       startAt: event.startAt?.toISOString(),
       endAt: event.endAt?.toISOString(),
@@ -195,7 +201,10 @@ export async function getPublicEvent(slug: string) {
     category: record.category,
     status: record.status,
     participationMode: record.participationMode || "individual",
-    maxTeamSize: record.maxTeamSize || 1,
+    minTeamSize: (record as any).minParticipants || (record as any).minTeamSize || (record as any).teamSize?.min || 1,
+    maxTeamSize: (record as any).maxParticipants || (record as any).maxTeamSize || (record as any).teamSize?.max || 1,
+    minParticipants: (record as any).minParticipants || (record as any).minTeamSize || (record as any).teamSize?.min || 1,
+    maxParticipants: (record as any).maxParticipants || (record as any).maxTeamSize || (record as any).teamSize?.max || 1,
     registrationOpen: record.registrationOpen,
     registrationStart: record.registrationStart?.toISOString(),
     registrationEnd: record.registrationEnd?.toISOString(),

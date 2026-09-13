@@ -105,7 +105,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const mode = payload.mode === "team" ? "team" : "individual";
     
     // Coerce data inconsistencies where maxTeamSize or teamSize.max > 1 but participationMode was left as "individual"
-    const derivedMaxTeamSize = Math.max(1, Number(event.maxTeamSize || 1), Number(event.teamSize?.max || 1));
+    const derivedMinTeamSize = Math.max(1, Number(event.minParticipants || event.minTeamSize || event.teamSize?.min || (event.participationMode === "team" ? 2 : 1)));
+    const derivedMaxTeamSize = Math.max(derivedMinTeamSize, Number(event.maxParticipants || event.maxTeamSize || event.teamSize?.max || 1));
     const eventMode = event.participationMode === "both" ? "both" : (derivedMaxTeamSize > 1 ? "team" : (event.participationMode || "individual"));
     
     const allowed = eventMode === "both" || eventMode === mode;
@@ -124,8 +125,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
       const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => member && (clean(member?.name) || clean(member?.email) || clean(member?.uid))) : [];
       const totalSize = 1 + memberInputs.length;
+      const minTeamSize = derivedMinTeamSize;
       const maxTeamSize = derivedMaxTeamSize;
       if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
+      if (mode === "team" && totalSize < minTeamSize) return NextResponse.json({ error: `Minimum team size is ${minTeamSize} member${minTeamSize > 1 ? "s" : ""}.` }, { status: 400 });
       if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
       if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
         return NextResponse.json({ error: "Every team member needs valid name, email, phone, UID, and program." }, { status: 400 });

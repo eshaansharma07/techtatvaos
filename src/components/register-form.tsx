@@ -25,17 +25,29 @@ type Mode = "individual" | "team" | "both";
 interface RegisterFormProps {
   eventId: string;
   participationMode?: Mode;
+  minTeamSize?: number;
   maxTeamSize?: number;
+  minParticipants?: number;
+  maxParticipants?: number;
 }
 
-export function RegisterForm({ eventId, participationMode = "individual", maxTeamSize = 1 }: RegisterFormProps) {
+export function RegisterForm({ 
+  eventId, 
+  participationMode = "individual", 
+  minTeamSize,
+  maxTeamSize = 1,
+  minParticipants,
+  maxParticipants 
+}: RegisterFormProps) {
+  const effectiveMin = Math.max(1, minParticipants || minTeamSize || (participationMode === "team" ? 2 : 1));
+  const effectiveMax = Math.max(effectiveMin, maxParticipants || maxTeamSize || 1);
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"individual" | "team">(participationMode === "team" ? "team" : "individual");
   const [teamName, setTeamName] = useState("");
-  const [teamSize, setTeamSize] = useState(Math.max(2, Math.min(maxTeamSize, 2)));
+  const [teamSize, setTeamSize] = useState(effectiveMin);
 
   // Team Leader or Individual details
   const [leader, setLeader] = useState({
@@ -49,7 +61,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
   // Team members details
   const [members, setMembers] = useState<Array<{ name: string; email: string; phone: string; uid: string; program: string; semester: string }>>(() =>
-    Array.from({ length: Math.max(1, maxTeamSize - 1) }).map(() => ({
+    Array.from({ length: Math.max(1, effectiveMax - 1) }).map(() => ({
       name: "",
       email: "",
       phone: "",
@@ -133,8 +145,10 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
 
   const isStep1Valid = useMemo(() => {
     if (mode === "individual") return true;
-    return teamName.trim().length >= 2;
-  }, [mode, teamName]);
+    if (teamName.trim().length < 2) return false;
+    if (teamSize < effectiveMin || teamSize > effectiveMax) return false;
+    return true;
+  }, [mode, teamName, teamSize, effectiveMin, effectiveMax]);
 
   const isFormValid = useMemo(() => {
     return isStep1Valid && isLeaderValid && allMembersValid;
@@ -360,7 +374,7 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                           />
                         </label>
 
-                        {maxTeamSize > 2 && (
+                        {effectiveMax > effectiveMin ? (
                           <div className="pt-2">
                             <div className="flex items-center justify-between text-[10px] font-black tracking-widest text-white/40 uppercase">
                               <span>TEAM SQUAD SIZE</span>
@@ -369,8 +383,8 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                             <div className="mt-3 flex items-center gap-3">
                               <input 
                                 type="range" 
-                                min={2} 
-                                max={maxTeamSize} 
+                                min={effectiveMin} 
+                                max={effectiveMax} 
                                 value={teamSize}
                                 onChange={(e) => {
                                   const size = Number(e.target.value);
@@ -379,9 +393,17 @@ export function RegisterForm({ eventId, participationMode = "individual", maxTea
                                 className="flex-grow accent-[rgba(168, 85, 247, 1)] h-1.5 rounded-lg bg-black cursor-pointer"
                               />
                             </div>
-                            <span className="text-[9px] text-white/25 mt-1 block">Includes team leader + {teamSize - 1} secondary members. Limit: {maxTeamSize}.</span>
+                            <span className="text-[9px] text-white/25 mt-1 block">Includes team leader + {teamSize - 1} secondary members. Allowed squad size: {effectiveMin} to {effectiveMax} members.</span>
                           </div>
-                        )}
+                        ) : effectiveMax > 1 ? (
+                          <div className="pt-2">
+                            <div className="flex items-center justify-between text-[10px] font-black tracking-widest text-white/40 uppercase">
+                              <span>FIXED TEAM SQUAD SIZE</span>
+                              <span className="text-purple-400 font-mono">{effectiveMax} MEMBERS</span>
+                            </div>
+                            <span className="text-[9px] text-white/25 mt-1 block">This competition requires a fixed squad of exactly {effectiveMax} members (team leader + {effectiveMax - 1} secondary members).</span>
+                          </div>
+                        ) : null}
                       </motion.div>
                     )}
                   </motion.div>

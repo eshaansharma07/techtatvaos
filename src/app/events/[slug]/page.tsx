@@ -188,11 +188,22 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
 
             <p className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4 text-xs leading-5 text-white/60">
               Participation: {modeLabel}
-              {event.participationMode !== "individual" ? ` · Max team size ${event.maxTeamSize}` : ""}
+              {event.participationMode !== "individual" ? (
+                (event.minParticipants && event.minParticipants > 1) || (event.minTeamSize && event.minTeamSize > 1)
+                  ? ` · Squad size ${event.minParticipants || event.minTeamSize}–${event.maxParticipants || event.maxTeamSize} members`
+                  : ` · Max squad size ${event.maxParticipants || event.maxTeamSize} members`
+              ) : ""}
             </p>
 
             {event.registrationOpen ? (
-              <RegisterForm eventId={event.id} participationMode={event.participationMode} maxTeamSize={event.maxTeamSize} />
+              <RegisterForm 
+                eventId={event.id} 
+                participationMode={event.participationMode} 
+                minTeamSize={event.minParticipants || event.minTeamSize || 1}
+                maxTeamSize={event.maxParticipants || event.maxTeamSize || 1}
+                minParticipants={event.minParticipants || event.minTeamSize || 1}
+                maxParticipants={event.maxParticipants || event.maxTeamSize || 1}
+              />
             ) : (
               <p className="mt-7 rounded-xl border border-white/[.08] bg-white/[.035] p-4 text-center text-xs text-white/45">Registration is currently closed.</p>
             )}
