@@ -231,44 +231,44 @@ export function FloatingAIChat() {
 
       {/* ── Floating Launcher Pill (Unopened state) ── */}
       {/* Clean, high-tech cyber pill that tells visitors who it is without covering screen content */}
-      <div className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[80] transition-all duration-300 ${isOpen ? "opacity-0 pointer-events-none scale-90 translate-y-4" : "opacity-100 pointer-events-auto scale-100 translate-y-0"}`}>
+      <div className={`fixed bottom-24 right-4 sm:bottom-28 md:bottom-24 lg:bottom-6 lg:right-6 z-[80] transition-all duration-300 ${isOpen ? "opacity-0 pointer-events-none scale-90 translate-y-4" : "opacity-100 pointer-events-auto scale-100 translate-y-0"}`}>
         <button
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-3 rounded-full border border-violet-500/40 bg-[#0c0517]/90 px-3 py-2 sm:px-4 sm:py-2.5 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_24px_rgba(139,92,246,0.3)] hover:border-violet-400 hover:shadow-[0_12px_45px_rgba(0,0,0,0.8),0_0_35px_rgba(168,85,247,0.45)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-300"
+          className="group relative flex items-center gap-2 sm:gap-3 rounded-full border border-violet-500/40 bg-[#0c0517]/90 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2.5 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_24px_rgba(139,92,246,0.3)] hover:border-violet-400 hover:shadow-[0_12px_45px_rgba(0,0,0,0.8),0_0_35px_rgba(168,85,247,0.45)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-300"
           aria-label="Open Tech Tatva AI Assistant"
         >
           {/* Animated gradient ring on hover */}
           <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 opacity-0 blur-sm group-hover:opacity-60 transition duration-500" />
           
           {/* AI Avatar Icon with live pulse indicator */}
-          <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-cyan-400 p-[1.5px] shadow-[0_0_15px_rgba(168,85,247,0.5)] shrink-0">
+          <div className="relative flex h-7 w-7 sm:h-8 sm:w-8 lg:h-9 lg:w-9 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-cyan-400 p-[1.5px] shadow-[0_0_15px_rgba(168,85,247,0.5)] shrink-0">
             <div className="flex h-full w-full items-center justify-center rounded-full bg-[#0a0514]">
-              <Sparkles size={16} className="text-violet-300 group-hover:rotate-12 transition-transform duration-300" />
+              <Sparkles size={14} className="text-violet-300 group-hover:rotate-12 transition-transform duration-300 sm:w-[16px] sm:h-[16px]" />
             </div>
             {/* Live Online Pip */}
-            <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+            <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2 sm:h-2.5 sm:w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 border-2 border-black" />
+              <span className="relative inline-flex h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-emerald-400 border border-black sm:border-2" />
             </span>
           </div>
 
           {/* Descriptive labels — Clearly identifies AI without being obstructive */}
           <div className="flex flex-col text-left pr-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] sm:text-xs font-black tracking-tight text-white group-hover:text-violet-200 transition">
+              <span className="text-[10px] sm:text-[11px] lg:text-xs font-black tracking-tight text-white group-hover:text-violet-200 transition">
                 Tech Tatva AI
               </span>
-              <span className="text-[8px] font-mono font-black uppercase px-1.5 py-0.2 rounded-full bg-violet-500/25 text-violet-300 border border-violet-500/40">
+              <span className="text-[7px] sm:text-[8px] font-mono font-black uppercase px-1.5 py-0.2 rounded-full bg-violet-500/25 text-violet-300 border border-violet-500/40 hidden sm:inline-block">
                 Online
               </span>
             </div>
-            <span className="text-[10px] sm:text-[11px] font-medium text-white/60 group-hover:text-white/80 transition truncate max-w-[135px] sm:max-w-[180px]">
-              Ask events, teams & joining
+            <span className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium text-white/60 group-hover:text-white/80 transition truncate max-w-[110px] sm:max-w-[135px] lg:max-w-[180px]">
+              Ask events & joining
             </span>
           </div>
 
           {/* Quick interactive hint badge */}
-          <div className="hidden sm:flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-2 py-1 text-[10px] font-mono text-violet-300 group-hover:bg-violet-500/20 group-hover:border-violet-500/40 transition">
+          <div className="hidden lg:flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-2 py-1 text-[10px] font-mono text-violet-300 group-hover:bg-violet-500/20 group-hover:border-violet-500/40 transition">
             <Bot size={11} />
             <span>Chat</span>
           </div>
