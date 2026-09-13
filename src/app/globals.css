@@ -98,7 +98,6 @@ body:before {
   transform: translateY(-2px);
 }
 .brutalist-btn-theme {
-  display: inline-flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
@@ -539,9 +538,6 @@ body:before {
   object-fit: contain;
 }
 @media (max-width: 767px) {
-  .public-header-inner {
-    border-radius: 0;
-  }
   .university-affiliation {
     align-items: flex-start;
     flex-direction: column;
