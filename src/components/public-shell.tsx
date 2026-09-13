@@ -63,7 +63,7 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
         <nav className="public-nav hidden w-auto items-center gap-1 text-xs font-medium tracking-[.15em] text-white/50 md:flex">
           {publicLinks.map(([label,href])=><Link className="rounded-xl px-4 py-3 transition hover:bg-white/10 hover:text-white font-bold uppercase" key={href} href={href}>{label}</Link>)}
         </nav>
-        <Link href="/contact" className="brutalist-btn-theme hidden min-h-11 items-center gap-2 rounded-xl px-5 text-xs font-bold tracking-[.12em] md:inline-flex shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
+        <Link href="/contact" className="brutalist-btn-theme hidden h-9 items-center gap-1.5 rounded-xl px-3.5 text-[11px] font-bold tracking-[.1em] md:inline-flex shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
           CONNECT <ArrowUpRight size={14}/>
         </Link>
         <MobilePublicMenu logo={info.logo}/>
