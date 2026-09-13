@@ -106,7 +106,7 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
   const events = await Event.find({ status: { $in: ["published", "active", "completed"] } })
     .sort({ startAt: 1 })
     .limit(limit || 0)
-    .select("slug title description banner venue capacity category status participationMode maxTeamSize registrationOpen startAt endAt team")
+    .select("slug title description banner venue capacity category status participationMode minTeamSize maxTeamSize minParticipants maxParticipants teamSize registrationOpen startAt endAt team certEventLogo")
     .populate("team", "name")
     .lean();
   const counts = await EventRegistration.aggregate([
@@ -134,7 +134,8 @@ export async function getPublicEvents(limit?: number): Promise<PublicEvent[]> {
       startAt: event.startAt?.toISOString(),
       endAt: event.endAt?.toISOString(),
       team: (event.team as unknown as { name?: string })?.name,
-      registrations: countMap.get(String(event._id)) || 0
+      registrations: countMap.get(String(event._id)) || 0,
+      certEventLogo: (event as any).certEventLogo || (event as any).logo || ""
     }))
   );
 }
@@ -645,7 +646,7 @@ export async function getAdminDashboardData() {
 export async function getPublicLeaderboards() {
   await connectDB();
   const events = await Event.find({ leaderboardVisible: true })
-    .select("slug title category banner venue startAt leaderboardVisible")
+    .select("slug title category banner venue startAt leaderboardVisible certEventLogo")
     .sort({ startAt: -1 })
     .lean();
 
@@ -675,6 +676,7 @@ export async function getPublicLeaderboards() {
       title: event.title,
       category: event.category,
       banner: event.banner,
+      certEventLogo: (event as any).certEventLogo || (event as any).logo || "",
       venue: event.venue,
       leaderboard: map.get(String(event._id)) || []
     }))

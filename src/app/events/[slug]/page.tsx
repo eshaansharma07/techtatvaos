@@ -80,18 +80,26 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(168,85,247,0.05),transparent_45%)] pointer-events-none" />
           <div className="relative grid items-start gap-8 lg:grid-cols-[minmax(0,.92fr)_minmax(340px,.78fr)]">
             <div className="max-w-4xl">
-              {event.certEventLogo ? (
-                <div className="mb-5 inline-flex items-center justify-center rounded-2xl bg-black/40 border border-white/10 p-3 h-14 w-14 backdrop-blur-md">
-                  <Image width={1200} height={1200} src={optimizeCloudinaryUrl(event.certEventLogo, 120)} alt="" className="h-full w-full object-contain" />
-                </div>
-              ) : null}
-              <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-purple-500 px-3 py-1 md:px-4 md:py-1.5 text-[9px] md:text-[10px] font-bold tracking-[.24em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
-                <Sparkles size={12} />
-                {(event.category || "EVENT").toUpperCase()}
-              </span>
-              <h1 className="mt-5 max-w-4xl text-[2.5rem] font-extrabold leading-[1.05] tracking-[-.05em] text-white md:mt-7 md:text-6xl lg:text-7xl xl:text-8xl">{event.title}</h1>
+              <div className="mb-6 flex flex-wrap items-center gap-4">
+                {event.certEventLogo ? (
+                  <div className="relative inline-flex items-center justify-center rounded-2xl bg-black/60 border border-white/15 px-5 py-2.5 h-16 sm:h-20 max-w-[280px] sm:max-w-[340px] backdrop-blur-xl shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
+                    <Image
+                      width={800}
+                      height={400}
+                      src={optimizeCloudinaryUrl(event.certEventLogo, 600)}
+                      alt={event.title || "Event Logo"}
+                      className="h-full w-auto max-h-12 sm:max-h-14 max-w-full object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]"
+                    />
+                  </div>
+                ) : null}
+                <span className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-purple-500 px-3.5 py-2 md:px-4 md:py-2.5 text-[10px] md:text-[11px] font-extrabold tracking-[.24em] text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.8)]">
+                  <Sparkles size={13} />
+                  {(event.category || "EVENT").toUpperCase()}
+                </span>
+              </div>
+              <h1 className="mt-2 max-w-4xl text-[2.5rem] font-extrabold leading-[1.05] tracking-[-.05em] text-white md:mt-4 md:text-6xl lg:text-7xl xl:text-8xl">{event.title}</h1>
               <p className="mt-4 line-clamp-4 max-w-3xl text-[13px] leading-relaxed text-white/62 md:mt-6 md:text-lg md:leading-8">{summary}</p>
-              <div className="mt-7 grid gap-3 sm:grid-cols-3">
+              <div className="mt-7 grid gap-3 grid-cols-2 sm:grid-cols-4">
                 <div className="glass-brutalist px-4 py-4 rounded-xl">
                   <Calendar className="text-purple-400" size={16} />
                   <p className="mt-3 text-xs uppercase tracking-[.16em] text-white/35 font-bold">Date</p>
@@ -101,6 +109,11 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
                   <Clock className="text-purple-400" size={16} />
                   <p className="mt-3 text-xs uppercase tracking-[.16em] text-white/35 font-bold">Time</p>
                   <p className="mt-1 text-sm font-semibold text-white/80">{timeText(event.startAt)}</p>
+                </div>
+                <div className="glass-brutalist px-4 py-4 rounded-xl">
+                  <MapPin className="text-purple-400" size={16} />
+                  <p className="mt-3 text-xs uppercase tracking-[.16em] text-white/35 font-bold">Venue</p>
+                  <p className="mt-1 text-sm font-semibold text-white/80 truncate">{event.venue || "Venue TBA"}</p>
                 </div>
                 <div className="glass-brutalist px-4 py-4 rounded-xl">
                   <Users className="text-purple-400" size={16} />
