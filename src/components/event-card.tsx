@@ -21,52 +21,32 @@ const formatTime = (value?: string) =>
 
 export function EventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
   const gradient = gradients[index % gradients.length];
-  const logoUrl = event.certEventLogo;
-  const displayImage = logoUrl || event.banner;
-  const isShowingLogo = Boolean(logoUrl);
+  const displayImage = event.banner || event.certEventLogo;
 
   return (
     <Link
       href={eventHref(event.slug)}
       className="event-card glass-brutalist group block overflow-hidden rounded-[1.75rem] transition duration-500 active:scale-[.99] md:rounded-3xl md:hover:-translate-y-1.5 md:hover:border-purple-500/50"
     >
-      <div className={`event-card-media relative h-60 overflow-hidden bg-gradient-to-br ${gradient} p-5 md:h-52`}>
-        {/* Ambient background: if banner exists and logo is showing, provide cinematic backdrop */}
-        {isShowingLogo && event.banner ? (
-          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20 filter blur-md scale-110">
-            <Image
-              width={600}
-              height={400}
-              src={optimizeCloudinaryUrl(event.banner, 600)}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          </div>
-        ) : null}
-
-        {/* Primary graphic: Event Logo (or Banner fallback) */}
+      <div className={`event-card-media relative h-60 overflow-hidden bg-gradient-to-br ${gradient} p-4 md:h-52`}>
         {displayImage ? (
-          <div className="absolute inset-0 grid place-items-center overflow-hidden p-6 z-[1]">
+          <div className="absolute inset-0 grid place-items-center overflow-hidden bg-black/15 p-3.5">
             <Image
-              width={800}
-              height={500}
+              width={1200}
+              height={1200}
               src={optimizeCloudinaryUrl(displayImage, 800)}
               alt={event.title}
-              className={
-                isShowingLogo
-                  ? "max-h-24 md:max-h-20 w-auto max-w-[85%] object-contain drop-shadow-[0_16px_36px_rgba(0,0,0,.85)] transition duration-700 group-hover:scale-110"
-                  : "h-full w-full object-contain opacity-95 drop-shadow-[0_22px_46px_rgba(0,0,0,.38)] transition duration-700 group-hover:scale-[1.035]"
-              }
+              className="h-full w-full object-contain opacity-95 drop-shadow-[0_22px_46px_rgba(0,0,0,.38)] transition duration-700 group-hover:scale-[1.035]"
             />
           </div>
         ) : null}
 
         <div className="absolute inset-0 grid-bg opacity-25 pointer-events-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.02)_45%,rgba(0,0,0,.55))] pointer-events-none" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.02)_45%,rgba(0,0,0,.45))] pointer-events-none" />
         <span className="relative z-10 rounded-xl border border-white/20 bg-black/60 px-3 py-1.5 text-[10px] font-bold tracking-[.22em] text-blue-300 backdrop-blur">
           {(event.category || "EVENT").toUpperCase()}
         </span>
-        <span className="absolute right-5 top-5 z-10 grid h-10 w-10 place-items-center rounded-xl border border-white/25 bg-black/60 text-blue-300 opacity-0 backdrop-blur transition group-hover:opacity-100">
+        <span className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-xl border border-white/25 bg-black/60 text-blue-300 opacity-0 backdrop-blur transition group-hover:opacity-100">
           <ArrowUpRight size={16} />
         </span>
       </div>
