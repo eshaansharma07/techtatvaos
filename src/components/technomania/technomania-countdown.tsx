@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 
 interface TechnomaniaCountdownProps {
   targetDate: string;
+  tbdMessage?: string;
 }
 
-export function TechnomaniaCountdown({ targetDate }: TechnomaniaCountdownProps) {
+export function TechnomaniaCountdown({ targetDate, tbdMessage }: TechnomaniaCountdownProps) {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -41,6 +42,20 @@ export function TechnomaniaCountdown({ targetDate }: TechnomaniaCountdownProps) 
   }, [targetDate]);
 
   if (!mounted) return null;
+
+  if (tbdMessage) {
+    return (
+      <div className="flex flex-col items-center gap-3 font-mono mx-auto">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 font-bold tracking-[0.2em] uppercase">
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          <span>FESTIVAL UPDATE</span>
+        </div>
+        <div className="px-6 py-4 sm:px-8 inline-flex items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-950 text-white font-mono text-sm sm:text-base tracking-widest text-center shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+          <span>{tbdMessage}</span>
+        </div>
+      </div>
+    );
+  }
 
   if (isExpired) {
     return (

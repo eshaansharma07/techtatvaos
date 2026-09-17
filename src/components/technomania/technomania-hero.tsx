@@ -48,7 +48,7 @@ export function TechnomaniaHero({
 
         {/* Countdown */}
         <div className="py-6">
-          <TechnomaniaCountdown targetDate={targetDate} />
+          <TechnomaniaCountdown targetDate={targetDate} tbdMessage="SHIFTED TO OCTOBER (DATES TBD)" />
         </div>
 
         {/* CTAs */}

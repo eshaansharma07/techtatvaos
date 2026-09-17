@@ -11,7 +11,7 @@ const DEFAULT_TM_CONFIG = {
   headline: "Flagship Technical & Cultural Festival",
   tagline: "24H Hackathon Sprint · Multi-Title Esports Championship · Star Cultural Stage",
   announcementStatus: "REGISTRATIONS LIVE FOR UNIVERSITY STUDENTS · FREE PASSES",
-  targetDate: "2026-09-15T09:00:00+05:30",
+  targetDate: "2026-10-15T09:00:00+05:30",
   prizePoolText: "₹XX,XXX CASH & INTERNSHIPS",
   registrationStatus: "open", // open, closed, coming_soon
   ctaPrimaryText: "REGISTER SQUAD NOW",
