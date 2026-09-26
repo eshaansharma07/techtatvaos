@@ -19,7 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     await connectDB();
-    const event = await Event.findById(id).lean();
+    const event = await Event.findById(id).lean() as any;
     if (!event) {
       return NextResponse.json({ error: "Event not found." }, { status: 404 });
     }
