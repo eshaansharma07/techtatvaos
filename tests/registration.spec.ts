@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('TechTatva OS Workflows', () => {
   test('Homepage loads correctly', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=Tech Tatva')).toBeVisible();
+    await expect(page.locator('text=Tech Tatva').first()).toBeVisible();
   });
 
   // Example test for event registration rendering
