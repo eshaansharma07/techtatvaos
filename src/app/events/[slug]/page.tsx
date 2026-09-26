@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: event.title,
       description: eventSummary(event.description || ""),
-      images: event.banner ? [optimizeCloudinaryUrl(event.banner, 1200, 630)] : [],
+      images: event.banner ? [optimizeCloudinaryUrl(event.banner, 1200)] : [],
     },
   };
 }

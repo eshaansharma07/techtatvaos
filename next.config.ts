@@ -59,7 +59,7 @@ const nextConfig: NextConfig = {
   }
 };
 
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 export default withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG,
@@ -68,6 +68,5 @@ export default withSentryConfig(nextConfig, {
   widenClientFileUpload: true,
   reactComponentAnnotation: { enabled: true },
   tunnelRoute: "/monitoring",
-  hideSourceMaps: true,
-  disableLogger: true,
+  sourcemaps: { disable: true },
 });
