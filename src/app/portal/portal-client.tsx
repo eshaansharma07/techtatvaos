@@ -394,6 +394,27 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
     await refresh();
   }
 
+  async function requireReapprovalWorkspace(item: any, scope: "waitlisted" | "all" = "waitlisted") {
+    if (!window.confirm(`Are you sure you want to ${item.requireReapproval ? "DISABLE" : "REQUIRE"} re-approval for ${scope} teams for "${item.title}"?`)) return;
+    setBusy(true);
+    setPanel("Updating re-approval settings...");
+    try {
+      const res = await fetch("/api/admin/reapproval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId: idOf(item), action: item.requireReapproval ? "disable" : "require", scope })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed");
+      setPanel(`Success: ${result.message}`);
+    } catch(err: any) {
+      setPanel(`Error: ${err.message}`);
+    } finally {
+      setBusy(false);
+      await refresh();
+    }
+  }
+
   function rowsFor(module:Module){
     if(module==="Members")return (data.users||[]).map((u:any)=>[u.name,u.email && u.email !== "undefined" ? u.email : "-",u.uid||"-",teamNamesOf(u)||"-",leadRolesOf(u,data.teams)||u.status||"active",u]);
     if(module==="Teams")return (data.teams||[]).map((t:any)=>[t.name,valueOf(t,"lead") || "No lead",asArray(t.coLeads).map((lead:any)=>lead?.name || (typeof lead==="string"?lead:"")).filter(Boolean).join(", ") || "No co-leads",`${asArray(t.members).length} members`,t.active===false?"inactive":"active",t]);
@@ -619,12 +640,12 @@ export function PortalClient({ initialData, userName }: { initialData: Data; use
               </button>
             </div>
             {eventsTab === "events" ? (
-              <Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent} />
+              <Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent} requireReapprovalWorkspace={requireReapprovalWorkspace} />
             ) : (
               <EventParticipantsDesk data={data} setPanel={setPanel} refresh={refresh} />
             )}
           </div>
-        ) : active==="Leaderboard"?<LeaderboardDesk data={data} setPanel={setPanel} refresh={refresh}/>:active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent}/>}
+        ) : active==="Leaderboard"?<LeaderboardDesk data={data} setPanel={setPanel} refresh={refresh}/>:active==="Overview"?<Overview counts={counts} chart={chart} setActive={setActive}/>:active==="Recruitment"?<RecruitmentDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Membership Drive"?<MembershipDriveDesk data={data} open={setDrawer} patch={patch} remove={remove} refresh={refresh} setPanel={setPanel}/>:active==="Attendance"?<Attendance data={data} setPanel={setPanel} refresh={refresh}/>:active==="Certificates"?<CertificatesDesk data={data} setPanel={setPanel} open={setDrawer}/>:active==="AI"?<AIDesk data={data} setPanel={setPanel}/>:active==="Settings"?<Settings info={data.clubInfo||{}} open={setDrawer}/>:active==="Teams"?<TeamStructureEditor data={data} open={setDrawer} remove={remove} restore={restore}/>:<Workspace active={active} data={data} rows={filtered} open={setDrawer} remove={remove} restore={restore} patch={patch} duplicateEvent={duplicateEvent} requireReapprovalWorkspace={requireReapprovalWorkspace}/>}
         <div className="portal-action mt-4 rounded-2xl p-5 border border-violet-500/10">
           <p className="text-[10px] tracking-[.24em] text-violet-200">ACTION PANEL</p>
           <p className="mt-3 text-sm leading-6 text-white/65">{panel}</p>
@@ -1090,7 +1111,7 @@ function TeamStructureEditor({data,open,remove,restore}:{data:Data;open:(drawer:
   );
 }
 
-function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent}:{active:Module;data:Data;rows:any[];open:(drawer:any)=>void;remove:(resource:Resource,item:any)=>void;restore:(resource:Resource,item:any)=>void;patch:(resource:Resource,item:any,body:Record<string, any>,message:string)=>void;duplicateEvent:(item:any)=>void}) {
+function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent,requireReapprovalWorkspace}:{active:Module;data:Data;rows:any[];open:(drawer:any)=>void;remove:(resource:Resource,item:any)=>void;restore:(resource:Resource,item:any)=>void;patch:(resource:Resource,item:any,body:Record<string, any>,message:string)=>void;duplicateEvent:(item:any)=>void;requireReapprovalWorkspace:(item:any,scope?:"waitlisted"|"all")=>Promise<void>}) {
   const c = config[active as keyof typeof config];
   const defaults = active === "Events" ? { status: "published", registrationOpen: "true" } : active === "Meetings" ? { status: "completed" } : {};
   const helper =
@@ -2722,6 +2743,7 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
     if (action === "require" && !window.confirm(`Are you sure you want to require re-approval for ${scope} teams? This will reset their re-approved status to false.`)) return;
     setReapprovalBusy(true);
     setPanel(`Updating re-approval settings...`);
+      
     try {
       const res = await fetch("/api/admin/reapproval", {
         method: "POST",
