@@ -55,6 +55,7 @@ import {
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, Area, AreaChart, YAxis, CartesianGrid } from "recharts";
 import { TechnomaniaAdminPortal } from "@/components/portal/technomania-admin-portal";
 import { Workspace } from "./modules/Workspace";
+console.log("[TechTatva Portal] Build v2.1 — Re-approve buttons active");
 import { EventParticipantsDesk } from "./modules/EventParticipantsDesk";
 import { MembershipDriveDesk } from "./modules/MembershipDriveDesk";
 import { RecruitmentDesk } from "./modules/RecruitmentDesk";
