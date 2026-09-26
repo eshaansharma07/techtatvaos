@@ -159,6 +159,8 @@ function normalizeEventBody(input: Record<string, any>, create = false) {
   if (body.registrationEnd) normalized.registrationEnd = parseLocalDate(body.registrationEnd);
   if (body.startAt) normalized.startAt = parseLocalDate(body.startAt);
   if (body.endAt) normalized.endAt = parseLocalDate(body.endAt);
+  if (create || body.requireReapproval !== undefined) normalized.requireReapproval = body.requireReapproval === true || body.requireReapproval === "true";
+  if (body.reapprovalScope !== undefined) normalized.reapprovalScope = body.reapprovalScope;
   if (body.leads !== undefined) normalized.leads = refIds(body.leads);
   if ("winnerFirst" in input) normalized.winnerFirst = refId(input.winnerFirst) || null;
   if ("winnerSecond" in input) normalized.winnerSecond = refId(input.winnerSecond) || null;
@@ -400,7 +402,21 @@ export async function updateResource(resource: AdminResource, id: string, input:
     if (user) await syncMemberTeams(user._id, userTeamIds(user), userTeamIds(existing));
     return user;
   }
-  if (resource === "events") return Event.findByIdAndUpdate(id, normalizeEventBody(input), { new: true, runValidators: true });
+  if (resource === "events") {
+    const existing = await Event.findById(id).lean() as any;
+    const updated = await Event.findByIdAndUpdate(id, normalizeEventBody(input), { new: true, runValidators: true }) as any;
+    if (updated && existing) {
+      if (
+        (!existing.requireReapproval && updated.requireReapproval) || 
+        (existing.requireReapproval && updated.requireReapproval && existing.reapprovalScope !== updated.reapprovalScope && updated.reapprovalScope === "all")
+      ) {
+        const query: any = { event: id };
+        if (updated.reapprovalScope === "waitlisted") query.status = "waitlisted";
+        await EventRegistration.updateMany(query, { $set: { reapproved: false } });
+      }
+    }
+    return updated;
+  }
   if (resource === "meetings") return Meeting.findByIdAndUpdate(id, { ...body, date: body.date ? parseLocalDate(body.date) : undefined, organizer: refId(body.organizer), attendees: refIds(body.attendees), actionItems: parseActionItems(body.actionItems) }, { new: true });
   if (resource === "tasks") return Task.findByIdAndUpdate(id, { ...body, dueAt: body.dueAt ? parseLocalDate(body.dueAt) : undefined }, { new: true });
   if (resource === "announcements") return Announcement.findByIdAndUpdate(id, { ...body, publishAt: body.publishAt ? parseLocalDate(body.publishAt) : undefined }, { new: true });
