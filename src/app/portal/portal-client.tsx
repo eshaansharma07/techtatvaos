@@ -2570,6 +2570,8 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
   const [modeFilter, setModeFilter] = useState<"all" | "team" | "individual">("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [expandedTeamIds, setExpandedTeamIds] = useState<Record<string, boolean>>({});
+  const [reapprovalBusy, setReapprovalBusy] = useState(false);
+  const selectedEventObj = selectedEventId !== "all" ? events.find(e => idOf(e) === selectedEventId) : null;
 
   // Process registrations into structured team & individual cards
   const formattedRegistrations = useMemo(() => {
@@ -2629,6 +2631,7 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
         teamName,
         status,
         registeredAt,
+        reapproved: reg.reapproved,
         leader,
         members,
         totalSize
@@ -2711,6 +2714,46 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
       setPanel(`Registration for "${teamOrName}" removed successfully.`);
     } catch {
       setPanel("Network error while removing registration.");
+    }
+  };
+
+  const toggleReapproval = async (action: "require" | "disable", scope?: "all" | "waitlisted") => {
+    if (!selectedEventObj) return;
+    if (action === "require" && !window.confirm(`Are you sure you want to require re-approval for ${scope} teams? This will reset their re-approved status to false.`)) return;
+    setReapprovalBusy(true);
+    setPanel(`Updating re-approval settings...`);
+    try {
+      const res = await fetch("/api/admin/reapproval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId: selectedEventId, action, scope })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to update");
+      await refresh();
+      setPanel(`Success: ${result.message}`);
+    } catch(err: any) {
+      setPanel(`Error: ${err.message}`);
+    } finally {
+      setReapprovalBusy(false);
+    }
+  };
+
+  const handlePromote = async (regId: string) => {
+    if (!window.confirm("Promote this waitlisted squad to confirmed?")) return;
+    setPanel("Promoting to confirmed...");
+    try {
+      const res = await fetch("/api/admin/reapproval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "promote", eventId: selectedEventId, registrationId: regId })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to promote");
+      await refresh();
+      setPanel("Squad successfully promoted to Confirmed!");
+    } catch(err: any) {
+      setPanel(`Error: ${err.message}`);
     }
   };
 
@@ -2871,6 +2914,48 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
             </div>
           </div>
 
+          {/* Re-approval Admin Controls */}
+          {selectedEventObj && (
+            <div className="mt-1 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+              <div>
+                <h3 className="text-sm font-bold text-amber-400">Waitlist & Re-approval Management</h3>
+                <p className="text-[10px] text-amber-500/70 mt-0.5 max-w-lg">
+                  {selectedEventObj.requireReapproval 
+                    ? `Re-approval is currently REQUIRED for ${selectedEventObj.reapprovalScope} teams. Students will see a prompt to confirm attendance on the public website.`
+                    : `Trigger a re-approval wave to ask waitlisted (or all) teams to confirm they are still coming.`}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedEventObj.requireReapproval ? (
+                  <button 
+                    onClick={() => toggleReapproval("disable")}
+                    disabled={reapprovalBusy}
+                    className="rounded-xl bg-amber-500/20 border border-amber-500/30 px-4 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/30 transition disabled:opacity-50"
+                  >
+                    Disable Re-approval
+                  </button>
+                ) : (
+                  <>
+                    <button 
+                      onClick={() => toggleReapproval("require", "waitlisted")}
+                      disabled={reapprovalBusy}
+                      className="rounded-xl bg-amber-500 border border-amber-400 px-4 py-2 text-xs font-bold text-black hover:bg-amber-400 transition shadow-[0_0_15px_rgba(245,158,11,0.2)] disabled:opacity-50"
+                    >
+                      Require for Waitlisted
+                    </button>
+                    <button 
+                      onClick={() => toggleReapproval("require", "all")}
+                      disabled={reapprovalBusy}
+                      className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/70 hover:bg-white/10 hover:text-white transition disabled:opacity-50"
+                    >
+                      Require for All
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Secondary Filter Bar: Mode, Status, Expand/Collapse */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/[0.05]">
             <div className="flex flex-wrap items-center gap-2.5">
@@ -2993,6 +3078,21 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
 
                       {/* Top Right Badges & Delete */}
                       <div className="flex items-center gap-2">
+                        {item.status === "waitlisted" && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handlePromote(item.id); }}
+                            className="h-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/20 flex items-center transition"
+                            title="Promote to Confirmed"
+                          >
+                            Promote
+                          </button>
+                        )}
+                        {item.reapproved && (
+                          <span className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider border bg-purple-500/10 border-purple-500/30 text-purple-300" title="User has re-confirmed attendance">
+                            <CheckCircle2 size={10} /> Re-approved
+                          </span>
+                        )}
                         <span className={`rounded-full px-2.5 py-1 text-[8.5px] font-black uppercase tracking-wider border ${
                           item.status === "confirmed"
                             ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
