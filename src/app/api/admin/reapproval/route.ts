@@ -8,7 +8,8 @@ export async function POST(req: NextRequest) {
   if (blocked) return blocked;
 
   try {
-    const { eventId, action, scope } = await req.json();
+    const body = await req.json();
+    const { eventId, action, scope, registrationId } = body;
 
     if (!eventId || !action) {
       return NextResponse.json({ error: "Event ID and action are required." }, { status: 400 });
@@ -40,8 +41,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "promote") {
-      // Body expects registrationId
-      const { registrationId } = await req.json().catch(() => ({}));
       if (!registrationId) return NextResponse.json({ error: "Registration ID is required." }, { status: 400 });
 
       const reg = await EventRegistration.findOneAndUpdate(
@@ -52,6 +51,19 @@ export async function POST(req: NextRequest) {
       if (!reg) return NextResponse.json({ error: "Waitlisted registration not found." }, { status: 404 });
 
       return NextResponse.json({ success: true, message: "Promoted to confirmed successfully.", record: reg });
+    }
+
+    if (action === "manual_reapprove") {
+      if (!registrationId) return NextResponse.json({ error: "Registration ID is required." }, { status: 400 });
+
+      const reg = await EventRegistration.findOneAndUpdate(
+        { _id: registrationId, event: eventId },
+        { $set: { reapproved: true } },
+        { new: true }
+      );
+      if (!reg) return NextResponse.json({ error: "Registration not found." }, { status: 404 });
+
+      return NextResponse.json({ success: true, message: "Manually marked as re-approved.", record: reg });
     }
 
     return NextResponse.json({ error: "Invalid action." }, { status: 400 });

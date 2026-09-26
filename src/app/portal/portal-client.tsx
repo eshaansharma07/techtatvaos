@@ -2653,6 +2653,7 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
         status,
         registeredAt,
         reapproved: reg.reapproved,
+        requireReapproval: eventObj?.requireReapproval,
         leader,
         members,
         totalSize
@@ -2774,6 +2775,24 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
       if (!res.ok) throw new Error(result.error || "Failed to promote");
       await refresh();
       setPanel("Squad successfully promoted to Confirmed!");
+    } catch(err: any) {
+      setPanel(`Error: ${err.message}`);
+    }
+  };
+
+  const handleManualReapprove = async (regId: string) => {
+    if (!window.confirm("Mark this squad as re-approved?")) return;
+    setPanel("Marking as re-approved...");
+    try {
+      const res = await fetch("/api/admin/reapproval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "manual_reapprove", eventId: selectedEventId, registrationId: regId })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to mark as re-approved");
+      await refresh();
+      setPanel("Squad successfully marked as Re-approved!");
     } catch(err: any) {
       setPanel(`Error: ${err.message}`);
     }
@@ -3062,6 +3081,7 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
             {filtered.map((item) => {
               const isExpanded = !!expandedTeamIds[item.id];
               const isTeam = item.mode === "team";
+              const needsReapproval = item.requireReapproval && (item.eventObj?.reapprovalScope === "all" || (item.eventObj?.reapprovalScope === "waitlisted" && item.status === "waitlisted"));
 
               return (
                 <div
@@ -3108,6 +3128,16 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
                             title="Promote to Confirmed"
                           >
                             Promote
+                          </button>
+                        )}
+                        {!item.reapproved && needsReapproval && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleManualReapprove(item.id); }}
+                            className="h-8 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 text-[10px] font-bold text-purple-300 hover:bg-purple-500/20 flex items-center transition"
+                            title="Manually Mark as Re-approved"
+                          >
+                            Mark Re-app
                           </button>
                         )}
                         {item.reapproved && (
