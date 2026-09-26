@@ -3,54 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { Attendance, Event, EventRegistration, RecruitmentSettings, User } from "@/lib/models";
 import { rateLimit } from "@/lib/rate-limit";
-import { registrationInput } from "@/lib/validations/event";
+import { registrationInput, eventRegistrationPayloadSchema } from "@/lib/validations/event";
 
-type PublicParticipant = {
-  name?: string;
-  email?: string;
-  phone?: string;
-  uid?: string;
-  program?: string;
-  semester?: string | number;
-  customFields?: Record<string, any>;
-};
-
-const clean = (value: unknown): string => {
-  if (typeof value === "string") return value.trim();
-  if (typeof value === "number") return String(value);
-  return "";
-};
-
-const cleanPhone = (value: unknown): string => {
-  const raw = clean(value);
-  // Strip everything except digits and leading +
-  return raw.replace(/[^\d+]/g, "");
-};
-
-const semesterOf = (value: unknown): number | undefined => {
-  const number = Number(value);
-  return Number.isFinite(number) && number > 0 && number <= 12 ? number : undefined;
-};
-
-function isValidPhone(phone: string): boolean {
-  const digits = phone.replace(/\D/g, "");
-  return digits.length >= 8 && digits.length <= 15;
-}
-
-function isValidParticipant(input: PublicParticipant): boolean {
-  return (
-    clean(input.name).length >= 2 &&
-    clean(input.email).includes("@") &&
-    isValidPhone(clean(input.phone)) &&
-    clean(input.uid).length >= 2 &&
-    clean(input.program).length >= 1
-  );
-}
-
-async function upsertParticipant(input: PublicParticipant) {
-  const email = clean(input.email).toLowerCase();
-  const uid = clean(input.uid);
-  const phone = cleanPhone(input.phone);
+async function upsertParticipant(input: any) {
+  const email = input.email.toLowerCase();
+  const uid = input.uid;
+  const phone = input.phone;
   const query = {
     $or: [
       { email },
@@ -58,12 +16,12 @@ async function upsertParticipant(input: PublicParticipant) {
     ]
   };
   const set: Record<string, unknown> = {
-    name: clean(input.name),
+    name: input.name,
     email,
     uid,
     phone,
-    program: clean(input.program),
-    semester: semesterOf(input.semester),
+    program: input.program,
+    semester: input.semester,
     status: "active"
   };
   return User.findOneAndUpdate(
@@ -88,11 +46,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
     }
 
-    // Guard: payload must be an object
-    if (!payload || typeof payload !== "object") {
-      return NextResponse.json({ error: "Invalid request format." }, { status: 400 });
-    }
-
     const legacy = registrationInput.safeParse(payload);
 
     await connectDB();
@@ -102,41 +55,58 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Registration is closed" }, { status: 409 });
     }
 
-    const mode = payload.mode === "team" ? "team" : "individual";
-    
-    // Coerce data inconsistencies where maxTeamSize or teamSize.max > 1 but participationMode was left as "individual"
-    const derivedMinTeamSize = Math.max(1, Number(event.minParticipants || event.minTeamSize || event.teamSize?.min || (event.participationMode === "team" ? 2 : 1)));
-    const derivedMaxTeamSize = Math.max(derivedMinTeamSize, Number(event.maxParticipants || event.maxTeamSize || event.teamSize?.max || 1));
-    const eventMode = event.participationMode === "both" ? "both" : (derivedMaxTeamSize > 1 ? "team" : (event.participationMode || "individual"));
-    
-    const allowed = eventMode === "both" || eventMode === mode;
-    if (!allowed) return NextResponse.json({ error: `This event accepts ${eventMode} registrations only.` }, { status: 400 });
-
     let userId = legacy.success ? legacy.data.userId : null;
+    let mode = payload.mode === "team" ? "team" : "individual";
     let leader: any = null;
     let teamMembers: any[] = [];
+    let cleanTeamName = payload.teamName || "";
 
     if (!userId) {
-      const leaderInput: PublicParticipant = payload;
-      if (!isValidParticipant(leaderInput)) {
-        return NextResponse.json({ error: "Valid candidate details are required (name, email, phone, UID, program)." }, { status: 400 });
+      // Validate using Zod
+      // The frontend sends flat leader properties at root, so we map them to "leader" for Zod
+      const zodPayload = {
+        mode: payload.mode || "individual",
+        teamName: payload.teamName,
+        leader: {
+          name: payload.name,
+          email: payload.email,
+          phone: payload.phone,
+          uid: payload.uid,
+          program: payload.program,
+          semester: payload.semester,
+          customFields: payload.customFields
+        },
+        members: Array.isArray(payload.members) ? payload.members : [],
+        customFields: payload.customFields
+      };
+
+      const parsed = eventRegistrationPayloadSchema.safeParse(zodPayload);
+      if (!parsed.success) {
+        const firstIssue = parsed.error.issues[0]?.message || "Invalid registration data.";
+        return NextResponse.json({ error: firstIssue, issues: parsed.error.flatten() }, { status: 400 });
       }
 
-      const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
-      const memberInputs: PublicParticipant[] = mode === "team" ? rawMembers.filter((member) => member && (clean(member?.name) || clean(member?.email) || clean(member?.uid))) : [];
+      const input = parsed.data;
+      mode = input.mode;
+      cleanTeamName = input.teamName || "";
+      
+      const derivedMinTeamSize = Math.max(1, Number(event.minParticipants || event.minTeamSize || event.teamSize?.min || (event.participationMode === "team" ? 2 : 1)));
+      const derivedMaxTeamSize = Math.max(derivedMinTeamSize, Number(event.maxParticipants || event.maxTeamSize || event.teamSize?.max || 1));
+      const eventMode = event.participationMode === "both" ? "both" : (derivedMaxTeamSize > 1 ? "team" : (event.participationMode || "individual"));
+      
+      const allowed = eventMode === "both" || eventMode === mode;
+      if (!allowed) return NextResponse.json({ error: `This event accepts ${eventMode} registrations only.` }, { status: 400 });
+
+      const memberInputs = mode === "team" ? (input.members || []) : [];
       const totalSize = 1 + memberInputs.length;
-      const minTeamSize = derivedMinTeamSize;
-      const maxTeamSize = derivedMaxTeamSize;
-      if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
-      if (mode === "team" && totalSize < minTeamSize) return NextResponse.json({ error: `Minimum team size is ${minTeamSize} member${minTeamSize > 1 ? "s" : ""}.` }, { status: 400 });
-      if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
-      if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
-        return NextResponse.json({ error: "Every team member needs valid name, email, phone, UID, and program." }, { status: 400 });
-      }
-
+      
       if (mode === "team") {
-        const allEmails = [clean(leaderInput.email), ...memberInputs.map(m => clean(m.email))].map(e => e.toLowerCase());
-        const allUids = [clean(leaderInput.uid), ...memberInputs.map(m => clean(m.uid))].map(u => u.toLowerCase());
+        if (!cleanTeamName) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
+        if (totalSize < derivedMinTeamSize) return NextResponse.json({ error: `Minimum team size is ${derivedMinTeamSize} member${derivedMinTeamSize > 1 ? "s" : ""}.` }, { status: 400 });
+        if (totalSize > derivedMaxTeamSize) return NextResponse.json({ error: `Maximum team size is ${derivedMaxTeamSize}.` }, { status: 400 });
+        
+        const allEmails = [input.leader.email, ...memberInputs.map(m => m.email)].map(e => e.toLowerCase());
+        const allUids = [input.leader.uid, ...memberInputs.map(m => m.uid)].map(u => u.toLowerCase());
         
         if (new Set(allEmails).size !== allEmails.length) {
           return NextResponse.json({ error: "Duplicate email addresses found in the team." }, { status: 400 });
@@ -146,18 +116,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         }
       }
 
-      leader = await upsertParticipant(leaderInput);
+      leader = await upsertParticipant(input.leader);
       userId = String(leader._id);
       const memberUsers = await Promise.all(memberInputs.map((member) => upsertParticipant(member)));
       teamMembers = memberUsers.map((member, index) => ({
         user: member._id,
         name: member.name,
         email: member.email,
-        phone: member.phone || cleanPhone(memberInputs[index]?.phone),
+        phone: member.phone || memberInputs[index].phone,
         uid: member.uid,
         program: member.program,
-        semester: member.semester ?? semesterOf(memberInputs[index]?.semester),
-        customFields: memberInputs[index]?.customFields
+        semester: member.semester ?? memberInputs[index].semester,
+        customFields: memberInputs[index].customFields
       }));
     }
 
@@ -165,7 +135,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const status = count >= (event.capacity || Infinity) ? "waitlisted" : "confirmed";
     const record = await EventRegistration.findOneAndUpdate(
       { event: id, user: userId },
-      { $setOnInsert: { qrToken: randomUUID() }, $set: { status, mode, teamName: clean(payload.teamName), teamMembers, customFields: payload.customFields, registeredAt: new Date() } },
+      { $setOnInsert: { qrToken: randomUUID() }, $set: { status, mode, teamName: cleanTeamName, teamMembers, customFields: payload.customFields, registeredAt: new Date() } },
       { upsert: true, new: true }
     );
 
@@ -191,7 +161,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (error?.code === 11000) {
       return NextResponse.json({ error: "A candidate with this email or UID is already registered for this event." }, { status: 409 });
     }
-    // Log server-side for debugging but return a clean error message
     console.error("[Registration Error]", error);
     return NextResponse.json({ error: "Registration failed. Please try again or contact the organizers." }, { status: 500 });
   }

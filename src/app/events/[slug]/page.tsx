@@ -38,6 +38,25 @@ const eventDescriptionBlocks = (value: string) =>
     .map((block) => block.trim())
     .filter(Boolean);
 
+
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const event = await getPublicEvent(slug);
+  if (!event) return { title: "Event Not Found | Tech Tatva" };
+  
+  return {
+    title: `${event.title} | Tech Tatva`,
+    description: eventSummary(event.description || ""),
+    openGraph: {
+      title: event.title,
+      description: eventSummary(event.description || ""),
+      images: event.banner ? [optimizeCloudinaryUrl(event.banner, 1200, 630)] : [],
+    },
+  };
+}
+
 export default async function EventDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const event = await getPublicEvent(slug);

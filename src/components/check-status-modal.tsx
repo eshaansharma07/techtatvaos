@@ -73,7 +73,7 @@ export function CheckStatusModal({ eventId, requireReapproval }: { eventId: stri
       >
         <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.02] px-6 py-4">
           <h3 className="font-bold text-white tracking-wide">Check Registration Status</h3>
-          <button onClick={() => setIsOpen(false)} className="text-white/50 hover:text-white transition"><X size={20}/></button>
+          <button aria-label="Close modal" onClick={() => setIsOpen(false)} className="text-white/50 hover:text-white transition"><X size={20}/></button>
         </div>
 
         <div className="p-6">
