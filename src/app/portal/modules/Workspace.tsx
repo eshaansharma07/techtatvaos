@@ -129,6 +129,12 @@ export function Workspace({active,data,rows,open,remove,restore,patch,duplicateE
                               <button onClick={() => duplicateEvent(item)} className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold text-amber-200 transition hover:bg-amber-500/20">
                                 Duplicate
                               </button>
+                              <button onClick={() => requireReapprovalWorkspace(item, "all")} className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-200 transition hover:bg-emerald-500/20">
+                                Re-approve (All)
+                              </button>
+                              <button onClick={() => requireReapprovalWorkspace(item, "waitlisted")} className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-200 transition hover:bg-emerald-500/20">
+                                Re-approve (Waitlist)
+                              </button>
                             </>
                           ) : null}
                           
