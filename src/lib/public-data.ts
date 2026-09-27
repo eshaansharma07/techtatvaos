@@ -595,7 +595,7 @@ export async function getAdminDashboardData() {
     Announcement.find({}).sort({ publishAt: -1 }).limit(200).lean(),
     Notification.find({}).sort({ createdAt: -1 }).limit(50).lean(),
     Attendance.find({}).populate("event", "title").populate("user", "name email uid program semester phone").limit(1000).lean(),
-    EventRegistration.find({}).populate("event", "title participationMode").populate("user", "name email uid program semester phone").limit(1000).lean(),
+    EventRegistration.find({}).populate("event", "title participationMode").populate("user", "name email uid program semester phone").populate("teamMembers.user", "name email uid program semester phone").limit(1000).lean(),
     Sponsor.find({}).sort({ name: 1 }).lean(),
     Achievement.find({}).sort({ awardedAt: -1 }).lean(),
     Gallery.find({}).sort({ createdAt: -1 }).populate("event", "title").lean(),

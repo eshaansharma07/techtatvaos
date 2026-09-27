@@ -93,7 +93,7 @@ export function RegisterForm({
   const fields = [
     { name: "name", label: "Full Name", type: "text", placeholder: "Eshaan Sharma", icon: User },
     { name: "email", label: "University Email", type: "email", placeholder: "eshaan@university.edu", icon: Mail },
-    { name: "phone", label: "WhatsApp Number (Required)", type: "tel", placeholder: "+91 98765 43210", icon: Phone },
+    { name: "phone", label: "WhatsApp Phone Number (Mandatory)", type: "tel", placeholder: "10-digit WhatsApp number (e.g. 9876543210)", icon: Phone },
     { name: "uid", label: "University UID", type: "text", placeholder: "24BAI70387", icon: FileText },
     { name: "program", label: "Degree Program", type: "text", placeholder: "B.E. CSE AI/ML", icon: Layers },
     { name: "semester", label: "Current Semester", type: "number", placeholder: "4", icon: Sparkles }

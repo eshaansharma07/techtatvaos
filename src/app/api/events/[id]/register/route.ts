@@ -34,7 +34,7 @@ const semesterOf = (value: unknown): number | undefined => {
 
 function isValidPhone(phone: string): boolean {
   const digits = phone.replace(/\D/g, "");
-  return digits.length >= 8 && digits.length <= 15;
+  return digits.length >= 10 && digits.length <= 15;
 }
 
 function isValidParticipant(input: PublicParticipant): boolean {
@@ -118,8 +118,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (!userId) {
       const leaderInput: PublicParticipant = payload;
+      if (!clean(leaderInput.phone) || !isValidPhone(clean(leaderInput.phone))) {
+        return NextResponse.json({ error: "Active WhatsApp phone number (minimum 10 digits) is mandatory." }, { status: 400 });
+      }
       if (!isValidParticipant(leaderInput)) {
-        return NextResponse.json({ error: "Valid candidate details are required (name, email, phone, UID, program)." }, { status: 400 });
+        return NextResponse.json({ error: "Valid candidate details are required (name, email, WhatsApp phone, UID, program)." }, { status: 400 });
       }
 
       const rawMembers: PublicParticipant[] = Array.isArray(payload.members) ? payload.members : [];
@@ -130,8 +133,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       if (mode === "team" && !clean(payload.teamName)) return NextResponse.json({ error: "Team name is required." }, { status: 400 });
       if (mode === "team" && totalSize < minTeamSize) return NextResponse.json({ error: `Minimum team size is ${minTeamSize} member${minTeamSize > 1 ? "s" : ""}.` }, { status: 400 });
       if (mode === "team" && totalSize > maxTeamSize) return NextResponse.json({ error: `Maximum team size is ${maxTeamSize}.` }, { status: 400 });
+      if (mode === "team" && memberInputs.some((m) => !clean(m.phone) || !isValidPhone(clean(m.phone)))) {
+        return NextResponse.json({ error: "Every team member must provide a valid WhatsApp phone number (minimum 10 digits)." }, { status: 400 });
+      }
       if (mode === "team" && memberInputs.some((member) => !isValidParticipant(member))) {
-        return NextResponse.json({ error: "Every team member needs valid name, email, phone, UID, and program." }, { status: 400 });
+        return NextResponse.json({ error: "Every team member needs valid name, email, WhatsApp phone, UID, and program." }, { status: 400 });
       }
 
       if (mode === "team") {
@@ -165,7 +171,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const status = count >= (event.capacity || Infinity) ? "waitlisted" : "confirmed";
     const record = await EventRegistration.findOneAndUpdate(
       { event: id, user: userId },
-      { $setOnInsert: { qrToken: randomUUID() }, $set: { status, mode, teamName: clean(payload.teamName), teamMembers, customFields: payload.customFields, registeredAt: new Date() } },
+      { $setOnInsert: { qrToken: randomUUID() }, $set: { status, mode, teamName: clean(payload.teamName), phone: leader?.phone || cleanPhone(payload.phone), teamMembers, customFields: payload.customFields, registeredAt: new Date() } },
       { upsert: true, new: true }
     );
 

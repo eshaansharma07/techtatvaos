@@ -11,6 +11,7 @@ import { InteractiveHero3D } from "@/components/interactive-hero-3d";
 import { CommunityShowcase } from "@/components/community-showcase";
 import { InstagramFeed } from "@/components/instagram-feed";
 import { MobileInteractiveSections } from "@/components/mobile-interactive";
+import { HomeEventCarousel } from "@/components/home-event-carousel";
 
 export const revalidate = 10;
 
@@ -156,37 +157,8 @@ export default async function Home() {
 
         <Reveal delay={.12}>
           <div className="grid gap-4 grid-cols-2">
-            {/* Bento Box 1: Next Event Details (Col Span 2) */}
-            <div className="col-span-2 glass-brutalist rounded-[2rem] p-6 flex flex-col justify-between relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.02),transparent_40%)] pointer-events-none" />
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] border border-white/10 text-white"><Ticket size={16}/></span>
-                  <span className={nextEvent?.registrationOpen ? "rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-[9px] font-bold tracking-[.18em] text-blue-400 uppercase" : "rounded-xl border border-white/10 bg-white/[0.05] px-3 py-1 text-[9px] font-bold tracking-[.18em] text-white/45 uppercase"}>
-                    {nextEvent ? nextEvent.registrationOpen ? "REGISTRATION OPEN" : "EVENT LIVE" : "NO ACTIVE EVENT"}
-                  </span>
-                </div>
-                <p className="mt-8 text-[9px] font-bold tracking-[.3em] text-white/35">NEXT EVENT SIGNAL</p>
-                <h3 className="mt-2 text-2xl font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors">{nextEvent?.title || "Events will appear here"}</h3>
-                <p className="mt-3 text-xs leading-6 text-white/40 line-clamp-3">{nextEvent?.description || "When the admin publishes an event, candidates will see it here and can register from the event page."}</p>
-              </div>
-
-              <div className="mt-6 border-t border-white/[0.05] pt-5">
-                <div className="grid grid-cols-2 gap-4 text-xs font-mono mb-5">
-                  <div>
-                    <span className="text-[9px] text-white/30 uppercase tracking-wider block">VENUE</span>
-                    <span className="text-white/80 block mt-1 truncate">{nextEvent?.venue || "TBA"}</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-white/30 uppercase tracking-wider block">PARTICIPATION</span>
-                    <span className="text-white/80 block mt-1 capitalize">{nextEvent?.participationMode || "Open"}</span>
-                  </div>
-                </div>
-                <Link href={nextEvent ? eventHref(nextEvent.slug) : "/events"} className="brutalist-btn flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold text-black border-2 border-black w-full">
-                  {nextEvent ? "Open event page" : "View events"} <ArrowUpRight size={14}/>
-                </Link>
-              </div>
-            </div>
+            {/* Bento Box 1: Next Event Carousel (Col Span 2) */}
+            <HomeEventCarousel events={events} />
 
             {/* Bento Box 2: Core Members (Col Span 1) */}
             <div className="glass-brutalist rounded-[2rem] p-5 flex flex-col justify-between min-h-[140px]">

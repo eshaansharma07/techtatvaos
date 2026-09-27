@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 
-import { type MouseEvent, useEffect, useMemo, useState, useRef } from "react";
+import { type MouseEvent, useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { signOut } from "next-auth/react";
 import {
   Activity,
@@ -2571,6 +2571,72 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
   const [statusFilter, setStatusFilter] = useState("all");
   const [expandedTeamIds, setExpandedTeamIds] = useState<Record<string, boolean>>({});
 
+  // Comprehensive phone resolver across all database collections
+  const phoneLookup = useMemo(() => {
+    const map = new Map<string, string>();
+    const register = (key?: any, phone?: any) => {
+      if (!key || !phone) return;
+      const k = String(key).trim().toLowerCase();
+      const p = String(phone).trim();
+      if (k && p && p !== "N/A" && p !== "undefined" && !map.has(k)) {
+        map.set(k, p);
+      }
+    };
+
+    (data.users || []).forEach((u: any) => {
+      if (u.phone) {
+        register(u.email, u.phone);
+        register(u.uid, u.phone);
+        register(idOf(u), u.phone);
+      }
+    });
+
+    (data.studentMembers || []).forEach((s: any) => {
+      if (s.phone) {
+        register(s.email, s.phone);
+        register(s.uid, s.phone);
+      }
+    });
+
+    (data.recruitmentApplications || []).forEach((a: any) => {
+      if (a.phone) {
+        register(a.email, a.phone);
+        register(a.uid, a.phone);
+      }
+    });
+
+    (data.contactMessages || []).forEach((c: any) => {
+      if (c.phone) {
+        register(c.email, c.phone);
+      }
+    });
+
+    return map;
+  }, [data.users, data.studentMembers, data.recruitmentApplications, data.contactMessages]);
+
+  const resolvePhone = useCallback((person: any, userObj: any, reg: any) => {
+    const cleanP = (v: any) => (v && typeof v === "string" && v.trim() && v !== "N/A" && v !== "undefined" ? v.trim() : "");
+    const direct =
+      cleanP(person?.phone) ||
+      cleanP(person?.whatsapp) ||
+      cleanP(person?.mobile) ||
+      cleanP(userObj?.phone) ||
+      cleanP(userObj?.whatsapp) ||
+      cleanP(person?.customFields?.phone) ||
+      cleanP(person?.customFields?.whatsapp) ||
+      cleanP(reg?.phone) ||
+      cleanP(reg?.customFields?.phone) ||
+      cleanP(reg?.customFields?.whatsapp);
+
+    if (direct) return direct;
+
+    const emailKey = String(person?.email || userObj?.email || "").trim().toLowerCase();
+    const uidKey = String(person?.uid || userObj?.uid || "").trim().toLowerCase();
+    const userIdKey = String(userObj?._id || userObj?.id || userObj || "").trim().toLowerCase();
+
+    return phoneLookup.get(emailKey) || phoneLookup.get(uidKey) || phoneLookup.get(userIdKey) || "";
+  }, [phoneLookup]);
+
   // Process registrations into structured team & individual cards
   const formattedRegistrations = useMemo(() => {
     return (registrations as any[]).map((reg: any) => {
@@ -2582,15 +2648,16 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
       const teamName = String(reg.teamName || (mode === "team" ? "Unnamed Squad" : "Individual Entry"));
       const status = String(reg.status || "confirmed");
       const registeredAt = reg.registeredAt ? new Date(reg.registeredAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "N/A";
-      const leaderUser = reg.user || {};
+      const leaderUser = reg.user && typeof reg.user === "object" ? reg.user : {};
+      const leaderPhone = resolvePhone(reg, leaderUser, reg);
 
       const leader = {
-        name: String(leaderUser.name || "N/A"),
-        email: String(leaderUser.email || "N/A"),
-        phone: String(leaderUser.phone || "N/A"),
-        uid: String(leaderUser.uid || "N/A"),
-        program: String(leaderUser.program || "N/A"),
-        semester: String(leaderUser.semester ?? "N/A"),
+        name: String(leaderUser.name || reg.name || "N/A"),
+        email: String(leaderUser.email || reg.email || "N/A"),
+        phone: leaderPhone || String(leaderUser.phone || "N/A"),
+        uid: String(leaderUser.uid || reg.uid || "N/A"),
+        program: String(leaderUser.program || reg.program || "N/A"),
+        semester: String(leaderUser.semester ?? reg.semester ?? "N/A"),
         role: mode === "team" ? "Team Leader" : "Candidate"
       };
 
@@ -2606,11 +2673,12 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
 
       if (mode === "team" && Array.isArray(reg.teamMembers)) {
         reg.teamMembers.forEach((m: any, idx: number) => {
-          const u = m.user || m;
+          const u = m.user && typeof m.user === "object" ? m.user : {};
+          const memberPhone = resolvePhone(m, u, reg);
           members.push({
             name: String(m.name || u.name || "N/A"),
             email: String(m.email || u.email || "N/A"),
-            phone: String(m.phone || u.phone || "N/A"),
+            phone: memberPhone || String(m.phone || u.phone || "N/A"),
             uid: String(m.uid || u.uid || "N/A"),
             program: String(m.program || u.program || "N/A"),
             semester: String(m.semester ?? u.semester ?? "N/A"),
@@ -2634,7 +2702,7 @@ function EventParticipantsDesk({ data, setPanel, refresh }: { data: Data; setPan
         totalSize
       };
     });
-  }, [registrations, events, eventMap]);
+  }, [registrations, events, eventMap, resolvePhone]);
 
   // Compute event stats map for fast pill indicators
   const eventStatsMap = useMemo(() => {

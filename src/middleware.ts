@@ -10,7 +10,7 @@ export default async function middleware(req: NextRequest) {
   const portal = isPortalHost(req);
   const internalPath = path.startsWith("/admin") || portalOnlyPrefixes.some((prefix) => path.startsWith(prefix));
 
-  if (!portal && internalPath) {
+  if (process.env.NODE_ENV === "production" && !portal && internalPath) {
     return new NextResponse("Not found", { status: 404 });
   }
 
