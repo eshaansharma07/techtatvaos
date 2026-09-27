@@ -9,23 +9,33 @@ type EmailPayload = {
 export async function sendEmail({ to, subject, html }: EmailPayload) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM || "Tech Tatva <noreply@techtatva.in>";
-  if (!apiKey) return { sent: false, reason: "missing_api_key" as const };
-
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ from, to: [to], subject, html })
-  });
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    console.error("Recruitment email failed:", detail.slice(0, 240));
-    return { sent: false, reason: "api_error" as const };
+  if (!apiKey) {
+    console.error("[Email System] RESEND_API_KEY is missing in environment variables.");
+    return { sent: false, reason: "missing_api_key" as const, error: "RESEND_API_KEY environment variable is not configured." };
   }
-  return { sent: true as const };
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ from, to: [to], subject, html })
+    });
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.error("[Email API Error]", res.status, detail.slice(0, 300));
+      return { sent: false, reason: "api_error" as const, error: detail || `HTTP ${res.status}` };
+    }
+
+    const data = await res.json().catch(() => ({}));
+    return { sent: true as const, id: data?.id };
+  } catch (err: any) {
+    console.error("[Email Network Exception]", err);
+    return { sent: false, reason: "network_error" as const, error: err?.message || "Failed to reach email provider" };
+  }
 }
 
 export function recruitmentEmailTemplate(title: string, body: string, cta?: { label: string; href: string }) {

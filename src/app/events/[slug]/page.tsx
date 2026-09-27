@@ -5,6 +5,7 @@ import { PublicShell } from "@/components/public-shell";
 import { getPublicEvent } from "@/lib/public-data";
 import { RegisterForm } from "@/components/register-form";
 import { CheckStatusModal } from "@/components/check-status-modal";
+import { TeamAvailabilityModal } from "@/components/team-availability-modal";
 import { optimizeCloudinaryUrl } from "@/lib/cloudinary-client";
 
 export const revalidate = 60;
@@ -116,8 +117,19 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
                   <Sparkles size={13} />
                   {(event.category || "EVENT").toUpperCase()}
                 </span>
+                {event.postponed && (
+                  <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/50 bg-amber-500/20 px-3.5 py-2 text-[10px] md:text-[11px] font-black uppercase tracking-[.2em] text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+                    📅 EVENT RESCHEDULED
+                  </span>
+                )}
               </div>
               <h1 className="mt-2 max-w-4xl text-[2.5rem] font-extrabold leading-[1.05] tracking-[-.05em] text-white md:mt-4 md:text-6xl lg:text-7xl xl:text-8xl">{event.title}</h1>
+              {event.postponed && event.postponementNotice ? (
+                <div className="mt-4 max-w-3xl rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs md:text-sm text-amber-200/90 leading-relaxed font-sans">
+                  <strong className="text-amber-300 font-bold block mb-1">📢 Organizer Notice regarding Postponement:</strong>
+                  {event.postponementNotice}
+                </div>
+              ) : null}
               <p className="mt-4 line-clamp-4 max-w-3xl text-[13px] leading-relaxed text-white/62 md:mt-6 md:text-lg md:leading-8">{summary}</p>
               <div className="mt-7 grid gap-3 grid-cols-2 sm:grid-cols-4">
                 <div className="glass-brutalist px-4 py-4 rounded-xl">
@@ -238,13 +250,33 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
                   minParticipants={event.minParticipants || event.minTeamSize || 1}
                   maxParticipants={event.maxParticipants || event.maxTeamSize || 1}
                 />
-                <CheckStatusModal eventId={event.id} requireReapproval={event.requireReapproval} />
+                <div className="mt-3 space-y-2">
+                  <TeamAvailabilityModal
+                    eventId={event.id}
+                    eventTitle={event.title}
+                    eventDate={event.rescheduledDate || dateText(event.startAt)}
+                    venue={event.venue}
+                    postponed={event.postponed}
+                    postponementNotice={event.postponementNotice}
+                  />
+                  <CheckStatusModal eventId={event.id} requireReapproval={event.requireReapproval} />
+                </div>
                 <p className="mt-3 flex items-center justify-center gap-1 text-center text-[10px] text-white/30">Secure registration <ArrowUpRight size={11} /></p>
               </>
             ) : (
               <>
                 <p className="mt-7 rounded-xl border border-white/[.08] bg-white/[.035] p-4 text-center text-xs text-white/45">Registration is currently closed.</p>
-                <CheckStatusModal eventId={event.id} requireReapproval={event.requireReapproval} />
+                <div className="mt-3 space-y-2">
+                  <TeamAvailabilityModal
+                    eventId={event.id}
+                    eventTitle={event.title}
+                    eventDate={event.rescheduledDate || dateText(event.startAt)}
+                    venue={event.venue}
+                    postponed={event.postponed}
+                    postponementNotice={event.postponementNotice}
+                  />
+                  <CheckStatusModal eventId={event.id} requireReapproval={event.requireReapproval} />
+                </div>
               </>
             )}
           </aside>

@@ -15,7 +15,7 @@ import { Data, Resource, Module, Field } from "../portal-client";
 import { splitPortalTeams, PortalAdvisoryRow, PortalOperationsRoot, TeamLaneEditor, GalleryAssetsControl, UploadControl, headersMap, getWorkspaceStats, renderCell, playSuccessSound, playClickSound, nav, config, extraFields, settingsFields, idOf, asArray, valueOf, rawValue, teamNamesOf, memberLabel, leadRolesOf, normalizePortalData } from "../portal-client";
 
 
-export function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent,requireReapprovalWorkspace}:{active:Module;data:Data;rows:any[];open:(drawer:any)=>void;remove:(resource:Resource,item:any)=>void;restore:(resource:Resource,item:any)=>void;patch:(resource:Resource,item:any,body:Record<string, any>,message:string)=>void;duplicateEvent:(item:any)=>void;requireReapprovalWorkspace:(item:any,scope?:"waitlisted"|"all")=>Promise<void>}) {
+export function Workspace({active,data,rows,open,remove,restore,patch,duplicateEvent,requireReapprovalWorkspace,onOpenReplyModal}:{active:Module;data:Data;rows:any[];open:(drawer:any)=>void;remove:(resource:Resource,item:any)=>void;restore:(resource:Resource,item:any)=>void;patch:(resource:Resource,item:any,body:Record<string, any>,message:string)=>void;duplicateEvent:(item:any)=>void;requireReapprovalWorkspace:(item:any,scope?:"waitlisted"|"all")=>Promise<void>;onOpenReplyModal?:(item:any)=>void}) {
   const c = config[active as keyof typeof config];
   const defaults = active === "Events" ? { status: "published", registrationOpen: "true" } : active === "Meetings" ? { status: "completed" } : {};
   const helper =
@@ -155,9 +155,20 @@ export function Workspace({active,data,rows,open,remove,restore,patch,duplicateE
                               <Trash2 size={10} /> Delete
                             </button>
                           ) : active === "Contact Messages" ? (
-                            <button onClick={() => patch(resource, item, { status: item.status === "resolved" ? "new" : "resolved" }, item.status === "resolved" ? "Message reopened." : "Message marked resolved.")} className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/20">
-                              {item.status === "resolved" ? "Reopen" : "Resolve"}
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              {onOpenReplyModal && (
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenReplyModal(item)}
+                                  className="inline-flex items-center gap-1 rounded-full border border-purple-500/30 bg-purple-500/10 px-2.5 py-1 text-[10px] font-semibold text-purple-200 transition hover:bg-purple-500/20"
+                                >
+                                  <Mail size={10} /> Reply
+                                </button>
+                              )}
+                              <button onClick={() => patch(resource, item, { status: item.status === "resolved" ? "new" : "resolved" }, item.status === "resolved" ? "Message reopened." : "Message marked resolved.")} className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/20">
+                                {item.status === "resolved" ? "Reopen" : "Resolve"}
+                              </button>
+                            </div>
                           ) : inactive ? (
                             <button onClick={() => restore(resource, item)} className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[10px] font-semibold text-blue-200 transition hover:bg-blue-500/20">
                               Restore
