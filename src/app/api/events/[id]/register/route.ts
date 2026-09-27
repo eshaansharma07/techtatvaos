@@ -5,17 +5,6 @@ import { Attendance, Event, EventRegistration, RecruitmentSettings, User } from 
 import { rateLimit } from "@/lib/rate-limit";
 import { registrationInput, eventRegistrationPayloadSchema } from "@/lib/validations/event";
 
-<<<<<<< HEAD
-type PublicParticipant = {
-  name?: string;
-  email?: string;
-  phone?: string;
-  uid?: string;
-  program?: string;
-  semester?: string | number;
-  customFields?: Record<string, any>;
-};
-
 const clean = (value: unknown): string => {
   if (typeof value === "string") return value.trim();
   if (typeof value === "number") return String(value);
@@ -24,40 +13,13 @@ const clean = (value: unknown): string => {
 
 const cleanPhone = (value: unknown): string => {
   const raw = clean(value);
-  // Strip everything except digits and leading +
   return raw.replace(/[^\d+]/g, "");
 };
 
-const semesterOf = (value: unknown): number | undefined => {
-  const number = Number(value);
-  return Number.isFinite(number) && number > 0 && number <= 12 ? number : undefined;
-};
-
-function isValidPhone(phone: string): boolean {
-  const digits = phone.replace(/\D/g, "");
-  return digits.length >= 10 && digits.length <= 15;
-}
-
-function isValidParticipant(input: PublicParticipant): boolean {
-  return (
-    clean(input.name).length >= 2 &&
-    clean(input.email).includes("@") &&
-    isValidPhone(clean(input.phone)) &&
-    clean(input.uid).length >= 2 &&
-    clean(input.program).length >= 1
-  );
-}
-
-async function upsertParticipant(input: PublicParticipant) {
+async function upsertParticipant(input: any) {
   const email = clean(input.email).toLowerCase();
   const uid = clean(input.uid);
   const phone = cleanPhone(input.phone);
-=======
-async function upsertParticipant(input: any) {
-  const email = input.email.toLowerCase();
-  const uid = input.uid;
-  const phone = input.phone;
->>>>>>> origin/main
   const query = {
     $or: [
       { email },
@@ -184,7 +146,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const status = count >= (event.capacity || Infinity) ? "waitlisted" : "confirmed";
     const record = await EventRegistration.findOneAndUpdate(
       { event: id, user: userId },
-      { $setOnInsert: { qrToken: randomUUID() }, $set: { status, mode, teamName: cleanTeamName, phone: leader?.phone || input?.leader?.phone, teamMembers, customFields: payload.customFields, registeredAt: new Date() } },
+      { $setOnInsert: { qrToken: randomUUID() }, $set: { status, mode, teamName: cleanTeamName, phone: leader?.phone || cleanPhone(payload.phone), teamMembers, customFields: payload.customFields, registeredAt: new Date() } },
       { upsert: true, new: true }
     );
 
