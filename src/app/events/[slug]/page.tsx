@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight, Calendar, Check, Clock, MapPin, Sparkles, Trop
 import { PublicShell } from "@/components/public-shell";
 import { getPublicEvent } from "@/lib/public-data";
 import { RegisterForm } from "@/components/register-form";
+import { CheckStatusModal } from "@/components/check-status-modal";
 import { optimizeCloudinaryUrl } from "@/lib/cloudinary-client";
 
 export const revalidate = 60;
@@ -36,6 +37,25 @@ const eventDescriptionBlocks = (value: string) =>
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean);
+
+
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const event = await getPublicEvent(slug);
+  if (!event) return { title: "Event Not Found | Tech Tatva" };
+  
+  return {
+    title: `${event.title} | Tech Tatva`,
+    description: eventSummary(event.description || ""),
+    openGraph: {
+      title: event.title,
+      description: eventSummary(event.description || ""),
+      images: event.banner ? [optimizeCloudinaryUrl(event.banner, 1200)] : [],
+    },
+  };
+}
 
 export default async function EventDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -209,18 +229,24 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
             </p>
 
             {event.registrationOpen ? (
-              <RegisterForm 
-                eventId={event.id} 
-                participationMode={event.participationMode} 
-                minTeamSize={event.minParticipants || event.minTeamSize || 1}
-                maxTeamSize={event.maxParticipants || event.maxTeamSize || 1}
-                minParticipants={event.minParticipants || event.minTeamSize || 1}
-                maxParticipants={event.maxParticipants || event.maxTeamSize || 1}
-              />
+              <>
+                <RegisterForm 
+                  eventId={event.id} 
+                  participationMode={event.participationMode} 
+                  minTeamSize={event.minParticipants || event.minTeamSize || 1}
+                  maxTeamSize={event.maxParticipants || event.maxTeamSize || 1}
+                  minParticipants={event.minParticipants || event.minTeamSize || 1}
+                  maxParticipants={event.maxParticipants || event.maxTeamSize || 1}
+                />
+                <CheckStatusModal eventId={event.id} requireReapproval={event.requireReapproval} />
+                <p className="mt-3 flex items-center justify-center gap-1 text-center text-[10px] text-white/30">Secure registration <ArrowUpRight size={11} /></p>
+              </>
             ) : (
-              <p className="mt-7 rounded-xl border border-white/[.08] bg-white/[.035] p-4 text-center text-xs text-white/45">Registration is currently closed.</p>
+              <>
+                <p className="mt-7 rounded-xl border border-white/[.08] bg-white/[.035] p-4 text-center text-xs text-white/45">Registration is currently closed.</p>
+                <CheckStatusModal eventId={event.id} requireReapproval={event.requireReapproval} />
+              </>
             )}
-            <p className="mt-3 flex items-center justify-center gap-1 text-center text-[10px] text-white/30">Secure registration <ArrowUpRight size={11} /></p>
           </aside>
         </div>
 

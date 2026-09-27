@@ -12,6 +12,7 @@
   "dependencies": {
     "@auth/mongodb-adapter": "^3.10.0",
     "@react-pdf/renderer": "^4.1.6",
+    "@sentry/nextjs": "^11.0.0",
     "@sparticuz/chromium": "^149.0.0",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
@@ -30,9 +31,10 @@
     "react-dom": "^19.0.0",
     "recharts": "^2.15.3",
     "xlsx": "^0.18.5",
-    "zod": "^3.25.42"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",

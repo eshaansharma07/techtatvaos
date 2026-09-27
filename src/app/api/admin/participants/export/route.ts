@@ -61,6 +61,7 @@ export async function GET(req: NextRequest) {
     { header: "Program", key: "program", width: 24 },
     { header: "Semester", key: "semester", width: 12 },
     { header: "Status", key: "status", width: 14 },
+    { header: "Re-approved", key: "reapproved", width: 14 },
     { header: "Registration Date", key: "registeredAt", width: 22 }
   ];
 
@@ -72,6 +73,7 @@ export async function GET(req: NextRequest) {
     const mode = reg.mode === "team" ? "Team" : "Individual";
     const teamName = reg.teamName || (reg.mode === "team" ? "Unnamed Team" : "N/A");
     const regDate = reg.registeredAt ? new Date(reg.registeredAt).toLocaleString("en-IN") : "";
+    const isReapproved = reg.reapproved ? "Yes" : "No";
 
     // Leader / Primary candidate
     const leaderUser = reg.user;
@@ -87,6 +89,7 @@ export async function GET(req: NextRequest) {
       program: leaderUser?.program || "N/A",
       semester: leaderUser?.semester ?? "N/A",
       status: reg.status || "confirmed",
+      reapproved: isReapproved,
       registeredAt: regDate
     });
 
@@ -106,6 +109,7 @@ export async function GET(req: NextRequest) {
           program: member.program || u.program || "N/A",
           semester: member.semester ?? u.semester ?? "N/A",
           status: reg.status || "confirmed",
+          reapproved: isReapproved,
           registeredAt: regDate
         });
       });

@@ -16,6 +16,18 @@ export async function requirePortal(req: NextRequest) {
   return null;
 }
 
+export async function requireRole(req: NextRequest, allowedRoles: string[]) {
+  const portalCheck = await requirePortal(req);
+  if (portalCheck) return portalCheck;
+  
+  const session = await auth();
+  const role = (session?.user as { role?: string })?.role;
+  if (!role || (!allowedRoles.includes(role) && role !== "super_admin")) {
+    return NextResponse.json({ error: "Insufficient permissions for this action." }, { status: 403 });
+  }
+  return null;
+}
+
 export async function audit(req: NextRequest, action: string, metadata: Record<string, unknown> = {}) {
   try {
     const session = await auth();

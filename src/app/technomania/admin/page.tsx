@@ -164,8 +164,8 @@ export default function TechnomaniaAdminPage() {
       venue: "Block D, Central Tech Labs",
       status: "published",
       registrationOpen: true,
-      startAt: "2026-09-15T09:00:00",
-      endAt: "2026-09-16T09:00:00",
+      startAt: "2026-10-15T09:00:00",
+      endAt: "2026-10-16T09:00:00",
       description: "24 hours of non-stop building, mentoring, and shipping solutions. Solve real industry problem statements and pitch live to tech founders.",
       prizes: "₹XX,XXX PRIZES & INTERNSHIPS",
       banner: "/technomania/logo-white.png",
@@ -188,8 +188,8 @@ export default function TechnomaniaAdminPage() {
       venue: "E-Sports Theater, Auditorium 2",
       status: "published",
       registrationOpen: true,
-      startAt: "2026-09-15T11:00:00",
-      endAt: "2026-09-16T17:00:00",
+      startAt: "2026-10-15T11:00:00",
+      endAt: "2026-10-16T17:00:00",
       description: "High-stakes esports showdown across BGMI, Valorant, and EA FC. Experience live casting on stage, tournament-grade setups, and intense bracket battles.",
       prizes: "TROPHIES & CASH REWARDS",
       banner: "/technomania/logo-white.png",
@@ -212,8 +212,8 @@ export default function TechnomaniaAdminPage() {
       venue: "CU Main Amphitheatre",
       status: "published",
       registrationOpen: true,
-      startAt: "2026-09-16T18:00:00",
-      endAt: "2026-09-16T22:00:00",
+      startAt: "2026-10-16T18:00:00",
+      endAt: "2026-10-16T22:00:00",
       description: "The pulse of Chandigarh University's artistic spirit. Battle of the bands, western & classical dance showdowns, fashion choreography, and an electrifying celebrity DJ night.",
       prizes: "MEMENTOS & CASH PRIZES",
       banner: "/technomania/logo-emblem.png",
@@ -234,8 +234,8 @@ export default function TechnomaniaAdminPage() {
       venue: "Academic Block 3, Seminar Hall",
       status: "published",
       registrationOpen: true,
-      startAt: "2026-09-15T14:00:00",
-      endAt: "2026-09-15T18:00:00",
+      startAt: "2026-10-15T14:00:00",
+      endAt: "2026-10-15T18:00:00",
       description: "Rapid-fire spot events designed for quick thinking and instant glory. UI/UX speed runs, algorithmic debugging races, tech trivia, and mystery box building rounds.",
       prizes: "SPOT GOODIES & CERTIFICATES",
       banner: "/technomania/logo-white.png",
@@ -316,11 +316,11 @@ export default function TechnomaniaAdminPage() {
 
   // 3. SCHEDULE STATE
   const [schedules, setSchedules] = useState<ScheduleRecord[]>([
-    { id: "sch-1", day: "Day 1 — Sep 15", time: "09:00 AM", title: "Festival Opening Ceremony", venue: "Auditorium 1", category: "Ceremony", status: "upcoming" },
-    { id: "sch-2", day: "Day 1 — Sep 15", time: "10:30 AM", title: "Code Storm 24H Hackathon Kickoff", venue: "Block D Tech Labs", category: "Hackathon", status: "upcoming" },
-    { id: "sch-3", day: "Day 1 — Sep 15", time: "01:00 PM", title: "Esports Arena Prelims (Valorant & BGMI)", venue: "E-Sports Theater", category: "Esports", status: "upcoming" },
-    { id: "sch-4", day: "Day 2 — Sep 16", time: "11:00 AM", title: "Hackathon Final Pitches & Project Demos", venue: "Seminar Hall 4", category: "Hackathon", status: "upcoming" },
-    { id: "sch-5", day: "Day 2 — Sep 16", time: "06:00 PM", title: "Star Cultural Night & Awards Ceremony", venue: "CU Main Amphitheatre", category: "Cultural", status: "upcoming" }
+    { id: "sch-1", day: "Day 1 — October (TBD)", time: "09:00 AM", title: "Festival Opening Ceremony", venue: "Auditorium 1", category: "Ceremony", status: "upcoming" },
+    { id: "sch-2", day: "Day 1 — October (TBD)", time: "10:30 AM", title: "Code Storm 24H Hackathon Kickoff", venue: "Block D Tech Labs", category: "Hackathon", status: "upcoming" },
+    { id: "sch-3", day: "Day 1 — October (TBD)", time: "01:00 PM", title: "Esports Arena Prelims (Valorant & BGMI)", venue: "E-Sports Theater", category: "Esports", status: "upcoming" },
+    { id: "sch-4", day: "Day 2 — October (TBD)", time: "11:00 AM", title: "Hackathon Final Pitches & Project Demos", venue: "Seminar Hall 4", category: "Hackathon", status: "upcoming" },
+    { id: "sch-5", day: "Day 2 — October (TBD)", time: "06:00 PM", title: "Star Cultural Night & Awards Ceremony", venue: "CU Main Amphitheatre", category: "Cultural", status: "upcoming" }
   ]);
 
   // 4. WEBSITE CONTENT STATE (CMS)
@@ -330,7 +330,7 @@ export default function TechnomaniaAdminPage() {
     campusLocation: "CHANDIGARH UNIVERSITY · GHARUAN, MOHALI",
     headline: "Flagship Technical & Cultural Festival",
     tagline: "24H Hackathon Sprint · Multi-Title Esports Championship · Star Cultural Stage",
-    targetDate: "2026-09-15T09:00:00+05:30",
+    targetDate: "2026-10-15T09:00:00+05:30",
     prizePoolText: "₹XX,XXX CASH & INTERNSHIPS",
     registrationStatus: "open",
     ctaPrimaryText: "REGISTER SQUAD NOW",
@@ -1033,7 +1033,7 @@ export default function TechnomaniaAdminPage() {
                   onClick={() => {
                     const newItem: ScheduleRecord = {
                       id: `sch-${Date.now()}`,
-                      day: "Day 1 — Sep 15",
+                      day: "Day 1 — October (TBD)",
                       time: "02:00 PM",
                       title: "New Session / Round",
                       venue: "Auditorium 2",
@@ -1161,7 +1161,7 @@ export default function TechnomaniaAdminPage() {
                       type="text"
                       value={contentSettings.targetDate}
                       onChange={(e) => setContentSettings({ ...contentSettings, targetDate: e.target.value })}
-                      placeholder="2026-09-15T09:00:00+05:30"
+                      placeholder="2026-10-15T09:00:00+05:30"
                       className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-sm outline-none focus:border-zinc-600 font-mono"
                     />
                   </div>
@@ -1671,7 +1671,7 @@ export default function TechnomaniaAdminPage() {
                       venue: editingEvent.venue || "Campus Labs",
                       status: "published",
                       registrationOpen: true,
-                      startAt: "2026-09-15T09:00:00",
+                      startAt: "2026-10-15T09:00:00",
                       description: editingEvent.description || "",
                       prizes: editingEvent.prizes || ""
                     };

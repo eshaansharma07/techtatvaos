@@ -3,3 +3,29 @@ const booleanInput=z.preprocess((value)=>value==="true"||value===true,z.boolean(
 export const eventInput=z.object({title:z.string().min(3).max(120),slug:z.string().regex(/^[a-z0-9-]+$/),description:z.string().min(10).max(5000),venue:z.string().min(2),capacity:z.coerce.number().int().positive().max(10000),category:z.string().min(2),participationMode:z.enum(["individual","team","both"]).default("individual"),minTeamSize:z.coerce.number().int().positive().max(50).default(1).optional(),maxTeamSize:z.coerce.number().int().positive().max(50).default(1).optional(),minParticipants:z.coerce.number().int().positive().max(50).default(1).optional(),maxParticipants:z.coerce.number().int().positive().max(50).default(1).optional(),status:z.enum(["draft","published","active","completed","archived"]).default("published"),startAt:z.coerce.date(),endAt:z.coerce.date().optional(),registrationStart:z.coerce.date().optional(),registrationEnd:z.coerce.date().optional(),registrationOpen:booleanInput.default(true),team:z.string().optional(),leads:z.array(z.string()).optional()});
 export const registrationInput=z.object({userId:z.string().length(24)});
 export const publicRegistrationInput=z.object({name:z.string().min(2).max(120),email:z.string().email(),phone:z.string().min(10,"WhatsApp number is mandatory (min 10 digits)").max(20),uid:z.string().min(2).max(50)});
+
+export const participantSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(120),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "WhatsApp number is mandatory (min 10 digits)").max(20),
+  uid: z.string().min(2, "UID is required").max(50),
+  program: z.string().min(1, "Program is required").max(100),
+  semester: z.coerce.number().int().min(1).max(12).optional(),
+  customFields: z.record(z.any()).optional()
+});
+
+export const eventRegistrationPayloadSchema = z.object({
+  mode: z.enum(["individual", "team"]),
+  leader: participantSchema,
+  members: z.array(participantSchema).optional(),
+  teamName: z.string().min(2, "Team name must be at least 2 characters").max(100).optional(),
+  customFields: z.record(z.any()).optional()
+}).refine(data => {
+  if (data.mode === "team" && (!data.members || data.members.length === 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Team members are required for team registration",
+  path: ["members"]
+});
