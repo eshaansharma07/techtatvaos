@@ -55,7 +55,7 @@ export function EditorialHeader() {
         </Link>
 
         {/* Center Pill Navigation (Desktop) */}
-        <nav className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.02]">
+        <nav className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.02]">
           {NAV_LINKS.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -81,7 +81,7 @@ export function EditorialHeader() {
         <div className="flex items-center gap-3">
           <Link
             href="/join"
-            className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white hover:text-black text-white text-xs font-semibold tracking-wide transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95"
+            className="hidden xl:inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white hover:text-black text-white text-xs font-semibold tracking-wide transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95"
           >
             <span>Join the Community</span>
             <ArrowRight size={13} />
@@ -99,7 +99,7 @@ export function EditorialHeader() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle mobile menu"
-            className="md:hidden w-9 h-9 rounded-full border border-white/15 bg-white/[0.04] text-white/80 flex items-center justify-center"
+            className="lg:hidden w-9 h-9 rounded-full border border-white/15 bg-white/[0.04] text-white/80 flex items-center justify-center"
           >
             {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>

@@ -49,7 +49,6 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
   }) || null;
 
   return <main className="site-canvas min-h-screen overflow-hidden bg-ink">
-    <SiteLoader logo={info.logo}/>
     
     {/* Premium Animated Parallax Particle Background */}
     <PremiumBackground />
