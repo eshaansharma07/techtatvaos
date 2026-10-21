@@ -9,7 +9,6 @@ import { PremiumBackground } from "@/components/premium-background";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { QuoteBlock } from "@/components/quote-block";
 import { FloatingAnnouncement } from "@/components/floating-announcement";
-import { EditorialHeader } from "@/components/navigation/editorial-header";
 
 const publicLinks = [
   ["HOME", "/"],
@@ -58,7 +57,19 @@ export async function PublicShell({ children }: { children: React.ReactNode }) {
     {/* Subtle Vignette & Depth Bloom Layer */}
     <div className="premium-vignette" aria-hidden="true" />
 
-    <EditorialHeader />
+    <header className="public-header fixed inset-x-0 top-0 z-[70] pt-[env(safe-area-inset-top)]">
+      <div className="public-header-inner mx-4 mt-2 md:mx-auto flex max-w-7xl xl:max-w-[1380px] 2xl:max-w-[1536px] flex-row items-center justify-between px-5 py-3.5 md:mt-4 md:h-[4.75rem] md:px-5 md:py-0 border border-white/10 md:border-2 md:border-white/15 rounded-[20px] md:rounded-[999px] bg-black/80 md:bg-black/95">
+        <MotionLogo logo={info.logo}/>
+        <nav className="public-nav hidden w-auto items-center gap-1 text-xs font-medium tracking-[.15em] text-white/50 md:flex">
+          {publicLinks.map(([label,href])=><Link className="rounded-xl px-4 py-3 transition hover:bg-white/10 hover:text-white font-bold uppercase" key={href} href={href}>{label}</Link>)}
+        </nav>
+        <Link href="/contact" className="brutalist-btn-theme hidden h-7 items-center gap-1 rounded-lg px-2.5 text-[9px] font-extrabold tracking-widest md:inline-flex shadow-[1px_1px_0px_0px_rgba(255,255,255,0.2)]">
+          CONNECT <ArrowUpRight size={12}/>
+        </Link>
+        <MobilePublicMenu logo={info.logo}/>
+      </div>
+    </header>
+    <div className="h-20 md:hidden" />
     {children}
     
     <footer className="public-footer px-5 pt-10 pb-24 md:px-6 md:pt-16 md:pb-20">
