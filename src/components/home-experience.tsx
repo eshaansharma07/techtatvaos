@@ -52,7 +52,10 @@ export function HomeExperience({
         {/* Real Three.js 3D WebGL Canvas */}
         <HeroPavilion scrollProgress={scrollProgress} />
 
-        {/* Overlay Typography, Editorial Copy & Narrative */}
+        {/* Cinematic Background Ambient Atmosphere */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#060709] via-transparent to-transparent pointer-events-none z-[5]" />
+        
+        {/* Overlay Typography, Editorial Copy & Seated Silhouette */}
         <HeroOverlay stats={stats} />
       </section>
 

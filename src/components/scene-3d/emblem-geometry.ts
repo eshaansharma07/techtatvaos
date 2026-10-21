@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 
-// Authentic TechTatva vector paths from public/logo-colour.svg
+// Exact vector paths from authentic TechTatva logo (public/logo-colour.svg)
 const TECHTATVA_PATHS = {
   // Top triangular apex block (Brain sector)
   top: "M571.06,40.52l263.19,443.91c4.48,7.56-.99,17.11-9.77,17.08l-566.35-2.11c-8.66-.03-14.07-9.39-9.78-16.91L497.21,46.12c.33-.57.7-1.13,1.12-1.64,19.61-23.89,47.2-27.63,70.58-6.59.84.76,1.56,1.66,2.14,2.64Z",
@@ -13,36 +13,40 @@ const TECHTATVA_PATHS = {
 
 export interface EmblemMeshGroup {
   group: THREE.Group;
+  topMesh: THREE.Mesh;
+  leftMesh: THREE.Mesh;
+  rightMesh: THREE.Mesh;
+  orbitGroup: THREE.Group;
   update: (time: number, scrollProgress?: number) => void;
   dispose: () => void;
 }
 
 /**
- * Creates the monumental 3D TechTatva sculpture matching the architectural reference artwork.
- * Uses genuine vector paths with brushed titanium / steel metallic materials,
- * beveled architectural facets catching daylight, and floating orbital filament rings.
+ * Creates the monumental 3D TechTatva sculpture with authentic geometry,
+ * brushed titanium/graphite PBR materials, beveled architectural edges,
+ * and delicate floating orbital filaments.
  */
 export function createTechTatvaEmblem(): EmblemMeshGroup {
   const group = new THREE.Group();
   const loader = new SVGLoader();
 
-  // Architectural sculpture extrusion parameters: thick slab with crisp beveled edges
+  // Common extrusion settings for architectural monument look
   const extrudeSettings: THREE.ExtrudeGeometryOptions = {
-    depth: 0.65,
+    depth: 0.52,
     bevelEnabled: true,
-    bevelSegments: 5,
+    bevelSegments: 6,
     steps: 1,
     bevelSize: 0.06,
     bevelThickness: 0.06,
-    curveSegments: 36
+    curveSegments: 32
   };
 
-  // Center of mass for the combined logo in SVG coordinates (1080x1080 viewBox)
+  // SVG coordinate center is at (540, 540) in a 1080x1080 canvas
   const SVG_CENTER_X = 540;
-  const SVG_CENTER_Y = 510;
-  const TARGET_SCALE = 0.0048; // Scales ~1000px logo to ~4.8 world units
+  const SVG_CENTER_Y = 540;
+  const TARGET_SCALE = 0.0052; // Scales ~1000px SVG to ~5.2 world units
 
-  function parsePath(pathStr: string): THREE.ExtrudeGeometry {
+  function parsePathToGeometry(pathStr: string): THREE.ExtrudeGeometry {
     const svgNode = `<svg xmlns="http://www.w3.org/2000/svg"><path d="${pathStr}"/></svg>`;
     const parsed = loader.parse(svgNode);
     const shapes: THREE.Shape[] = [];
@@ -52,65 +56,90 @@ export function createTechTatvaEmblem(): EmblemMeshGroup {
     }
 
     if (shapes.length === 0) {
+      // Fallback simple triangle shape if parser returns empty
       const fallbackShape = new THREE.Shape();
-      fallbackShape.moveTo(0, 1.5);
-      fallbackShape.lineTo(1.5, -1.5);
-      fallbackShape.lineTo(-1.5, -1.5);
+      fallbackShape.moveTo(0, 200);
+      fallbackShape.lineTo(200, -200);
+      fallbackShape.lineTo(-200, -200);
       fallbackShape.closePath();
       shapes.push(fallbackShape);
     }
 
+    // Transform shapes: center around (540, 540) and invert Y (SVG down is +Y, 3D up is +Y)
+    for (const shape of shapes) {
+      const points = shape.getPoints();
+      for (const pt of points) {
+        pt.x = (pt.x - SVG_CENTER_X) * TARGET_SCALE;
+        pt.y = -(pt.y - SVG_CENTER_Y) * TARGET_SCALE;
+      }
+      // Rebuild shape from transformed points
+      shape.curves = [];
+      shape.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        shape.lineTo(points[i].x, points[i].y);
+      }
+      shape.closePath();
+    }
+
     const geom = new THREE.ExtrudeGeometry(shapes, extrudeSettings);
     geom.computeVertexNormals();
-
-    // Scale and center around the emblem's true center of mass
-    // Invert Y because SVG +Y is downwards while WebGL +Y is upwards
-    geom.scale(TARGET_SCALE, -TARGET_SCALE, TARGET_SCALE);
-    geom.translate(-SVG_CENTER_X * TARGET_SCALE, SVG_CENTER_Y * TARGET_SCALE, -0.32);
-
+    geom.center(); // Center the pivot exactly inside the extruded mesh
     return geom;
   }
 
-  // Museum-grade brushed titanium and metallic steel materials
-  // High metalness and controlled roughness so daylight from above creates brilliant silvery specular highlights
+  // 1. Materials: Museum-grade brushed graphite titanium
+  // With subtle color grading per sector reflecting the authentic TechTatva blue, violet, and amber hues
   const topMaterial = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color("#CBD5E1"), // Bright titanium steel
+    color: new THREE.Color("#1A1F2B"), // Deep titanium blue-slate
     metalness: 0.92,
-    roughness: 0.18,
-    clearcoat: 0.65,
-    clearcoatRoughness: 0.12,
-    reflectivity: 0.95,
-    envMapIntensity: 2.4
+    roughness: 0.24,
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.18,
+    reflectivity: 0.85,
+    envMapIntensity: 1.4,
+    emissive: new THREE.Color("#0D1A30"),
+    emissiveIntensity: 0.25
   });
 
   const leftMaterial = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color("#C0C8D8"), // Cool steel titanium
+    color: new THREE.Color("#211929"), // Deep titanium obsidian-violet
     metalness: 0.90,
-    roughness: 0.20,
-    clearcoat: 0.60,
-    clearcoatRoughness: 0.15,
-    reflectivity: 0.90,
-    envMapIntensity: 2.2
+    roughness: 0.26,
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.2,
+    reflectivity: 0.8,
+    envMapIntensity: 1.3,
+    emissive: new THREE.Color("#1F0A2B"),
+    emissiveIntensity: 0.25
   });
 
   const rightMaterial = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color("#D4D4D8"), // Silver gunmetal
-    metalness: 0.94,
-    roughness: 0.17,
-    clearcoat: 0.70,
-    clearcoatRoughness: 0.12,
-    reflectivity: 0.95,
-    envMapIntensity: 2.5
+    color: new THREE.Color("#261E17"), // Deep titanium obsidian-amber
+    metalness: 0.93,
+    roughness: 0.23,
+    clearcoat: 0.4,
+    clearcoatRoughness: 0.16,
+    reflectivity: 0.85,
+    envMapIntensity: 1.5,
+    emissive: new THREE.Color("#291305"),
+    emissiveIntensity: 0.3
   });
 
-  const topGeom = parsePath(TECHTATVA_PATHS.top);
-  const leftGeom = parsePath(TECHTATVA_PATHS.bottomLeft);
-  const rightGeom = parsePath(TECHTATVA_PATHS.bottomRight);
+  // Build the 3 extruded meshes
+  const topGeom = parsePathToGeometry(TECHTATVA_PATHS.top);
+  const leftGeom = parsePathToGeometry(TECHTATVA_PATHS.bottomLeft);
+  const rightGeom = parsePathToGeometry(TECHTATVA_PATHS.bottomRight);
 
   const topMesh = new THREE.Mesh(topGeom, topMaterial);
   const leftMesh = new THREE.Mesh(leftGeom, leftMaterial);
   const rightMesh = new THREE.Mesh(rightGeom, rightMaterial);
 
+  // Position offsets relative to monument center
+  topMesh.position.set(0, 1.15, 0);
+  leftMesh.position.set(-1.08, -0.95, 0);
+  rightMesh.position.set(1.08, -0.95, 0);
+
+  // Shadow casting
   topMesh.castShadow = true;
   topMesh.receiveShadow = true;
   leftMesh.castShadow = true;
@@ -118,25 +147,25 @@ export function createTechTatvaEmblem(): EmblemMeshGroup {
   rightMesh.castShadow = true;
   rightMesh.receiveShadow = true;
 
-  const monument = new THREE.Group();
-  monument.add(topMesh);
-  monument.add(leftMesh);
-  monument.add(rightMesh);
-  group.add(monument);
+  const emblemCore = new THREE.Group();
+  emblemCore.add(topMesh);
+  emblemCore.add(leftMesh);
+  emblemCore.add(rightMesh);
+  group.add(emblemCore);
 
-  // 2. Orbital Glowing Filament Rings (matching reference image)
+  // 2. Orbital Glowing Filament Rings (as seen in the reference screenshot)
   const orbitGroup = new THREE.Group();
 
-  function createOrbitRing(radiusX: number, radiusY: number, tiltX: number, tiltY: number, colorHex: string, opacity = 0.5) {
+  function createOrbitRing(radiusX: number, radiusY: number, tiltX: number, tiltY: number, colorHex: string) {
     const curve = new THREE.EllipseCurve(0, 0, radiusX, radiusY, 0, 2 * Math.PI, false, 0);
-    const points = curve.getPoints(120);
+    const points = curve.getPoints(90);
     const geom = new THREE.BufferGeometry().setFromPoints(
       points.map(p => new THREE.Vector3(p.x, p.y, 0))
     );
     const mat = new THREE.LineBasicMaterial({
       color: new THREE.Color(colorHex),
       transparent: true,
-      opacity,
+      opacity: 0.45,
       blending: THREE.AdditiveBlending
     });
     const line = new THREE.Line(geom, mat);
@@ -145,62 +174,65 @@ export function createTechTatvaEmblem(): EmblemMeshGroup {
     return line;
   }
 
-  // Cyan-white primary orbital filament
-  const orbit1 = createOrbitRing(2.8, 1.8, Math.PI / 3.2, Math.PI / 5.5, "#93C5FD", 0.65);
-  // Warm golden secondary filament
-  const orbit2 = createOrbitRing(2.5, 1.5, -Math.PI / 3.8, -Math.PI / 4.2, "#FDE68A", 0.45);
-  // Fine outer atmospheric ring
-  const orbit3 = createOrbitRing(3.1, 2.1, Math.PI / 2.2, -Math.PI / 7, "#67E8F9", 0.35);
+  // Cyan-blue main orbital ring
+  const orbit1 = createOrbitRing(3.2, 2.0, Math.PI / 3, Math.PI / 6, "#60A5FA");
+  // Amber warm complementary ring
+  const orbit2 = createOrbitRing(2.9, 1.7, -Math.PI / 4, -Math.PI / 5, "#F59E0B");
+  // Ultra-fine outer ring
+  const orbit3 = createOrbitRing(3.6, 2.4, Math.PI / 2.5, -Math.PI / 8, "#A78BFA");
 
   orbitGroup.add(orbit1);
   orbitGroup.add(orbit2);
   orbitGroup.add(orbit3);
   group.add(orbitGroup);
 
-  // 3. Floating ambient daylight micro-particles
-  const particleCount = 35;
+  // 3. Floating luminous energy dust particles
+  const particleCount = 45;
   const particleGeom = new THREE.BufferGeometry();
   const particlePositions = new Float32Array(particleCount * 3);
+  const particleScales = new Float32Array(particleCount);
 
   for (let i = 0; i < particleCount; i++) {
-    const r = 1.0 + Math.random() * 2.2;
+    const r = 1.2 + Math.random() * 2.8;
     const theta = Math.random() * Math.PI * 2;
-    const phi = (Math.random() - 0.5) * Math.PI;
+    const phi = (Math.random() - 0.5) * Math.PI * 0.9;
     particlePositions[i * 3 + 0] = r * Math.cos(theta) * Math.cos(phi);
     particlePositions[i * 3 + 1] = r * Math.sin(phi);
     particlePositions[i * 3 + 2] = r * Math.sin(theta) * Math.cos(phi);
+    particleScales[i] = Math.random();
   }
 
   particleGeom.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
   const particleMat = new THREE.PointsMaterial({
-    color: new THREE.Color("#E0F2FE"),
-    size: 0.04,
+    color: new THREE.Color("#93C5FD"),
+    size: 0.05,
     transparent: true,
-    opacity: 0.6,
+    opacity: 0.65,
     blending: THREE.AdditiveBlending
   });
   const particles = new THREE.Points(particleGeom, particleMat);
   group.add(particles);
 
-  // Animation update: restrained, majestic, cinematic
+  // Continuous subtle animation update
   function update(time: number, scrollProgress = 0) {
-    // Subtle breathing float
-    const floatY = Math.sin(time * 0.8) * 0.06;
-    monument.position.y = floatY;
+    // Gentle breathing levitation
+    const levitate = Math.sin(time * 0.9) * 0.08;
+    emblemCore.position.y = levitate;
 
-    // Gentle rotation that sweeps daylight across the facets
-    const rotY = Math.sin(time * 0.25) * 0.07 + (scrollProgress * 0.35);
-    const rotX = Math.cos(time * 0.3) * 0.04 - (scrollProgress * 0.12);
-    monument.rotation.y = rotY;
-    monument.rotation.x = rotX;
+    // Subtle isometric oscillation that catches highlights
+    const baseRotY = Math.sin(time * 0.35) * 0.08 + (scrollProgress * 0.4);
+    const baseRotX = Math.cos(time * 0.45) * 0.05 - (scrollProgress * 0.15);
+    emblemCore.rotation.y = baseRotY;
+    emblemCore.rotation.x = baseRotX;
 
-    // Slowly rotate filaments
-    orbit1.rotation.z = time * 0.1;
-    orbit2.rotation.z = -time * 0.08;
-    orbit3.rotation.z = time * 0.05;
+    // Slowly rotate orbital filaments
+    orbit1.rotation.z = time * 0.12;
+    orbit2.rotation.z = -time * 0.09;
+    orbit3.rotation.z = time * 0.06;
 
     // Slowly drift particles
-    particles.rotation.y = time * 0.03;
+    particles.rotation.y = time * 0.04;
+    particles.rotation.x = Math.sin(time * 0.02) * 0.05;
   }
 
   function dispose() {
@@ -216,6 +248,10 @@ export function createTechTatvaEmblem(): EmblemMeshGroup {
 
   return {
     group,
+    topMesh,
+    leftMesh,
+    rightMesh,
+    orbitGroup,
     update,
     dispose
   };
