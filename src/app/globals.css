@@ -444,17 +444,53 @@ body:before {
 }
 .public-header {
   padding: 0;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 .public-header-inner {
-  box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.05);
-  -webkit-backdrop-filter: blur(24px);
-  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform, height, box-shadow;
 }
 .public-nav {
-  border: 2px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  background: rgba(255,255,255,.03);
-  padding: .25rem;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Device & Browser Navigation Optimizations ─── */
+/* 1. iOS Safari & iPhone (Notch, Dynamic Island, Home Indicator) */
+@supports (-webkit-touch-callout: none) {
+  .public-header {
+    padding-top: max(0.25rem, env(safe-area-inset-top));
+  }
+  .public-header-inner {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
+/* 2. Samsung Internet & Android browser touch performance */
+@media (pointer: coarse) {
+  .public-nav a,
+  .public-header-inner button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* 3. Reduced Motion accessibility override */
+@media (prefers-reduced-motion: reduce) {
+  .public-header,
+  .public-header-inner,
+  .public-nav,
+  [data-layout-id="navActivePill"] {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
 }
 .public-header-cta {
   background: #a855f7;
