@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ParticleNetwork } from "@/components/particle-network";
 
 export function PremiumBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
@@ -31,124 +31,29 @@ export function PremiumBackground() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [prefersReducedMotion]);
 
-  const speedMultiplier = useRef(1);
-
   useEffect(() => {
-    const handleToggle = () => {
-      speedMultiplier.current = speedMultiplier.current === 1 ? 4 : 1;
-    };
-    window.addEventListener("antigravity-toggle", handleToggle);
-    return () => window.removeEventListener("antigravity-toggle", handleToggle);
-  }, []);
-
-  useEffect(() => {
-    let animationId: number;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const handleResize = () => {
-      if (!canvas) return;
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    class Particle {
-      x: number;
-      y: number;
-      size: number;
-      speedX: number;
-      speedY: number;
-      opacity: number;
-
-      constructor() {
-        this.x = Math.random() * (canvas?.width || 800);
-        this.y = Math.random() * (canvas?.height || 600);
-        this.size = Math.random() * 1.2 + 0.4;
-        this.speedX = (Math.random() - 0.5) * 0.12;
-        this.speedY = (Math.random() - 0.5) * 0.12;
-        this.opacity = Math.random() * 0.18 + 0.04;
-      }
-
-      update() {
-        this.x += this.speedX * speedMultiplier.current;
-        this.y += this.speedY * speedMultiplier.current;
-
-        const mouseX = (mouseCoords.current.x + 1) * ((canvas?.width || 800) / 2);
-        const mouseY = (mouseCoords.current.y + 1) * ((canvas?.height || 600) / 2);
-        const dx = this.x - mouseX;
-        const dy = this.y - mouseY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 180) {
-          const force = (180 - dist) / 180;
-          this.x += (dx / dist) * force * 0.22;
-          this.y += (dy / dist) * force * 0.22;
-        }
-
-        if (canvas) {
-          if (this.x < 0) this.x = canvas.width;
-          if (this.x > canvas.width) this.x = 0;
-          if (this.y < 0) this.y = canvas.height;
-          if (this.y > canvas.height) this.y = 0;
-        }
-      }
-
-      draw() {
-        if (!ctx) return;
-        ctx.fillStyle = `rgba(216, 195, 255, ${this.opacity})`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    const particleCount = Math.min(32, Math.floor((canvas.width * canvas.height) / 40000));
-    const particles: Particle[] = [];
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
-    }
+    if (prefersReducedMotion) return;
+    let rafId: number;
 
     const tick = () => {
-      if (window.innerWidth < 768 || document.visibilityState === "hidden") {
-        animationId = requestAnimationFrame(tick);
-        return;
-      }
-
       mouseCoords.current.x += (targetCoords.current.x - mouseCoords.current.x) * 0.045;
       mouseCoords.current.y += (targetCoords.current.y - mouseCoords.current.y) * 0.045;
 
-      if (containerRef.current && !prefersReducedMotion) {
+      if (containerRef.current) {
         containerRef.current.style.setProperty("--px", `${mouseCoords.current.x * 12}px`);
         containerRef.current.style.setProperty("--py", `${mouseCoords.current.y * 12}px`);
       }
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (!prefersReducedMotion) {
-        particles.forEach((p) => {
-          p.update();
-          p.draw();
-        });
-      }
-
-      animationId = requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     };
-
-    tick();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationId);
-    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
   }, [prefersReducedMotion]);
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[-2] overflow-hidden bg-ink">
+      {/* ── Particle Network Canvas (new) ── */}
+      <ParticleNetwork />
+
       <div
         ref={containerRef}
         className="absolute inset-0 h-full w-full"
@@ -200,9 +105,6 @@ export function PremiumBackground() {
             </svg>
           </div>
         )}
-
-        {/* Floating particles canvas */}
-        <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
       </div>
     </div>
   );
