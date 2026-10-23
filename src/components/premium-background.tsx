@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ParticleNetwork } from "@/components/particle-network";
+import { WireframeMesh } from "@/components/wireframe-mesh";
 
 export function PremiumBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -51,7 +52,10 @@ export function PremiumBackground() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[-2] overflow-hidden bg-ink">
-      {/* ── Particle Network Canvas (new) ── */}
+      {/* ── 3D Undulating Wireframe Mesh (Terrain / Waves) ── */}
+      <WireframeMesh />
+
+      {/* ── Particle Network Canvas (Floating Nodes & Dynamic Connections) ── */}
       <ParticleNetwork />
 
       <div
